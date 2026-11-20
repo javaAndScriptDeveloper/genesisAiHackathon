@@ -158,3 +158,6 @@ vite.config.ts.timestamp-*
 
 # SSH private keys
 ssh/hetzner_ed25519
+
+# executing-plans scratch
+.superpowers/
