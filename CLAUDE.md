@@ -1,0 +1,27 @@
+# Hackathon backbone
+
+Minimal monorepo: push to `main` goes live on the VPS.
+
+## Layout
+- `platform-backend/` — Node 24 + TypeScript + Fastify. One route `GET /api/health` (runs `SELECT 1`; 503 if DB down). Tests: Vitest + Testcontainers (needs Docker).
+- `frontend/` — Next.js (App Router, standalone). Calls the backend server-side; `/api/*` is rewritten to the backend.
+- `compose.yml` — local stack, frontend on http://localhost:18080.
+- `deploy/compose.prod.yml` — production stack (db + platform-backend + frontend).
+- `ssh/` — Hetzner key (`hetzner_ed25519` is gitignored; `.pub` committed) and `connect.sh`.
+- New microservice: add a folder with a Dockerfile, a service in both compose files, and build/push + test steps in `.github/workflows/ci.yml`.
+
+## Where it is deployed
+- Hetzner VPS `37.27.8.181` (user `root`), app dir `/opt/app`. Plain HTTP, no domain yet.
+- Live: http://37.27.8.181/ (frontend, port 80) and http://37.27.8.181/api/health.
+- Only the frontend is published; `platform-backend` and `db` (Postgres, volume `postgres_data`) stay on the internal compose network.
+- Shell: `./ssh/connect.sh` (e.g. `./ssh/connect.sh "cd /opt/app && docker compose -f compose.prod.yml logs -f"`).
+
+## CI/CD (`.github/workflows/ci.yml`)
+Repo: `javaAndScriptDeveloper/genesisAiHackathon` (private). On push to `main` (PRs run `test` only):
+1. `test` — backend tests (Testcontainers) + frontend build.
+2. `deploy` — builds both images, pushes to GHCR (`ghcr.io/javaandscriptdeveloper/genesisaihackathon/<service>:sha-<commit>` + `:latest`).
+3. SSHes to the VPS, copies `deploy/compose.prod.yml`, writes `/opt/app/.env`, `docker compose pull && up -d`.
+4. Verifies by curling `http://37.27.8.181/api/health` (retries, requires `"db":true`); the run fails if it doesn't.
+
+Secrets (repo): `VPS_SSH_KEY` (contents of `ssh/hetzner_ed25519`), `POSTGRES_PASSWORD`. See `docs/deploy.md` for setup and rollback.
+Gotchas: Postgres reads its password only on first init — changing `POSTGRES_PASSWORD` later needs `docker compose down -v` on the VPS (wipes data). Ports 3000/8080 may be taken locally, hence 18080.
