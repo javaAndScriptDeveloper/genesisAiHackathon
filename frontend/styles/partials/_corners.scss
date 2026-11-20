@@ -1,0 +1,38 @@
+@use "sass:meta";
+@use "sass:list";
+@use "sass:math";
+
+// Every rounded corner is declared through this mixin. `$radius` is the plain fallback; where `corner-shape`
+// is supported the corner becomes a squircle, which reads tighter, so the radius is doubled to keep the same look.
+@mixin radius($radius) {
+	border-radius: $radius;
+
+	@supports (corner-shape: squircle) {
+		@if meta.type-of($radius) == "list" {
+			$doubled: ();
+			@each $value in $radius {
+				@if meta.type-of($value) == "number" {
+					$doubled: list.append($doubled, $value * 2);
+				} @else {
+					$doubled: list.append($doubled, calc(#{$value} * 2));
+				}
+			}
+			border-radius: $doubled;
+		} @else if meta.type-of($radius) == "number" {
+			border-radius: $radius * 2;
+		} @else {
+			border-radius: calc(#{$radius} * 2);
+		}
+		corner-shape: squircle;
+	}
+}
+
+// An element rounded inside a rounded parent: radius = parent radius - gap (padding + border), floored at $min,
+// so both curves stay concentric. Use for items in dropdown panels, menus and modals.
+@mixin nested($outer, $inset, $min: 0.2rem) {
+	@if meta.type-of($outer) == "number" and meta.type-of($inset) == "number" {
+		@include radius(math.max($outer - $inset, $min));
+	} @else {
+		@include radius(max(calc(#{$outer} - #{$inset}), $min));
+	}
+}

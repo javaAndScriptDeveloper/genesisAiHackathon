@@ -1,0 +1,50 @@
+@use "partials/mixins";
+
+.page {
+	padding-block: var(--space-7) var(--space-9);
+}
+
+.lead {
+	max-width: 72rem;
+	margin-block: var(--space-3) var(--space-6);
+	color: var(--color-textMuted);
+}
+
+.grid {
+	display: grid;
+	gap: var(--space-5);
+
+	@include mixins.respond(md) {
+		grid-template-columns: repeat(2, 1fr);
+	}
+}
+
+.head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--space-3);
+	margin-bottom: var(--space-4);
+}
+
+.cardTitle {
+	font-size: 1.8rem;
+}
+
+.details {
+	display: grid;
+	grid-template-columns: auto 1fr;
+	gap: var(--space-2) var(--space-4);
+
+	dt {
+		color: var(--color-textSubtle);
+	}
+
+	dd {
+		overflow-wrap: anywhere;
+	}
+}
+
+.error {
+	color: var(--color-dangerText);
+}

@@ -1,0 +1,73 @@
+// Display font (Unbounded, heavy) is for h1 only; everything else is Inter.
+h1,
+.h1 {
+	font-family: var(--font-display), var(--font-body), sans-serif;
+	font-size: clamp(3.2rem, 6vw, 6.4rem);
+	font-weight: 800;
+	line-height: 1.05;
+	letter-spacing: -0.02em;
+	text-wrap: balance;
+}
+
+h2,
+.h2 {
+	font-size: clamp(2.6rem, 4vw, 4rem);
+	font-weight: 700;
+	line-height: 1.15;
+	letter-spacing: -0.02em;
+	text-wrap: balance;
+}
+
+h3,
+.h3 {
+	font-size: clamp(2rem, 2.6vw, 2.6rem);
+	font-weight: 650;
+	line-height: 1.25;
+	letter-spacing: -0.015em;
+}
+
+h4,
+.h4 {
+	font-size: 1.8rem;
+	font-weight: 600;
+	line-height: 1.35;
+}
+
+p,
+.body {
+	font-size: 1.6rem;
+	line-height: 1.6;
+	text-wrap: pretty;
+}
+
+.lead {
+	font-size: clamp(1.8rem, 2vw, 2rem);
+	line-height: 1.55;
+	color: var(--color-textMuted);
+}
+
+.small {
+	font-size: 1.4rem;
+	line-height: 1.5;
+}
+
+.caption {
+	font-size: 1.2rem;
+	line-height: 1.4;
+	color: var(--color-textSubtle);
+}
+
+.eyebrow {
+	font-size: 1.2rem;
+	font-weight: 600;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: var(--color-textSubtle);
+}
+
+code,
+kbd,
+pre {
+	font-family: var(--font-mono), ui-monospace, monospace;
+	font-size: 0.9em;
+}

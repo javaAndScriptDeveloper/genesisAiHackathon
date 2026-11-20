@@ -1,0 +1,114 @@
+@use "partials/corners";
+@use "partials/mixins";
+
+$panel-radius: 1.2rem; // keep in sync with the panel radius below
+$panel-gap: 0.4rem; // panel padding
+
+.root {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	gap: 0.6rem;
+	min-width: 0;
+}
+
+.label {
+	font-size: 1.4rem;
+	font-weight: 550;
+}
+
+.trigger {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1rem;
+	width: 100%;
+	min-height: var(--hit-target);
+	padding: 0 1.4rem;
+	background: var(--color-surface);
+	border: 0.1rem solid var(--color-borderStrong);
+	font-size: 1.6rem;
+	text-align: left;
+	transition: border-color var(--transition-fast);
+	@include corners.radius(var(--radius-control));
+	@include mixins.focus-ring;
+
+	&:hover {
+		border-color: var(--color-textSubtle);
+	}
+}
+
+.open {
+	border-color: var(--color-fieldFocus);
+
+	.chevron {
+		transform: rotate(180deg);
+	}
+}
+
+.invalid {
+	border-color: var(--color-danger);
+}
+
+.value {
+	@include mixins.truncate;
+}
+
+.placeholder {
+	color: var(--color-placeholder);
+}
+
+.chevron {
+	flex: none;
+	color: var(--color-textSubtle);
+	transition: transform var(--transition-fast);
+}
+
+.panel {
+	position: absolute;
+	z-index: var(--z-dropdown);
+	top: calc(100% + 0.4rem);
+	left: 0;
+	right: 0;
+	max-height: 28rem;
+	overflow-y: auto;
+	padding: $panel-gap;
+	background: var(--color-surface);
+	border: 0.1rem solid var(--color-border);
+	box-shadow: var(--shadow-popover);
+	animation: pop 0.12s ease-out;
+	@include corners.radius($panel-radius);
+}
+
+.option {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1rem;
+	min-height: 4rem;
+	padding: 0 1rem;
+	font-size: 1.5rem;
+	cursor: pointer;
+	@include corners.nested($panel-radius, $panel-gap + 0.1rem);
+}
+
+.active {
+	background: var(--color-surfaceMuted);
+}
+
+.disabled {
+	opacity: 0.45;
+	cursor: not-allowed;
+}
+
+.error {
+	font-size: 1.3rem;
+	color: var(--color-dangerText);
+}
+
+@keyframes pop {
+	from {
+		opacity: 0;
+		transform: translateY(-0.4rem);
+	}
+}

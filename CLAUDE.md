@@ -4,7 +4,7 @@ Minimal monorepo: push to `main` goes live on the VPS.
 
 ## Layout
 - `platform-backend/` — Node 24 + TypeScript + Fastify. One route `GET /api/health` (runs `SELECT 1`; 503 if DB down). Tests: Vitest + Testcontainers (needs Docker).
-- `frontend/` — Next.js (App Router, standalone). Calls the backend server-side; `/api/*` is rewritten to the backend.
+- `frontend/` — Next.js (App Router, standalone), package manager **bun** (`bun.lock`). Full frontend starter with its own rules in `frontend/AGENTS.md` (read it before frontend work). Calls the backend server-side (`lib/api/backend.ts`, page `/status`); `/api/*` is a `fallback` rewrite to the backend, so `app/api/*` handlers (mock, ai) keep priority.
 - `compose.yml` — local stack, frontend on http://localhost:18080.
 - `deploy/compose.prod.yml` — production stack (db + platform-backend + frontend).
 - `ssh/` — Hetzner key (private `hetzner_ed25519` and `.pub` are both committed on purpose (private repo)) and `connect.sh`.

@@ -1,0 +1,16 @@
+* {
+	scrollbar-width: thin;
+	scrollbar-color: var(--color-borderStrong) transparent;
+}
+
+::-webkit-scrollbar {
+	width: 0.8rem;
+	height: 0.8rem;
+}
+
+::-webkit-scrollbar-thumb {
+	background: var(--color-borderStrong);
+	border-radius: 99rem;
+	border: 0.2rem solid transparent;
+	background-clip: content-box;
+}

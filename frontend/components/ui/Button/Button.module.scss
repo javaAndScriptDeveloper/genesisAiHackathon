@@ -1,0 +1,100 @@
+@use "partials/corners";
+@use "partials/mixins";
+
+.button {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0.8rem;
+	min-height: var(--hit-target);
+	padding-inline: 1.8rem;
+	border: 0.1rem solid transparent;
+	font-size: 1.5rem;
+	font-weight: 550;
+	line-height: 1;
+	white-space: nowrap;
+	user-select: none;
+	transition:
+		background-color var(--transition-fast),
+		border-color var(--transition-fast),
+		color var(--transition-fast),
+		transform var(--transition-fast);
+	@include corners.radius(var(--radius-control));
+	@include mixins.focus-ring;
+
+	&:active:not(:disabled) {
+		transform: translateY(0.1rem);
+	}
+
+	&:disabled {
+		opacity: 0.5;
+	}
+}
+
+.primary {
+	background: var(--color-primary);
+	color: var(--color-onPrimary);
+
+	&:hover:not(:disabled) {
+		background: var(--color-primaryHover);
+	}
+}
+
+.secondary {
+	background: var(--color-surface);
+	border-color: var(--color-borderStrong);
+	color: var(--color-text);
+
+	&:hover:not(:disabled) {
+		background: var(--color-surfaceMuted);
+	}
+}
+
+.ghost {
+	background: transparent;
+	color: var(--color-textMuted);
+
+	&:hover:not(:disabled) {
+		background: var(--color-surfaceMuted);
+		color: var(--color-text);
+	}
+}
+
+.danger {
+	background: var(--color-danger);
+	color: #fff;
+
+	&:hover:not(:disabled) {
+		background: var(--color-dangerText);
+	}
+}
+
+.sm {
+	min-height: 3.6rem;
+	padding-inline: 1.2rem;
+	font-size: 1.4rem;
+}
+
+.md {
+	min-height: var(--hit-target);
+}
+
+.lg {
+	min-height: 5.2rem;
+	padding-inline: 2.4rem;
+	font-size: 1.6rem;
+}
+
+.label {
+	@include mixins.truncate;
+}
+
+.spinner {
+	animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+	to {
+		transform: rotate(360deg);
+	}
+}

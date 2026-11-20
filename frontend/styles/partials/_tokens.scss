@@ -1,0 +1,86 @@
+:root {
+	// Surfaces
+	--color-canvas: #ffffff;
+	--color-surface: #ffffff;
+	--color-surfaceSubtle: #fafafa;
+	--color-surfaceMuted: #f4f4f5;
+	--color-surfaceHover: #f0f0f2;
+	--color-overlay: rgba(10, 10, 12, 0.4);
+
+	// Text
+	--color-text: #0b0b0d;
+	--color-textMuted: #3f3f46;
+	--color-textSubtle: #71717a;
+	--color-placeholder: #a1a1aa;
+
+	// Lines
+	--color-border: #e7e7ea;
+	--color-borderStrong: #d4d4d8;
+
+	// Brand (single restrained accent) and primary action (near-black)
+	--color-accent: #5b5bd6;
+	--color-accentHover: #4b4bc4;
+	--color-accentSoft: #eeeefc;
+	--color-accentText: #4338ca;
+	--color-onAccent: #ffffff;
+	--color-primary: #0b0b0d;
+	--color-primaryHover: #27272a;
+	--color-onPrimary: #ffffff;
+
+	// Status
+	--color-success: #16a34a;
+	--color-successText: #15803d;
+	--color-successSoft: #f0fdf4;
+	--color-warning: #d97706;
+	--color-warningText: #b45309;
+	--color-warningSoft: #fffbeb;
+	--color-danger: #dc2626;
+	--color-dangerText: #b42318;
+	--color-dangerSoft: #fef2f2;
+	--color-dangerBorder: #fecaca;
+
+	// Focus
+	--color-focusRing: rgba(91, 91, 214, 0.55);
+	--color-fieldFocus: #0b0b0d;
+
+	// Elevation
+	--shadow-card: 0 0.1rem 0.2rem rgba(10, 10, 12, 0.04);
+	--shadow-popover: 0 0.8rem 2.4rem rgba(10, 10, 12, 0.1), 0 0 0 0.1rem rgba(10, 10, 12, 0.04);
+	--shadow-modal: 0 2.4rem 6.4rem rgba(10, 10, 12, 0.2);
+
+	// Radii (declared through `corners.radius`, never as a bare border-radius)
+	--radius-control: 0.8rem;
+	--radius-card: 1.2rem;
+	--radius-panel: 1.6rem;
+	--radius-pill: 99rem;
+
+	// Spacing scale
+	--space-1: 0.4rem;
+	--space-2: 0.8rem;
+	--space-3: 1.2rem;
+	--space-4: 1.6rem;
+	--space-5: 2.4rem;
+	--space-6: 3.2rem;
+	--space-7: 4.8rem;
+	--space-8: 6.4rem;
+	--space-9: 9.6rem;
+
+	// Layout
+	--container-max: 120rem;
+	--container-gutter: 1.6rem;
+	--hit-target: 4.4rem;
+
+	// Motion
+	--transition-fast: 0.15s ease-out;
+	--transition-base: 0.25s cubic-bezier(0.2, 0.7, 0.2, 1);
+
+	// Stacking
+	--z-header: 20;
+	--z-dropdown: 40;
+	--z-modal: 60;
+	--z-toast: 80;
+
+	@media (min-width: 768px) {
+		--container-gutter: 2.4rem;
+	}
+}

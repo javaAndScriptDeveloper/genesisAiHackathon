@@ -1,0 +1,18 @@
+@use "partials/corners";
+
+.badge {
+	display: inline-flex;
+	align-items: center;
+	padding: 0.3rem 0.9rem;
+	font-size: 1.2rem;
+	font-weight: 600;
+	line-height: 1.4;
+	white-space: nowrap;
+	@include corners.radius(0.7rem);
+}
+
+.neutral { background: var(--color-surfaceMuted); color: var(--color-textMuted); }
+.accent { background: var(--color-accentSoft); color: var(--color-accentText); }
+.success { background: var(--color-successSoft); color: var(--color-successText); }
+.warning { background: var(--color-warningSoft); color: var(--color-warningText); }
+.danger { background: var(--color-dangerSoft); color: var(--color-dangerText); }

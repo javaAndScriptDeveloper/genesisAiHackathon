@@ -1,0 +1,36 @@
+.root {
+	display: flex;
+	flex-direction: column;
+	gap: var(--space-4);
+}
+
+.swiper {
+	width: 100%;
+	padding-bottom: 3.2rem;
+
+	:global(.swiper-pagination-bullet) {
+		background: var(--color-borderStrong);
+		opacity: 1;
+	}
+
+	:global(.swiper-pagination-bullet-active) {
+		background: var(--color-primary);
+	}
+}
+
+.slide {
+	height: auto;
+}
+
+.controls {
+	display: flex;
+	justify-content: flex-end;
+	gap: 0.8rem;
+}
+
+.prev,
+.next {
+	&:global(.swiper-button-disabled) {
+		opacity: 0.4;
+	}
+}

@@ -1,0 +1,33 @@
+@use "partials/corners";
+@use "partials/mixins";
+
+.iconButton {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: var(--hit-target);
+	height: var(--hit-target);
+	flex: none;
+	color: var(--color-textMuted);
+	transition: background-color var(--transition-fast), color var(--transition-fast);
+	@include corners.radius(var(--radius-control));
+	@include mixins.focus-ring;
+
+	&:hover:not(:disabled) {
+		background: var(--color-surfaceMuted);
+		color: var(--color-text);
+	}
+
+	&:disabled {
+		opacity: 0.5;
+	}
+}
+
+.ghost {
+	background: transparent;
+}
+
+.secondary {
+	background: var(--color-surface);
+	border: 0.1rem solid var(--color-borderStrong);
+}

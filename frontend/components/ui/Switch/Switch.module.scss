@@ -1,0 +1,55 @@
+.row {
+	position: relative;
+	display: inline-flex;
+	align-items: center;
+	gap: 1.2rem;
+	min-height: var(--hit-target);
+	cursor: pointer;
+}
+
+.input {
+	position: absolute;
+	opacity: 0;
+	inset: 0;
+	margin: 0;
+	cursor: inherit;
+}
+
+.track {
+	position: relative;
+	width: 4rem;
+	height: 2.4rem;
+	flex: none;
+	background: var(--color-borderStrong);
+	border-radius: var(--radius-pill);
+	transition: background-color var(--transition-fast);
+
+	.input:checked + & {
+		background: var(--color-primary);
+	}
+
+	.input:focus-visible + & {
+		outline: 0.2rem solid var(--color-focusRing);
+		outline-offset: 0.2rem;
+	}
+}
+
+.thumb {
+	position: absolute;
+	top: 0.2rem;
+	left: 0.2rem;
+	width: 2rem;
+	height: 2rem;
+	background: #fff;
+	border-radius: 50%;
+	box-shadow: 0 0.1rem 0.3rem rgba(0, 0, 0, 0.25);
+	transition: transform var(--transition-base);
+
+	.input:checked + .track & {
+		transform: translateX(1.6rem);
+	}
+}
+
+.text {
+	font-size: 1.5rem;
+}
