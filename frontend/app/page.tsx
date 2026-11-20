@@ -16,7 +16,7 @@ export default async function Home() {
   const health = await getHealth();
   return (
     <main style={{ fontFamily: "sans-serif", padding: "2rem" }}>
-      <h1>Hackathon backbone</h1>
+      <h1>Hackathon backbone (redeploy check)</h1>
       <p data-testid="health">{health}</p>
     </main>
   );
