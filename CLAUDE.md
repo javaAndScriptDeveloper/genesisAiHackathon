@@ -7,7 +7,7 @@ Minimal monorepo: push to `main` goes live on the VPS.
 - `frontend/` — Next.js (App Router, standalone). Calls the backend server-side; `/api/*` is rewritten to the backend.
 - `compose.yml` — local stack, frontend on http://localhost:18080.
 - `deploy/compose.prod.yml` — production stack (db + platform-backend + frontend).
-- `ssh/` — Hetzner key (`hetzner_ed25519` is gitignored; `.pub` committed) and `connect.sh`.
+- `ssh/` — Hetzner key (private `hetzner_ed25519` and `.pub` are both committed on purpose (private repo)) and `connect.sh`.
 - New microservice: add a folder with a Dockerfile, a service in both compose files, and build/push + test steps in `.github/workflows/ci.yml`.
 
 ## Where it is deployed

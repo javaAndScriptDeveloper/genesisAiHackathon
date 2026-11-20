@@ -9,11 +9,11 @@ The key lives in `ssh/`:
 | File | In git? | Purpose |
 |---|---|---|
 | `ssh/hetzner_ed25519.pub` | yes | Public key, already authorized on the VPS |
-| `ssh/hetzner_ed25519` | **no** (gitignored) | Private key. Get it from a teammate over a secure channel; never commit or paste it in chat |
+| `ssh/hetzner_ed25519` | yes (private repo only) | Private key, committed on purpose. Never make this repo public without rotating the key |
 
 Checklist:
 
-1. Put the private key at `ssh/hetzner_ed25519` and run `chmod 600 ssh/hetzner_ed25519`.
+1. After cloning, run `chmod 600 ssh/hetzner_ed25519` (git does not keep that mode).
 2. Check access: `./ssh/connect.sh` (opens a shell on the VPS).
 3. **Add it to GitHub, or CI deploys will fail:**
    ```bash

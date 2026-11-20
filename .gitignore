@@ -156,8 +156,6 @@ vite.config.ts.timestamp-*
 .nx/workspace-data
 .nx/migrate-runs
 
-# SSH private keys
-ssh/hetzner_ed25519
 
 # executing-plans scratch
 .superpowers/
