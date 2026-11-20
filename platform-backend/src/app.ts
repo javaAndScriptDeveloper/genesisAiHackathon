@@ -17,5 +17,11 @@ export function buildApp(pool: Queryable): FastifyInstance {
     }
   });
 
+  // Dummy route: lets the frontend prove service-to-service calls work after every deploy.
+  app.get("/api/ping", async () => ({
+    message: "pong from platform-backend",
+    time: new Date().toISOString(),
+  }));
+
   return app;
 }

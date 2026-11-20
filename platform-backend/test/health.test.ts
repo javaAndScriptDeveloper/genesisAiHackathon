@@ -30,4 +30,13 @@ describe("GET /api/health", () => {
     expect(res.statusCode).toBe(503);
     expect(res.json()).toEqual({ status: "error", db: false });
   });
+
+  it("answers /api/ping with a pong from platform-backend", async () => {
+    const app = buildApp(pool);
+    const res = await app.inject({ method: "GET", url: "/api/ping" });
+    expect(res.statusCode).toBe(200);
+    const body = res.json();
+    expect(body.message).toBe("pong from platform-backend");
+    expect(Number.isNaN(Date.parse(body.time))).toBe(false);
+  });
 });
