@@ -103,6 +103,7 @@ export function Select<T extends string>({ options, value, onChange, label, plac
 					{label}
 				</label>
 			)}
+			<div className={styles.field}>
 			<button
 				ref={triggerRef}
 				type="button"
@@ -138,6 +139,7 @@ export function Select<T extends string>({ options, value, onChange, label, plac
 					))}
 				</ul>
 			)}
+			</div>
 			{error && (
 				<p className={styles.error} role="alert">
 					{error}

@@ -40,14 +40,14 @@ Design history: `docs/superpowers/specs/` and `docs/superpowers/plans/`.
 - **Server Components by default.** Add `"use client"` only at the smallest interactive leaf.
 - **Layers:** page → section/feature component → `components/ui` primitive; data only via `lib/api`. No fetching or business logic inside `components/ui`.
 - **Components:** each in its own PascalCase folder with a co-located `Name.module.scss`. Reuse an existing UI component; never use a bare native control where a kit component exists.
-- **Styles:** rem units (`html { font-size: 62.5% }`), one root class per module, camelCase nested classes, breakpoints 576/768/992/1200 via `mixins.respond`. Radii only via `corners.radius` / `corners.nested`. Colors and spacing only from tokens.
+- **Styles:** rem units (`html { font-size: 62.5% }`), one root class per module, camelCase nested classes, breakpoints 576/768/992/1200 via `mixins.respond`. Radii only via `corners.radius` / `corners.nested` (squircle `corner-shape` is applied by these mixins). Always check nested border radius: a rounded child inside a rounded parent uses `corners.nested($parentRadius, $gap)`. Colors and spacing only from tokens.
 - **Fonts:** Inter body, Unbounded for h1 (heavy), Montserrat/Poppins opt-in. Loaded via `next/font` in `lib/fonts.ts`.
 - **Icons:** Hugeicons only, via `components/ui/Icon`, individual named imports. Never emoji or text glyphs as icons.
 - **Images:** WebP, @2x when possible, always through `next/image` (`Picture`). Convert with `bun run images`.
 - **Copy:** user-facing text in `messages/uk.json`, read with `t("key")`. Ukrainian only, no language switcher.
 - **Theme:** one light theme, no theme switcher.
 - **Forms:** react-hook-form + zod; no browser-native validation; show errors in the kit's own UI.
-- **Loading/empty/error:** every data view has a skeleton, an empty state and an error state.
+- **Loading/empty/error:** every data view has a skeleton, an empty state and an error state. Data that can take a while to load or switch (pagination, tabs, filters, search, refetch) MUST show skeletons during the switch, not stale/blank content; skeleton keeps the same layout (columns, row count, heights) so nothing jumps.
 - **Destructive actions** always go through `ConfirmDialog`.
 - **Secrets:** AI keys only in `.env.local`, used in server code (`lib/ai`, route handlers). Never `NEXT_PUBLIC_` for secrets.
 - **Render only what changes:** keep input state local, no re-keying of controls the user is typing in.

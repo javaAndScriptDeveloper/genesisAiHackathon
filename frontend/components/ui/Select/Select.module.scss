@@ -5,11 +5,14 @@ $panel-radius: 1.2rem; // keep in sync with the panel radius below
 $panel-gap: 0.4rem; // panel padding
 
 .root {
-	position: relative;
 	display: flex;
 	flex-direction: column;
 	gap: 0.6rem;
 	min-width: 0;
+}
+
+.field {
+	position: relative; // panel is positioned against trigger only, not label/error
 }
 
 .label {

@@ -33,8 +33,13 @@
 	@include corners.radius(var(--radius-control));
 }
 
-.success svg { color: #4ade80; }
-.danger svg { color: #f87171; }
+.success {
+	background: var(--color-success);
+}
+
+.danger {
+	background: var(--color-danger);
+}
 
 @keyframes slide {
 	from {

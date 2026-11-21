@@ -10,6 +10,8 @@
 
 .table {
 	width: 100%;
+	min-width: 56rem; // below this the wrap scrolls horizontally instead of squeezing columns
+	table-layout: fixed; // column widths come from `Column.width` or split evenly, never from the current page's content
 	font-size: 1.4rem;
 	text-align: left;
 
