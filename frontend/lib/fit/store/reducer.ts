@@ -1,4 +1,5 @@
 import { daysBetween, toISO, type ISODate } from "../dates";
+import { MAX_PAUSE_DAYS } from "../../progress/consistency";
 import type { Units } from "../units";
 import { findExercise, getExercise } from "../exercises";
 import { applyAdapt, replaceBlock, replaceUnavailable } from "../adapt";
@@ -28,9 +29,6 @@ import type {
 	SessionLog,
 	SkipReason,
 } from "../types";
-
-/** A pause covers at most 4 weeks: to − from ≤ 27 days. */
-const MAX_PAUSE_DAYS = 27;
 
 export type Action =
 	| { type: "hydrate"; state: FitState }

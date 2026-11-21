@@ -108,14 +108,13 @@ export function streakWeeks(h: History): number {
 // ---- v2 ----
 
 const WEIGHTS_V2 = [0.4, 0.3, 0.2, 0.1] as const;
-const MAX_PAUSE_DAYS = 27; // 4 weeks: to − from ≤ 27
+/** A pause covers at most 4 weeks: to − from ≤ 27 days. */
+export const MAX_PAUSE_DAYS = 27;
 
 const hasQuality = (h: History, date: IsoDate): boolean => h.sessions.some((s) => s.date === date && isQualitySession(s));
 
-/** Rest day is credited when the nearest planned training day of the same week was quality-completed. */
-export function restDayCredited(h: History, date: IsoDate): boolean {
-	const entry = h.plan.find((p) => p.date === date);
-	if (!entry || entry.type !== "rest") return false;
+/** Nearest planned training day of the same week as `date` (tie → prefer a quality-completed one), or null. */
+export function nearestTrainingDay(h: History, date: IsoDate): IsoDate | null {
 	const ws = weekStart(date);
 	let best: IsoDate | null = null;
 	let bestDist = Infinity;
@@ -128,6 +127,14 @@ export function restDayCredited(h: History, date: IsoDate): boolean {
 			bestDist = dist;
 		}
 	}
+	return best;
+}
+
+/** Rest day is credited when the nearest planned training day of the same week was quality-completed. */
+export function restDayCredited(h: History, date: IsoDate): boolean {
+	const entry = h.plan.find((p) => p.date === date);
+	if (!entry || entry.type !== "rest") return false;
+	const best = nearestTrainingDay(h, date);
 	return best !== null && hasQuality(h, best);
 }
 

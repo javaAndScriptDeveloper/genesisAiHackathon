@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { calendarDayState, calendarMonth, dayDetails, shiftMonth, weekDetails } from "@/lib/progress/calendar";
+import { restDayCredited } from "@/lib/progress/consistency";
 import { addDays, weekday } from "@/lib/progress/dates";
 import type { History, IsoDate, PlannedDay, ProgressContext, WorkoutSession } from "@/lib/progress/types";
 
@@ -156,5 +157,15 @@ describe("details", () => {
 	it("shiftMonth crosses years", () => {
 		expect(shiftMonth("2026-01", -1)).toBe("2025-12");
 		expect(shiftMonth("2026-12", 1)).toBe("2027-01");
+	});
+});
+
+describe("calendar agrees with consistency", () => {
+	it("rest-credited cells equal restDayCredited for every past day of a month", () => {
+		// Mixed month: quality, low-quality and missed workouts.
+		const h = history([...S, session("2026-11-11", { sets: [{ exerciseId: "squat", reps: 5, weightKg: 40, durationSec: null }] })]);
+		const days = calendarMonth(h, ctx, "2026-11").weeks.flatMap((w) => w.days).filter((d) => d.date <= TODAY);
+		expect(days.length).toBeGreaterThan(20);
+		for (const d of days) expect([d.date, d.state === "rest-credited"]).toEqual([d.date, restDayCredited(h, d.date)]);
 	});
 });

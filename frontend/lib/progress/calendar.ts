@@ -1,5 +1,5 @@
-import { consistencyV2, isPausedWeek, weekCredited, weekScore } from "./consistency";
-import { addDays, daysBetween, eachDay, weekStart } from "./dates";
+import { consistencyV2, isPausedWeek, nearestTrainingDay, restDayCredited, weekCredited, weekScore } from "./consistency";
+import { addDays, eachDay, weekStart } from "./dates";
 import { isQualitySession } from "./days";
 import type { History, IsoDate, ProgressContext, WorkoutSession } from "./types";
 
@@ -61,26 +61,9 @@ export function inPause(ctx: ProgressContext, date: IsoDate): boolean {
 
 const doneSessions = (h: History, date: IsoDate): WorkoutSession[] => h.sessions.filter((s) => s.date === date && s.status === "completed");
 
-/** Nearest planned training day of the same week (ties prefer a quality one), as used for rest-day credit. */
-export function nearestTrainingDay(h: History, date: IsoDate): IsoDate | null {
-	const ws = weekStart(date);
-	let best: IsoDate | null = null;
-	let bestDist = Infinity;
-	const quality = (d: IsoDate) => h.sessions.some((s) => s.date === d && isQualitySession(s));
-	for (const d of eachDay(ws, addDays(ws, 6))) {
-		if (h.plan.find((p) => p.date === d)?.type !== "workout") continue;
-		const dist = Math.abs(daysBetween(date, d));
-		if (dist < bestDist || (dist === bestDist && best !== null && !quality(best) && quality(d))) {
-			best = d;
-			bestDist = dist;
-		}
-	}
-	return best;
-}
-
+/** Calendar credit for a rest day: same rule as consistency (restDayCredited), only once the day has passed. */
 function restCredited(h: History, date: IsoDate): boolean {
-	const nearest = nearestTrainingDay(h, date);
-	return nearest !== null && nearest <= h.today && h.sessions.some((s) => s.date === nearest && isQualitySession(s));
+	return date <= h.today && restDayCredited(h, date);
 }
 
 /**
@@ -97,7 +80,7 @@ export function calendarDayState(h: History, ctx: ProgressContext, date: IsoDate
 		if (date < h.today) return "missed";
 		return date === h.today ? "today" : "planned";
 	}
-	if (date <= h.today && restCredited(h, date)) return "rest-credited";
+	if (restCredited(h, date)) return "rest-credited";
 	return date === h.today ? "today" : "rest";
 }
 
@@ -218,7 +201,7 @@ export function weekDetails(h: History, ctx: ProgressContext, ws: IsoDate): Week
 		if (entry.type === "workout") {
 			plannedWorkouts++;
 			if (h.sessions.some((s) => s.date === d && isQualitySession(s))) qualityWorkouts++;
-		} else if (d <= h.today && restCredited(h, d)) creditedRest++;
+		} else if (restCredited(h, d)) creditedRest++;
 	}
 	const counted = consistencyV2(h, ctx).weeks.find((w) => w.weekStart === ws);
 	return {

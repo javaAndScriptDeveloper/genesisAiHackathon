@@ -37,7 +37,9 @@ export function ScoreBreakdown({ score, weeks, onWeek }: ScoreBreakdownProps) {
 											{range}
 											<span className={styles.weight}>{t(`${k}.weight`, { pct })}</span>
 										</span>
-										<ProgressBar value={w.score} label={range} className={styles.bar} />
+										<span aria-hidden className={styles.bar}>
+											<ProgressBar value={w.score} label={range} />
+										</span>
 										<strong className={styles.score}>{nf.format(w.score)}</strong>
 										<Icon icon={ArrowRight01Icon} size={16} className={styles.chevron} />
 									</button>

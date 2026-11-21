@@ -61,6 +61,11 @@
 		font-weight: 500;
 	}
 
+	.bar {
+		display: block;
+		min-width: 0;
+	}
+
 	.score {
 		font-size: 1.5rem;
 		text-align: right;
