@@ -148,6 +148,24 @@ describe("daily sessions", () => {
 		expect(buildDailySession(rec, original, "recovery", alex)).toBeNull();
 	});
 
+	const short: PlannedWorkout = {
+		...original,
+		durationMin: 10,
+		exercises: original.exercises.slice(0, 2).map((b) => ({ ...b, sets: b.sets.slice(0, 2) })),
+	};
+
+	it("recovery returns null when it has more sets than a short original", () => {
+		const rec = { note: "n", title: "T", exercises: [ex("dead-bug", 3), ex("warrior-ii", 3)] };
+		expect(buildDailySession(rec, short, "recovery", alex)).toBeNull();
+	});
+
+	it("fallbackDaily recovery fits a short original", () => {
+		const rec = fallbackDaily(short, "recovery", alex);
+		expect(totalSetsOf(rec)).toBeLessThanOrEqual(totalSetsOf(short));
+		expect(rec.durationMin).toBeLessThanOrEqual(short.durationMin);
+		expect(rec.id).toBe(short.id);
+	});
+
 	it("returns a session keeping the original id", () => {
 		const light = buildDailySession({ note: "n", title: "T", exercises: [ex("goblet-squat", 1, 8), ex("db-row", 1, 8)] }, original, "lighter", alex);
 		expect(light?.id).toBe(original.id);

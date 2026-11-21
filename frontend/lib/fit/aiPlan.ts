@@ -130,8 +130,8 @@ export function buildDailySession(ai: AiSession, original: PlannedWorkout, statu
 	if (status === "recovery" && cleaned.some((c) => c.exercise.kind !== "mobility" && c.exercise.kind !== "cardio" && c.exercise.muscle !== "core")) return null;
 	const exercises = cleaned.map((c) => toBlock(c, 0));
 	const minutes = estimateMinutes(exercises);
-	if (status === "recovery" && minutes > 30) return null;
-	if (status === "lighter" && (totalSets(exercises) > totalSets(original.exercises) || minutes > original.durationMin)) return null;
+	const maxMinutes = status === "recovery" ? Math.min(30, original.durationMin) : original.durationMin;
+	if (totalSets(exercises) > totalSets(original.exercises) || minutes > maxMinutes) return null;
 	return {
 		...original,
 		title: status === "recovery" ? trim40(ai.title) || "Active recovery" : original.title,
@@ -148,7 +148,17 @@ export function fallbackDaily(original: PlannedWorkout, status: Exclude<DailySta
 		return { ...original, exercises, durationMin: estimateMinutes(exercises) };
 	}
 	const { adHoc: _adHoc, ...rest } = buildAdHocWorkout("mobility", original.date, profile);
-	return { ...rest, id: original.id };
+	const maxMinutes = Math.min(30, original.durationMin);
+	const maxSets = totalSets(original.exercises);
+	let blocks = rest.exercises;
+	const fits = () => totalSets(blocks) <= maxSets && estimateMinutes(blocks) <= maxMinutes;
+	while (!fits() && blocks.length > 1) blocks = blocks.slice(0, -1);
+	while (!fits()) {
+		const biggest = blocks.reduce((a, b) => (b.sets.length > a.sets.length ? b : a));
+		if (biggest.sets.length <= 1) break;
+		blocks = blocks.map((b) => (b === biggest ? { ...b, sets: b.sets.slice(0, -1) } : b));
+	}
+	return { ...rest, id: original.id, exercises: blocks, durationMin: estimateMinutes(blocks) };
 }
 
 function weekNames(plan: PlannedWorkout[], today: ISODate): string[] {
