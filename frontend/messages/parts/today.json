@@ -55,10 +55,10 @@
       "weekGoal": "Weekly goal",
       "sessions": "sessions",
       "noPlanThisWeek": "Nothing planned this week.",
-      "goalDone": "All planned sessions done. Enjoy the rest.",
+      "goalDone": "Weekly goal reached. Enjoy the rest.",
       "goalLeft": "{n} more to hit your goal.",
       "streak": "Streak",
-      "streakHint": "planned sessions in a row",
+      "streakHint": "weeks in a row at your goal",
       "level": "Level",
       "xpProgress": "XP to next level",
       "challenge": "Weekly challenge",
@@ -69,7 +69,8 @@
       "waterRemove": "Remove {ml} ml",
       "waterLeft": "{ml} ml to go",
       "waterDone": "Goal reached. Nice work!",
-      "waterLimit": "Daily limit reached ({max} ml). More at once isn't safe."
+      "waterLimit": "Daily limit reached ({max} ml). More at once isn't safe.",
+      "streakHintOne": "week in a row at your goal"
     },
     "session": {
       "level": "Level {n}",

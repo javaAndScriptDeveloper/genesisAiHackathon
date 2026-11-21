@@ -1,9 +1,10 @@
 import { addDays, daysBetween, mondayOf, mulberry32, type ISODate } from "./dates";
 import { getExercise } from "./exercises";
-import { evaluateAchievements } from "./gamification";
 import { DEFAULT_NOTIFICATION_SETTINGS } from "./notifications";
 import { estimateMinutes, generatePlan } from "./plan";
-import { applyProgression, detectPrs, sessionXp, volumeOf } from "./stats";
+import { applyProgression, detectPrs, volumeOf } from "./stats";
+import { historyFromFit } from "../progress/fromFit";
+import { xpForSession } from "../progress/xp";
 import type { ExerciseBlock, FitState, LoggedExercise, PlannedWorkout, Profile, SessionLog } from "./types";
 
 export const WATER_GOAL_ML = 2500;
@@ -54,6 +55,7 @@ export function emptyState(): FitState {
 		progressToken: newProgressToken(),
 		weeklyGoal: 3,
 		progressEvents: [],
+		lastProgressDay: null,
 		archivedWeeks: [],
 		archiveQueue: [],
 	};
@@ -92,7 +94,7 @@ function logFromBlocks(blocks: ExerciseBlock[], opts: { id: string; plannedId: s
 		adaptations: [],
 		avgHr: reached ? Math.round(112 + rand() * 18) : undefined,
 		hrDemo: true,
-		xp: sessionXp({ status, durationSec, prs: prs.length, adHocExtra: false }),
+		xp: 0, // set from the engine once the whole history exists (seedHistory)
 		prs,
 		demo: true,
 	};
@@ -174,9 +176,10 @@ export function seedHistory(profile: Profile, today: ISODate): Pick<FitState, "p
 	for (let d = 1; d <= 5; d += 1) water[addDays(today, -d)] = Math.round((1700 + rand() * 900) / 50) * 50;
 
 	const pauses = [{ from: pausedMonday, to: pausedSunday }];
-	const base: FitState = { ...emptyState(), profile, planned: [...planned, ...upcoming], history, water, pauses };
-	const unlockedIds = evaluateAchievements(base, today);
-	const lastDate = history[history.length - 1]?.date ?? today;
-	const unlocked = Object.fromEntries(unlockedIds.map((id) => [id, lastDate]));
-	return { planned: [...planned, ...upcoming], history, bodyWeights, water, unlocked, hasDemoHistory: true, pauses, futureFrom: today };
+	const all = [...planned, ...upcoming];
+	// Per-session XP comes from lib/progress, like every other progress number. Badges are derived, never stored.
+	const h = historyFromFit({ planned: all, history, bodyWeights }, today);
+	const ctx = { weeklyGoal: defaultWeeklyGoal(profile), pauses };
+	const scored = history.map((l) => ({ ...l, xp: xpForSession(h, ctx, l.id).total }));
+	return { planned: all, history: scored, bodyWeights, water, unlocked: {}, hasDemoHistory: true, pauses, futureFrom: today };
 }

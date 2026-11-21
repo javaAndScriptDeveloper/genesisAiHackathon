@@ -172,6 +172,21 @@ describe("historyFromFit: plan-credited sessions", () => {
 		expect(isQualitySession(h.sessions[0]!)).toBe(true);
 		expect(dayStatus(h, "2026-11-18")).toBe("completed");
 	});
+	it("same-week early start keeps the planned day; the date never changes later", () => {
+		// 2026-11-18 (Wed) done for the plan of 2026-11-20 (Fri): same Monday-week.
+		const state = mk([planned("p1", "2026-11-20", { status: "completed", logId: "l1" })], [log({ date: "2026-11-18" })]);
+		expect(historyFromFit(state, "2026-11-18").sessions[0]?.date).toBe("2026-11-20");
+		expect(historyFromFit(state, "2026-11-25").sessions[0]?.date).toBe("2026-11-20");
+	});
+	it("across a week boundary the session counts on the day it was done, before and after the planned day", () => {
+		// Done Sun 2026-11-22 for the plan of Mon 2026-11-23.
+		const early = mk([planned("p1", "2026-11-23", { status: "completed", logId: "l1" })], [log({ date: "2026-11-22" })]);
+		expect(historyFromFit(early, "2026-11-22").sessions[0]?.date).toBe("2026-11-22");
+		expect(historyFromFit(early, "2026-11-30").sessions[0]?.date).toBe("2026-11-22");
+		// A missed Friday done the next Monday counts on Monday.
+		const late = mk([planned("p1", "2026-11-20", { status: "completed", logId: "l1" })], [log({ date: "2026-11-23" })]);
+		expect(historyFromFit(late, "2026-11-23").sessions[0]?.date).toBe("2026-11-23");
+	});
 	it("ad-hoc log stays on its own date, unplanned", () => {
 		const h = historyFromFit(mk([planned("a", "2026-11-19", { adHoc: true, status: "completed" })], [log({ plannedId: "a", date: "2026-11-19" })]), "2026-11-21");
 		expect(h.sessions[0]).toMatchObject({ date: "2026-11-19", planned: false });
@@ -179,19 +194,26 @@ describe("historyFromFit: plan-credited sessions", () => {
 });
 
 describe("consistencyDeltaOf", () => {
-	it("ignores workouts after the week-ago day", async () => {
+	it("is consistencyV2 now minus consistencyV2 a week ago (same number as the ring)", async () => {
 		const { consistencyDeltaOf } = await import("@/lib/progress/fromFit");
-		const { consistencyScore } = await import("@/lib/fit/stats");
+		const { consistencyV2 } = await import("@/lib/progress/consistency");
 		const P: PlannedWorkout[] = [];
+		const L: SessionLog[] = [];
 		for (let i = 0; i < 32; i++) {
 			const d = new Date(Date.UTC(2026, 9, 19 + i)).toISOString().slice(0, 10);
 			const wd = new Date(`${d}T00:00:00Z`).getUTCDay();
 			if (![1, 3, 5].includes(wd)) continue;
-			const status = d > "2026-11-19" ? "planned" : d >= "2026-11-09" && d <= "2026-11-15" ? "planned" : "completed";
-			P.push(planned(`p${i}`, d, { status }));
+			const done = d <= "2026-11-19" && !(d >= "2026-11-09" && d <= "2026-11-15");
+			P.push(planned(`p${i}`, d, { status: done ? "completed" : "planned", logId: done ? `l${i}` : undefined }));
+			if (done) L.push(log({ id: `l${i}`, plannedId: `p${i}`, date: d, exercises: [{ exerciseId: "goblet-squat", skipped: false, sets: [{ reps: 10, weight: 10 }, { reps: 10, weight: 10 }, { reps: 10, weight: 10 }] }] }));
 		}
-		const ago = P.filter((w) => w.date <= "2026-11-12");
-		expect(consistencyDeltaOf(P, "2026-11-19")).toBe(consistencyScore(P, "2026-11-19") - consistencyScore(ago, "2026-11-12"));
-		expect(consistencyDeltaOf([], "2026-11-19")).toBeNull();
+		const h = historyFromFit({ planned: P, history: L, bodyWeights: [] }, "2026-11-19");
+		const ctx = { weeklyGoal: 3, pauses: [] };
+		const now = consistencyV2(h, ctx).score;
+		const ago = consistencyV2({ ...h, today: "2026-11-12" }, ctx).score;
+		expect(now).not.toBeNull();
+		expect(consistencyDeltaOf(h, ctx)).toBe((now ?? 0) - (ago ?? 0));
+		expect(consistencyDeltaOf(h, ctx)).toBeLessThan(0);
+		expect(consistencyDeltaOf(historyFromFit({ planned: [], history: [], bodyWeights: [] }, "2026-11-19"), ctx)).toBeNull();
 	});
 });

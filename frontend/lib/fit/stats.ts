@@ -32,38 +32,6 @@ export function weekStats(planned: PlannedWorkout[], history: SessionLog[], toda
 	};
 }
 
-/** Share of planned sessions finished over the last `weeks` weeks. Recovery and illness skips are excused. */
-export function consistencyScore(planned: PlannedWorkout[], today: ISODate, weeks = 4): number {
-	const start = addDays(mondayOf(today), -(weeks - 1) * 7);
-	const due = planned.filter((w) => !w.adHoc && w.date >= start && (w.date < today || w.status !== "planned"));
-	const counted = due.filter((w) => !(w.status === "skipped" && w.skipReason !== "busy"));
-	if (counted.length === 0) return 0;
-	const done = counted.filter((w) => w.status === "completed" || w.status === "partial").length;
-	return Math.round((done / counted.length) * 100);
-}
-
-export interface StreakInfo {
-	current: number;
-	longest: number;
-}
-
-/**
- * Streak counts consecutive planned sessions completed. Rest days never matter, and a skip for recovery or
- * illness is neutral (it neither adds nor breaks). Only a missed or "busy" skip resets it. Extra sessions never count.
- */
-export function computeStreak(planned: PlannedWorkout[], today: ISODate): StreakInfo {
-	const relevant = planned.filter((w) => !w.adHoc && (w.status !== "planned" || w.date < today)).sort((a, b) => a.date.localeCompare(b.date));
-	let current = 0;
-	let longest = 0;
-	for (const w of relevant) {
-		if (w.status === "completed" || w.status === "partial") current += 1;
-		else if (w.status === "skipped" && w.skipReason !== "busy") continue;
-		else current = 0;
-		longest = Math.max(longest, current);
-	}
-	return { current, longest };
-}
-
 export interface RecordEntry {
 	exerciseId: string;
 	best: number;
@@ -136,20 +104,6 @@ export function applyProgression(planned: PlannedWorkout[], log: SessionLog, tod
 		});
 		return { ...w, exercises };
 	});
-}
-
-export function sessionXp(args: { status: "completed" | "partial"; durationSec: number; prs: number; adHocExtra: boolean }): number {
-	const base = args.status === "completed" ? 60 : 30;
-	const minutes = Math.min(60, Math.round(args.durationSec / 60));
-	const raw = base + minutes + args.prs * 15;
-	return Math.round(args.adHocExtra ? raw * 0.25 : raw);
-}
-
-export function levelInfo(xp: number): { level: number; into: number; span: number; pct: number } {
-	const level = Math.floor(Math.sqrt(xp / 100)) + 1;
-	const floor = 100 * (level - 1) ** 2;
-	const ceil = 100 * level ** 2;
-	return { level, into: xp - floor, span: ceil - floor, pct: Math.round(((xp - floor) / (ceil - floor)) * 100) };
 }
 
 export function mean(values: number[]): number {

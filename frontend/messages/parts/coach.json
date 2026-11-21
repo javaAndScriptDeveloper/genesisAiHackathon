@@ -5,7 +5,7 @@
       "suggestions": "Suggested questions", "placeholder": "Message your coach", "send": "Send message", "typing": "Coach is typing",
       "voice": "Dictate a message", "voiceUnsupported": "Voice input isn't supported in this browser. Type instead.", "voiceError": "Voice input failed. Try again or type.",
       "applied": "Applied", "backToWorkout": "Back to my workout (paused)",
-      "doneRecovery": "Done. Today is a recovery day and your streak is safe. Come back refreshed.", "doneEquipment": "Done. I removed that equipment from your profile and swapped {n} exercises in your next workout. Later sessions are updated too.", "doneLimitation": "Done. I'll avoid those movements in upcoming sessions and swapped what I could.", "doneRebuild": "Done. Your upcoming weeks are rebuilt from your latest preferences and history."
+      "doneRecovery": "Done. Today is a recovery day. Come back refreshed.", "doneEquipment": "Done. I removed that equipment from your profile and swapped {n} exercises in your next workout. Later sessions are updated too.", "doneLimitation": "Done. I'll avoid those movements in upcoming sessions and swapped what I could.", "doneRebuild": "Done. Your upcoming weeks are rebuilt from your latest preferences and history."
     }
   }
 }

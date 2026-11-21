@@ -1,6 +1,6 @@
 import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import type { Knex } from "knex";
-import { archiveSnapshot, getSnapshot, HttpError, listArchive, listWorkouts, markEventsSeen, resolveUser, syncSnapshot, type ArchiveInput, type HistoryQuery, type SyncBody } from "./repo.js";
+import { archiveSnapshot, getSnapshot, HttpError, listArchive, listWorkouts, markEventsSeen, resolveUser, syncSnapshot, withGuestUser, type ArchiveInput, type HistoryQuery, type SyncBody } from "./repo.js";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -160,9 +160,10 @@ export function progressRoutes(db: Knex) {
       if (typeof header !== "string" || !UUID.test(header)) return reply.code(400).send({ error: "invalid progress token" });
     });
 
-    const guard = async (reply: FastifyReply, label: string, fn: () => Promise<unknown>, okCode = 200) => {
+    const guard = async (reply: FastifyReply, label: string, fn: () => Promise<unknown>, okCode: number | ((result: unknown) => number) = 200) => {
       try {
-        return reply.code(okCode).send(await fn());
+        const result = await fn();
+        return reply.code(typeof okCode === "function" ? okCode(result) : okCode).send(result);
       } catch (err) {
         if (err instanceof HttpError) return reply.code(err.statusCode).send({ error: err.message });
         const code = (err as { code?: string }).code;
@@ -178,8 +179,7 @@ export function progressRoutes(db: Knex) {
 
     app.post("/api/progress/sync", { bodyLimit: 1024 * 1024, schema: { body: syncSchema } }, async (req, reply) =>
       guard(reply, "progress sync", async () => {
-        const userId = await resolveUser(db, token(req), { create: true });
-        return syncSnapshot(db, userId!, req.body as SyncBody);
+        return withGuestUser(db, token(req), (trx, userId) => syncSnapshot(trx, userId, req.body as SyncBody));
       }));
 
     app.post("/api/progress/events/seen", { schema: { body: seenSchema } }, async (req, reply) =>
@@ -192,14 +192,12 @@ export function progressRoutes(db: Knex) {
       const body = req.body as ArchiveInput;
       if (body.period === "weekly" && (body.weekStart === null || !isMonday(body.weekStart))) return reply.code(400).send({ error: "weekly archive needs a Monday weekStart" });
       if (body.period === "change" && body.weekStart !== null) return reply.code(400).send({ error: "change archive must have null weekStart" });
-      try {
-        const userId = await resolveUser(db, token(req), { create: true });
-        const archived = await archiveSnapshot(db, userId!, body);
-        return reply.code(archived ? 201 : 200).send({ archived });
-      } catch (err) {
-        app.log.error(err, "progress archive failed");
-        return reply.code(503).send({ error: "progress unavailable" });
-      }
+      return guard(
+        reply,
+        "progress archive",
+        async () => ({ archived: await withGuestUser(db, token(req), (trx, userId) => archiveSnapshot(trx, userId, body)) }),
+        (r) => ((r as { archived: boolean }).archived ? 201 : 200),
+      );
     });
 
     app.get("/api/progress/workouts", { schema: { querystring: historyQuerySchema } }, async (req, reply) => {

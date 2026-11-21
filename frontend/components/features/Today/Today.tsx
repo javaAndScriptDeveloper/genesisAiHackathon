@@ -42,7 +42,7 @@ export function Today() {
 	const active = state.active && state.active.phase !== "summary" ? state.active : null;
 	const next = stats.next;
 	const unread = unreadCount(state);
-	const weekPct = stats.week.planned ? (stats.week.done / stats.week.planned) * 100 : 0;
+	const weekPct = Math.min(100, (stats.goal.done / stats.goal.target) * 100);
 
 	return (
 		<div className={styles.root}>
@@ -129,19 +129,19 @@ export function Today() {
 
 				<section aria-label={t("fit.today.weekGoal")} className={styles.goal}>
 					<ProgressRing value={weekPct} label={t("fit.today.weekGoal")} size={92}>
-						<strong className={styles.ringNum}><AnimatedNumber value={stats.week.done} />/<AnimatedNumber value={stats.week.planned} /></strong>
+						<strong className={styles.ringNum}><AnimatedNumber value={stats.goal.done} />/<AnimatedNumber value={stats.goal.target} /></strong>
 						<span className={styles.ringLabel}>{t("fit.today.sessions")}</span>
 					</ProgressRing>
 					<div className={styles.goalText}>
 						<h2>{t("fit.today.weekGoal")}</h2>
-						<p>{stats.week.planned === 0 ? t("fit.today.noPlanThisWeek") : stats.week.done >= stats.week.planned ? t("fit.today.goalDone") : t("fit.today.goalLeft", { n: stats.week.planned - stats.week.done })}</p>
+						<p>{stats.goal.done >= stats.goal.target ? t("fit.today.goalDone") : stats.week.planned === 0 && stats.goal.done === 0 ? t("fit.today.noPlanThisWeek") : t("fit.today.goalLeft", { n: stats.goal.target - stats.goal.done })}</p>
 					</div>
 				</section>
 
 				<WeekStrip planned={state.planned} today={today} />
 
 				<div className={styles.stats}>
-					<Stat label={t("fit.today.streak")} value={stats.streak.current} hint={t("fit.today.streakHint")} icon={<Icon icon={FireIcon} size={14} />} />
+					<Stat label={t("fit.today.streak")} value={stats.streak.current} hint={t(stats.streak.current === 1 ? "fit.today.streakHintOne" : "fit.today.streakHint")} icon={<Icon icon={FireIcon} size={14} />} />
 					<Stat label={t("fit.today.level")} value={stats.level.level} hint={`${stats.level.into}/${stats.level.span} XP`} icon={<Icon icon={Medal01Icon} size={14} />} />
 				</div>
 				<ProgressBar value={stats.level.pct} label={t("fit.today.xpProgress")} />

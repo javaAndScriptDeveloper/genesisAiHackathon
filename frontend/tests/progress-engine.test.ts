@@ -69,7 +69,13 @@ describe("events", () => {
 		expect(detectEvents(before, before, NOW)).toEqual([]);
 		const rec = { exerciseId: "bench", metric: "e1rm" as const, value: 90, previous: 80, date: today, sessionId: "s" };
 		const ev = detectEvents(before, { ...before, records: [rec] }, NOW);
-		expect(ev[0]).toMatchObject({ id: `pr:bench:e1rm:${today}`, kind: "pr" });
+		expect(ev[0]).toMatchObject({ id: `pr:bench:e1rm:${today}:90`, kind: "pr" });
+	});
+	it("a second, higher PR on the same day raises a new event", () => {
+		const rec = (value: number) => ({ exerciseId: "bench", metric: "e1rm" as const, value, previous: 80, date: today, sessionId: "s" });
+		const first = { ...before, records: [rec(90)] };
+		const ev = detectEvents(first, { ...before, records: [rec(90), rec(95)] }, NOW);
+		expect(ev.map((e) => e.id)).toEqual([`pr:bench:e1rm:${today}:95`]);
 	});
 	it("unseen after seenAt", () => {
 		const ev = detectEvents(before, after, NOW);

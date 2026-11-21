@@ -189,7 +189,7 @@
       "voiceError": "Voice input failed. Try again or type.",
       "applied": "Applied",
       "backToWorkout": "Back to my workout (paused)",
-      "doneRecovery": "Done. Today is a recovery day and your streak is safe. Come back refreshed.",
+      "doneRecovery": "Done. Today is a recovery day. Come back refreshed.",
       "doneEquipment": "Done. I removed that equipment from your profile and swapped {n} exercises in your next workout. Later sessions are updated too.",
       "doneLimitation": "Done. I'll avoid those movements in upcoming sessions and swapped what I could.",
       "doneRebuild": "Done. Your upcoming weeks are rebuilt from your latest preferences and history."
@@ -433,12 +433,12 @@
     },
     "insight": {
       "headNone": "Your insights start with your first workout",
-      "headDone": "Week complete. Well done.",
+      "headDone": "Weekly goal reached. Well done.",
       "headSome": "On track, {left} more to go this week",
       "headFresh": "A fresh week, start with your next session",
       "tipConsistent": "Consistency is your superpower. Keep protecting your rest days.",
       "tipVolumeDown": "Volume dipped compared with last week. Normal after a lighter week, so build back gradually.",
-      "tipStreak": "{n} planned sessions in a row. Rest days never break it.",
+      "tipStreak": "{n} weeks in a row at your weekly goal. Rest days never break it.",
       "tipDefault": "Small, steady sessions beat rare heroic ones. Aim for your next planned day."
     },
     "progress": {
@@ -466,19 +466,21 @@
       "last4": "Last 4 weeks",
       "sessions": "Sessions",
       "completedVsPlanned": "done / planned",
+      "ofWeeklyGoal": "of weekly goal",
       "time": "Training time",
       "volume": "Volume",
       "streakLabel": "Streak",
-      "longest": "longest {n}",
+      "longest": "best {n} wk",
       "consistency": "Consistency",
-      "consistencyBody": "Planned sessions completed over the last 4 weeks. Recovery skips don't count against you.",
+      "consistencyBody": "Your last 4 finished weeks, recent ones weigh more. Paused weeks are skipped.",
+      "consistencyEmpty": "Your score appears after your first full week of training.",
       "insight": "Training insight",
       "summaryNone": "Finish your first workout and your personal summary shows up here.",
       "summary": "You've done {done} of {planned} planned sessions this week with {score}% consistency over four weeks. Your training volume is {trend} compared with last week.",
       "trendUp": "up or steady",
       "trendDown": "lower",
       "shareTitle": "My progress",
-      "shareText": "This week: {done}/{planned} sessions, {streak}-session streak, level {level} in Personal Coach.",
+      "shareText": "This week: {done}/{planned} workouts toward my weekly goal, {streak}-week streak, level {level} in Personal Coach.",
       "shareAwards": "Level {level}, {xp} XP and {badges} badges in Personal Coach.",
       "shared": "Shared",
       "shareAchievements": "Share my achievements",
@@ -728,6 +730,61 @@
         "record": "{exercise}: {before} to {now}, up {delta}",
         "consistency": "Consistency up {delta} points, from {before} to {now}",
         "streak": "Streak grew from {before} to {now} weeks"
+      },
+      "badge": {
+        "first-workout": {
+          "title": "First workout",
+          "desc": "Finish your first quality workout."
+        },
+        "perfect-week": {
+          "title": "Perfect week",
+          "desc": "Complete every planned workout in a week."
+        },
+        "streak-2": {
+          "title": "Two weeks strong",
+          "desc": "Reach your weekly goal 2 weeks in a row."
+        },
+        "streak-4": {
+          "title": "Four-week streak",
+          "desc": "Reach your weekly goal 4 weeks in a row."
+        },
+        "streak-6": {
+          "title": "Six-week streak",
+          "desc": "Reach your weekly goal 6 weeks in a row."
+        },
+        "streak-10": {
+          "title": "Ten-week streak",
+          "desc": "Reach your weekly goal 10 weeks in a row."
+        },
+        "streak-20": {
+          "title": "Twenty-week streak",
+          "desc": "Reach your weekly goal 20 weeks in a row."
+        },
+        "first-pr": {
+          "title": "First record",
+          "desc": "Beat one of your own bests."
+        },
+        "prs-5": {
+          "title": "Record breaker",
+          "desc": "Set 5 personal records."
+        },
+        "workouts-20": {
+          "title": "20 workouts",
+          "desc": "Complete 20 quality workouts."
+        },
+        "workouts-50": {
+          "title": "50 workouts",
+          "desc": "Complete 50 quality workouts."
+        },
+        "workouts-100": {
+          "title": "100 workouts",
+          "desc": "Complete 100 quality workouts."
+        }
+      },
+      "notify": {
+        "badgeTitle": "Unlocked: {title}",
+        "levelTitle": "Level {level} reached",
+        "levelBody": "Your training keeps adding up. See your progress."
       }
     },
     "awards": {
@@ -738,7 +795,7 @@
       "overall": "Overall",
       "workouts": "Workouts",
       "minutes": "Minutes",
-      "bestStreak": "Best streak",
+      "bestStreak": "Best streak, weeks",
       "collection": "Collection",
       "collected": "{n} of {total} collected",
       "aheadOf": "Ahead of {percent} of users",
@@ -767,7 +824,10 @@
         "7": "Champion",
         "8": "Legend"
       },
-      "badges": "Badges"
+      "badges": "Badges",
+      "earned": "Earned",
+      "progress": "Progress",
+      "progressOf": "{n} of {total}"
     },
     "history": {
       "totals": "Totals",
@@ -833,7 +893,7 @@
       },
       "steps": {
         "name": {
-          "title": "What should I call you?"
+          "title": "How should I call you?"
         },
         "gender": {
           "title": "Tell me a bit about you"
@@ -1136,12 +1196,12 @@
       "notFoundBody": "It may have been replaced when your plan was updated.",
       "toTraining": "Back to training",
       "extra": "Extra session",
-      "extraNote": "Extra sessions earn reduced XP and don't count toward your streak. Rest days are what make training work.",
+      "extraNote": "Extra sessions don't earn XP or count toward your weekly goal. Rest days are what make training work.",
       "moved": "Moved from {day}",
       "restWarning": "You already trained today. A second hard session is rarely better than rest. Consider keeping this for another day.",
       "skipped": {
-        "recovery": "Skipped for recovery. This keeps your streak safe.",
-        "unwell": "Skipped while unwell. Your streak is safe. Come back when you feel ready.",
+        "recovery": "Skipped for recovery. Rest is part of the plan.",
+        "unwell": "Skipped while unwell. Come back when you feel ready.",
         "busy": "Skipped because of a busy day."
       },
       "start": "Start workout",
@@ -1162,24 +1222,24 @@
       "dayTaken": "Already has {title}",
       "dayFree": "Free day",
       "skipTitle": "Skip this workout",
-      "skipLead": "Tell us why so your plan and streak stay fair.",
+      "skipLead": "Tell us why so your plan stays fair.",
       "reason": {
         "recovery": {
           "label": "I need recovery",
-          "hint": "Sore or tired. Counts as neutral for your streak."
+          "hint": "Sore or tired. Your streak counts whole weeks at your goal."
         },
         "unwell": {
           "label": "I'm unwell or hurt",
-          "hint": "Take care of yourself. Streak is safe."
+          "hint": "Take care of yourself. You can pause your streak in Progress."
         },
         "busy": {
           "label": "Too busy",
-          "hint": "Ends the current streak, but you can restart anytime."
+          "hint": "Life happens. Your streak counts whole weeks at your goal."
         }
       },
       "skipToast": {
-        "recovery": "Recovery day taken. Streak is safe.",
-        "unwell": "Take care. Streak is safe.",
+        "recovery": "Recovery day taken.",
+        "unwell": "Take care. Come back when you feel ready.",
         "busy": "Workout skipped"
       },
       "replaceTitle": "Replace exercise",
@@ -1214,7 +1274,8 @@
       "kg": "kg",
       "reps": "reps",
       "sets": "sets",
-      "premium": "Premium"
+      "premium": "Premium",
+      "demo": "Demo"
     },
     "shell": {
       "resume": "Workout in progress"
@@ -1224,7 +1285,9 @@
       "titleMany": "{n} achievements unlocked",
       "total": "+{n} XP",
       "nice": "Nice!",
-      "shareText": "I just unlocked \"{title}\" in Personal Coach: {description}"
+      "shareText": "I just unlocked \"{title}\" in Personal Coach: {description}",
+      "level": "Level {level}: {name}",
+      "levelBody": "{xp} XP earned so far. Keep the rhythm."
     },
     "week": {
       "label": "This week",
@@ -1281,10 +1344,10 @@
       "weekGoal": "Weekly goal",
       "sessions": "sessions",
       "noPlanThisWeek": "Nothing planned this week.",
-      "goalDone": "All planned sessions done. Enjoy the rest.",
+      "goalDone": "Weekly goal reached. Enjoy the rest.",
       "goalLeft": "{n} more to hit your goal.",
       "streak": "Streak",
-      "streakHint": "planned sessions in a row",
+      "streakHint": "weeks in a row at your goal",
       "level": "Level",
       "xpProgress": "XP to next level",
       "challenge": "Weekly challenge",
@@ -1295,7 +1358,8 @@
       "waterRemove": "Remove {ml} ml",
       "waterLeft": "{ml} ml to go",
       "waterDone": "Goal reached. Nice work!",
-      "waterLimit": "Daily limit reached ({max} ml). More at once isn't safe."
+      "waterLimit": "Daily limit reached ({max} ml). More at once isn't safe.",
+      "streakHintOne": "week in a row at your goal"
     },
     "muscle": {
       "all": "All",

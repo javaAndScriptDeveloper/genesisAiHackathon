@@ -77,6 +77,8 @@ describe("DB schema migrations", () => {
       height: { type: "numeric", nullable: true },
       trainer_id: { type: "bigint", nullable: true },
       level: { type: "character varying", nullable: true },
+      days_per_week: { type: "smallint", nullable: true },
+      duration_min: { type: "smallint", nullable: true },
       ...ts,
     });
     expect(await columns("user_devices")).toMatchObject({
@@ -134,6 +136,9 @@ describe("DB schema migrations", () => {
 
     await expect(db("users").insert({ name: "Dup", email: "u@example.com" })).rejects.toThrow(/users_email_unique/);
     await expect(db("user_trainings").insert({ userId: user.id })).rejects.toThrow(/plan_data/);
+    await db("users").where({ id: user.id }).update({ daysPerWeek: 3, durationMin: 45 });
+    await expect(db("users").where({ id: user.id }).update({ daysPerWeek: 8 })).rejects.toThrow(/users_days_per_week_check/);
+    await expect(db("users").where({ id: user.id }).update({ durationMin: 0 })).rejects.toThrow(/users_duration_min_check/);
 
     await db("trainers").where({ id: trainer.id }).delete();
     expect((await db("users").where({ id: user.id }).first()).trainerId).toBeNull();
@@ -173,7 +178,7 @@ describe("DB schema migrations", () => {
     await expect(db("trainers").insert({ slug: "mike", name: "Dup", sortOrder: 9 })).rejects.toThrow(/trainers_slug_unique/);
     await db("trainers").where({ slug: "new" }).delete();
 
-    await db.migrate.rollback(migrationConfig); // last batch = the five 20261123 migrations
+    await db.migrate.rollback(migrationConfig); // last batch = the 20261123 and later migrations
     expect(await tables()).toEqual(["trainers"]);
     expect(Object.keys(await columns("trainers")).sort()).toEqual(["id", "name", "path_to_image", "sort_order", "tov"]);
     expect(await db("trainers").orderBy("sortOrder")).toEqual(

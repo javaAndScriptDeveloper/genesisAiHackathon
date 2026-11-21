@@ -1,7 +1,7 @@
 import { addDays, mondayOf, type ISODate } from "./dates";
 import { getExercise } from "./exercises";
 import { badges } from "../progress/badges";
-import { historyFromFit } from "../progress/fromFit";
+import { progressOf } from "./store/progressStats";
 import { reducer } from "./store/reducer";
 import { emptyState } from "./seed";
 import type { FitState, PlannedWorkout, Profile, SessionLog } from "./types";
@@ -65,15 +65,14 @@ function s2(today: ISODate): FitState {
 	const lastMonday = addDays(mondayOf(today), -7);
 	const missed = state.history.find((l) => l.date >= lastMonday && l.date < mondayOf(today));
 	state = { ...dropLogs(state, (l) => l.id !== missed?.id), weeklyGoal: 2 };
-	const h = historyFromFit(state, today);
-	const ctx = { weeklyGoal: state.weeklyGoal, pauses: state.pauses };
+	const { history: h, ctx, level } = progressOf(state, today);
 	const earned = badges(h, ctx)
 		.filter((b) => b.unlocked)
 		.map((b) => b.id);
 	const lastTwo = earned.slice(-2);
 	const createdAt = `${today}T08:00:00.000Z`;
 	const ev = (id: string, kind: "badge" | "level" | "report", refId: string) => ({ id, kind, refId, createdAt, seenAt: null });
-	const progressEvents = [...lastTwo.map((id) => ev(`badge:${id}`, "badge", id)), ev("level:new", "level", "new"), ev(`report:${addDays(mondayOf(today), -7)}`, "report", addDays(mondayOf(today), -7))];
+	const progressEvents = [...lastTwo.map((id) => ev(`badge:${id}`, "badge", id)), ev(`level:${level.level}`, "level", String(level.level)), ev(`report:${addDays(mondayOf(today), -7)}`, "report", addDays(mondayOf(today), -7))];
 	return { ...state, progressEvents };
 }
 

@@ -1,4 +1,4 @@
-import type { ExerciseKind, History, IsoDate, SetLog, WorkoutSession } from "./types";
+import type { Exercise, ExerciseKind, History, IsoDate, SetLog, WorkoutSession } from "./types";
 
 export type RecordMetric = "weight" | "e1rm" | "reps" | "time";
 export interface PersonalRecord {
@@ -59,13 +59,18 @@ function chronological(h: History): WorkoutSession[] {
 		.sort((a, b) => (a.date === b.date ? a.id.localeCompare(b.id) : a.date.localeCompare(b.date)));
 }
 
+/** One metric per exercise: e1RM if any set ever qualifies, otherwise max weight (never a mix). */
+export function exerciseMetric(h: History, ex: Exercise): RecordMetric {
+	if (ex.kind !== "weighted") return mainMetric(ex.kind);
+	const anyE1rm = chronological(h).some((s) => metricValue(s.sets.filter((x) => x.exerciseId === ex.id), "e1rm") !== null);
+	return anyE1rm ? "e1rm" : "weight";
+}
+
 export function exerciseSeries(h: History, exerciseId: string): SeriesPoint[] {
-	const kind = h.exercises.find((e) => e.id === exerciseId)?.kind;
-	if (!kind) return [];
+	const ex = h.exercises.find((e) => e.id === exerciseId);
+	if (!ex) return [];
 	const done = chronological(h);
-	let main = mainMetric(kind);
-	// One metric per exercise: e1RM if any set ever qualifies, otherwise max weight (never a mix).
-	if (kind === "weighted" && !done.some((s) => metricValue(s.sets.filter((x) => x.exerciseId === exerciseId), "e1rm") !== null)) main = "weight";
+	const main = exerciseMetric(h, ex);
 	const points: SeriesPoint[] = [];
 	for (const s of done) {
 		const sets = s.sets.filter((x) => x.exerciseId === exerciseId);

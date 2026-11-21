@@ -1,4 +1,4 @@
-import { consistencyV2, isPausedWeek, nearestTrainingDay, restDayCredited, weekCredited, weekScore } from "./consistency";
+import { consistencyV2, effectiveGoal, isPausedWeek, nearestTrainingDay, restDayCredited, weekCredited, weekScore } from "./consistency";
 import { addDays, eachDay, weekStart } from "./dates";
 import { isQualitySession } from "./days";
 import type { History, IsoDate, ProgressContext, WorkoutSession } from "./types";
@@ -207,7 +207,7 @@ export function weekDetails(h: History, ctx: ProgressContext, ws: IsoDate): Week
 	return {
 		weekStart: ws,
 		summary: calendarWeekSummary(h, ctx, ws),
-		goal: Math.min(5, Math.max(2, ctx.weeklyGoal)),
+		goal: effectiveGoal(ctx),
 		plannedDays,
 		plannedWorkouts,
 		qualityWorkouts,

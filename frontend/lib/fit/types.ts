@@ -259,6 +259,8 @@ export interface FitState {
 	/** Planned workouts per week the user commits to (2..5). */
 	weeklyGoal: number;
 	progressEvents: ProgressEvent[];
+	/** Last day `sync` diffed the progress snapshot on (rollover badges/levels); null until the first sync. */
+	lastProgressDay: ISODate | null;
 	/** Mondays (ISO dates) whose weekly report is already archived. */
 	archivedWeeks: string[];
 	archiveQueue: ArchiveItem[];

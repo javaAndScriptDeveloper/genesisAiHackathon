@@ -1,6 +1,6 @@
 import { addDays, weekday } from "./dates";
-import { isPausedWeek, streakV2, weekCredited, weeklyGoal, type WeekGoal } from "./consistency";
-import { isQualitySession } from "./days";
+import { effectiveGoal, isPausedWeek, streakV2, weekCredited, weeklyGoal, type WeekGoal } from "./consistency";
+import { isQualitySession, truncateHistory } from "./days";
 import { advice, improvements, type Advice, type Improvement } from "./improvements";
 import { insights, type Insight } from "./insights";
 import { personalRecords, type PersonalRecord } from "./records";
@@ -58,26 +58,16 @@ export interface WeeklyReportV2 {
 
 const clampGoal = (n: number): number => Math.min(5, Math.max(2, n));
 
-/** History as it was at the end of the week: nothing later can change the report. */
-function truncate(h: History, end: IsoDate): History {
-	return {
-		...h,
-		today: end,
-		sessions: h.sessions.filter((s) => s.date <= end),
-		plan: h.plan.filter((p) => p.date <= end),
-		body: h.body.filter((b) => b.date <= end),
-		checkIns: h.checkIns.filter((c) => c.date <= end),
-	};
-}
-
 const inWeek = (s: WorkoutSession, ws: IsoDate): boolean => s.date >= ws && s.date <= addDays(ws, 6);
+
+const qualityCount = (h: History, ws: IsoDate): number => h.sessions.filter((s) => inWeek(s, ws) && isQualitySession(s)).length;
 
 function totals(h: History, ctx: ProgressContext, ws: IsoDate): WeekTotals {
 	const end = addDays(ws, 6);
 	const week = h.sessions.filter((s) => inWeek(s, ws));
 	const quality = week.filter(isQualitySession);
 	return {
-		workouts: quality.length,
+		workouts: qualityCount(h, ws),
 		minutes: week.filter((s) => s.status === "completed").reduce((a, s) => a + s.durationMin, 0),
 		qualitySets: quality.reduce((a, s) => a + s.sets.length, 0),
 		xp: xpLedger(h, ctx).filter((e) => e.date >= ws && e.date <= end).reduce((a, e) => a + e.amount, 0),
@@ -85,17 +75,19 @@ function totals(h: History, ctx: ProgressContext, ws: IsoDate): WeekTotals {
 }
 
 export function weeklyReportV2(h: History, ctx: ProgressContext, weekStart: IsoDate): WeeklyReportV2 {
-	const t = truncate(h, addDays(weekStart, 6));
+	const t = truncateHistory(h, addDays(weekStart, 6));
 	const paused = isPausedWeek(ctx, weekStart);
 	const summary = totals(t, ctx, weekStart);
 
-	// Mean quality sessions over up to 4 finished, non-paused weeks ending with this one.
-	const counts: number[] = [summary.workouts];
+	// Mean quality sessions over up to 4 finished, non-paused weeks, newest first. A paused report week is not
+	// seeded; older weeks are pulled in instead. No eligible weeks -> the minimum goal.
+	const counts: number[] = [];
+	if (!paused) counts.push(summary.workouts);
 	for (let ws = addDays(weekStart, -7); counts.length < 4 && t.sessions.some((s) => s.date <= addDays(ws, 6)); ws = addDays(ws, -7)) {
 		if (isPausedWeek(ctx, ws)) continue;
-		counts.push(t.sessions.filter((s) => inWeek(s, ws) && isQualitySession(s)).length);
+		counts.push(qualityCount(t, ws));
 	}
-	const recommendedGoal = clampGoal(Math.round(counts.reduce((a, b) => a + b, 0) / counts.length));
+	const recommendedGoal = counts.length === 0 ? 2 : clampGoal(Math.round(counts.reduce((a, b) => a + b, 0) / counts.length));
 
 	return {
 		weekStart,
@@ -108,7 +100,7 @@ export function weeklyReportV2(h: History, ctx: ProgressContext, weekStart: IsoD
 		recommendedGoal,
 		pushText: {
 			key: "fit.progress.push.weekly",
-			params: { done: summary.workouts, goal: clampGoal(ctx.weeklyGoal), streak: streakV2(t, ctx).current },
+			params: { done: summary.workouts, goal: effectiveGoal(ctx), streak: streakV2(t, ctx).current },
 		},
 	};
 }
