@@ -17,10 +17,10 @@ Minimal monorepo: push to `main` goes live on the VPS.
 - Shell: `./ssh/connect.sh` (e.g. `./ssh/connect.sh "cd /opt/app && docker compose -f compose.prod.yml logs -f"`).
 
 ## CI/CD (`.github/workflows/ci.yml`)
-Repo: `javaAndScriptDeveloper/genesisAiHackathon` (private). On push to `main` (PRs run `test` only):
-1. `test` — backend tests (Testcontainers) + frontend build.
-2. `deploy` — builds both images, pushes to GHCR (`ghcr.io/javaandscriptdeveloper/genesisaihackathon/<service>:sha-<commit>` + `:latest`).
-3. SSHes to the VPS, copies `deploy/compose.prod.yml`, writes `/opt/app/.env`, `docker compose pull && up -d`.
+Repo: `javaAndScriptDeveloper/genesisAiHackathon` (private). On push to `main` (PRs run the checks only):
+1. In parallel: frontend typecheck + tests, backend tests (Testcontainers), and the two image builds pushed to GHCR (no separate `next build`; the image build compiles the frontend).
+2. Images go to GHCR (`ghcr.io/javaandscriptdeveloper/genesisaihackathon/<service>:sha-<commit>` + `:latest`).
+3. `deploy` (needs all of the above green) SSHes to the VPS, copies `deploy/compose.prod.yml`, writes `/opt/app/.env`, `docker compose pull && up -d`.
 4. Verifies by curling `http://37.27.8.181/api/health` (retries, requires `"db":true`); the run fails if it doesn't.
 
 Secrets (repo): `VPS_SSH_KEY` (contents of `ssh/hetzner_ed25519`), `POSTGRES_PASSWORD`. See `docs/deploy.md` for setup and rollback.

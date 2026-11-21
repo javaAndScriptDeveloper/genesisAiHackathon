@@ -1,6 +1,6 @@
 # Deploy
 
-Push to `main` -> CI tests, builds images to GHCR, SSHes to the VPS (`37.27.8.181`), runs `docker compose up -d`,
+Push to `main` -> CI runs checks and image builds in parallel, then SSHes to the VPS (`37.27.8.181`), runs `docker compose up -d`,
 then curls `http://37.27.8.181/api/health` and requires `"db":true`.
 
 ## One-time setup
