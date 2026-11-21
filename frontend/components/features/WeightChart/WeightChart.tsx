@@ -1,6 +1,5 @@
 "use client";
 
-import clsx from "clsx";
 import { useId, useState, type KeyboardEvent, type PointerEvent } from "react";
 import { useT } from "@/lib/i18n/I18nProvider";
 import { daysBetween } from "@/lib/progress/dates";
@@ -43,6 +42,8 @@ export function WeightChart({ series, fmt, fmtDate, unit, goalKg, label, tall = 
 	const avgAt = series.line.find((l) => l.date === active.date);
 	const ticks = [series.max, (series.max + series.min) / 2, series.min];
 
+	const valueText = `${fmtDate(active.date)}, ${t("fit.progress.weight.weighIn")} ${fmt(active.kg)} ${unit}${avgAt ? `, ${t("fit.progress.weight.avg")} ${fmt(avgAt.kg)} ${unit}` : ""}`;
+
 	const pick = (e: PointerEvent<SVGSVGElement>) => {
 		const r = e.currentTarget.getBoundingClientRect();
 		const px = ((e.clientX - r.left) / r.width) * W;
@@ -74,11 +75,16 @@ export function WeightChart({ series, fmt, fmtDate, unit, goalKg, label, tall = 
 			{/* The svg is focusable so keyboard users can step through weigh-ins; the text alternative sits in aria-label. */}
 			<svg
 				viewBox={`0 0 ${W} ${H}`}
-				role="img"
+				role="slider"
 				tabIndex={0}
-				aria-label={`${label}. ${t("fit.progress.weight.chartSummary", { n: series.dots.length, from: fmtDate(series.dots[0]?.date ?? series.from), to: fmtDate(last.date), last: `${fmt(last.kg)} ${unit}` })}. ${t("fit.progress.weight.scrub")}`}
+				aria-label={`${label}. ${t("fit.progress.weight.chartSummary", { n: series.dots.length, from: fmtDate(series.dots[0]?.date ?? series.from), to: fmtDate(last.date), last: `${fmt(last.kg)} ${unit}` })}`}
+				aria-orientation="horizontal"
+				aria-valuemin={0}
+				aria-valuemax={series.dots.length - 1}
+				aria-valuenow={Math.max(0, series.dots.findIndex((d) => d.date === active.date))}
+				aria-valuetext={valueText}
 				aria-describedby={`${id}-hint`}
-				className={clsx(styles.svg, tall && styles.tall)}
+				className={styles.svg}
 				onPointerDown={(e) => {
 					e.currentTarget.setPointerCapture(e.pointerId);
 					pick(e);
@@ -112,7 +118,7 @@ export function WeightChart({ series, fmt, fmtDate, unit, goalKg, label, tall = 
 				)}
 				{series.line.length > 1 && <polyline fill="none" className={styles.line} points={series.line.map((p) => `${x(p.date)},${y(p.kg)}`).join(" ")} />}
 				{series.dots.map((p) => (
-					<circle key={p.date} cx={x(p.date)} cy={y(p.kg)} r={p.date === active.date ? 5 : 3} className={clsx(styles.dot, p.date === active.date && styles.dotActive)} />
+					<circle key={p.date} cx={x(p.date)} cy={y(p.kg)} r={p.date === active.date ? 5 : 3} className={p.date === active.date ? `${styles.dot} ${styles.dotActive}` : styles.dot} />
 				))}
 				<line x1={x(active.date)} x2={x(active.date)} y1={PAD_T} y2={H - PAD_B} className={styles.cursor} />
 			</svg>

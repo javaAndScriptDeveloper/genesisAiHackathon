@@ -13,16 +13,16 @@ import { formatMonthDay } from "@/lib/fit/dates";
 import { MAX_BODY_KG, MIN_BODY_KG, validateBodyWeightInput } from "@/lib/fit/numberInput";
 import { useFit } from "@/lib/fit/store/FitProvider";
 import { useProgress, useUnits } from "@/lib/fit/store/hooks";
-import { useT } from "@/lib/i18n/I18nProvider";
+import { useI18n } from "@/lib/i18n/I18nProvider";
 import type { WeightPeriod } from "@/lib/progress/bodyWeight";
-import { BMI_SEGMENTS, WEIGHT_PERIODS, weightScreenView } from "@/lib/progress/weightScreen";
+import { BMI_SEGMENTS, WEIGHT_PERIODS, formatWeight, weightScreenView } from "@/lib/progress/weightScreen";
 import styles from "./ProgressWeight.module.scss";
 
 const k = "fit.progress.weight";
 
 /** Body weight: start / now / change, interactive chart with 7-day average, BMI by WHO classification, quick weigh-in. */
 export function ProgressWeight() {
-	const t = useT();
+	const { t, locale } = useI18n();
 	const u = useUnits();
 	const toast = useToast();
 	const premium = usePremium();
@@ -39,7 +39,7 @@ export function ProgressWeight() {
 	const change = first && last && series.dots.length > 1 ? Math.round((last.kg - first.kg) * 10) / 10 : null;
 	const latestKg = checkIns.lastWeighIn?.kg ?? null;
 	const toGoal = latestKg !== null && goalKg !== null ? Math.round((latestKg - goalKg) * 10) / 10 : null;
-	const fmt = (kg: number) => u.mass(kg, 1).toLocaleString("en-US", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+	const fmt = (kg: number) => formatWeight(u.mass(kg, 1), locale);
 
 	const schema = useMemo(
 		() =>
@@ -78,6 +78,7 @@ export function ProgressWeight() {
 								<EmptyState title={t(`${k}.empty`)} description={t(`${k}.emptyBody`)} />
 							) : (
 								<>
+									{series ? (
 									<ul className={styles.facts}>
 										<li>
 											<span>{t(`${k}.start`)}</span>
@@ -86,7 +87,7 @@ export function ProgressWeight() {
 										</li>
 										<li>
 											<span>{t(`${k}.current`)}</span>
-											<strong>{latestKg !== null ? `${fmt(latestKg)} ${u.unit}` : "—"}</strong>
+											<strong>{last ? `${fmt(last.kg)} ${u.unit}` : "—"}</strong>
 										</li>
 										<li>
 											<span>{t(`${k}.change`)}</span>
@@ -96,6 +97,9 @@ export function ProgressWeight() {
 											</strong>
 										</li>
 									</ul>
+									) : (
+										<p className={styles.hint}>{t(`${k}.periodEmptyBody`)}</p>
+									)}
 									<SegmentedControl
 										label={t(`${k}.periods.label`)}
 										value={period}
@@ -155,7 +159,7 @@ export function ProgressWeight() {
 							{view.bmi ? (
 								<>
 									<p className={styles.bmiValue}>
-										<strong>{view.bmi.value.toLocaleString("en-US", { minimumFractionDigits: 1 })}</strong>
+										<strong>{formatWeight(view.bmi.value, locale)}</strong>
 										<span>{t(`${k}.bmi.${view.bmi.category}`)}</span>
 									</p>
 									<div className={styles.scale} role="img" aria-label={`${t(`${k}.bmiScale`)}: ${t(`${k}.bmiValue`, { value: view.bmi.value })}, ${t(`${k}.bmi.${view.bmi.category}`)}`}>

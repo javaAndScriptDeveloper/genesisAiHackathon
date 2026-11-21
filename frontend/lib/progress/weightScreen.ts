@@ -99,3 +99,8 @@ export function weightScreenView(entries: BodyMeasurement[], heightCm: number | 
 	const state: WeightScreenState = entries.length === 0 ? "empty" : entries.length === 1 || (series !== null && series.dots.length < 2) ? "single" : "trend";
 	return { state, locked, series, bmi: b ? { ...b, marker: bmiMarker(b.value) } : null };
 }
+
+/** Locale-aware number with fixed decimals (uk uses a comma). */
+export function formatWeight(value: number, locale: string, decimals = 1): string {
+	return new Intl.NumberFormat(locale, { minimumFractionDigits: decimals, maximumFractionDigits: decimals }).format(value);
+}

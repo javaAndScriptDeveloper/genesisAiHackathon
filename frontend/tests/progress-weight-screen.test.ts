@@ -76,3 +76,20 @@ describe("weightScreenView", () => {
 		expect(weightScreenView(entries, 175, "month", today, true).state).toBe("trend");
 	});
 });
+
+import { formatWeight } from "@/lib/progress/weightScreen";
+describe("formatWeight", () => {
+	it("follows the locale decimal separator", () => {
+		expect(formatWeight(76.4, "uk")).toBe("76,4");
+		expect(formatWeight(76.4, "en")).toBe("76.4");
+		expect(formatWeight(70, "en")).toBe("70.0");
+	});
+});
+
+describe("weightScreenView imperial inputs", () => {
+	it("is unit-agnostic: series and BMI stay in kg", () => {
+		const v = weightScreenView([e("2026-11-10", 70), e("2026-11-18", 69.5)], 170, "month", today, false);
+		expect(v.series?.dots.map((d) => d.kg)).toEqual([70, 69.5]);
+		expect(v.bmi?.value).toBeCloseTo(24.0, 0);
+	});
+});
