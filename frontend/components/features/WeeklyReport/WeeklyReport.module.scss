@@ -1,4 +1,5 @@
 @use "partials/corners";
+@use "partials/mixins";
 
 .root {
 	padding-bottom: var(--space-6);
@@ -73,14 +74,46 @@
 	min-width: 0;
 	@include corners.radius(var(--radius-control));
 
-	strong {
-		min-height: 1.4rem;
-		font-size: 1.1rem;
-		font-weight: 600;
-	}
-
 	&[data-type="workout"]:not([data-none]) {
 		border-color: var(--color-accent);
 		color: var(--color-accentText);
+	}
+}
+
+.marker,
+.none {
+	display: block;
+	box-sizing: border-box;
+	width: 0.8rem;
+	height: 0.8rem;
+	border-radius: 50%;
+}
+
+.marker[data-type="workout"] {
+	background: var(--color-accent);
+}
+
+.marker[data-type="rest"] {
+	border: 0.2rem solid var(--color-textSubtle);
+}
+
+.srOnly {
+	@include mixins.visually-hidden;
+}
+
+.legend {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--space-3);
+	margin: var(--space-3) 0 0;
+	padding: 0;
+	list-style: none;
+	color: var(--color-textSubtle);
+	font-size: 1.2rem;
+
+	li {
+		display: flex;
+		align-items: center;
+		gap: 0.4rem;
 	}
 }

@@ -78,9 +78,20 @@ export function WeeklyReport({ week }: { week: string }) {
 							{nextWeek.days.map((d, i) => (
 								<li key={d.date} className={styles.day} data-type={d.type} data-none={d.status === "none" || undefined}>
 									<span>{t(`fit.progress.weekdays.${i}`).slice(0, 3)}</span>
-									<strong aria-label={d.status === "none" ? undefined : d.type === "workout" ? t("fit.progress.report.workoutDay") : t("fit.progress.report.restDay")}>{d.status === "none" ? "" : d.type === "workout" ? "●" : "○"}</strong>
+									{d.status === "none" ? <span className={styles.none} aria-hidden="true" /> : (
+										<>
+											<span className={styles.marker} data-type={d.type} aria-hidden="true" />
+											<span className={styles.srOnly}>{d.type === "workout" ? t("fit.progress.report.workoutDay") : t("fit.progress.report.restDay")}</span>
+										</>
+									)}
 								</li>
 							))}
+						</ul>
+					)}
+					{planned > 0 && (
+						<ul className={styles.legend} aria-hidden="true">
+							<li><span className={styles.marker} data-type="workout" />{t("fit.progress.report.workoutDay")}</li>
+							<li><span className={styles.marker} data-type="rest" />{t("fit.progress.report.restDay")}</li>
 						</ul>
 					)}
 				</Card>
