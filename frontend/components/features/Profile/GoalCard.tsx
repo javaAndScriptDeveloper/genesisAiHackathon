@@ -35,7 +35,8 @@ export function GoalCard() {
 			const data: unknown = await response.json().catch(() => null);
 			if (!response.ok || typeof data !== "object" || data === null || !("text" in data) || typeof data.text !== "string" || data.text === "") throw new Error("stt");
 			const heard = data.text;
-			setText((prev) => (prev.trim() ? `${prev.trim()} ${heard}` : heard).slice(0, 500));
+			// A new recording replaces the goal instead of piling onto the previous one.
+			setText(heard.slice(0, 500));
 		} catch {
 			toast.show(t("fit.profile.micFailed"), "danger");
 		} finally {
