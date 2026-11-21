@@ -9,7 +9,8 @@
     "lint": "eslint",
     "typecheck": "next typegen && tsc --noEmit",
     "test": "vitest run",
-    "images": "node scripts/convert-images.mjs"
+    "images": "node scripts/convert-images.mjs",
+    "eval:photo": "bun --conditions react-server evals/photo-insight/run.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.11.0",
