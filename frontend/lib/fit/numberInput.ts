@@ -24,3 +24,20 @@ export function validateBodyWeightInput(raw: string, units: Units): { kg: number
 	const kg = toKg(n, units);
 	return kg >= MIN_BODY_KG && kg <= MAX_BODY_KG ? { kg, error: false } : { kg: null, error: true };
 }
+
+/**
+ * Blood-pressure fields. Values are rounded FIRST; range and systolic > diastolic are checked on the rounded
+ * values (100.4 / 100.2 both become 100 and are rejected). Empty fields are neither valid nor an error.
+ */
+export function validateBloodPressure(sysRaw: string, diaRaw: string): { systolic: number | null; diastolic: number | null; sysError: boolean; diaError: boolean; valid: boolean } {
+	const sRaw = parseDecimal(sysRaw);
+	const dRaw = parseDecimal(diaRaw);
+	const s = sRaw === null ? Number.NaN : Math.round(sRaw);
+	const d = dRaw === null ? Number.NaN : Math.round(dRaw);
+	const sysOk = s >= 70 && s <= 250;
+	const diaOk = d >= 40 && d <= 150;
+	const sysError = sysRaw !== "" && !sysOk;
+	const diaError = diaRaw !== "" && !diaOk;
+	const valid = sysRaw !== "" && diaRaw !== "" && sysOk && diaOk && s > d;
+	return { systolic: sysOk ? s : null, diastolic: diaOk ? d : null, sysError, diaError, valid };
+}
