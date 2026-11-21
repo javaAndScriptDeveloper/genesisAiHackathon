@@ -36,7 +36,11 @@
   },
   "fit": {
     "ai": {
-      "fallbackSummary": "{name} here. I built this week from your goal, schedule and equipment. Tell me what you'd like to change and I'll rebuild it."
+      "fallbackSummary": "{name} here. I built this week from your goal, schedule and equipment. Tell me what you'd like to change and I'll rebuild it.",
+      "noStats": "No device data for today yet, so your plan stays as it is.",
+      "dailyFine": "You look good to go today. Stick with the plan.",
+      "dailyLighter": "You're a bit worn down today, so I made this session lighter.",
+      "dailyRecovery": "Your body needs rest today, so I cut this down to a short, easy session."
     },
     "coach": {
       "title": "Personal Coach",

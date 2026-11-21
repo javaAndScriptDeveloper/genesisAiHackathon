@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { dailyStatsSchema, type DailyStats, type DailyStatus } from "./dailyStats";
 import { EQUIPMENT, GENDERS, GOALS, LIMITATIONS, LOCATIONS, EXPERIENCES, WEARABLES } from "./options";
 import type { ExerciseBlock, PlannedWorkout, Profile, SetEntry } from "./types";
 
@@ -73,3 +74,23 @@ export const planResponseSchema = z.object({
 	trainingId: z.number().nullable(),
 });
 export type PlanResponse = z.infer<typeof planResponseSchema>;
+
+export const dailyRequestSchema = z.object({
+	userId: z.number().int().positive(),
+	profile: profileSchema,
+	trainerSlug: z.string().min(1).max(100),
+	session: plannedWorkoutSchema.nullable(),
+	upcoming: z.array(plannedWorkoutSchema).max(100),
+	wishes: z.array(z.string().max(200)).max(10),
+	today: isoDate,
+});
+export type DailyRequest = z.infer<typeof dailyRequestSchema>;
+
+export const dailyResponseSchema: z.ZodType<{ status: DailyStatus; session: PlannedWorkout | null; note: string; stats: DailyStats | null; createdBy: "ai" | "fallback" }> = z.object({
+	status: z.enum(["unchanged", "lighter", "recovery"]),
+	session: plannedWorkoutSchema.nullable(),
+	note: z.string(),
+	stats: dailyStatsSchema.nullable(),
+	createdBy: z.enum(["ai", "fallback"]),
+});
+export type DailyResponse = z.infer<typeof dailyResponseSchema>;
