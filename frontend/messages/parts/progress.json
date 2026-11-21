@@ -86,7 +86,37 @@
       "removeBody": "This photo will be deleted from this device.",
       "removeConfirm": "Remove",
       "photosLockedTitle": "Unlimited photo check-ins",
-      "photosLockedBody": "Free includes {n} photos. Premium keeps your whole journey."
+      "photosLockedBody": "Free includes {n} photos. Premium keeps your whole journey.",
+      "consistencyDelta": "{sign}{n} vs last week",
+      "weekdays": {
+        "0": "Monday",
+        "1": "Tuesday",
+        "2": "Wednesday",
+        "3": "Thursday",
+        "4": "Friday",
+        "5": "Saturday",
+        "6": "Sunday"
+      },
+      "insights": {
+        "title": "What's working",
+        "next": "Next: {text}",
+        "weekday_misses": {
+          "title": "{weekday} sessions slip most often",
+          "next": "Move that session to a day that suits you better?"
+        },
+        "strength_gain": {
+          "title": "{exercise}: {from} → {to} in {weeks} wk",
+          "next": "Try adding one more set."
+        },
+        "too_hard": {
+          "title": "Your last sessions felt hard",
+          "next": "We'll make the next one lighter."
+        },
+        "consistency_up": {
+          "title": "Consistency up {delta} points",
+          "next": "Keep this rhythm — it works."
+        }
+      }
     },
     "awards": {
       "level": "Level",

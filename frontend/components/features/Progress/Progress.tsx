@@ -6,6 +6,7 @@ import { Awards } from "@/components/features/Awards/Awards";
 import { CheckIns } from "@/components/features/CheckIns/CheckIns";
 import { History } from "@/components/features/History/History";
 import { BarChart, LineChart } from "@/components/features/Charts/Charts";
+import { ProgressInsights } from "@/components/features/ProgressInsights/ProgressInsights";
 import { PremiumGate, usePremium } from "@/components/features/PremiumGate/PremiumGate";
 import { WeekBars } from "@/components/features/WeekBars/WeekBars";
 import { TrainingInsight } from "@/components/features/TrainingInsight/TrainingInsight";
@@ -18,7 +19,7 @@ import { kcalFor } from "@/lib/fit/calories";
 import { getExercise } from "@/lib/fit/exercises";
 import { historyByWeek } from "@/lib/fit/stats";
 import { useFit } from "@/lib/fit/store/FitProvider";
-import { useFitStats, useUnits } from "@/lib/fit/store/hooks";
+import { useFitStats, useProgressAnalytics, useUnits } from "@/lib/fit/store/hooks";
 import { useTabMemory } from "@/lib/fit/store/useTabMemory";
 import { useT } from "@/lib/i18n/I18nProvider";
 import styles from "./Progress.module.scss";
@@ -56,6 +57,7 @@ function Overview() {
 	const u = useUnits();
 	const { state, today } = useFit();
 	const stats = useFitStats();
+	const { insights, consistencyDelta } = useProgressAnalytics();
 	const [period, setPeriod] = useState<"week" | "month">("week");
 	const premium = usePremium();
 
@@ -108,7 +110,12 @@ function Overview() {
 					<strong><AnimatedNumber value={stats.consistency} suffix="%" /></strong>
 				</ProgressRing>
 				<div>
-					<h3>{t("fit.progress.consistency")}</h3>
+					<div className={styles.rowHead}>
+						<h3>{t("fit.progress.consistency")}</h3>
+						{consistencyDelta !== null && consistencyDelta !== 0 && (
+							<Badge tone={consistencyDelta > 0 ? "success" : "neutral"}>{t("fit.progress.consistencyDelta", { sign: consistencyDelta > 0 ? "+" : "−", n: Math.abs(consistencyDelta) })}</Badge>
+						)}
+					</div>
 					<p>{t("fit.progress.consistencyBody")}</p>
 				</div>
 			</Card>
@@ -119,6 +126,8 @@ function Overview() {
 				<WeekBars title={t("fit.progress.time")} unit={t("fit.common.minShort")} values={dayMinutes} todayIndex={weekdayIndex(today)} tone="neutral" sport="stopwatch" />
 				<WeekBars title={t("fit.progress.calories")} unit="kcal" values={dayKcal} todayIndex={weekdayIndex(today)} tone="accent" sport="flame" />
 			</div>
+
+			{insights.length > 0 && <ProgressInsights insights={insights} fallback="" />}
 
 			<Card>
 				<h3 className={styles.h3}>{t("fit.progress.weeklyVolume")}</h3>
