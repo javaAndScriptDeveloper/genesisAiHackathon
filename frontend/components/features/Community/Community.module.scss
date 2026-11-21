@@ -88,3 +88,10 @@
 .hidden {
 	display: none;
 }
+
+.badges {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--space-1);
+	margin-top: 0.4rem;
+}

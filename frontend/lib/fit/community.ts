@@ -19,6 +19,13 @@ export interface Buddy {
 	results: BuddyResults;
 }
 
+export type BuddyTier = "master" | "pro" | "regular" | "newcomer";
+
+/** Training experience shown as a badge. Derived from the buddy's level so it stays consistent with the rest of the profile. */
+export function buddyTier(level: number): BuddyTier {
+	return level >= 7 ? "master" : level >= 5 ? "pro" : level >= 3 ? "regular" : "newcomer";
+}
+
 /** How long a connection request waits for "approval" before the simulated buddy accepts. */
 export const ACCEPT_DELAY_MS = 5000;
 export const MAX_CHAT_MESSAGES = 50;

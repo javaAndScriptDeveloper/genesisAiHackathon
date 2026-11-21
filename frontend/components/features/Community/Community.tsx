@@ -1,14 +1,30 @@
 "use client";
 
-import { ArrowRight01Icon } from "@hugeicons/core-free-icons";
+import { ArrowRight01Icon, CrownIcon, FireIcon, Medal01Icon } from "@hugeicons/core-free-icons";
 import Link from "next/link";
 import { useEffect, useRef } from "react";
 import { ScreenHeader } from "@/components/features/ScreenHeader/ScreenHeader";
 import { Avatar, Badge, Button, Card, Icon, useToast } from "@/components/ui";
-import { BUDDIES, type Buddy } from "@/lib/fit/community";
+import { BUDDIES, buddyTier, type Buddy } from "@/lib/fit/community";
 import { useFit } from "@/lib/fit/store/FitProvider";
 import { useT } from "@/lib/i18n/I18nProvider";
 import kit from "../ScreenKit/ScreenKit.module.scss";
+import styles from "./Community.module.scss";
+
+const TIER_ICON = { master: CrownIcon, pro: Medal01Icon, regular: Medal01Icon, newcomer: Medal01Icon } as const;
+const TIER_TONE = { master: "warning", pro: "accent", regular: "neutral", newcomer: "neutral" } as const;
+
+// Experience and consistency at a glance: "Master · 5+ years" and the current weekly streak.
+function BuddyBadges({ buddy }: { buddy: Buddy }) {
+	const t = useT();
+	const tier = buddyTier(buddy.level);
+	return (
+		<span className={styles.badges}>
+			<Badge tone={TIER_TONE[tier]}><Icon icon={TIER_ICON[tier]} size={12} />{t(`fit.community.tier.${tier}`)}</Badge>
+			{buddy.results.streakWeeks >= 2 && <Badge tone="success"><Icon icon={FireIcon} size={12} />{t("fit.community.streak", { n: buddy.results.streakWeeks })}</Badge>}
+		</span>
+	);
+}
 
 export function Community() {
 	const t = useT();
@@ -57,6 +73,7 @@ export function Community() {
 										<span className={kit.rowText}>
 											<strong>{b.name}</strong>
 											<span>{t("fit.community.lastWorkout", { title: b.results.lastWorkout.title, when: when(b.results.lastWorkout.daysAgo) })}</span>
+											<BuddyBadges buddy={b} />
 										</span>
 										<Icon icon={ArrowRight01Icon} size={16} />
 									</Link>
@@ -77,7 +94,8 @@ export function Community() {
 											<Avatar name={b.name} />
 											<span className={kit.rowText}>
 												<strong>{b.name}</strong>
-												<span>{t(`fit.opt.goal.${b.goal}.label`)} · {t("fit.community.level", { n: b.level })}</span>
+												<span>{t(`fit.opt.goal.${b.goal}.label`)} · {b.days}</span>
+												<BuddyBadges buddy={b} />
 											</span>
 											<Badge tone="warning">{t("fit.community.awaiting")}</Badge>
 										</div>
@@ -100,7 +118,8 @@ export function Community() {
 											<Avatar name={b.name} />
 											<span className={kit.rowText}>
 												<strong>{b.name}</strong>
-												<span>{t(`fit.opt.goal.${b.goal}.label`)} · {b.days} · {t("fit.community.level", { n: b.level })}</span>
+												<span>{t(`fit.opt.goal.${b.goal}.label`)} · {b.days}</span>
+												<BuddyBadges buddy={b} />
 											</span>
 										</div>
 										<Button size="sm" variant="secondary" onClick={() => connect(b)}>{t("fit.community.connect")}</Button>

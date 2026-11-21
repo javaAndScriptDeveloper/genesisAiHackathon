@@ -294,7 +294,13 @@
       "photoFailed": "Couldn't use that file. Pick an image.",
       "sharedPhoto": "Shared photo",
       "typing": "{name} is typing…",
-      "photoRemoved": "Photo removed to save space"
+      "photoRemoved": "Photo removed to save space",
+      "tier": {
+        "master": "Master · 5+ years",
+        "pro": "Pro · 3+ years",
+        "regular": "Regular · 1+ year",
+        "newcomer": "Newcomer"
+      }
     },
     "health": {
       "title": "Live health",
