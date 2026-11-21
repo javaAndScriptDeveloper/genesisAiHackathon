@@ -154,6 +154,18 @@
         "best": "Best: {value} {unit}",
         "records": "Recent records",
         "chart": "{name} trend"
+      },
+      "levels": {
+        "1": "Starter",
+        "2": "Steady",
+        "3": "Committed",
+        "4": "Determined",
+        "5": "Strong",
+        "6": "Unstoppable",
+        "7": "Athlete",
+        "8": "Elite",
+        "9": "Champion",
+        "10": "Legend"
       }
     },
     "awards": {

@@ -5,5 +5,6 @@ export * from "./consistency";
 export * from "./records";
 export * from "./xp";
 export * from "./summary";
-export * from "./achievements";
+export * from "./levels";
+export * from "./badges";
 export * from "./insights";
