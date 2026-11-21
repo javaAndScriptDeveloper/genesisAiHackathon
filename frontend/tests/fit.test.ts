@@ -134,3 +134,15 @@ describe("trainer and goal text", () => {
 		expect(activeTrainerId({ ...emptyState(), trainerId: "alex" })).toBe("alex");
 	});
 });
+
+describe("goalText survives preference edits", () => {
+	const base: FitState = { ...emptyState(), profile: { ...profile, goalText: "run a half marathon" }, planned: generatePlan(profile, today, 4) };
+	it("update-profile keeps goalText when the edit form does not carry it and the goal is unchanged", () => {
+		const { goalText: _drop, ...edited } = { ...profile, daysPerWeek: 5 };
+		expect(run(base, { type: "update-profile", profile: edited, today }).profile?.goalText).toBe("run a half marathon");
+	});
+	it("update-profile drops goalText when the preset goal itself was changed", () => {
+		const { goalText: _drop, ...edited } = { ...profile, goal: "lose-fat" as const };
+		expect(run(base, { type: "update-profile", profile: edited, today }).profile?.goalText).toBeUndefined();
+	});
+});

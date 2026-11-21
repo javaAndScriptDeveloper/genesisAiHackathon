@@ -385,6 +385,7 @@
       "micDenied": "Microphone access was blocked. Allow it in your browser, or type your goal.",
       "micUnsupported": "Voice input isn't supported in this browser. Type your goal instead.",
       "goalSaved": "Goal updated and plan refreshed",
+      "goalUnavailable": "Saved your wording, but goal matching is unavailable right now, so your plan is unchanged.",
       "goalKept": "Saved your wording, but it didn't match a preset, so your plan is unchanged.",
       "trainerTitle": "Your trainer",
       "trainerNote": "Pick who coaches you.",

@@ -4,22 +4,10 @@ import { Mic01Icon, StopIcon, Target02Icon } from "@hugeicons/core-free-icons";
 import { useState } from "react";
 import { Button, Card, Icon, IconButton, Textarea, useToast } from "@/components/ui";
 import { useVoiceRecorder } from "@/lib/hooks/useVoiceRecorder";
-import { GOALS } from "@/lib/fit/options";
+import { matchGoal } from "@/lib/fit/goalClient";
 import { useFit } from "@/lib/fit/store/FitProvider";
-import type { Goal } from "@/lib/fit/types";
 import { useT } from "@/lib/i18n/I18nProvider";
 import kit from "../ScreenKit/ScreenKit.module.scss";
-
-async function matchPreset(text: string): Promise<Goal | null> {
-	try {
-		const response = await fetch("/api/goal", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ text }) });
-		if (!response.ok) return null;
-		const data: unknown = await response.json();
-		return typeof data === "object" && data !== null && "goal" in data ? (GOALS.find((g) => g === data.goal) ?? null) : null;
-	} catch {
-		return null;
-	}
-}
 
 export function GoalCard() {
 	const t = useT();
@@ -61,10 +49,11 @@ export function GoalCard() {
 		const wording = text.trim();
 		if (!wording) return;
 		setSaving(true);
-		const preset = await matchPreset(wording);
-		dispatch({ type: "set-goal", goal: preset ?? profile.goal, goalText: wording, today });
+		const match = await matchGoal(wording);
+		dispatch({ type: "set-goal", goal: match.status === "matched" ? match.goal : profile.goal, goalText: wording, today });
 		setSaving(false);
-		toast.show(preset ? t("fit.settings.goalSaved") : t("fit.settings.goalKept"), preset ? "success" : "danger");
+		if (match.status === "matched") toast.show(t("fit.settings.goalSaved"), "success");
+		else toast.show(t(match.status === "none" ? "fit.settings.goalKept" : "fit.settings.goalUnavailable"), "danger");
 	};
 
 	return (

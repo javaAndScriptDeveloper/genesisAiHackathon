@@ -12,6 +12,7 @@ import { useFit } from "@/lib/fit/store/FitProvider";
 import { useFitStats } from "@/lib/fit/store/hooks";
 import { useT } from "@/lib/i18n/I18nProvider";
 import kit from "../ScreenKit/ScreenKit.module.scss";
+import styles from "./Profile.module.scss";
 
 const LINKS: { href: string; key: string; icon: IconDefinition }[] = [
 	{ href: "/profile/edit", key: "preferences", icon: Edit02Icon },
@@ -47,7 +48,7 @@ export function Profile() {
 					<div className={kit.chips}>
 						<Badge tone="accent">
 							<Icon icon={Dumbbell03Icon} size={12} />
-							{p.goalText ?? t(`fit.opt.goal.${p.goal}.label`)}
+							{t(`fit.opt.goal.${p.goal}.label`)}
 						</Badge>
 						<Badge>{t(`fit.opt.experience.${p.experience}.label`)}</Badge>
 						<Badge>
@@ -57,6 +58,7 @@ export function Profile() {
 							{p.durationMin} {t("fit.common.minShort")}
 						</Badge>
 					</div>
+					{p.goalText && <p className={`${kit.note} ${styles.goalText}`}>“{p.goalText}”</p>}
 					<p className={kit.note}>{p.heightCm} cm · {p.weightKg} kg · BMI {bmi(p)}</p>
 				</Card>
 				{state.subscription.tier !== "premium" && (

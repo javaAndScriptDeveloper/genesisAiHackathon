@@ -234,7 +234,10 @@ export function reducer(state: FitState, action: Action): FitState {
 		}
 		case "update-profile": {
 			const devices = { apple: action.profile.wearable === "apple" ? true : state.devices.apple && action.profile.wearable === "none" ? state.devices.apple : state.devices.apple, garmin: state.devices.garmin };
-			return rebuildUpcoming({ ...state, devices }, action.profile, action.today);
+			// The preferences form does not carry the free-text goal; keep it unless the preset goal changed.
+			const prev = state.profile;
+			const profile = action.profile.goalText === undefined && prev?.goalText && prev.goal === action.profile.goal ? { ...action.profile, goalText: prev.goalText } : action.profile;
+			return rebuildUpcoming({ ...state, devices }, profile, action.today);
 		}
 		case "set-goal":
 			return state.profile ? reducer(state, { type: "update-profile", profile: { ...state.profile, goal: action.goal, goalText: action.goalText }, today: action.today }) : state;
