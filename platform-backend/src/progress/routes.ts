@@ -87,6 +87,23 @@ const syncSchema = {
         properties: { id: str, kind: { enum: ["badge", "level", "pr", "report"] }, refId: str, payload: {}, createdAt: dateTime, seenAt: nullable(dateTime) },
       },
     },
+    checkIns: {
+      type: "array",
+      maxItems: 5000,
+      items: {
+        type: "object",
+        additionalProperties: false,
+        required: ["id", "kind", "date", "takenAt"],
+        properties: {
+          id: str,
+          kind: { enum: ["weight", "goal", "photo"] },
+          date,
+          takenAt: dateTime,
+          weightKg: nullable({ type: "number", exclusiveMinimum: 0, maximum: 999.99 }),
+          goalKg: nullable({ type: "number", exclusiveMinimum: 0, maximum: 999.99 }),
+        },
+      },
+    },
   },
 } as const;
 

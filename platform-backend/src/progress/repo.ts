@@ -1,6 +1,7 @@
 import type { Knex } from "knex";
 import type { Modifiers } from "objection";
 import {
+  ProgressCheckInModel,
   ProgressEventModel,
   ProgressPauseModel,
   ProgressPlanDayModel,
@@ -45,6 +46,7 @@ export interface RemoteSnapshot {
   pauses: { id: string; fromDate: string; toDate: string }[];
   weights: { date: string; kg: number }[];
   events: { id: string; kind: "badge" | "level" | "pr" | "report"; refId: string; payload: unknown; createdAt: string; seenAt: string | null }[];
+  checkIns: { id: string; kind: "weight" | "goal" | "photo"; date: string; takenAt: string; weightKg: number | null; goalKg: number | null }[];
 }
 export type SyncBody = Partial<Omit<RemoteSnapshot, "settings">> & { settings?: Partial<RemoteSnapshot["settings"]> };
 export interface ArchiveInput {
@@ -113,15 +115,16 @@ function toWorkoutDto(w: ProgressWorkoutModel): WorkoutDto {
 const orderedSets: Modifiers = { ordered: (b) => b.orderBy("performedAt").orderBy("id") };
 
 export async function getSnapshot(db: Knex, userId: number | null): Promise<RemoteSnapshot> {
-  const snapshot: RemoteSnapshot = { settings: { weeklyGoal: 3, units: "metric", heightCm: null }, planDays: [], workouts: [], pauses: [], weights: [], events: [] };
+  const snapshot: RemoteSnapshot = { settings: { weeklyGoal: 3, units: "metric", heightCm: null }, planDays: [], workouts: [], pauses: [], weights: [], events: [], checkIns: [] };
   if (userId === null) return snapshot;
-  const [settings, planDays, workouts, pauses, weights, events] = await Promise.all([
+  const [settings, planDays, workouts, pauses, weights, events, checkIns] = await Promise.all([
     ProgressSettingsModel.query(db).findById(userId),
     ProgressPlanDayModel.query(db).where({ userId }).orderBy("date"),
     ProgressWorkoutModel.query(db).where({ userId }).withGraphFetched("sets(ordered)").modifiers(orderedSets).orderBy("performedOn").orderBy("id"),
     ProgressPauseModel.query(db).where({ userId }).orderBy("fromDate").orderBy("id"),
     db("user_progress_weights").where({ userId }).orderBy("date"),
     ProgressEventModel.query(db).where({ userId }).orderBy("createdAt").orderBy("id"),
+    ProgressCheckInModel.query(db).where({ userId }).orderBy("takenAt").orderBy("id"),
   ]);
   if (settings) snapshot.settings = { weeklyGoal: settings.weeklyGoal, units: settings.units, heightCm: null };
   snapshot.planDays = planDays.map((p) => ({ date: p.date, type: p.type, workoutRef: p.workoutRef }));
@@ -129,6 +132,7 @@ export async function getSnapshot(db: Knex, userId: number | null): Promise<Remo
   snapshot.pauses = pauses.map((p) => ({ id: p.id, fromDate: p.fromDate, toDate: p.toDate }));
   snapshot.weights = weights.map((w: { date: string; kg: number }) => ({ date: w.date, kg: w.kg }));
   snapshot.events = events.map((e) => ({ id: e.id, kind: e.kind, refId: e.refId, payload: e.payload, createdAt: e.createdAt.toISOString(), seenAt: iso(e.seenAt) }));
+  snapshot.checkIns = checkIns.map((c) => ({ id: c.id, kind: c.kind, date: c.date, takenAt: c.takenAt.toISOString(), weightKg: c.weightKg, goalKg: c.goalKg }));
   return snapshot;
 }
 
@@ -145,6 +149,7 @@ export async function syncSnapshot(db: Knex, userId: number, body: SyncBody) {
   const pauses = body.pauses ?? [];
   const weights = body.weights ?? [];
   const events = body.events ?? [];
+  const checkIns = body.checkIns ?? [];
   const sets = workouts.flatMap((w) => w.sets.map((s) => ({ ...s, workoutId: w.id })));
 
   await db.transaction(async (trx) => {
@@ -157,6 +162,7 @@ export async function syncSnapshot(db: Knex, userId: number, body: SyncBody) {
     await assertNotForeign(trx, "user_progress_sets", userId, sets.map((s) => s.id));
     await assertNotForeign(trx, "user_progress_pauses", userId, pauses.map((p) => p.id));
     await assertNotForeign(trx, "user_progress_events", userId, events.map((e) => e.id));
+    await assertNotForeign(trx, "user_progress_checkins", userId, checkIns.map((c) => c.id));
 
     if (body.settings && Object.keys(body.settings).length > 0) {
       const patch: Record<string, unknown> = { updatedAt: trx.fn.now() };
@@ -201,8 +207,17 @@ export async function syncSnapshot(db: Knex, userId: number, body: SyncBody) {
           seenAt: trx.raw("coalesce(excluded.seen_at, user_progress_events.seen_at)"),
         });
     }
+    if (checkIns.length) {
+      await trx("user_progress_checkins")
+        .insert(checkIns.map((c) => ({ id: c.id, userId, kind: c.kind, date: c.date, takenAt: c.takenAt, weightKg: c.weightKg ?? null, goalKg: c.goalKg ?? null })))
+        .onConflict("id")
+        .merge();
+    }
   });
-  return { ok: true as const, counts: { planDays: planDays.length, workouts: workouts.length, sets: sets.length, pauses: pauses.length, weights: weights.length, events: events.length } };
+  return {
+    ok: true as const,
+    counts: { planDays: planDays.length, workouts: workouts.length, sets: sets.length, pauses: pauses.length, weights: weights.length, events: events.length, checkIns: checkIns.length },
+  };
 }
 
 export async function markEventsSeen(db: Knex, userId: number | null, ids: string[], seenAt: string): Promise<number> {

@@ -5,6 +5,7 @@ import { createDb, migrate, migrationConfig } from "../src/db.js";
 import { ProgressSetModel, ProgressWeightModel, ProgressWorkoutModel } from "../src/progress/models.js";
 
 const PROGRESS_TABLES = [
+  "user_progress_checkins",
   "user_progress_events",
   "user_progress_pauses",
   "user_progress_plan_days",
@@ -114,6 +115,16 @@ describe("progress schema", () => {
       created_at: { type: tz, nullable: false },
       seen_at: { type: tz, nullable: true },
     });
+    expect(await columns("user_progress_checkins")).toEqual({
+      id: { type: "text", nullable: false },
+      user_id: { type: "bigint", nullable: false },
+      kind: { type: "text", nullable: false },
+      date: { type: "date", nullable: false },
+      taken_at: { type: tz, nullable: false },
+      weight_kg: { type: "numeric", nullable: true },
+      goal_kg: { type: "numeric", nullable: true },
+      created_at: { type: tz, nullable: false },
+    });
     expect(await columns("user_progress_snapshots")).toMatchObject({
       id: { type: "bigint", nullable: false },
       user_id: { type: "bigint", nullable: false },
@@ -124,8 +135,10 @@ describe("progress schema", () => {
       payload: { type: "jsonb", nullable: false },
       payload_hash: { type: "text", nullable: false },
     });
-    const { rows } = await db.raw("select table_name, column_name, numeric_precision p, numeric_scale s from information_schema.columns where data_type = 'numeric' and table_name like 'user_progress_%' order by 1");
+    const { rows } = await db.raw("select table_name, column_name, numeric_precision p, numeric_scale s from information_schema.columns where data_type = 'numeric' and table_name like 'user_progress_%' order by 1, 2");
     expect(rows).toEqual([
+      { table_name: "user_progress_checkins", column_name: "goal_kg", p: 5, s: 2 },
+      { table_name: "user_progress_checkins", column_name: "weight_kg", p: 5, s: 2 },
       { table_name: "user_progress_sets", column_name: "weight_kg", p: 6, s: 2 },
       { table_name: "user_progress_weights", column_name: "kg", p: 5, s: 2 },
     ]);
@@ -195,6 +208,7 @@ describe("progress schema", () => {
     await db("user_progress_weights").insert({ userId, date: "2026-11-21", kg: 80.5 });
     await db("user_progress_events").insert({ id: "e", userId, kind: "badge", refId: "b", payload: {} });
     await db("user_progress_snapshots").insert({ userId, period: "change", engineVersion: "1", payload: {}, payloadHash: "h" });
+    await db("user_progress_checkins").insert({ id: "c", userId, kind: "weight", date: "2026-11-21", takenAt: "2026-11-21T08:00:00Z", weightKg: 80.5 });
     await db("users").where({ id: userId }).delete();
     for (const t of PROGRESS_TABLES) expect(await db(t).count("* as n")).toEqual([{ n: "0" }]);
   });
@@ -212,7 +226,7 @@ describe("progress schema", () => {
     expect(kg!.kg).toBe(80.25);
   });
 
-  it("rolling back the last batch removes the 8 tables and keeps the team's", async () => {
+  it("rolling back the last batch removes the 9 tables and keeps the team's", async () => {
     await db.migrate.rollback(migrationConfig, true);
     // Team migrations (7 files) as batch 1, progress as batch 2.
     const teamCount = 7;

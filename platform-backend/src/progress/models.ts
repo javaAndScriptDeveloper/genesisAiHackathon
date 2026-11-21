@@ -99,3 +99,16 @@ export class ProgressSnapshotModel extends Model {
   payload!: unknown;
   payloadHash!: string;
 }
+
+// Check-in journal. Photos are metadata only (date + weight); an image is never stored.
+export class ProgressCheckInModel extends Model {
+  static tableName = "user_progress_checkins";
+  id!: string;
+  userId!: number;
+  kind!: "weight" | "goal" | "photo";
+  date!: string;
+  takenAt!: Date;
+  weightKg!: number | null;
+  goalKg!: number | null;
+  createdAt!: Date;
+}
