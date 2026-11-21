@@ -15,12 +15,10 @@ interface Props {
 	elapsedSec: number;
 	resting: boolean;
 	recoveryDrop: number;
-	/** Name of a linked provider; data stays simulated until a native integration exists. */
-	linkedTo?: string;
 }
 
 // Heart rate, duration, activity and recovery. Simulated values are always labelled; nothing here is a medical measurement.
-export function WorkoutHealthPanel({ sample, zone, alert, elapsedSec, resting, recoveryDrop, linkedTo }: Props) {
+export function WorkoutHealthPanel({ sample, zone, alert, elapsedSec, resting, recoveryDrop }: Props) {
 	const t = useT();
 	return (
 		<section className={styles.panel} aria-label={t("fit.health.title")}>
@@ -52,7 +50,6 @@ export function WorkoutHealthPanel({ sample, zone, alert, elapsedSec, resting, r
 					{alert}
 				</p>
 			)}
-			<p className={styles.foot}>{linkedTo ? t("fit.health.linkedDemo", { name: linkedTo }) : t("fit.health.demoNote")}</p>
 		</section>
 	);
 }

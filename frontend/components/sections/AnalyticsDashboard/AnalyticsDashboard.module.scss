@@ -1,9 +1,13 @@
 @use "partials/corners";
 @use "partials/mixins";
+@use "partials/training";
 
 .dashboard {
+	@include training.light;
+
 	min-height: 100dvh;
-	background: var(--color-surfaceSubtle);
+	background: var(--color-canvas);
+	color: var(--color-text);
 
 	.frame {
 		width: min(calc(100% - 2 * var(--container-gutter)), 132rem);
@@ -384,7 +388,7 @@
 
 	.costRows i { background: var(--cost-color); }
 	[data-cost="fees"] { --cost-color: var(--color-textSubtle); }
-	[data-cost="ai"] { --cost-color: var(--color-warning); }
+	[data-cost="ai"] { --cost-color: var(--color-coach); }
 	[data-cost="infra"] { --cost-color: var(--color-borderStrong); }
 	[data-cost="contribution"] { --cost-color: var(--color-accent); }
 
@@ -453,6 +457,55 @@
 
 		h2 { margin: 0; font-size: clamp(2.3rem, 3vw, 3.15rem); letter-spacing: -0.045em; }
 	}
+
+	.activityControls {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--space-2) var(--space-3);
+		min-width: 0;
+
+		[role="tab"][aria-selected="true"] { color: var(--color-accentText); }
+	}
+
+	.cohorts {
+		display: grid;
+		gap: var(--space-3);
+		margin-top: var(--space-4);
+		min-width: 0;
+		scroll-margin-top: var(--space-5);
+	}
+
+	.cohortGrid {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr);
+		align-items: start;
+		gap: var(--space-4);
+
+		@include mixins.respond(xl) { grid-template-columns: minmax(0, 2.5fr) minmax(0, 1fr); }
+	}
+
+	.cohortTable {
+		min-width: 0;
+
+		table { min-width: 67rem; }
+		th, td { padding: var(--space-3); }
+	}
+
+	.cohortCell {
+		display: inline-block;
+		min-width: 4.7rem;
+		padding: var(--space-1) var(--space-2);
+		font-weight: 650;
+		font-variant-numeric: tabular-nums;
+		text-align: right;
+		@include corners.radius(var(--radius-control));
+
+		&[data-heat="low"] { background: var(--color-surfaceMuted); color: var(--color-textMuted); }
+		&[data-heat="medium"] { background: var(--color-accentSoft); color: var(--color-accentText); }
+		&[data-heat="high"] { background: var(--color-accent); color: var(--color-onAccent); }
+	}
+
+	.cohortNote { font-size: 1.25rem; }
 
 	.activityChart {
 		display: grid;

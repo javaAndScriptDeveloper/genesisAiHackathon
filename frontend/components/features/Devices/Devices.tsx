@@ -58,7 +58,7 @@ export function Devices() {
 				</ul>
 
 				{anyLinked ? (
-					<WorkoutHealthPanel sample={health.sample} zone={health.zone} alert={health.alert} elapsedSec={0} resting recoveryDrop={health.recoveryDrop} linkedTo={state.devices.apple ? "Apple Health" : "Garmin"} />
+					<WorkoutHealthPanel sample={health.sample} zone={health.zone} alert={health.alert} elapsedSec={0} resting recoveryDrop={health.recoveryDrop} />
 				) : (
 					<EmptyState icon={SmartWatch01Icon} title={t("fit.devices.noneTitle")} description={t("fit.devices.noneBody")} />
 				)}

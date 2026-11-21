@@ -3,7 +3,6 @@
 import { ArrowRight01Icon } from "@hugeicons/core-free-icons";
 import Link from "next/link";
 import { useEffect, useRef } from "react";
-import { Notice } from "@/components/features/Notice/Notice";
 import { ScreenHeader } from "@/components/features/ScreenHeader/ScreenHeader";
 import { Avatar, Badge, Button, Card, Icon, useToast } from "@/components/ui";
 import { BUDDIES, type Buddy } from "@/lib/fit/community";
@@ -46,7 +45,6 @@ export function Community() {
 		<div className={kit.page}>
 			<ScreenHeader title={t("fit.community.title")} />
 			<div className={kit.content}>
-				<Notice tone="info">{t("fit.community.demoNote")}</Notice>
 
 				{connected.length > 0 && (
 					<section className={kit.stack}>

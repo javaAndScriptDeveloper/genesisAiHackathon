@@ -22,6 +22,7 @@ export function AnalyticsDashboard() {
 					<nav className={styles.nav} aria-label={t("analytics.title")}>
 						<a href="#economics">{t("analytics.economics")}</a>
 						<a href="#product-activity">{t("analytics.activity.title")}</a>
+						<a href="#cohorts">{t("analytics.cohorts.title")}</a>
 					</nav>
 					<Link href="/today" className={styles.productLink}>
 						{t("analytics.openApp")} <Icon icon={ArrowUpRight01Icon} size={16} />

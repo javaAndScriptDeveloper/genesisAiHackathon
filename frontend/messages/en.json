@@ -74,7 +74,7 @@
       "gross": "Gross revenue per month",
       "costs": {
         "fees": "Store fees",
-        "ai": "AI inference",
+        "ai": "AI infrastructure",
         "infra": "Infrastructure & analytics",
         "contribution": "Contribution margin"
       },
@@ -102,7 +102,7 @@
         "cac": "Paid CAC = cost per install ÷ install-to-paid conversion. Blended CAC assumes the same conversion for organic installs and zero incremental organic spend.",
         "payback": "Payback is the first month cumulative contribution covers blended CAC. The model recognizes annual revenue over each 12-month term and includes one possible renewal.",
         "fixed": "Operating break-even = fixed costs ÷ monthly contribution per active subscriber, rounded up. Acquisition spend is tracked separately in CAC.",
-        "limits": "The model excludes free-tier usage, voice, taxes, refunds and wearable integration costs. The AI estimate uses planned token volumes and rates from the report.",
+        "limits": "The model excludes free-tier usage, voice, taxes, refunds and wearable integration costs. AI infrastructure uses the planned token volumes from the report and Gemini 2.5 Flash-Lite Standard text rates.",
         "source": "Prices, conversion, paid acquisition and renewal assumptions come from section 4 of the Fitness Companion Market Evidence & Unit Economics Report.",
         "pilot": "The pilot uses a 90% organic target and a $50 monthly budget assumption. Include ongoing labor, content and other recurring costs in your actual budget."
       },
@@ -171,7 +171,37 @@
         "workouts": "Logged workouts include partial sessions. The 80% metric uses the planned set count after workout adjustments and excludes extra sessions, safety stops and seeded history.",
         "subscription": "Trials in the app are simulated. Prices, acquisition costs and AI expenses above are planning estimates.",
         "cohorts": "The product goal is three planned workouts in the first 14 days. Cohort activation and retention require shared user IDs and server-side event collection."
-      }
+      },
+      "demoBadge": "Simulated data",
+      "demoSubtitle": "Sample events for a simulated product launch.",
+      "source": "Data source",
+      "sources": {
+        "browser": "This browser",
+        "demo": "Sample data"
+      },
+      "showDemo": "Show sample data"
+    },
+    "cohorts": {
+      "title": "Cohorts",
+      "detail": "Grouped by onboarding week. A dash marks an observation window that’s still open.",
+      "week": "Week",
+      "size": "Users",
+      "metrics": {
+        "d1": "D1",
+        "d7": "D7",
+        "d14": "D14",
+        "d30": "D30",
+        "activation": "Activated",
+        "paid": "Paid D35"
+      },
+      "pending": "Observation window still open",
+      "fraction": "{count} of {total} users",
+      "retention": "Workout retention",
+      "returned": "Users who returned",
+      "comparable": "Same {users} users across all four days, from cohorts with a full 30-day window.",
+      "definitions": "Retention counts users who started a workout on the exact day after onboarding. Activation is three planned workouts with at least 80% of sets completed in the first 14 days. Paid D35 counts the first simulated payment by the end of day 35.",
+      "empty": "Cohort data is unavailable here",
+      "emptyDetail": "Multi-user cohorts need shared user IDs and billing events. Explore the view with a simulated dataset."
     }
   },
   "fit": {
@@ -192,7 +222,38 @@
       "doneRecovery": "Done. Today is a recovery day. Come back refreshed.",
       "doneEquipment": "Done. I removed that equipment from your profile and swapped {n} exercises in your next workout. Later sessions are updated too.",
       "doneLimitation": "Done. I'll avoid those movements in upcoming sessions and swapped what I could.",
-      "doneRebuild": "Done. Your upcoming weeks are rebuilt from your latest preferences and history."
+      "doneRebuild": "Done. Your upcoming weeks are rebuilt from your latest preferences and history.",
+      "presets": {
+        "questions": {
+          "difficulty": "My workout is too difficult",
+          "equipment": "I don't have dumbbells",
+          "time": "I only have 20 minutes",
+          "progress": "How am I progressing?",
+          "today": "What should I train today?",
+          "tired": "I feel exhausted"
+        },
+        "replies": {
+          "difficulty": "Let’s make the session easier. I can lower the load or reps and give you more rest between sets.",
+          "equipment": "You can still train. I can swap the dumbbell exercises for options that fit the equipment you have.",
+          "time": "Let’s use those 20 minutes for the main exercises. I can trim extra sets and accessory work.",
+          "progress": "You’ve finished {done} of {planned} planned workouts this week. Open Progress for your training history and records.",
+          "todayDone": "You’ve already trained today. If you feel like moving, a short walk or some gentle mobility is enough.",
+          "todayNext": "Your next workout is {workout}. It takes about {minutes} minutes.",
+          "todayEmpty": "There’s no workout scheduled. Open your training preferences to choose days for your plan.",
+          "tired": "Take a recovery day or choose a lighter session if you feel up to it. A recovery day keeps your streak."
+        },
+        "actions": {
+          "hard": "Make it easier",
+          "eq-dumbbells": "Replace dumbbell exercises",
+          "time-20": "Fit into 20 min",
+          "see-progress": "Open Progress",
+          "mob": "Open training",
+          "prefs": "Edit preferences",
+          "start-next": "View workout",
+          "tired": "Use a lighter session",
+          "recover": "Take a recovery day"
+        }
+      }
     },
     "community": {
       "title": "Community",

@@ -12,7 +12,6 @@ import { ProgressInsights } from "@/components/features/ProgressInsights/Progres
 import { PremiumGate, usePremium } from "@/components/features/PremiumGate/PremiumGate";
 import { WeekBars } from "@/components/features/WeekBars/WeekBars";
 import { TrainingInsight } from "@/components/features/TrainingInsight/TrainingInsight";
-import { Notice } from "@/components/features/Notice/Notice";
 import { ScreenHeader } from "@/components/features/ScreenHeader/ScreenHeader";
 import { Stat } from "@/components/features/Stat/Stat";
 import { AnimatedNumber, Badge, Card, Icon, IconButton, ProgressBar, ProgressRing, SegmentedControl } from "@/components/ui";
@@ -103,7 +102,6 @@ function Overview() {
 
 	return (
 		<>
-			{state.hasDemoHistory && <Notice tone="info">{t("fit.progress.demoNote")}</Notice>}
 			<SegmentedControl label={t("fit.progress.period")} value={period} onChange={setPeriod} options={[{ id: "week", label: t("fit.progress.thisWeek") }, { id: "month", label: t("fit.progress.last4") }]} />
 			<div className={styles.grid2}>
 				<Stat label={t("fit.progress.sessions")} value={<><AnimatedNumber value={view.done} />/<AnimatedNumber value={view.planned} /></>} hint={period === "week" ? t("fit.progress.ofWeeklyGoal") : t("fit.progress.completedVsPlanned")} icon={<Icon icon={Calendar03Icon} size={14} />} />

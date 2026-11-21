@@ -27,15 +27,6 @@ export interface CoachReply {
 	safety?: boolean;
 }
 
-export const SUGGESTED_PROMPTS = [
-	"My workout is too difficult",
-	"I don't have dumbbells",
-	"I only have 20 minutes",
-	"How am I progressing?",
-	"What should I train today?",
-	"I feel exhausted",
-];
-
 export const SAFETY_TEXT = [
 	"Stop exercising now and sit or lie down somewhere comfortable.",
 	"Rest and breathe slowly. Do not push through chest pain, dizziness, fainting or severe discomfort.",

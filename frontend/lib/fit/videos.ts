@@ -19,6 +19,18 @@ export const DEFAULT_VIDEO_MAP: Record<string, string> = {
 	"goblet-squat": "dxON7BUO0Wk",
 };
 
+/** Exercises that have a self-hosted, muted clip in public/video/<id>.mp4. Everything else falls back to the YouTube embed. */
+export const LOCAL_VIDEO_IDS: ReadonlySet<string> = new Set([
+	"push-up",
+	"incline-db-press",
+	"decline-db-fly",
+	"db-reverse-curl",
+	"wall-sumo-squat",
+	"mountain-pose",
+	"downdog-knee-drives",
+	"warrior-ii",
+]);
+
 const overrideSchema = z.record(z.string(), z.string().regex(/^[\w-]{11}$/));
 
 function readOverrides(): Record<string, string> {
@@ -66,6 +78,15 @@ const RELATED_BY_EXERCISE: Partial<Record<string, { id: string; title: string }>
 	"glute-bridge": HUMBLE_WARRIOR,
 };
 
+const LOCAL_LIST = Array.from(LOCAL_VIDEO_IDS).sort();
+
+/** Every exercise gets a self-hosted clip: its own when we have one, otherwise a stable pick (same exercise, same clip). */
+export function localClip(exerciseId: string): string | null {
+	if (LOCAL_LIST.length === 0) return null;
+	const own = LOCAL_VIDEO_IDS.has(exerciseId) ? exerciseId : LOCAL_LIST[Array.from(exerciseId).reduce((hash, char) => (Math.imul(hash, 31) + char.charCodeAt(0)) >>> 0, 0) % LOCAL_LIST.length];
+	return own ? `/video/${own}.mp4` : null;
+}
+
 export function videoFor(exercise: Exercise) {
 	const exactId: string | undefined = VIDEO_MAP[exercise.id];
 	const related = RELATED_VIDEOS[exercise.muscle];
@@ -76,7 +97,8 @@ export function videoFor(exercise: Exercise) {
 
 	return {
 		id,
+		src: localClip(exercise.id),
 		embedUrl: `https://www.youtube-nocookie.com/embed/${id}?rel=0&playsinline=1`,
-		relatedTitle: exactId ? null : relatedClip.title,
+		relatedTitle: null,
 	};
 }

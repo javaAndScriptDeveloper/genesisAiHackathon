@@ -50,6 +50,7 @@ export function WorkoutStage({ onAdjust, onUnwell, sample }: { onAdjust: () => v
 				className={styles.video}
 				fullWidth
 				autoPlay
+				hold={a.phase !== "work" || a.paused}
 				header={
 					<div className={styles.heroInfo}>
 						<div className={styles.heroText}>

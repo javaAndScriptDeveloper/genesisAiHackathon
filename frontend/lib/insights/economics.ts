@@ -24,20 +24,21 @@ export const assumptions = {
 	defaultCombinedHourlyRate: 50,
 };
 
-// Calls per paid month × (input and output tokens priced per million).
+// Gemini 2.5 Flash-Lite Standard paid tier, USD per million text tokens.
+const aiRates = { input: 0.10, output: 0.40 };
 const aiFeatures = [
-	{ calls: 4, input: 6000, output: 2000, inputRate: 2, outputRate: 10 },
-	{ calls: 4, input: 5000, output: 800, inputRate: 2, outputRate: 10 },
-	{ calls: 12, input: 4000, output: 400, inputRate: 0.10, outputRate: 0.50 },
-	{ calls: 16, input: 3000, output: 300, inputRate: 0.10, outputRate: 0.50 },
-	{ calls: 30, input: 1000, output: 100, inputRate: 0.10, outputRate: 0.50 },
+	{ calls: 4, input: 6000, output: 2000 }, // Training plans
+	{ calls: 4, input: 5000, output: 800 }, // Progress reports
+	{ calls: 12, input: 4000, output: 400 }, // Coach replies
+	{ calls: 16, input: 3000, output: 300 }, // Workout adaptations
+	{ calls: 30, input: 1000, output: 100 }, // Notification copy
 ];
 
 export function modelEconomics(scenario: Scenario, organicShare: number, fixedCosts: number) {
 	const { annualShare, annualRenewal, monthlyLifetime, conversion, cpi } = scenarios[scenario];
 	const { monthlyPrice, annualPrice, storeFee, infraPerMonth } = assumptions;
 	const aiPerMonth = aiFeatures.reduce((sum, feature) => (
-		sum + feature.calls * (feature.input * feature.inputRate + feature.output * feature.outputRate) / 1_000_000
+		sum + feature.calls * (feature.input * aiRates.input + feature.output * aiRates.output) / 1_000_000
 	), 0);
 
 	const monthlyShare = 1 - annualShare;

@@ -1,23 +1,33 @@
 "use client";
 
 import { Activity01Icon, ChartBarLineIcon, CheckmarkCircle02Icon, Dumbbell01Icon, UserAdd01Icon } from "@hugeicons/core-free-icons";
-import { useState, useSyncExternalStore } from "react";
+import { useMemo, useState, useSyncExternalStore } from "react";
 import { Badge, Card, EmptyState, Icon, SegmentedControl, Skeleton } from "@/components/ui";
-import { fromISO } from "@/lib/fit/dates";
+import { fromISO, toISO } from "@/lib/fit/dates";
 import { useI18n } from "@/lib/i18n/I18nProvider";
 import { summarizeActivity, type Period } from "@/lib/insights/activity";
+import { createDemoAnalytics } from "@/lib/insights/demo";
 import { eventNames, readBrowserEvents, subscribeBrowserEvents } from "@/lib/insights/browserEvents";
+import { CohortsPanel } from "./CohortsPanel";
 import { DashboardChart } from "./DashboardChart";
 import styles from "./AnalyticsDashboard.module.scss";
 
 const periodOptions: Period[] = ["week", "month", "quarter"];
+const dataSources = ["browser", "demo"] as const;
+type DataSource = (typeof dataSources)[number];
 const noServerSnapshot = () => null;
 
 export function ProductActivity() {
 	const { locale, t } = useI18n();
 	const [period, setPeriod] = useState<Period>("month");
-	const snapshot = useSyncExternalStore(subscribeBrowserEvents, readBrowserEvents, noServerSnapshot);
-	const data = snapshot?.available ? summarizeActivity(snapshot.events, period, new Date()) : null;
+	const [source, setSource] = useState<DataSource>("browser");
+	const isDemo = source === "demo";
+	const stored = useSyncExternalStore(subscribeBrowserEvents, readBrowserEvents, noServerSnapshot);
+	const now = new Date();
+	const today = toISO(now);
+	const demo = useMemo(() => isDemo ? createDemoAnalytics(today) : null, [isDemo, today]);
+	const snapshot = demo ? { available: true, events: demo.events } : stored;
+	const data = snapshot?.available ? summarizeActivity(snapshot.events, period, now) : null;
 	const formatDate = new Intl.DateTimeFormat(locale, { month: "short", day: "numeric" });
 	const formatNumber = new Intl.NumberFormat(locale);
 	const metrics = [
@@ -40,11 +50,14 @@ export function ProductActivity() {
 				<div>
 					<div className={styles.activityTitle}>
 						<h2 id="activity-title">{t("analytics.activity.title")}</h2>
-						<Badge className={styles.sourceBadge}>{t("analytics.activity.badge")}</Badge>
+						<Badge tone={isDemo ? "accent" : "neutral"} className={styles.sourceBadge}>{t(isDemo ? "analytics.activity.demoBadge" : "analytics.activity.badge")}</Badge>
 					</div>
-					<p>{t("analytics.activity.subtitle")}</p>
+					<p>{t(isDemo ? "analytics.activity.demoSubtitle" : "analytics.activity.subtitle")}</p>
 				</div>
-				<SegmentedControl label={t("analytics.activity.period")} options={periodOptions.map((id) => ({ id, label: t(`analytics.activity.periods.${id}`) }))} value={period} onChange={setPeriod} />
+				<div className={styles.activityControls}>
+					<SegmentedControl label={t("analytics.activity.source")} options={dataSources.map((id) => ({ id, label: t(`analytics.activity.sources.${id}`) }))} value={source} onChange={setSource} />
+					<SegmentedControl label={t("analytics.activity.period")} options={periodOptions.map((id) => ({ id, label: t(`analytics.activity.periods.${id}`) }))} value={period} onChange={setPeriod} />
+				</div>
 			</header>
 
 			<div className={styles.metrics} aria-live="polite">
@@ -72,7 +85,7 @@ export function ProductActivity() {
 					{!snapshot ? <Skeleton height="20rem" /> : data?.total ? (
 						<div className={styles.activityChart}>
 							<DashboardChart
-								key={period}
+								key={`${source}-${period}`}
 								label={t("analytics.activity.chartTitle")}
 								max={ceiling}
 								ticks={ticks.map((value) => ({ value, label: formatNumber.format(value) }))}
@@ -122,6 +135,7 @@ export function ProductActivity() {
 					) : <Skeleton height="20rem" />}
 				</Card>
 			</div>
+			<CohortsPanel cohorts={demo?.cohorts ?? null} onShowDemo={() => setSource("demo")} />
 			<details className={styles.method}>
 				<summary>{t("analytics.activity.coverage")}</summary>
 				<ul className={styles.notes}>

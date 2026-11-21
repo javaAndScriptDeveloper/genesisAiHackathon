@@ -159,3 +159,7 @@ vite.config.ts.timestamp-*
 
 # executing-plans scratch
 .superpowers/
+
+# Raw downloads dropped in the repo root
+/*.mp4
+*.crdownload

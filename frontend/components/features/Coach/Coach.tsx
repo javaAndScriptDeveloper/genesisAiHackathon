@@ -8,7 +8,8 @@ import { useEffect, useRef, useState } from "react";
 import { ScreenHeader } from "@/components/features/ScreenHeader/ScreenHeader";
 import { Button, Icon, IconButton, useToast } from "@/components/ui";
 import { applyAdapt, replaceUnavailable } from "@/lib/fit/adapt";
-import { coachReply, isSafetyConcern, SUGGESTED_PROMPTS, type CoachContext } from "@/lib/fit/coach";
+import { coachReply, isSafetyConcern, type CoachContext } from "@/lib/fit/coach";
+import { coachPresetReply, coachPresets } from "@/lib/fit/coachPresets";
 import { listenOnce, speechSupported } from "@/lib/fit/speech";
 import { useFit } from "@/lib/fit/store/FitProvider";
 import { useFitStats } from "@/lib/fit/store/hooks";
@@ -61,11 +62,20 @@ export function Coach() {
 		premium: state.subscription.tier === "premium",
 	});
 
-	const send = (raw: string) => {
+	const send = (raw: string, chosen?: (typeof coachPresets)[number]) => {
 		const value = raw.trim();
 		if (!value || pending) return;
+		const preset = chosen ?? coachPresets.find(({ id, request }) => {
+			const normalized = value.toLowerCase();
+			return [t(`fit.coach.presets.questions.${id}`), request].some((question) => question.toLowerCase() === normalized);
+		});
 		setText("");
 		dispatch({ type: "coach-message", message: { id: uid(), from: "user", text: value, at: new Date().toISOString() } });
+		if (preset) {
+			const reply = coachPresetReply(preset, context(), t);
+			dispatch({ type: "coach-message", message: { id: uid(), from: "coach", text: reply.text, at: new Date().toISOString(), actions: reply.actions } });
+			return;
+		}
 		setPending(true);
 		timer.current = window.setTimeout(() => {
 			const reply = coachReply(value, context());
@@ -159,9 +169,10 @@ export function Coach() {
 
 			<div className={styles.composer}>
 				<div className={styles.prompts} role="group" aria-label={t("fit.coach.suggestions")}>
-					{SUGGESTED_PROMPTS.map((p) => (
-						<button key={p} type="button" className={styles.prompt} disabled={pending} onClick={() => send(p)}>{p}</button>
-					))}
+					{coachPresets.map((preset) => {
+						const question = t(`fit.coach.presets.questions.${preset.id}`);
+						return <button key={preset.id} type="button" className={styles.prompt} disabled={pending} onClick={() => send(question, preset)}>{question}</button>;
+					})}
 				</div>
 				<form className={styles.form} onSubmit={(e) => { e.preventDefault(); send(text); }}>
 					<input className={styles.input} value={text} onChange={(e) => setText(e.target.value)} placeholder={t("fit.coach.placeholder")} aria-label={t("fit.coach.placeholder")} maxLength={300} />
