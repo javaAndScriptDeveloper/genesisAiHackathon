@@ -1,6 +1,5 @@
 import { addDays, daysBetween, eachDay, weekStart } from "./dates";
-import { dayStatus } from "./days";
-import { isQualitySession } from "./days";
+import { dayStatus, isQualitySession } from "./days";
 import type { DayStatus, History, IsoDate, ProgressContext } from "./types";
 
 export interface Consistency {
@@ -190,8 +189,9 @@ export function streakV2(h: History, ctx: ProgressContext): { current: number; b
 	let current = 0;
 	let best = 0;
 	for (let ws = weekStart(earliest); ws <= currentWs; ws = addDays(ws, 7)) {
+		if (isPausedWeek(ctx, ws)) continue; // pause: streak neither grows nor resets
 		if (weekCredited(h, ctx, ws)) current++;
-		else if (ws < currentWs && !isPausedWeek(ctx, ws)) current = 0;
+		else if (ws < currentWs) current = 0;
 		best = Math.max(best, current);
 	}
 	return { current, best };

@@ -221,4 +221,39 @@ describe("weekCredited and streakV2", () => {
 	it("empty history gives zeros", () => {
 		expect(streakV2(hist([]), ctx())).toEqual({ current: 0, best: 0 });
 	});
+	it("a paused week that met the goal does not add to the streak", () => {
+		const h = hist([
+			{ ago: 4, n: 3, k: 3 }, { ago: 3, n: 3, k: 3 },
+			{ ago: 2, n: 3, k: 3 }, { ago: 1, n: 3, k: 3 },
+		]);
+		const c = ctx({ pauses: [{ from: wk(2), to: addDays(wk(2), 6) }] });
+		expect(streakV2(h, c)).toEqual({ current: 3, best: 3 });
+	});
+	it("a paused and credited current week does not add", () => {
+		const h = hist([{ ago: 1, n: 3, k: 3 }, { ago: 0, n: 3, k: 3 }]);
+		const c = ctx({ pauses: [{ from: W0, to: addDays(W0, 6) }] });
+		expect(streakV2(h, c)).toEqual({ current: 1, best: 1 });
+	});
+});
+
+describe("v2 edge cases", () => {
+	it("rest day equidistant from quality and non-quality training day is credited", () => {
+		// Mon workout (done), Tue rest, Wed workout (not done)
+		const ws = wk(1);
+		const h: History = {
+			today: "2026-11-19", exercises: [], body: [], device: null,
+			plan: [
+				{ date: ws, type: "workout" },
+				{ date: addDays(ws, 1), type: "rest" },
+				{ date: addDays(ws, 2), type: "workout" },
+			],
+			sessions: [session(ws)],
+		};
+		expect(restDayCredited(h, addDays(ws, 1))).toBe(true);
+		const h2 = { ...h, sessions: [session(addDays(ws, 2))] };
+		expect(restDayCredited(h2, addDays(ws, 1))).toBe(true);
+	});
+	it("a pause with to before from is ignored", () => {
+		expect(isPausedWeek(ctx({ pauses: [{ from: addDays(wk(1), 3), to: wk(1) }] }), wk(1))).toBe(false);
+	});
 });
