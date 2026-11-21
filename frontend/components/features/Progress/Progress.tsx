@@ -162,10 +162,12 @@ function Overview() {
 				</Card>
 			</Link>
 
+			<Link href="/progress/weight" transitionTypes={["nav-forward"]} className={styles.calLink} aria-label={t("fit.progress.weight.screenTitle")}>
 			<Card>
 				<h3 className={styles.h3}>{t("fit.progress.bodyWeight")}</h3>
 				{weights.length < 2 ? <p className={styles.p}>{t("fit.progress.weightNeedMore")}</p> : <LineChart data={weights} label={t("fit.progress.bodyWeight")} unit={` ${u.unit}`} goal={state.goalWeightKg ? u.mass(state.goalWeightKg, 1) : undefined} goalLabel={t("fit.progress.goal")} />}
 			</Card>
+			</Link>
 
 			<PremiumGate title={t("fit.progress.insightsLockedTitle")} body={t("fit.progress.insightsLockedBody")} source="insights">
 				<Card>
