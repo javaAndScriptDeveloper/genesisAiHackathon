@@ -23,7 +23,9 @@
       "playLabel": "Play video",
       "related": "Related clip · {name}",
       "searchExact": "Find this exercise",
-      "openYoutube": "Open on YouTube"
+      "openYoutube": "Open on YouTube",
+      "pause": "Pause video",
+      "resume": "Play video"
     },
     "music": {
       "title": "Workout music",
@@ -95,7 +97,11 @@
       "search": "Search exercises",
       "searchPlaceholder": "Squat, row, plank…",
       "filterMuscle": "Filter by muscle",
-      "onlyMine": "Only exercises that fit my equipment and limits",
+      "onlyMine": "Fits my setup",
+      "onlyMineHint": "Only exercises that fit my equipment and limits",
+      "medium": "Medium",
+      "pro": "PRO",
+      "proLevel": "PRO difficulty: hard exercises available",
       "noResults": "No exercises found",
       "noResultsBody": "Try another search or show everything.",
       "clearFilters": "Show all exercises"

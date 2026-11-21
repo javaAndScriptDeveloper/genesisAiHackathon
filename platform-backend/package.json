@@ -6,7 +6,10 @@
   "scripts": {
     "build": "tsc",
     "start": "node dist/server.js",
-    "test": "vitest run"
+    "test": "vitest run",
+    "migrate:latest": "knex --knexfile knexfile.js migrate:latest",
+    "migrate:rollback": "knex --knexfile knexfile.js migrate:rollback",
+    "migrate:status": "knex --knexfile knexfile.js migrate:status"
   },
   "dependencies": {
     "fastify": "^5.12.8",

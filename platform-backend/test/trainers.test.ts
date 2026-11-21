@@ -32,9 +32,14 @@ describe("GET /api/trainers", () => {
     }
   });
 
-  it("has the columns id, name, path_to_image, tov and sort_order", async () => {
+  it("returns the slug as the trainer id", async () => {
+    const res = await buildApp(db).inject({ method: "GET", url: "/api/trainers" });
+    expect(res.json().trainers.map((t: { id: string }) => t.id)).toEqual(["mike", "john", "hanna", "caroline", "alex"]);
+  });
+
+  it("has the columns id, slug, name, path_to_image, tov, sort_order and timestamps", async () => {
     const { rows } = await db.raw("select column_name from information_schema.columns where table_name = 'trainers' order by column_name");
-    expect(rows.map((r: { column_name: string }) => r.column_name)).toEqual(["id", "name", "path_to_image", "sort_order", "tov"]);
+    expect(rows.map((r: { column_name: string }) => r.column_name)).toEqual(["created_at", "id", "name", "path_to_image", "slug", "sort_order", "tov", "updated_at"]);
   });
 
   it("the rename migration keeps rows written under the old column names", async () => {
@@ -42,9 +47,9 @@ describe("GET /api/trainers", () => {
     await db.migrate.up(migrationConfig);
     await db.raw("insert into trainers (id, name, icon_path, description, sort_order) values ('legacy', 'Legacy', '/trainers/legacy.svg', 'old tone', 9)");
     await migrate(db);
-    const row = await db("trainers").where({ id: "legacy" }).first();
+    const row = await db("trainers").where({ slug: "legacy" }).first();
     expect(row).toMatchObject({ name: "Legacy", pathToImage: "/trainers/legacy.svg", tov: "old tone" });
-    await db("trainers").where({ id: "legacy" }).delete();
+    await db("trainers").where({ slug: "legacy" }).delete();
   });
 
   it("migrate and seed are idempotent", async () => {

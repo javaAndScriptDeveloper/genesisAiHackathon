@@ -7,7 +7,7 @@ import { ScreenHeader } from "@/components/features/ScreenHeader/ScreenHeader";
 import { Stat } from "@/components/features/Stat/Stat";
 import { WeekStrip } from "@/components/features/WeekStrip/WeekStrip";
 import { WorkoutCard } from "@/components/features/WorkoutCard/WorkoutCard";
-import { AnimatedNumber, Button, Card, EmptyState, Icon, IconButton, ProgressBar, ProgressRing, useToast } from "@/components/ui";
+import { AnimatedNumber, Button, Card, EmptyState, Icon, IconButton, Picture, ProgressBar, ProgressRing, useToast } from "@/components/ui";
 import { kcalFor } from "@/lib/fit/calories";
 import { daysBetween, formatDay } from "@/lib/fit/dates";
 import { motivationFor } from "@/lib/fit/gamification";
@@ -70,6 +70,7 @@ export function Today() {
 					</Card>
 				) : todays ? (
 					<Card className={styles.hero}>
+						<Picture name="training-all" alt="" width={384} height={384} sizes="220px" className={styles.heroPhoto} />
 						<p className={styles.eyebrow}>{t("fit.today.todaysWorkout")}</p>
 						<h2 className={styles.heroTitle}>{todays.title}</h2>
 						<p className={styles.heroMeta}>
@@ -89,6 +90,7 @@ export function Today() {
 					</Card>
 				) : state.planned.length > 0 ? (
 					<Card className={styles.hero}>
+						<Picture name="training-mobility" alt="" width={384} height={384} sizes="220px" className={styles.heroPhoto} />
 						<p className={styles.eyebrow}>{t("fit.today.recoveryEyebrow")}</p>
 						<h2 className={styles.heroTitle}>{t("fit.today.recoveryTitle")}</h2>
 						<p className={styles.heroMeta}>{t("fit.today.recoveryBody")}</p>

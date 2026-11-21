@@ -3,9 +3,9 @@
 Minimal monorepo: push to `main` goes live on the VPS.
 
 ## Layout
-- `platform-backend/` — Node 24 + TypeScript + Fastify + Knex/Objection (migrations in `src/migrations`, run on boot). Routes: `GET /api/health` (runs `SELECT 1`; 503 if DB down), `GET /api/trainers` (5 seeded AI trainers). Tests: Vitest + Testcontainers (needs Docker).
+- `platform-backend/` — Node 24 + TypeScript + Fastify + Knex/Objection (migrations in `src/migrations`, run on boot). Schema: `trainers`, `users`, `user_devices`, `user_trainings`, `user_device_data_snapshots` (trainers keep a text `slug` that the API returns as `id`). Manual runs: `DATABASE_URL=... npm run migrate:latest` / `migrate:rollback -- --all` (records the same `.js` names as the app). Routes: `GET /api/health` (runs `SELECT 1`; 503 if DB down), `GET /api/trainers` (5 seeded AI trainers). Tests: Vitest + Testcontainers (needs Docker).
 - `frontend/` — Next.js (App Router, standalone), package manager **bun** (`bun.lock`). Full frontend starter with its own rules in `frontend/AGENTS.md` (read it before frontend work). Calls the backend server-side (`lib/api/backend.ts`, page `/status`); `/api/*` is a `fallback` rewrite to the backend, so `app/api/*` handlers (mock, ai) keep priority.
-- `compose.yml` — local stack, frontend on http://localhost:18080.
+- `compose.yml` — local stack, frontend on http://localhost:18080, Postgres on `localhost:15432` (`postgres://app:app@localhost:15432/app`).
 - `deploy/compose.prod.yml` — production stack (db + platform-backend + frontend).
 - `ssh/` — Hetzner key (private `hetzner_ed25519` and `.pub` are both committed on purpose (private repo)) and `connect.sh`.
 - New microservice: add a folder with a Dockerfile, a service in both compose files, and build/push + test steps in `.github/workflows/ci.yml`.

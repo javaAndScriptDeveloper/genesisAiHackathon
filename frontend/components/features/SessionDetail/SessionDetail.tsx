@@ -7,7 +7,7 @@ import { useState } from "react";
 import { MuscleMap } from "@/components/features/MuscleMap/MuscleMap";
 import { ChoiceList } from "@/components/features/ChoiceList/ChoiceList";
 import { ScreenHeader } from "@/components/features/ScreenHeader/ScreenHeader";
-import { Badge, Button, Card, EmptyState, Icon, Sheet, SportIcon, useToast, type IconDefinition } from "@/components/ui";
+import { Badge, Button, Card, EmptyState, Icon, Picture, Sheet, SportIcon, useToast, type IconDefinition } from "@/components/ui";
 import { kcalFor } from "@/lib/fit/calories";
 import { musclesOf } from "@/lib/fit/muscles";
 import { addDays, formatDay, mondayOf, WEEKDAYS, weekdayIndex } from "@/lib/fit/dates";
@@ -91,6 +91,8 @@ export function SessionDetail({ id }: { id: string }) {
 					{workout.adHoc && <Badge tone="warning">{t("fit.session.extra")}</Badge>}
 					{workout.movedFrom && <Badge>{t("fit.session.moved", { day: formatDay(workout.movedFrom) })}</Badge>}
 				</div>
+
+				<Picture name={`training-${muscles.length === 1 ? muscles[0] : "all"}`} alt="" width={384} height={384} sizes="(max-width: 576px) 100vw, 420px" className={styles.cover} />
 
 				<Card className={styles.targets}>
 					{muscles.length > 0 && (

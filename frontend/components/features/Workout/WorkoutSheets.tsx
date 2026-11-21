@@ -1,6 +1,6 @@
 "use client";
 
-import { Alert02Icon, ArrowReloadHorizontalIcon, Clock01Icon, Dumbbell03Icon, HelpCircleIcon, Leaf01Icon, Logout01Icon, Moon01Icon, PauseIcon, SkipForwardIcon, StopIcon, Timer02Icon, Tick02Icon } from "@hugeicons/core-free-icons";
+import { Alert02Icon, ArrowReloadHorizontalIcon, Clock01Icon, Dumbbell03Icon, HelpCircleIcon, SmileIcon, Logout01Icon, Moon01Icon, PauseIcon, SkipForwardIcon, StopIcon, Timer02Icon, Tick02Icon } from "@hugeicons/core-free-icons";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { ChoiceList, type Choice } from "@/components/features/ChoiceList/ChoiceList";
@@ -52,7 +52,7 @@ export function WorkoutSheets({ sheet, setSheet, toastShow }: Props) {
 
 	const ACTIONS: { key: string; icon: IconDefinition; op?: AdaptOp; onClick?: () => void }[] = [
 		{ key: "too-hard", icon: Alert02Icon, op: { kind: "too-hard" } },
-		{ key: "easier", icon: Leaf01Icon, op: { kind: "easier" } },
+		{ key: "easier", icon: SmileIcon, op: { kind: "easier" } },
 		{ key: "more-rest", icon: Clock01Icon, op: { kind: "more-rest" } },
 		{ key: "replace", icon: ArrowReloadHorizontalIcon, onClick: () => setSheet("replace") },
 		{ key: "min20", icon: Timer02Icon, op: { kind: "shorten", minutes: 20 } },
@@ -139,14 +139,14 @@ export function WorkoutSheets({ sheet, setSheet, toastShow }: Props) {
 					<ChoiceList
 						items={[
 							{ key: "unwell", icon: Alert02Icon, tone: "danger", title: t("fit.workout.reasonUnwell"), onClick: () => setSheet("safety") },
-							{ key: "hard", icon: Leaf01Icon, title: t("fit.workout.reasonHard"), hint: t("fit.workout.reasonHardHint"), onClick: () => { dispatch({ type: "resume" }); run({ kind: "too-hard" }); } },
+							{ key: "hard", icon: SmileIcon, title: t("fit.workout.reasonHard"), hint: t("fit.workout.reasonHardHint"), onClick: () => { dispatch({ type: "resume" }); run({ kind: "too-hard" }); } },
 							{ key: "unsure", icon: HelpCircleIcon, title: t("fit.workout.reasonUnsure"), hint: t("fit.workout.reasonUnsureHint"), onClick: () => { dispatch({ type: "resume" }); setSheet("replace"); } },
 						]}
 					/>
 				</div>
 				<hr className={styles.quitDivider} />
 				<div className={styles.quitActions}>
-					<Button variant="danger" iconLeft={Logout01Icon} onClick={() => setSheet("end")}>{t("fit.workout.quit")}</Button>
+					<Button variant="secondary" className={styles.leaveBtn} iconLeft={Logout01Icon} onClick={() => setSheet("end")}>{t("fit.workout.quit")}</Button>
 					<Link href="/coach" className={styles.feedbackLink}>{t("fit.workout.feedback")}</Link>
 				</div>
 			</Sheet>
@@ -155,7 +155,8 @@ export function WorkoutSheets({ sheet, setSheet, toastShow }: Props) {
 				<>
 					<Button variant="secondary" onClick={() => setSheet(null)}>{t("fit.workout.keepGoing")}</Button>
 					<Button
-						variant="danger"
+						variant="secondary"
+						className={styles.leaveBtn}
 						onClick={() => {
 							setSheet(null);
 							if (setsDone > 0) dispatch({ type: "end-early" });
@@ -177,7 +178,7 @@ export function WorkoutSheets({ sheet, setSheet, toastShow }: Props) {
 							<p>{t("fit.workout.tooHardHint")}</p>
 						</div>
 					</div>
-					<Button iconLeft={Leaf01Icon} onClick={() => run({ kind: "too-hard" })}>{t("fit.workout.regenEasier")}</Button>
+					<Button iconLeft={SmileIcon} onClick={() => run({ kind: "too-hard" })}>{t("fit.workout.regenEasier")}</Button>
 				</div>
 			</Sheet>
 
@@ -196,11 +197,13 @@ function SafetySheet({ open, onEnd, onResume }: { open: boolean; onEnd: () => vo
 			onClose={() => undefined}
 			title={t("fit.safety.title")}
 			variant="center"
+			panelClassName={styles.safetyPanel}
 			modal
 			footer={
-				<>
+				<div className={styles.safetyActions}>
 					<Button variant="danger" onClick={onEnd}>{t("fit.workout.end")}</Button>
 					<Button
+						variant="secondary"
 						disabled={!rested}
 						onClick={() => {
 							setRested(false);
@@ -209,7 +212,7 @@ function SafetySheet({ open, onEnd, onResume }: { open: boolean; onEnd: () => vo
 					>
 						{t("fit.safety.resume")}
 					</Button>
-				</>
+				</div>
 			}
 		>
 			<ul className={styles.safetyList}>

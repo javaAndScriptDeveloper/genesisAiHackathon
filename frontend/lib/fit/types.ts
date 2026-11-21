@@ -230,8 +230,11 @@ export interface FitState {
 	devices: DeviceState;
 	bloodPressure: BloodPressureEntry[];
 	photos: PhotoCheckIn[];
-	bodyWeights: { date: ISODate; kg: number }[];
+	/** `at` is the moment the entry was saved (absent on demo seed data). */
+	bodyWeights: { date: ISODate; kg: number; at?: string }[];
 	goalWeightKg: number | null;
+	/** When the current goal weight was set. */
+	goalSetAt?: string | null;
 	partners: Record<string, "invited" | "accepted">;
 	hasDemoHistory: boolean;
 	celebrate: string[];

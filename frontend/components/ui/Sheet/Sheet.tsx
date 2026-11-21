@@ -15,15 +15,16 @@ interface SheetProps {
 	closeLabel?: string;
 	children: ReactNode;
 	footer?: ReactNode;
-	/** `center` renders a compact dialog (confirmations); `bottom` a sheet that slides up. */
-	variant?: "bottom" | "center";
+	panelClassName?: string;
+	/** `center` renders a compact dialog (confirmations); `bottom` a sheet that slides up; `full` covers the whole screen (detail views). */
+	variant?: "bottom" | "center" | "full";
 	/** Hides the close button and blocks backdrop/Escape dismissal (safety stops, required choices). */
 	modal?: boolean;
 }
 
 // In-frame overlay. A native <dialog> would escape the phone frame on desktop, so sheets are positioned
 // against the nearest positioned ancestor (the device screen). Escape closes, focus moves inside, Tab is trapped.
-export function Sheet({ open, onClose, title, closeLabel = "Close", children, footer, variant = "bottom", modal = false }: SheetProps) {
+export function Sheet({ open, onClose, title, closeLabel = "Close", children, footer, panelClassName, variant = "bottom", modal = false }: SheetProps) {
 	const ref = useRef<HTMLDivElement>(null);
 	const titleId = useId();
 	const overlayRoot = useOverlayRoot();
@@ -72,7 +73,7 @@ export function Sheet({ open, onClose, title, closeLabel = "Close", children, fo
 	const node = (
 		<div className={clsx(styles.root, styles[variant])}>
 			<div className={styles.backdrop} onClick={modal ? undefined : onClose} aria-hidden />
-			<div ref={ref} role="dialog" aria-modal="true" aria-labelledby={titleId} tabIndex={-1} className={styles.panel}>
+			<div ref={ref} role="dialog" aria-modal="true" aria-labelledby={titleId} tabIndex={-1} className={clsx(styles.panel, panelClassName)}>
 				{variant === "bottom" && !modal && (
 					<div
 						className={styles.grab}

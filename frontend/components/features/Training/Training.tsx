@@ -1,6 +1,6 @@
 "use client";
 
-import { Search01Icon, Tick02Icon } from "@hugeicons/core-free-icons";
+import { FireIcon, Search01Icon, Tick02Icon } from "@hugeicons/core-free-icons";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { ScreenHeader } from "@/components/features/ScreenHeader/ScreenHeader";
@@ -101,10 +101,17 @@ export function Training() {
 						</div>
 						<div className={styles.muscleCards} role="group" aria-label={t("fit.training.filterMuscle")}>
 							{(["all", ...MUSCLES] as const).map((category) => {
-								const count = category === "all" ? matchingExercises.length : matchingExercises.filter((exercise) => exercise.muscle === category).length;
+								const exercises = category === "all" ? matchingExercises : matchingExercises.filter((exercise) => exercise.muscle === category);
+								const count = exercises.length;
+								const hasHard = exercises.some((exercise) => exercise.level === 3);
+								const hasMedium = exercises.some((exercise) => exercise.level === 2);
 								return (
 									<button key={category} type="button" className={styles.muscleCard} aria-pressed={muscle === category} onClick={() => setMuscle(category)}>
-										<Picture name={`training-${category}`} alt="" width={384} height={384} sizes="144px" className={styles.cover} />
+										<Picture name={`training-${category}`} alt="" width={384} height={384} sizes="172px" className={styles.cover} />
+										<span className={styles.cardBadges}>
+											{hasMedium && <span className={styles.medium}>{t("fit.training.medium")}</span>}
+											{hasHard && <span className={styles.pro} aria-label={t("fit.training.proLevel")}><Icon icon={FireIcon} size={12} />{t("fit.training.pro")}</span>}
+										</span>
 										<span className={styles.cardLabel}>
 											<strong>{t(`fit.muscle.${category}`)}</strong>
 											<span>{t(`fit.training.exerciseCount.${countPlural.select(count)}`, { count })}</span>
@@ -113,7 +120,7 @@ export function Training() {
 								);
 							})}
 						</div>
-						<Checkbox label={t("fit.training.onlyMine")} checked={onlyMine} onChange={(e) => setOnlyMine(e.target.checked)} />
+						<Checkbox compact className={styles.onlyMine} label={t("fit.training.onlyMine")} title={t("fit.training.onlyMineHint")} checked={onlyMine} onChange={(e) => setOnlyMine(e.target.checked)} />
 						{library.length === 0 ? (
 							<EmptyState title={t("fit.training.noResults")} description={t("fit.training.noResultsBody")} action={<Button variant="secondary" onClick={() => { setQuery(""); setMuscle("all"); setOnlyMine(false); }}>{t("fit.training.clearFilters")}</Button>} />
 						) : (

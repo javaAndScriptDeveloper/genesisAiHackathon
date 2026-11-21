@@ -35,6 +35,9 @@
 }
 
 .root .hero {
+	position: relative;
+	isolation: isolate;
+	overflow: hidden;
 	display: flex;
 	flex-direction: column;
 	gap: var(--space-2);
@@ -46,6 +49,18 @@
 	p {
 		color: rgba(255, 255, 255, 0.72);
 	}
+}
+
+.heroPhoto {
+	position: absolute;
+	z-index: -1;
+	inset-block-start: 0;
+	inset-inline-end: 0;
+	width: min(65%, 22rem);
+	height: auto;
+	opacity: 0.45;
+	mask-image: linear-gradient(to left, #000, transparent), linear-gradient(to bottom, #000 55%, transparent);
+	mask-composite: intersect;
 }
 
 .eyebrow {

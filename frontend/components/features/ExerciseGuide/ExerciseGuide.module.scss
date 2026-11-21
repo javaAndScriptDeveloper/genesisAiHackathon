@@ -123,11 +123,12 @@
 	gap: var(--space-3);
 	margin: var(--space-3) 0;
 	padding: var(--space-3);
-	background: var(--color-accentSoft);
-	color: var(--color-accentText);
+	background: var(--color-surfaceMuted);
+	color: var(--color-accent);
 	@include corners.radius(var(--radius-card));
 
 	strong {
+		color: var(--color-text);
 		font-size: 1.6rem;
 	}
 
@@ -211,4 +212,18 @@
 
 [data-section="mistakes"] > .card {
 	border-color: var(--color-warningSoft);
+}
+
+// Round info button that sits on the video scrim.
+.trigger {
+	flex: none;
+	background: rgba(255, 255, 255, 0.18);
+	backdrop-filter: blur(0.8rem);
+	border-color: transparent;
+	color: #fff;
+	border-radius: 50%;
+
+	&:hover:not(:disabled) {
+		background: rgba(255, 255, 255, 0.28);
+	}
 }

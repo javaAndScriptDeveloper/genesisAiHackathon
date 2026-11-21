@@ -117,8 +117,16 @@
 	text-shadow: 0 0.1rem 0.8rem rgba(10, 10, 12, 0.4);
 }
 
+.heroMeta {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--space-2);
+	margin-top: 0.6rem;
+}
+
 .target {
-	margin-top: 0.4rem;
+	margin: 0;
 	color: rgba(255, 255, 255, 0.82);
 	font-size: 1.4rem;
 	font-weight: 600;
@@ -311,7 +319,7 @@
 	justify-content: center;
 	gap: var(--space-4);
 	padding: var(--space-5);
-	background: rgba(19, 19, 22, 0.97);
+	background: #131316;
 	color: #fff;
 	text-align: center;
 	animation: fade 0.2s ease-out;
@@ -440,8 +448,23 @@
 	font-size: 1.4rem;
 }
 
+.safetyPanel {
+	padding: var(--space-2);
+}
 
+.safetyActions {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(min(100%, 13.6rem), 1fr));
+	gap: var(--space-2);
 
+	button {
+		padding-inline: var(--space-2);
+	}
+
+	button > span {
+		white-space: normal;
+	}
+}
 
 .safetyList {
 	margin: 0 0 var(--space-3);
@@ -591,8 +614,8 @@
 	gap: var(--space-3);
 	margin-top: var(--space-4);
 	padding: var(--space-3);
-	background: var(--color-accentSoft);
-	border: 0.1rem solid rgba(229, 36, 46, 0.25);
+	background: var(--color-surfaceMuted);
+	border: 0.1rem solid var(--color-border);
 	@include corners.nested(var(--radius-panel), var(--space-3));
 
 	button {
@@ -625,7 +648,7 @@
 	width: 4rem;
 	height: 4rem;
 	background: #fff;
-	color: var(--color-accent);
+	color: var(--color-textMuted);
 	@include corners.nested(var(--radius-panel), var(--space-3));
 }
 
@@ -665,5 +688,17 @@
 
 	&:hover {
 		color: var(--color-accentText);
+	}
+}
+
+// Muted red for the leave action: reads as "careful" without competing with the primary button.
+.leaveBtn {
+	background: var(--color-dangerSoft);
+	border-color: transparent;
+	color: var(--color-dangerText);
+
+	&:hover:not(:disabled) {
+		background: var(--color-dangerSoft);
+		filter: brightness(0.96);
 	}
 }

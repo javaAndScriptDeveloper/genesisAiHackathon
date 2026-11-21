@@ -1,9 +1,9 @@
 "use client";
 
-import { Alert02Icon, ArrowDown01Icon, Idea01Icon, LeftToRightListNumberIcon, WindIcon } from "@hugeicons/core-free-icons";
+import { Alert02Icon, ArrowDown01Icon, Idea01Icon, InformationCircleIcon, LeftToRightListNumberIcon, WindIcon } from "@hugeicons/core-free-icons";
 import clsx from "clsx";
 import { useState } from "react";
-import { Icon, SegmentedControl, Sheet, type IconDefinition } from "@/components/ui";
+import { Icon, IconButton, SegmentedControl, Sheet, type IconDefinition } from "@/components/ui";
 import type { Exercise } from "@/lib/fit/types";
 import { useT } from "@/lib/i18n/I18nProvider";
 import styles from "./ExerciseGuide.module.scss";
@@ -14,7 +14,7 @@ const IDS: SectionId[] = ["steps", "tips", "breathing", "mistakes"];
 
 interface Props {
 	exercise: Exercise;
-	/** `inline`: expandable sections on the page. `sheet`: four icon buttons that open a bottom sheet (keeps the workout screen focused). */
+	/** `inline`: expandable sections on the page. `sheet`: one info icon button that opens a bottom sheet with tabs (keeps the workout screen focused). */
 	variant?: "inline" | "sheet";
 	defaultOpen?: SectionId | null;
 }
@@ -28,24 +28,16 @@ export function ExerciseGuide({ exercise, variant = "inline", defaultOpen = "ste
 	if (variant === "sheet") {
 		return (
 			<>
-				<div className={styles.chips} role="group" aria-label={t("fit.guide.title")}>
-					{IDS.map((id) => (
-						<button
-							key={id}
-							type="button"
-							className={styles.chip}
-							onClick={() => {
-								setSection(id);
-								setOpen(id);
-							}}
-						>
-							<span className={styles.chipIcon}>
-								<Icon icon={ICONS[id]} size={20} />
-							</span>
-							{t(`fit.guide.short.${id}`)}
-						</button>
-					))}
-				</div>
+				<IconButton
+					icon={InformationCircleIcon}
+					label={t("fit.guide.title")}
+					variant="secondary"
+					className={styles.trigger}
+					onClick={() => {
+						setSection("steps");
+						setOpen("steps");
+					}}
+				/>
 				<Sheet open={open !== null} onClose={() => setOpen(null)} title={exercise.name} closeLabel={t("common.close")}>
 					<SegmentedControl label={t("fit.guide.title")} value={section} onChange={setSection} options={IDS.map((id) => ({ id, label: t(`fit.guide.short.${id}`) }))} />
 					<div className={styles.sheetIntro} data-section={section}>
