@@ -1,13 +1,13 @@
 "use client";
 
-import { ArrowDown01Icon, ArrowUp01Icon, Calendar03Icon, Clock01Icon, Dumbbell03Icon, HeartCheckIcon, Moon01Icon, PlayIcon, Tick02Icon, Timer02Icon } from "@hugeicons/core-free-icons";
+import { ArrowDown01Icon, ArrowReloadHorizontalIcon, ArrowUp01Icon, Calendar03Icon, Clock01Icon, Dumbbell01Icon, Dumbbell03Icon, FireIcon, HeartCheckIcon, Moon01Icon, PlayIcon, SkipForwardIcon, SlidersHorizontalIcon, Tick02Icon, Timer02Icon } from "@hugeicons/core-free-icons";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { MuscleMap } from "@/components/features/MuscleMap/MuscleMap";
 import { ChoiceList } from "@/components/features/ChoiceList/ChoiceList";
 import { ScreenHeader } from "@/components/features/ScreenHeader/ScreenHeader";
-import { Badge, Button, Card, EmptyState, Icon, Picture, Sheet, SportIcon, useToast, type IconDefinition } from "@/components/ui";
+import { Badge, Button, Card, EmptyState, Icon, IconButton, KIND_ICON, Picture, Sheet, SportIcon, useToast, type IconDefinition } from "@/components/ui";
 import { kcalFor } from "@/lib/fit/calories";
 import { musclesOf } from "@/lib/fit/muscles";
 import { addDays, formatDay, mondayOf, WEEKDAYS, weekdayIndex } from "@/lib/fit/dates";
@@ -47,6 +47,7 @@ export function SessionDetail({ id }: { id: string }) {
 	const editable = workout.status === "planned";
 	const ids = workout.exercises.map((b) => b.exerciseId);
 	const kcal = kcalFor(ids, profile.weightKg, workout.durationMin);
+	const totalSets = workout.exercises.reduce((n, b) => n + b.sets.length, 0);
 	const muscles = musclesOf(workout.exercises);
 	const equipment = Array.from(new Set(ids.flatMap((id) => getExercise(id).equipment)));
 	// "Knee-friendly" etc.: only for the limitations this user reported, and only when no exercise here loads that area.
@@ -82,17 +83,35 @@ export function SessionDetail({ id }: { id: string }) {
 
 	return (
 		<div className={styles.root}>
-			<ScreenHeader title={workout.title} subtitle={`${formatDay(workout.date)} · ${workout.durationMin} ${t("fit.common.minShort")} · ${kcal} kcal`} back="/training" />
+			<ScreenHeader title={workout.title} subtitle={formatDay(workout.date)} back="/training" />
 			<div className={styles.content}>
-				<div className={styles.badges}>
-					<Badge tone={workout.status === "planned" ? "accent" : workout.status === "completed" ? "success" : "neutral"}>{t(`fit.status.${workout.status}`)}</Badge>
-					<Badge>{t("fit.session.level", { n: workout.difficulty })}</Badge>
-					<Badge>{workout.focus}</Badge>
-					{workout.adHoc && <Badge tone="warning">{t("fit.session.extra")}</Badge>}
-					{workout.movedFrom && <Badge>{t("fit.session.moved", { day: formatDay(workout.movedFrom) })}</Badge>}
+				<div className={styles.hero}>
+					<Picture name={`training-${muscles.length === 1 ? muscles[0] : "all"}`} alt="" width={384} height={384} sizes="(max-width: 576px) 100vw, 420px" className={styles.cover} />
+					<div className={styles.heroBadges}>
+						<Badge tone={workout.status === "planned" ? "accent" : workout.status === "completed" ? "success" : "neutral"}>{t(`fit.status.${workout.status}`)}</Badge>
+						<Badge>{t("fit.session.level", { n: workout.difficulty })}</Badge>
+						{workout.adHoc && <Badge tone="warning">{t("fit.session.extra")}</Badge>}
+						{workout.movedFrom && <Badge>{t("fit.session.moved", { day: formatDay(workout.movedFrom) })}</Badge>}
+					</div>
 				</div>
 
-				<Picture name={`training-${muscles.length === 1 ? muscles[0] : "all"}`} alt="" width={384} height={384} sizes="(max-width: 576px) 100vw, 420px" className={styles.cover} />
+				<ul className={styles.stats}>
+					<li>
+						<Icon icon={Clock01Icon} size={20} />
+						<strong>{workout.durationMin}</strong>
+						<span>{t("fit.common.minShort")}</span>
+					</li>
+					<li>
+						<Icon icon={FireIcon} size={20} />
+						<strong>{kcal}</strong>
+						<span>kcal</span>
+					</li>
+					<li>
+						<Icon icon={Dumbbell01Icon} size={20} />
+						<strong>{totalSets}</strong>
+						<span>{t("fit.common.sets")}</span>
+					</li>
+				</ul>
 
 				<Card className={styles.targets}>
 					{muscles.length > 0 && (
@@ -101,9 +120,11 @@ export function SessionDetail({ id }: { id: string }) {
 						</div>
 					)}
 					<div className={styles.targetInfo}>
-						<h2 className={styles.h2}>{t("fit.session.targets")}</h2>
-						<p className={styles.note}>{muscles.length ? muscles.map((m) => t(`fit.muscle.${m}`)).join(" · ") : t("fit.muscle.mobility")}</p>
-						<h3 className={styles.h3}>{t("fit.session.equipmentTitle")}</h3>
+						<p className={styles.eyebrow}>{t("fit.session.targets")}</p>
+						<div className={styles.badges}>
+							{(muscles.length ? muscles : (["mobility"] as const)).map((m) => <Badge key={m} tone="accent">{t(`fit.muscle.${m}`)}</Badge>)}
+						</div>
+						<p className={styles.eyebrow}>{t("fit.session.equipmentTitle")}</p>
 						<div className={styles.badges}>
 							{equipment.length === 0 ? <Badge>{t("fit.session.bodyweightOnly")}</Badge> : equipment.map((e) => <Badge key={e}><SportIcon name="dumbbell" size={12} />{t(`fit.opt.equipment.${e}`)}</Badge>)}
 							{friendly.map((l) => <Badge key={l} tone="success"><Icon icon={Tick02Icon} size={12} strokeWidth={3} />{t("fit.session.friendly", { part: t(`fit.opt.limitation.${l}.label`) })}</Badge>)}
@@ -120,9 +141,9 @@ export function SessionDetail({ id }: { id: string }) {
 						<Button size="lg" iconLeft={PlayIcon} disabled={active} onClick={() => start(workout.id)}>{t("fit.session.start")}</Button>
 						{active && <p className={styles.note}>{t("fit.session.alreadyActive")}</p>}
 						<div className={styles.row}>
-							<Button variant="secondary" onClick={() => setPanel("adjust")}>{t("fit.session.adjust")}</Button>
-							<Button variant="secondary" onClick={() => setPanel("move")}>{t("fit.session.move")}</Button>
-							<Button variant="secondary" onClick={() => setPanel("skip")}>{t("fit.session.skip")}</Button>
+							<Button variant="secondary" size="sm" iconLeft={SlidersHorizontalIcon} onClick={() => setPanel("adjust")}>{t("fit.session.adjust")}</Button>
+							<Button variant="secondary" size="sm" iconLeft={Calendar03Icon} onClick={() => setPanel("move")}>{t("fit.session.move")}</Button>
+							<Button variant="secondary" size="sm" iconLeft={SkipForwardIcon} onClick={() => setPanel("skip")}>{t("fit.session.skip")}</Button>
 						</div>
 					</div>
 				)}
@@ -137,20 +158,30 @@ export function SessionDetail({ id }: { id: string }) {
 					</Card>
 				)}
 
-				<h2 className={styles.h2}>{t("fit.session.exerciseList")}</h2>
+				<h2 className={styles.h2}>
+					{t("fit.session.exerciseList")}
+					<span>{workout.exercises.length}</span>
+				</h2>
 				<ol className={styles.list}>
 					{workout.exercises.map((b, i) => {
 						const ex = getExercise(b.exerciseId);
 						return (
 							<li key={b.id} className={styles.item}>
-								<span className={styles.num}>{i + 1}</span>
+								<span className={styles.exIcon}>
+									<SportIcon name={KIND_ICON[ex.kind]} size={22} />
+									<span className={styles.num}>{i + 1}</span>
+								</span>
 								<div className={styles.itemBody}>
 									<Link href={`/training/exercise/${ex.id}`} className={styles.itemName}>{ex.name}</Link>
-									<span className={styles.itemMeta}>{describeBlock(b, u.units)} · {t("fit.session.rest", { s: b.restSec })}</span>
+									<span className={styles.itemMeta}>
+										<span className={styles.metaChip}>{describeBlock(b, u.units)}</span>
+										<span className={styles.metaChip}><Icon icon={Timer02Icon} size={13} />{t("fit.session.rest", { s: b.restSec })}</span>
+									</span>
 								</div>
-								{editable && (
-									<Button size="sm" variant="ghost" onClick={() => setPanel({ replace: b.id })}>{t("fit.session.replace")}</Button>
-								)}
+								<span className={styles.itemSide}>
+									<Badge>{t(`fit.muscle.${ex.muscle}`)}</Badge>
+									{editable && <IconButton icon={ArrowReloadHorizontalIcon} label={t("fit.session.replace")} onClick={() => setPanel({ replace: b.id })} />}
+								</span>
 							</li>
 						);
 					})}

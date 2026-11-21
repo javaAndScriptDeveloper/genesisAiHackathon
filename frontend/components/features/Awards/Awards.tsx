@@ -1,6 +1,6 @@
 "use client";
 
-import { Calendar03Icon, Clock01Icon, Dumbbell01Icon, FireIcon, Idea01Icon, Medal01Icon, Share08Icon, StarIcon, Target02Icon } from "@hugeicons/core-free-icons";
+import { Calendar03Icon, Clock01Icon, Dumbbell01Icon, FireIcon, Idea01Icon, Medal01Icon, Share08Icon, StarIcon, Target02Icon, CrownIcon } from "@hugeicons/core-free-icons";
 import { useState } from "react";
 import { AchievementBadge } from "@/components/features/AchievementBadge/AchievementBadge";
 import { Button, EmptyState, Icon, ProgressBar, ProgressRing, Sheet, SportIcon, KIND_ICON, useToast } from "@/components/ui";
@@ -51,8 +51,15 @@ export function Awards() {
 					</div>
 				</div>
 				<div className={styles.ranking}>
-					<span>{t("fit.awards.demoRanking")}</span>
-					<strong>{t("fit.awards.aheadOf", { percent: new Intl.NumberFormat(locale, { style: "percent", minimumFractionDigits: 1 }).format(DEMO_PERCENTILE) })}</strong>
+					<span className={styles.rankIcon}>
+						<Icon icon={CrownIcon} size={22} />
+					</span>
+					<div className={styles.rankBody}>
+						<strong>{t("fit.awards.aheadOf", { percent: new Intl.NumberFormat(locale, { style: "percent", minimumFractionDigits: 1 }).format(DEMO_PERCENTILE) })}</strong>
+						<span className={styles.rankTrack} aria-hidden>
+							<span className={styles.rankFill} style={{ width: `${DEMO_PERCENTILE * 100}%` }} />
+						</span>
+					</div>
 				</div>
 				<ul className={styles.overall} aria-label={t("fit.awards.overall")}>
 					<li>
@@ -97,7 +104,7 @@ export function Awards() {
 				<h2>{t("fit.awards.collection")}</h2>
 				<span>{t("fit.awards.collected", { n: unlockedCount, total: ACHIEVEMENTS.length })}</span>
 			</div>
-			<ProgressBar value={(unlockedCount / ACHIEVEMENTS.length) * 100} label={t("fit.awards.collection")} tone="neutral" />
+			<ProgressBar value={(unlockedCount / ACHIEVEMENTS.length) * 100} label={t("fit.awards.collection")} tone="accent" />
 
 			<ul className={styles.grid}>
 				{ACHIEVEMENTS.map((a) => {

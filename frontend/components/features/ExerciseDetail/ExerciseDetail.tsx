@@ -17,8 +17,8 @@ export function ExerciseDetail({ id }: { id: string }) {
 	return (
 		<div className={styles.root}>
 			<ScreenHeader title={exercise.name} back />
+			<ExerciseVideo exercise={exercise} autoPlay fullWidth />
 			<div className={styles.content}>
-				<ExerciseVideo exercise={exercise} />
 				<div className={styles.badges}>
 					<Badge tone="accent">{t(`fit.muscle.${exercise.muscle}`)}</Badge>
 					<Badge>{t(`fit.level.${exercise.level}`)}</Badge>

@@ -124,7 +124,7 @@ export function Coach() {
 
 	return (
 		<div className={styles.root}>
-			<ScreenHeader title={t("fit.coach.title")} subtitle={t("fit.coach.subtitle")} />
+			<ScreenHeader title={t("fit.coach.title")} />
 			<div className={styles.thread} role="log" aria-live="polite" aria-label={t("fit.coach.title")}>
 				<div className={clsx(styles.bubble, styles.coach)}>
 					<p>{t("fit.coach.greeting", { name: profile.name })}</p>
