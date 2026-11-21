@@ -73,7 +73,7 @@ export function generateDailyStats(userId: number, date: string, scenario: Scena
     hrvMul = between(rand(), 0.9, 1.1);
     stepsMul = between(rand(), 0.75, 1.25);
   } else if (scenario === "tired") {
-    sleep = between(rand(), 5.0, 5.8);
+    sleep = between(rand(), 5.0, 5.7);
     hr = b.restingHr + between(rand(), 4, 6);
     hrvMul = between(rand(), 0.75, 0.85);
     stepsMul = between(rand(), 0.6, 0.8);
