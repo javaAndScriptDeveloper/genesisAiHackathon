@@ -12,6 +12,7 @@ export function emptyState(): FitState {
 	return {
 		version: 1,
 		profile: null,
+		trainerId: null,
 		planned: [],
 		history: [],
 		active: null,

@@ -10,6 +10,7 @@ import type {
 	ActiveSession,
 	AdaptOp,
 	AppNotification,
+	Goal,
 	CoachAction,
 	CoachMessage,
 	Equipment,
@@ -32,6 +33,8 @@ export type Action =
 	| { type: "reset" }
 	| { type: "complete-onboarding"; profile: Profile; demoHistory: boolean; today: ISODate; now: string }
 	| { type: "update-profile"; profile: Profile; today: ISODate }
+	| { type: "set-goal"; goal: Goal; goalText: string; today: ISODate }
+	| { type: "set-trainer"; trainerId: string }
 	| { type: "sync"; now: string }
 	| { type: "start-workout"; plannedId: string; now: string }
 	| { type: "go-to"; index: number }
@@ -233,6 +236,10 @@ export function reducer(state: FitState, action: Action): FitState {
 			const devices = { apple: action.profile.wearable === "apple" ? true : state.devices.apple && action.profile.wearable === "none" ? state.devices.apple : state.devices.apple, garmin: state.devices.garmin };
 			return rebuildUpcoming({ ...state, devices }, action.profile, action.today);
 		}
+		case "set-goal":
+			return state.profile ? reducer(state, { type: "update-profile", profile: { ...state.profile, goal: action.goal, goalText: action.goalText }, today: action.today }) : state;
+		case "set-trainer":
+			return { ...state, trainerId: action.trainerId };
 		case "sync":
 			return state.profile ? appendNotifications(state, deriveNotifications(state, new Date(action.now))) : state;
 		case "start-workout": {

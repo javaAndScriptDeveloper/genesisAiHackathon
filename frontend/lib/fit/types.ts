@@ -18,6 +18,8 @@ export interface Profile {
 	heightCm: number;
 	weightKg: number;
 	goal: Goal;
+	/** The user's own wording of their goal (typed or dictated); `goal` is its closest preset. */
+	goalText?: string;
 	experience: Experience;
 	location: TrainingLocation;
 	equipment: Equipment[];
@@ -210,6 +212,8 @@ export type MealSlot = "breakfast" | "lunch" | "snack" | "dinner";
 export interface FitState {
 	version: 1;
 	profile: Profile | null;
+	/** Selected AI trainer id (from platform-backend `/api/trainers`); null means the default trainer. */
+	trainerId: string | null;
 	planned: PlannedWorkout[];
 	history: SessionLog[];
 	active: ActiveSession | null;
