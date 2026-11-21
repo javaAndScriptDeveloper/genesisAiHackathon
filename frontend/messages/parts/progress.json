@@ -643,6 +643,7 @@
       "unsuitable": "These photos could not be compared. Try two photos in similar light and framing.",
       "history": "Past analyses",
       "historyEmpty": "Your analyses will be listed here.",
+      "analysedCount": "Analysed {n}×",
       "errRateLimited": "You have reached today's limit of analyses. Try again tomorrow.",
       "errUnavailable": "Analysis is unavailable right now.",
       "errFailed": "We couldn't complete the analysis. Please try again in a moment.",

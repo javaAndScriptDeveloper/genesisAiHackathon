@@ -90,6 +90,8 @@ export function toInsight(args: { id: string; now: string; pair: PhotoPair; mode
 		analyzedAt: args.now,
 		beforeDate: args.pair.before.date,
 		afterDate: args.pair.after.date,
+		beforePhotoId: args.pair.before.id,
+		afterPhotoId: args.pair.after.id,
 		beforeWeightKg: args.pair.before.weightKg ?? null,
 		afterWeightKg: args.pair.after.weightKg ?? null,
 		model: args.model,

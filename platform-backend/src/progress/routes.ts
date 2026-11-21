@@ -116,6 +116,8 @@ const syncSchema = {
           analyzedAt: dateTime,
           beforeDate: date,
           afterDate: date,
+          beforePhotoId: nullable({ type: "string", maxLength: 100 }),
+          afterPhotoId: nullable({ type: "string", maxLength: 100 }),
           beforeWeightKg: nullable({ type: "number", exclusiveMinimum: 0, maximum: 999.99 }),
           afterWeightKg: nullable({ type: "number", exclusiveMinimum: 0, maximum: 999.99 }),
           model: str,

@@ -10,7 +10,7 @@ import { findExercise } from "@/lib/fit/exercises";
 import { buildContext, defaultPair, gating, orderPair, toInsight } from "@/lib/fit/photoInsight";
 import { useFit } from "@/lib/fit/store/FitProvider";
 import { useProgress } from "@/lib/fit/store/hooks";
-import type { PhotoInsight } from "@/lib/fit/types";
+import type { PhotoCheckIn, PhotoInsight } from "@/lib/fit/types";
 import { useI18n } from "@/lib/i18n/I18nProvider";
 import { ENGINE_VERSION } from "@/lib/progress";
 import styles from "./PhotoInsight.module.scss";
@@ -52,6 +52,23 @@ function InsightBody({ insight }: { insight: PhotoInsight }) {
 			)}
 			<p className={styles.disclaimer}>{t("fit.photoAi.disclaimer")}</p>
 		</div>
+	);
+}
+
+/** Thumbnails of the compared photos that still exist on this device; deleted ones are simply omitted (the dates stay in the summary). */
+function HistoryPhotos({ insight, photos }: { insight: PhotoInsight; photos: PhotoCheckIn[] }) {
+	const { t } = useI18n();
+	const found = [insight.beforePhotoId, insight.afterPhotoId].flatMap((id) => photos.find((p) => p.id === id) ?? []);
+	if (found.length === 0) return null;
+	return (
+		<ul className={styles.historyPhotos}>
+			{found.map((p) => (
+				<li key={p.id}>
+					{/* eslint-disable-next-line @next/next/no-img-element -- local data URL, not optimizable */}
+					<img src={p.dataUrl} alt={t("fit.progress.photoAlt", { day: formatDay(p.date) })} />
+				</li>
+			))}
+		</ul>
 	);
 }
 
@@ -145,6 +162,7 @@ export function PhotoInsightSection() {
 							<li key={i.id}>
 								<details>
 									<summary>{range(i)}</summary>
+									<HistoryPhotos insight={i} photos={photos} />
 									<InsightBody insight={i} />
 								</details>
 							</li>

@@ -230,6 +230,11 @@
 	}
 }
 
+.analysed {
+	font-weight: 600;
+	color: var(--color-textMuted);
+}
+
 .remove {
 	align-self: flex-start;
 	min-height: 3.6rem;

@@ -156,3 +156,18 @@
 		font-weight: 600;
 	}
 }
+
+.historyPhotos {
+	display: flex;
+	gap: var(--space-2);
+	margin: 0 0 var(--space-2);
+	padding: 0;
+	list-style: none;
+
+	img {
+		width: 6rem;
+		aspect-ratio: 3 / 4;
+		object-fit: cover;
+		@include corners.radius(var(--radius-control));
+	}
+}

@@ -33,6 +33,7 @@ export function CheckIns() {
 	const [goalDraft, setGoalDraft] = useState<string | null>(null);
 	const [busy, setBusy] = useState(false);
 	const [removing, setRemoving] = useState<string | null>(null);
+	const analysed = (id: string) => state.photoInsights.filter((i) => i.beforePhotoId === id || i.afterPhotoId === id).length;
 	const limited = !premium && state.photos.length >= FREE_PHOTOS;
 
 	const entries = state.bodyWeights;
@@ -195,6 +196,7 @@ export function CheckIns() {
 								{/* eslint-disable-next-line @next/next/no-img-element -- local data URL, not optimizable */}
 								<img src={p.dataUrl} alt={t("fit.progress.photoAlt", { day: formatDay(p.date) })} />
 								<span>{formatDay(p.date)}</span>
+								{analysed(p.id) > 0 && <span className={styles.analysed}>{t("fit.photoAi.analysedCount", { n: analysed(p.id) })}</span>}
 								<button type="button" className={styles.remove} onClick={() => setRemoving(p.id)}>{t("fit.progress.removePhoto")}</button>
 							</li>
 						))}

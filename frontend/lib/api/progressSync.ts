@@ -41,6 +41,8 @@ const photoInsightSchema = z.object({
 	analyzedAt: dateTime,
 	beforeDate: date,
 	afterDate: date,
+	beforePhotoId: z.string().max(100).nullish(),
+	afterPhotoId: z.string().max(100).nullish(),
 	beforeWeightKg: nullableNum,
 	afterWeightKg: nullableNum,
 	model: z.string().min(1),
@@ -107,11 +109,13 @@ function workoutOf(state: FitState, log: SessionLog): RemoteWorkout {
 }
 
 /** Explicit field copy: only analysis text leaves the device, never anything image-like. */
-const insightOf = (i: PhotoInsight): PhotoInsight => ({
+const insightOf = (i: Omit<PhotoInsight, "beforePhotoId" | "afterPhotoId"> & Partial<Pick<PhotoInsight, "beforePhotoId" | "afterPhotoId">>): PhotoInsight => ({
 	id: i.id,
 	analyzedAt: i.analyzedAt,
 	beforeDate: i.beforeDate,
 	afterDate: i.afterDate,
+	beforePhotoId: i.beforePhotoId ?? null,
+	afterPhotoId: i.afterPhotoId ?? null,
 	beforeWeightKg: i.beforeWeightKg,
 	afterWeightKg: i.afterWeightKg,
 	model: i.model,

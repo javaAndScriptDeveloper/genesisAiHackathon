@@ -121,6 +121,8 @@ export class ProgressPhotoInsightModel extends Model {
   analyzedAt!: Date;
   beforeDate!: string;
   afterDate!: string;
+  beforePhotoId!: string | null;
+  afterPhotoId!: string | null;
   beforeWeightKg!: number | null;
   afterWeightKg!: number | null;
   model!: string;

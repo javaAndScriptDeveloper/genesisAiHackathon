@@ -132,6 +132,8 @@ describe("progress schema", () => {
       analyzed_at: { type: tz, nullable: false },
       before_date: { type: "date", nullable: false },
       after_date: { type: "date", nullable: false },
+      before_photo_id: { type: "text", nullable: true },
+      after_photo_id: { type: "text", nullable: true },
       before_weight_kg: { type: "numeric", nullable: true },
       after_weight_kg: { type: "numeric", nullable: true },
       model: { type: "text", nullable: false },

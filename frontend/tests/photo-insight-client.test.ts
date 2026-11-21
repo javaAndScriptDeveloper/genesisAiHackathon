@@ -112,3 +112,26 @@ describe("sanitizing", () => {
 		expect([i.result.summary.length, i.result.observations[0]?.area.length, i.result.observations[0]?.text.length, i.result.encouragement.length]).toEqual([2000, 200, 1000, 1000]);
 	});
 });
+
+describe("toInsight photo ids", () => {
+	it("records the chosen photos' ids, before first", () => {
+		const a = { id: "pA", date: "2026-11-20", dataUrl: "d" };
+		const b = { id: "pB", date: "2026-10-01", dataUrl: "d" };
+		const pair = orderPair(a, b)!;
+		const i = toInsight({ id: "i", now: "2026-11-21T00:00:00.000Z", pair, model: "m", engineVersion: "v", result: { suitable: true, summary: "s", observations: [], encouragement: "e" } });
+		expect(i.beforePhotoId).toBe("pB");
+		expect(i.afterPhotoId).toBe("pA");
+	});
+});
+
+describe("hydrate of insights saved before photo ids", () => {
+	it("defaults beforePhotoId/afterPhotoId to null and keeps existing ids", async () => {
+		const { reducer } = await import("@/lib/fit/store/reducer");
+		const { emptyState } = await import("@/lib/fit/seed");
+		const old = { id: "i1", analyzedAt: "2026-11-20T10:00:00.000Z", beforeDate: "2026-10-01", afterDate: "2026-11-12", beforeWeightKg: null, afterWeightKg: null, model: "m", engineVersion: "v", suitable: true, result: { summary: "s", observations: [], encouragement: "e" } };
+		const kept = { ...old, id: "i2", beforePhotoId: "pA", afterPhotoId: "pB" };
+		const s = reducer(emptyState(), { type: "hydrate", state: { ...emptyState(), photoInsights: [old, kept] as never } });
+		expect(s.photoInsights[0]).toMatchObject({ beforePhotoId: null, afterPhotoId: null });
+		expect(s.photoInsights[1]).toMatchObject({ beforePhotoId: "pA", afterPhotoId: "pB" });
+	});
+});

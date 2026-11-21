@@ -66,7 +66,7 @@ function state(over: Partial<FitState> = {}): FitState {
 }
 
 const insight = (id: string, analyzedAt: string): PhotoInsight => ({
-	id, analyzedAt, beforeDate: "2026-10-01", afterDate: "2026-11-12", beforeWeightKg: 72, afterWeightKg: null, model: "gemini-test", engineVersion: "photo-v1", suitable: true,
+	id, analyzedAt, beforeDate: "2026-10-01", afterDate: "2026-11-12", beforePhotoId: "ph0", afterPhotoId: null, beforeWeightKg: 72, afterWeightKg: null, model: "gemini-test", engineVersion: "photo-v1", suitable: true,
 	result: { summary: "Steadier.", observations: [{ area: "posture", text: "More level." }], encouragement: "Keep going." },
 });
 

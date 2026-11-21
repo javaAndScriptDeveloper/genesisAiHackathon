@@ -214,6 +214,9 @@ export interface PhotoInsight {
 	analyzedAt: string;
 	beforeDate: string;
 	afterDate: string;
+	/** Local photo ids (FitState.photos). Null on old insights; the photo may since have been deleted. */
+	beforePhotoId: string | null;
+	afterPhotoId: string | null;
 	beforeWeightKg: number | null;
 	afterWeightKg: number | null;
 	model: string;

@@ -273,7 +273,7 @@ export function reducer(state: FitState, action: Action): FitState {
 				lastProgressDay: action.state.lastProgressDay ?? toISO(new Date()),
 				archivedWeeks: action.state.archivedWeeks ?? [],
 				archiveQueue: action.state.archiveQueue ?? [],
-				photoInsights: action.state.photoInsights ?? [],
+				photoInsights: (action.state.photoInsights ?? []).map((i) => ({ ...i, beforePhotoId: i.beforePhotoId ?? null, afterPhotoId: i.afterPhotoId ?? null })),
 				photoAiConsentAt: action.state.photoAiConsentAt ?? null,
 			};
 		case "reset":

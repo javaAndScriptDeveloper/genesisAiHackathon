@@ -56,6 +56,8 @@ export interface PhotoInsightDto {
   analyzedAt: string;
   beforeDate: string;
   afterDate: string;
+  beforePhotoId?: string | null;
+  afterPhotoId?: string | null;
   beforeWeightKg: number | null;
   afterWeightKg: number | null;
   model: string;
@@ -154,7 +156,7 @@ export async function getSnapshot(db: Knex, userId: number | null): Promise<Remo
   snapshot.events = events.map((e) => ({ id: e.id, kind: e.kind, refId: e.refId, payload: e.payload, createdAt: e.createdAt.toISOString(), seenAt: iso(e.seenAt) }));
   snapshot.checkIns = checkIns.map((c) => ({ id: c.id, kind: c.kind, date: c.date, takenAt: c.takenAt.toISOString(), weightKg: c.weightKg, goalKg: c.goalKg }));
   snapshot.photoInsights = photoInsights.map((p) => ({
-    id: p.id, analyzedAt: p.analyzedAt.toISOString(), beforeDate: p.beforeDate, afterDate: p.afterDate, beforeWeightKg: p.beforeWeightKg, afterWeightKg: p.afterWeightKg,
+    id: p.id, analyzedAt: p.analyzedAt.toISOString(), beforeDate: p.beforeDate, afterDate: p.afterDate, beforePhotoId: p.beforePhotoId, afterPhotoId: p.afterPhotoId, beforeWeightKg: p.beforeWeightKg, afterWeightKg: p.afterWeightKg,
     model: p.model, engineVersion: p.engineVersion, suitable: p.suitable, result: p.result,
   }));
   return snapshot;
@@ -242,7 +244,7 @@ export async function syncSnapshot(db: Knex, userId: number, body: SyncBody) {
     if (photoInsights.length) {
       await trx("user_progress_photo_insights")
         .insert(photoInsights.map((p) => ({
-          id: p.id, userId, analyzedAt: p.analyzedAt, beforeDate: p.beforeDate, afterDate: p.afterDate, beforeWeightKg: p.beforeWeightKg ?? null, afterWeightKg: p.afterWeightKg ?? null,
+          id: p.id, userId, analyzedAt: p.analyzedAt, beforeDate: p.beforeDate, afterDate: p.afterDate, beforePhotoId: p.beforePhotoId ?? null, afterPhotoId: p.afterPhotoId ?? null, beforeWeightKg: p.beforeWeightKg ?? null, afterWeightKg: p.afterWeightKg ?? null,
           model: p.model, engineVersion: p.engineVersion, suitable: p.suitable, result: JSON.stringify(p.result),
         })))
         .onConflict("id")

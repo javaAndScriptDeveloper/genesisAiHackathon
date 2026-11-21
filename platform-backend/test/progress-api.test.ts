@@ -10,7 +10,7 @@ const A = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
 const B = "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb";
 
 const insight = (id: string, analyzedAt: string) => ({
-  id, analyzedAt, beforeDate: "2026-10-01", afterDate: "2026-11-20", beforeWeightKg: 85.5, afterWeightKg: null, model: "gemini-test", engineVersion: "photo-v1", suitable: true,
+  id, analyzedAt, beforeDate: "2026-10-01", afterDate: "2026-11-20", beforePhotoId: "ph1", afterPhotoId: null, beforeWeightKg: 85.5, afterWeightKg: null, model: "gemini-test", engineVersion: "photo-v1", suitable: true,
   result: { summary: "Looks steadier.", observations: [{ area: "posture", text: "Shoulders are more level." }], encouragement: "Keep going." },
 });
 
@@ -202,6 +202,7 @@ describe("progress API", () => {
 
     it("rejects unknown fields such as dataUrl with 400 and stores nothing", async () => {
       const p = body().photoInsights[0];
+      expect((await call("POST", "/api/progress/sync", A, { photoInsights: [{ ...p, beforePhotoId: "x".repeat(101) }] })).statusCode).toBe(400);
       expect((await call("POST", "/api/progress/sync", A, { photoInsights: [{ ...p, dataUrl: "data:image/png;base64,AAAA" }] })).statusCode).toBe(400);
       expect((await call("POST", "/api/progress/sync", A, { photoInsights: [{ ...p, result: { ...p.result, dataUrl: "x" } }] })).statusCode).toBe(400);
       expect((await call("POST", "/api/progress/sync", A, { photoInsights: [{ ...p, result: { ...p.result, observations: Array(5).fill({ area: "a", text: "t" }) } }] })).statusCode).toBe(400);
