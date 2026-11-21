@@ -552,7 +552,11 @@
         "goalNone": "Set a goal weight in Check-ins to track the distance.",
         "goalReached": "You are at your goal weight.",
         "errorRange": "Enter a weight between {min} and {max} {unit}."
-      }
+      },
+      "overview": "Overview",
+      "history": "History",
+      "awards": "Awards",
+      "checkins": "Check-ins"
     },
     "awards": {
       "level": "Level",

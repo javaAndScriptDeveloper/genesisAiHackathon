@@ -4,6 +4,9 @@ import { Analytics01Icon, ArrowRight01Icon, Calendar03Icon } from "@hugeicons/co
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useMemo } from "react";
+import { Awards } from "@/components/features/Awards/Awards";
+import { CheckIns } from "@/components/features/CheckIns/CheckIns";
+import { History } from "@/components/features/History/History";
 import { fmtShort } from "@/components/features/ProgressCalendar/format";
 import { ProgressHighlights } from "@/components/features/ProgressHighlights/ProgressHighlights";
 import { ProgressLevelBar } from "@/components/features/ProgressLevelBar/ProgressLevelBar";
@@ -12,31 +15,51 @@ import { ProgressScoreCards } from "@/components/features/ProgressScoreCards/Pro
 import { ProgressWeekGoal } from "@/components/features/ProgressWeekGoal/ProgressWeekGoal";
 import { ScreenHeader } from "@/components/features/ScreenHeader/ScreenHeader";
 import { WeekBars } from "@/components/features/WeekBars/WeekBars";
-import { Icon, IconButton, Skeleton, useToast } from "@/components/ui";
+import { Icon, IconButton, SegmentedControl, Skeleton, useToast } from "@/components/ui";
 import { kcalFor } from "@/lib/fit/calories";
 import { addDays, mondayOf, weekdayIndex } from "@/lib/fit/dates";
 import { shareText } from "@/lib/fit/share";
 import { nextUpcoming } from "@/lib/fit/plan";
 import { useFit } from "@/lib/fit/store/FitProvider";
 import { useProgress, useProgressAnalytics, useStartWorkout, useUnits } from "@/lib/fit/store/hooks";
+import { useTabMemory } from "@/lib/fit/store/useTabMemory";
 import { useI18n } from "@/lib/i18n/I18nProvider";
 import { nextBadges, recentBadges } from "@/lib/progress/badges";
 import { mainAction, newRecords, unseenReportWeek, weekDayStates } from "@/lib/progress/mainScreen";
 import { weeklyReportV2 } from "@/lib/progress/report";
 import styles from "./Progress.module.scss";
 
-/** Main Progress screen: weekly goal, consistency and streak, level and achievements, highlights, then every sub-screen. */
+type Tab = "overview" | "history" | "awards" | "checkins";
+
+/** Progress screen: the team's four tabs; Overview holds the weekly goal, consistency and streak, level and achievements, highlights and sub-screen links. */
 export function Progress() {
 	const { t } = useI18n();
 	const router = useRouter();
 	const { ready } = useFit();
+	const [tab, setTab] = useTabMemory<Tab>("progress.tab", "overview");
 	return (
 		<div className={styles.root}>
 			<ScreenHeader
 				title={t("fit.progress.title")}
 				actions={<IconButton icon={Calendar03Icon} label={t("fit.progress.calendar.screenTitle")} onClick={() => router.push("/progress/calendar", { transitionTypes: ["nav-forward"] })} />}
 			/>
-			<div className={styles.content}>{ready ? <Overview /> : <OverviewSkeleton />}</div>
+			<div className={styles.content}>
+				<SegmentedControl
+					label={t("fit.progress.title")}
+					value={tab}
+					onChange={setTab}
+					options={[
+						{ id: "overview", label: t("fit.progress.overview") },
+						{ id: "history", label: t("fit.progress.history") },
+						{ id: "awards", label: t("fit.progress.awards") },
+						{ id: "checkins", label: t("fit.progress.checkins") },
+					]}
+				/>
+				{tab === "overview" && (ready ? <Overview /> : <OverviewSkeleton />)}
+				{tab === "history" && <History />}
+				{tab === "awards" && <Awards />}
+				{tab === "checkins" && <CheckIns />}
+			</div>
 		</div>
 	);
 }
@@ -90,8 +113,6 @@ function Overview() {
 			hint: t("fit.progress.main.nav.achievementsHint", { n: nf.format(unlocked), total: nf.format(p.badges.length) }),
 			mark: p.unseen.byKind.badge > 0 ? t("fit.progress.main.nav.newCount", { n: nf.format(p.unseen.byKind.badge) }) : undefined,
 		},
-		{ id: "history", href: "/progress/history", hint: t("fit.progress.main.nav.historyHint") },
-		{ id: "checkins", href: "/progress/checkins", hint: t("fit.progress.main.nav.checkinsHint") },
 	];
 
 	return (
