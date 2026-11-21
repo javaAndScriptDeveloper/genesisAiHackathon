@@ -654,7 +654,7 @@
       "logWeight": "Log your weight",
       "weightSaved": "Weight saved",
       "photos": "Photo check-ins",
-      "photosNote": "Photos are stored only in this browser and never uploaded.",
+      "photosNote": "Photos are stored only in this browser. If you ask for an AI analysis, the two photos you pick are sent once and not saved.",
       "addPhoto": "Add photo",
       "photoAdded": "Photo added",
       "photoError": "Couldn't read that photo",
