@@ -391,143 +391,120 @@ it("emptyHistory без сесій", () => expect(emptyHistory().sessions).toEqu
 
 ---
 
-### Task 7: API-контракт, мок-обробники, маршрути
+## Revision 2 (2026-11-21): інтеграція в застосунок з main
+
+Після rebase на `origin/main` у репозиторії з'явився повний застосунок (Дмитро): `app/(app)/*`, стан у `lib/fit` (`FitState`, `useFit()`, localStorage, демо-історія з `lib/fit/seed.ts`), екран `components/features/Progress` з власними регулярністю, серією, XP/рівнем, досягненнями, календарем, вагою, фото; графіки `components/features/Charts` (`LineChart`, `BarChart`); i18n: англійська — джерело в `messages/parts/*.json` → `node scripts/build-messages.mjs` → `messages/en.json` (`en.json` не редагувати вручну), `uk.json` відкатується на англійську. Правила застосунку — `frontend/docs/agent/fitness-app.md`.
+
+Користувач обрав **вбудувати наш модуль в екран Дмитра**. Старі Tasks 7–11 (мок-API, власний `/progress`, власний LineChart) скасовано.
+
+**Рішення (ruling):**
+- Серія, регулярність, XP/рівень, досягнення лишаються Дмитрові (єдине джерело — `useFitStats()`; правило «серія = поспіль виконані планові тренування» записане в `fitness-app.md`). Наші `streakWeeks`, `xpAndLevel`, `achievements`, `consistencyScore` у UI не використовуються.
+- Наш внесок у UI: підказки «що покращилось / що далі», зміна регулярності за тиждень, тижневий звіт, прогрес сили по вправі. Дані — зі справжнього `FitState` через адаптер.
+- Тексти — англійською в `messages/parts/progress.json` (ключі `fit.progress.*`), потім `node scripts/build-messages.mjs`. `uk.json` не чіпати.
+- `lib/api/mock/progressDb.ts` (Task 6) лишається як тестовий фікстур, у застосунку не використовується.
+
+### Task 7: Адаптер FitState → History і хук
 
 **Files:**
-- Create: `lib/api/progressTypes.ts`, `lib/api/mock/progressHandlers.ts`
-- Modify: `lib/api/index.ts`, `app/api/mock/[...path]/route.ts`
-- Test: `tests/progress-api.test.ts`
+- Create: `lib/progress/fromFit.ts`, `tests/progress-fromfit.test.ts`
+- Modify: `lib/fit/store/hooks.ts` (додати `useProgressAnalytics`), `lib/progress/index.ts` (НЕ реекспортувати `fromFit`, щоб `lib/progress` не залежав від `lib/fit` через index — імпортувати напряму)
 
 **Interfaces:**
-- Consumes: Tasks 1–6.
-- Produces (zod-схеми і типи `z.infer`, імена саме такі):
-  - `progressSummarySchema` → `ProgressSummary`:
-    `{ today, consistency: {score|null, delta|null, fullWeeks}, week: WeekGoal, streakWeeks, xp: XpLevel, insights: Insight[], records: { recent: PersonalRecord[] (останні 5, нові першими), newThisWeek: number }, totals: { week, month, all: PeriodSummary }, achievements: { unlocked, total, nearest: Achievement[] (3) }, body: BodyMeasurement[], device: DeviceDemo | null, exercises: Exercise[], reports: IsoDate[] (weekStart повних тижнів, нові першими) }`
-  - `progressCalendarSchema` → `{ month: "YYYY-MM", days: { date, status: DayStatus }[] }`
-  - `exerciseProgressSchema` → `{ exercise: Exercise, metric: RecordMetric, series: SeriesPoint[], best: SeriesPoint | null, records: PersonalRecord[], sessions: { date, sets: SetLog[] }[] (нові першими), insight: Insight | null }`
-  - `weeklyReportSchema` → `{ weekStart, summary: PeriodSummary, previous: PeriodSummary, records: PersonalRecord[], insight: Insight | null, nextWeek: WeekGoalDay[] }`
-  - `achievementsResponseSchema` → `{ items: Achievement[] }`
-  - Мок-обробники (приймають `History`, щоб тестувати з порожньою): `progressSummary(h)`, `progressCalendar(h, month)`, `exerciseProgress(h, id)` (`null` якщо вправи нема), `weeklyReport(h, weekStart)` (`null` якщо тиждень не повний або поза історією), `achievementsList(h)`.
-  - `api.progressSummary(debug?)`, `api.progressCalendar(month: string, debug?)`, `api.exerciseProgress(id: string, debug?)`, `api.weeklyReport(weekStart: string, debug?)`, `api.achievements(debug?)`, де `debug?: MockDebug = { delay?: number; fail?: boolean; empty?: boolean }` додається до URL як `?delay=&fail=1&empty=1` (для ручної перевірки станів; у справжньому бекенді ігнорується).
-- Маршрути: `GET /api/mock/progress/summary`, `/progress/calendar?month=YYYY-MM`, `/progress/exercises/:id`, `/progress/reports/weekly/:weekStart`, `/progress/achievements`. Параметр `?empty=1` на будь-якому — дані з `emptyHistory()`. `month` або `weekStart` не за форматом (`/^\d{4}-\d{2}$/`, `/^\d{4}-\d{2}-\d{2}$/`, а weekStart ще й понеділок) → 400 `{ error }`; невідома вправа / звіт → 404 `{ error }`. `totals.month` — з першого дня місяця `today` до `today`. Наявні `?delay`/`?fail` працюють і тут.
-
-- [ ] **Step 1: Тести**
-
-```ts
-it("summary демо проходить схему", () => expect(progressSummarySchema.safeParse(progressSummary(demoHistory())).success).toBe(true));
-it("summary порожньої історії проходить схему, score null", () => {
-	const s = progressSummary(emptyHistory());
-	expect(progressSummarySchema.safeParse(s).success).toBe(true);
-	expect(s.consistency.score).toBeNull();
-});
-it("усі вправи й усі звіти демо проходять схеми", () => { /* цикл по exercises і reports */ });
-it("невідома вправа → null; кривий тиждень → null", () => {
-	expect(exerciseProgress(demoHistory(), "nope")).toBeNull();
-	expect(weeklyReport(demoHistory(), "2026-11-17")).toBeNull(); // вівторок
-});
-it("маршрут: 400 на кривий month, 404 на невідому вправу", async () => {
-	const res = await GET(new Request("http://x/api/mock/progress/calendar?month=2026-13x"), ctx(["progress", "calendar"]));
-	expect(res.status).toBe(400);
-	const res2 = await GET(new Request("http://x/api/mock/progress/exercises/nope"), ctx(["progress", "exercises", "nope"]));
-	expect(res2.status).toBe(404);
-});
-```
-`ctx(path) = { params: Promise.resolve({ path }) }`.
-- [ ] **Step 2–4:** FAIL → реалізувати → PASS. Потім `bun run typecheck` → без помилок.
-- [ ] **Step 5:** commit `feat(progress): mock API endpoints and schemas`.
-
----
-
-### Task 8: Компонент LineChart
-
-**Files:**
-- Create: `components/ui/LineChart/LineChart.tsx`, `components/ui/LineChart/LineChart.module.scss`
-- Modify: `components/ui/index.ts`, `components/sections/UiKitShowcase/UiKitShowcase.tsx`
-- Test: `tests/linechart.test.ts` (для чистої функції масштабування)
-
-**Interfaces:**
+- Consumes: `FitState`, `PlannedWorkout`, `SessionLog` з `lib/fit/types.ts`; `getExercise`/`findExercise` з `lib/fit/exercises.ts`; усе з `lib/progress`.
 - Produces:
 ```ts
-export interface LinePoint { label: string; value: number }
-interface LineChartProps { points: LinePoint[]; unit?: string; ariaLabel: string; height?: number /* rem, default 16 */ }
-export function LineChart(props: LineChartProps): JSX.Element;
-export function scalePoints(values: number[], width: number, height: number, pad: number): { x: number; y: number }[]; // експорт для тесту
+export function historyFromFit(state: Pick<FitState, "planned" | "history" | "bodyWeights">, today: IsoDate): History;
+// lib/fit/store/hooks.ts
+export function useProgressAnalytics(): {
+	history: History;
+	insights: Insight[];                 // insights(history, 2)
+	consistencyDelta: number | null;     // consistencyScore (fit/stats) сьогодні мінус тиждень тому; null якщо немає планових днів у жодному з вікон
+	reportWeeks: IsoDate[];              // понеділки повних тижнів з хоч одним записом плану, нові першими, максимум 8
+};
 ```
-- SVG з `viewBox`, ширина 100 %, лінія `--color-accent`, точки, підпис першого й останнього значення з одиницею, мін/макс осі. `role="img"` + `aria-label`; під графіком візуально прихована таблиця значень для скрінрідерів. 0 точок — нічого не рендерить (батько показує порожній стан); 1 точка — одна точка по центру; усі значення однакові — горизонтальна лінія посередині (без ділення на 0).
+Правила мапінгу:
+- **plan**: діапазон від найранішої до найпізнішої дати серед не-`adHoc` `planned`. Для кожного дня: є не-`adHoc` тренування зі статусом не `skipped`, або `skipped` з `skipReason === "busy"` → `workout`; `skipped` з `recovery`/`unwell` → `rest` (вибачений пропуск, як у Дмитра); інакше → `rest`.
+- **sessions**: кожен `SessionLog` → `WorkoutSession`: `id`; `date`; `planned` = `plannedId` вказує на не-`adHoc` planned; `status: "completed"` (і `completed`, і `partial`); `adapted = adaptations.length > 0`; `durationMin = round(durationSec/60)`; `setsPlanned` = кількість сетів у відповідному `PlannedWorkout.exercises` (якщо нема — кількість залогованих сетів); `sets` = сети з не-`skipped` вправ: для `timed` вправ `{ reps: 0, weightKg: null, durationSec: set.reps }`, інакше `{ reps, weightKg: weight ?? null, durationSec: null }`; `rpe`: easy→easy, right→ok, hard→hard.
+- **exercises**: унікальні `exerciseId` з історії: `timed` → `timed`; є хоч один сет з `weight` → `weighted`; інакше `bodyweight`. `name` = `getExercise(id).name`; невідомий id — пропустити.
+- **body**: `bodyWeights` → `{ date, weightKg: kg }`; **device**: `null`.
+- `consistencyDelta` рахувати функцією Дмитра `consistencyScore(planned, today)` з `lib/fit/stats` (та сама цифра, що в кільці), різниця з `consistencyScore(planned, addDays(today, -7))`.
 
-- [ ] **Step 1: Тести** — `scalePoints([5,5,5], 100, 50, 0)` → усі `y === 25`; `scalePoints([1], 100, 50, 0)` → `[{ x: 50, y: 25 }]`; `scalePoints([0,10], 100, 50, 0)` → `[{x:0,y:50},{x:100,y:0}]`.
-- [ ] **Step 2–4:** FAIL → реалізувати → PASS.
-- [ ] **Step 5:** Додати приклад у `UiKitShowcase` (секція «Дані»), `bun run typecheck`, відкрити `/ui-kit` у `bun run dev`, переглянути.
-- [ ] **Step 6:** commit `feat(ui): LineChart`.
+- [ ] **Step 1: Тести** (`progress-fromfit.test.ts`): фікстура з `seedHistory(profile, "2026-11-19")` (`lib/fit/seed.ts`; профіль — мінімальний валідний `Profile`):
+```ts
+it("seed: план і сесії мапляться, без NaN", () => {
+	const h = historyFromFit(seed, "2026-11-19");
+	expect(h.sessions.length).toBe(seed.history.length);
+	expect(h.plan.length).toBeGreaterThan(0);
+	expect(h.sessions.every((s) => Number.isFinite(s.durationMin) && s.setsPlanned > 0)).toBe(true);
+});
+it("skipped recovery → rest, skipped busy → missed", () => { /* мала ручна FitState */ });
+it("timed вправа → durationSec, вага → weighted", () => { /* мала ручна FitState */ });
+it("порожній стан → порожня історія, insights []", () => {
+	const h = historyFromFit({ planned: [], history: [], bodyWeights: [] }, "2026-11-19");
+	expect(h.plan).toEqual([]); expect(insights(h)).toEqual([]);
+});
+```
+- [ ] **Step 2–4:** RED → реалізувати `historyFromFit` і хук (`useMemo` від `state`, `today` з `useFit()`) → GREEN. `bun run typecheck`.
+- [ ] **Step 5:** commit `feat(progress): adapt app state to progress history`.
 
----
-
-### Task 9: Головний екран `/progress`
-
-**Files:**
-- Create: `app/progress/page.tsx`, `app/progress/loading.tsx`
-- Create: `components/sections/Progress/ProgressOverview/` (клієнтський: `useQuery(["progress","summary"])`, стани), і блоки, кожен у своїй папці з `.module.scss`: `ConsistencyCard`, `WeekGoal`, `StreakLevel`, `InsightsCard`, `RecordsList`, `MonthCalendar`, `PeriodTotals`, `AchievementsPreview`, `BodyWeightCard`, `DeviceDemoCard`, `ReportsList`, `ProgressSkeleton`
-- Create: `components/sections/Progress/format.ts` (`formatInsight(i: Insight): { title: string; next: string }`, `formatRecord(r, exercises)`, `formatDate(d)` — `Intl.DateTimeFormat("uk-UA")`)
-- Modify: `messages/uk.json` (ключі `progress.*`; див. обмеження про коміт)
-
-**Interfaces:**
-- Consumes: `api.progressSummary`, `api.progressCalendar`, типи з Task 7, `tf` з Task 5, `LineChart` з Task 8.
-- Блоки отримують шматок `ProgressSummary` пропсами; тільки `ProgressOverview` і `MonthCalendar` (свій `useQuery(["progress","calendar",month])` з кнопками попередній/наступний місяць, скелетон сітки під час перемикання) звертаються до API.
-
-Поведінка:
-- Порядок блоків як на ескізі спеки 3.1 (A → K).
-- `ConsistencyCard`: число, стрілка і `delta` (не показувати, якщо `null`), підпис зі `streakWeeks`. `score === null` → «Рахуємо після першого повного тижня».
-- `WeekGoal`: 7 кружків пн–нд зі статусами (`completed` суцільний success, `adapted` success з позначкою, `missed` контур без докору, `planned` контур accent, `rest` маленька точка), підпис «2 з 3 тренувань».
-- `InsightsCard`: для кожного інсайту `title` + «Далі: …» з `progress.insights.<id>.title|next`.
-- `RecordsList`: останні рекорди з бейджем «Нове» (дата в поточному тижні), посилання на `/progress/exercises/[id]`.
-- `PeriodTotals`: `Tabs` тиждень / місяць / весь час.
-- `AchievementsPreview`: 3 найближчі з прогрес-баром, «Усі досягнення» → `/progress/achievements`.
-- `BodyWeightCard`: `LineChart` ваги, різниця перша → остання; під графіком неактивний рядок «Фото прогресу — скоро» (місце під функцію, без завантаження).
-- `DeviceDemoCard`: три показники + `Badge tone="warning"` «demo»; блок не рендериться, якщо `device === null`.
-- `ReportsList`: посилання на `/progress/reports/[week]`.
-- Порожня історія (`?empty=1` у мок-API або `consistency.fullWeeks === 0 && totals.all.workouts === 0`): `EmptyState` «Перше тренування відкриє твій прогрес» замість блоків.
-- Помилка: повідомлення + `Button` «Спробувати ще» → `refetch()`.
-- Тексти `progress.*` (приклади, остаточні формулювання на розсуд, без тиску):
-  - `insights.weekday_misses.title`: «П'ятниці даються найважче» (назва дня з `progress.weekdays.<n>`, через `{weekday}`), `.next`: «Перенесемо п'ятничне тренування на інший день?»
-  - `insights.strength_gain.title`: «{exercise}: {from} → {to} за {weeks} тиж.», `.next`: «Спробуй додати ще один підхід»
-  - `insights.too_hard.title`: «Останні тренування були важкими», `.next`: «Наступне зробимо легшим»
-  - `insights.consistency_up.title`: «Регулярність +{delta}», `.next`: «Тримай темп — він працює»
-
-- [ ] **Step 1:** Реалізувати `format.ts` з тестом `tests/progress-format.test.ts`: `formatInsight` для кожного `InsightId` повертає рядки без `{` (усі змінні підставлені) — FAIL → реалізувати → PASS.
-- [ ] **Step 2:** Реалізувати блоки, `ProgressOverview`, `page.tsx` (metadata з `t("progress.title")`), `loading.tsx` з `ProgressSkeleton` (та сама сітка, що й контент).
-- [ ] **Step 3:** `bun run typecheck` і `bun run test` → без помилок.
-- [ ] **Step 4:** `bun run dev`, відкрити `/progress` (порт з виводу `bun run dev`) у ширині 390 px і 1440 px; перевірити `?delay=1500` (скелетон), `?fail=1` (помилка), `?empty=1` (порожній стан) — для цього `page.tsx` читає `searchParams` (`delay`, `fail`, `empty`), складає `MockDebug` і передає пропсом у `ProgressOverview`, а той — у `api.*`. Переконатися: нема обрізаного тексту, нема горизонтального скролу.
-- [ ] **Step 5:** commit без `messages/uk.json` (див. Global Constraints): `feat(progress): overview screen`.
-
----
-
-### Task 10: Екрани вправи, тижневого звіту, досягнень
+### Task 8: Overview — підказки й зміна регулярності
 
 **Files:**
-- Create: `app/progress/exercises/[id]/page.tsx`, `app/progress/reports/[week]/page.tsx`, `app/progress/achievements/page.tsx` (+ `loading.tsx` для кожного)
-- Create: `components/sections/Progress/ExerciseDetail/`, `WeeklyReport/`, `AchievementsList/` (клієнтські, кожен з `useQuery`, скелетоном, помилкою, 404-станом)
-- Modify: `messages/uk.json` (`progress.exercise.*`, `progress.report.*`, `progress.achievements.<id>.title|description`)
+- Modify: `components/features/Progress/Progress.tsx` (+ `.module.scss` за потреби), `messages/parts/progress.json`, згенерований `messages/en.json`
+- Create: `components/features/ProgressInsights/ProgressInsights.tsx` + `.module.scss`, `lib/progress/insightCopy.ts` (+ тест `tests/progress-insightcopy.test.ts`)
 
 **Interfaces:**
-- Consumes: `api.exerciseProgress`, `api.weeklyReport`, `api.achievements`, `LineChart`, `format.ts`.
+- Consumes: `useProgressAnalytics()` (Task 7), `useT()`.
+- Produces: `insightKeys(i: Insight): { title: string; next: string; params: Record<string, string | number> }` — ключі `fit.progress.insights.<id>.title|next`; для `weekday_misses` параметр `weekday` = `WEEKDAYS[n]` з `lib/fit/dates.ts`... (локалізація днів: ключі `fit.progress.weekdays.0..6`, UI підставляє `t(...)`); `<ProgressInsights insights={Insight[]} fallback={string} />`.
 
 Поведінка:
-- `ExerciseDetail`: назва, `LineChart` основного показника (одиниця: кг для `e1rm`/`weight`, «повт.» для `reps`, «с» для `time`), найкраще значення, рекорди, сесії (дата, «3 × 12 × 16 кг» / «3 × 12» / «3 × 45 с»), інсайт. 404 від API → `EmptyState` «Такої вправи немає» з посиланням назад.
-- `WeeklyReport`: підсумок тижня поруч з минулим (стрілки ↑/↓ для тренувань, хвилин, % виконання), рекорди тижня, інсайт, план наступного тижня (7 днів як у `WeekGoal`, перевикористати компонент). 404/400 → `EmptyState`.
-- `AchievementsList`: сітка всіх досягнень — відкриті з іконкою, закриті з прогресом `current / target`.
-- Кнопка «Назад» до `/progress` на кожному екрані (`IconButton` з `label`).
+- Картку «Training insight» замінити на `ProgressInsights`: заголовок «What's working», для кожної підказки — рядок-висновок і рядок «Next: …». Якщо підказок немає — показати існуючий `summary` Дмитра (fallback). Кнопку «Share» зберегти.
+- Біля кільця регулярності — `Badge` зі зміною: `+6 vs last week` (success), `−3 vs last week` (neutral, без докору), `null`/0 — нічого.
+- Англійські тексти (без тиску):
+  - `insights.title`: "What's working"; `next`: "Next: {text}"
+  - `weekday_misses`: title "{weekday} sessions slip most often", next "Move that session to a day that suits you better?"
+  - `strength_gain`: title "{exercise}: {from} → {to} in {weeks} wk", next "Try adding one more set."
+  - `too_hard`: title "Your last sessions felt hard", next "We'll make the next one lighter."
+  - `consistency_up`: title "Consistency up {delta} points", next "Keep this rhythm — it works."
+  - `consistencyDelta`: "{sign}{n} vs last week"
+- [ ] **Step 1:** тест `insightKeys`: для кожного `InsightId` повертає існуючі ключі (перевірити, що `t(key)` з `lib/messages` не повертає сам ключ — тобто ключ є в `en.json`) і всі плейсхолдери покриті `params`. RED → реалізувати + додати тексти в `parts/progress.json` + `node scripts/build-messages.mjs` → GREEN.
+- [ ] **Step 2:** компонент і правки Overview. `bun run typecheck`, `bun run test`.
+- [ ] **Step 3:** dev-сервер уже на `http://localhost:3100`: відкрити `/progress` (демо-історію додає онбординг; якщо треба — пройти онбординг з демо-історією), переконатися, що картка підказок і бейдж видно, тексти не обрізані.
+- [ ] **Step 4:** commit `feat(progress): insights and consistency trend on overview`.
 
-- [ ] **Step 1:** Реалізувати три екрани.
-- [ ] **Step 2:** `bun run typecheck`, `bun run test` → без помилок.
-- [ ] **Step 3:** `bun run dev`: пройти з `/progress` у кожен рекорд, звіт, «Усі досягнення» і назад; відкрити `/progress/exercises/nope` і `/progress/reports/2026-11-17` — бачимо порожній стан, не 500.
-- [ ] **Step 4:** commit `feat(progress): exercise, weekly report and achievements screens`.
+### Task 9: Тижневий звіт
 
----
+**Files:**
+- Create: `app/(app)/progress/week/[week]/page.tsx`, `components/features/WeeklyReport/WeeklyReport.tsx` + `.module.scss`
+- Modify: `components/features/Progress/Progress.tsx` (картка «Weekly reports» в Overview зі списком `reportWeeks`, посилання з `transitionTypes={["nav-forward"]}` як у інших drill-down), `messages/parts/progress.json`, `messages/en.json`
+
+**Interfaces:**
+- Consumes: `useProgressAnalytics()`, `periodSummary`, `personalRecords`, `weeklyGoal`, `insights` з `lib/progress`; `ScreenHeader` (`back`), `Stat`, `Card`, `EmptyState`, `WeekStrip` (для наступного тижня, якщо його API підходить; інакше простий ряд з 7 днів).
+- Сторінка: `PageProps<"/progress/week/[week]">`, валідує `week` (`/^\d{4}-\d{2}-\d{2}$/` і понеділок, і повний тиждень ≤ today); невалідний → `EmptyState` «Report not found» з кнопкою назад на `/progress`.
+
+Вміст звіту: тиждень (дати), `Stat`: тренування (done/planned), хвилини, % виконання плану — кожен зі стрілкою/різницею проти попереднього тижня (`periodSummary` за попередній тиждень); рекорди тижня (`personalRecords` з датою в тижні, назва вправи + значення з одиницею); одна підказка (`insights(history with today = неділя тижня, 1)`); план наступного тижня (`weeklyGoal(history, addDays(week, 7))`). Порожній тиждень (0 тренувань) — короткий нейтральний текст без докору.
+- [ ] **Step 1:** реалізувати; `bun run typecheck`, `bun run test`.
+- [ ] **Step 2:** відкрити `/progress` → картка звітів → звіт → назад; відкрити `/progress/week/2026-11-17` (вівторок) → «Report not found».
+- [ ] **Step 3:** commit `feat(progress): weekly report screen`.
+
+### Task 10: Прогрес сили на екрані вправи
+
+**Files:**
+- Create: `components/features/ExerciseProgress/ExerciseProgress.tsx` + `.module.scss`
+- Modify: `components/features/ExerciseDetail/ExerciseDetail.tsx` (секція після `ExerciseGuide`), `messages/parts/progress.json`, `messages/en.json`
+
+**Interfaces:**
+- Consumes: `useProgressAnalytics().history`, `exerciseSeries`, `mainMetric`, `personalRecords`, `exerciseInsight` з `lib/progress`; `LineChart` з `components/features/Charts/Charts`.
+
+Поведінка: заголовок «Your progress»; `LineChart` останніх 8 точок (`label` = `formatMonthDay(date)`, одиниця: `e1rm`/`weight` → " kg", `reps` → " reps", `time` → " s"); «Best: …», останні 3 рекорди цієї вправи; `exerciseInsight` якщо є (той самий `insightKeys`). Менше 2 точок → текст «Log this exercise twice to see your trend.» Секція не залежить від Premium (базовий прогрес; розширена аналітика Дмитра лишається за `PremiumGate`).
+- [ ] **Step 1:** реалізувати; `bun run typecheck`, `bun run test`.
+- [ ] **Step 2:** відкрити `/training/exercise/<id вправи з демо-історії>` — графік і рекорди; вправа без історії — текст-заглушка.
+- [ ] **Step 3:** commit `feat(progress): strength trend on exercise detail`.
 
 ### Task 11: Фінальна перевірка
 
-- [ ] **Step 1:** `bun run typecheck && bun run test && bun run build` → усе зелене.
-- [ ] **Step 2:** `bun run lint` → без помилок у нових файлах.
-- [ ] **Step 3:** Додати в `docs/agent/architecture.md` рядок про `lib/progress/` (чисті функції розрахунку прогресу; мок-API віддає зведення, бекенд має реалізувати той самий контракт з `lib/api/progressTypes.ts`).
-- [ ] **Step 4:** Пройти перевірку анти-цілей спеки (розділ 2) по текстах і UI: немає тиску, demo позначено, дні відпочинку зараховуються.
-- [ ] **Step 5:** commit `docs: progress module architecture note`.
+- [ ] **Step 1:** `bun run typecheck` (лише відома помилка `lib/color.ts`), `bun run test`, `bun run build`.
+- [ ] **Step 2:** `bun run lint` — без помилок у змінених файлах.
+- [ ] **Step 3:** у `docs/agent/fitness-app.md` додати рядок: `lib/progress/` — чисті функції аналітики прогресу (підказки, тижневий звіт, ряд сили по вправі); `historyFromFit` адаптує `FitState`; серія/XP/досягнення лишаються в `lib/fit`.
+- [ ] **Step 4:** перевірити анти-цілі спеки по нових текстах.
+- [ ] **Step 5:** commit `docs: progress analytics in fitness app`.
