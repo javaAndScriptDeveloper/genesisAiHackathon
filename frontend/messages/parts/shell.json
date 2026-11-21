@@ -24,7 +24,8 @@
       "kg": "kg",
       "reps": "reps",
       "sets": "sets",
-      "premium": "Premium"
+      "premium": "Premium",
+      "demo": "Demo"
     },
     "shell": {
       "resume": "Workout in progress"
@@ -34,7 +35,9 @@
       "titleMany": "{n} achievements unlocked",
       "total": "+{n} XP",
       "nice": "Nice!",
-      "shareText": "I just unlocked \"{title}\" in Personal Coach: {description}"
+      "shareText": "I just unlocked \"{title}\" in Personal Coach: {description}",
+      "level": "Level {level}: {name}",
+      "levelBody": "{xp} XP earned so far. Keep the rhythm."
     }
   }
 }

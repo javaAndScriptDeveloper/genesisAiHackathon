@@ -55,6 +55,7 @@ export function Coach() {
 		weekPlanned: stats.week.planned,
 		consistency: stats.consistency,
 		xp: stats.xp,
+		level: stats.level.level,
 		sessions: state.history.length,
 		lastPr: [...state.history].reverse().find((l) => l.prs.length)?.prs[0] ?? null,
 		premium: state.subscription.tier === "premium",

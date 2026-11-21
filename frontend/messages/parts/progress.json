@@ -10,7 +10,7 @@
       "headFresh": "A fresh week, start with your next session",
       "tipConsistent": "Consistency is your superpower. Keep protecting your rest days.",
       "tipVolumeDown": "Volume dipped compared with last week. Normal after a lighter week, so build back gradually.",
-      "tipStreak": "{n} planned sessions in a row. Rest days never break it.",
+      "tipStreak": "{n} weeks in a row at your weekly goal. Rest days never break it.",
       "tipDefault": "Small, steady sessions beat rare heroic ones. Aim for your next planned day."
     },
     "progress": {
@@ -41,16 +41,16 @@
       "time": "Training time",
       "volume": "Volume",
       "streakLabel": "Streak",
-      "longest": "longest {n}",
+      "longest": "best {n} wk",
       "consistency": "Consistency",
-      "consistencyBody": "Planned sessions completed over the last 4 weeks. Recovery skips don't count against you.",
+      "consistencyBody": "Your last 4 finished weeks, recent ones weigh more. Paused weeks are skipped.",
       "insight": "Training insight",
       "summaryNone": "Finish your first workout and your personal summary shows up here.",
       "summary": "You've done {done} of {planned} planned sessions this week with {score}% consistency over four weeks. Your training volume is {trend} compared with last week.",
       "trendUp": "up or steady",
       "trendDown": "lower",
       "shareTitle": "My progress",
-      "shareText": "This week: {done}/{planned} sessions, {streak}-session streak, level {level} in Personal Coach.",
+      "shareText": "This week: {done}/{planned} sessions, {streak}-week streak, level {level} in Personal Coach.",
       "shareAwards": "Level {level}, {xp} XP and {badges} badges in Personal Coach.",
       "shared": "Shared",
       "shareAchievements": "Share my achievements",
@@ -300,6 +300,61 @@
         "record": "{exercise}: {before} to {now}, up {delta}",
         "consistency": "Consistency up {delta} points, from {before} to {now}",
         "streak": "Streak grew from {before} to {now} weeks"
+      },
+      "badge": {
+        "first-workout": {
+          "title": "First workout",
+          "desc": "Finish your first quality workout."
+        },
+        "perfect-week": {
+          "title": "Perfect week",
+          "desc": "Complete every planned workout in a week."
+        },
+        "streak-2": {
+          "title": "Two weeks strong",
+          "desc": "Reach your weekly goal 2 weeks in a row."
+        },
+        "streak-4": {
+          "title": "Four-week streak",
+          "desc": "Reach your weekly goal 4 weeks in a row."
+        },
+        "streak-6": {
+          "title": "Six-week streak",
+          "desc": "Reach your weekly goal 6 weeks in a row."
+        },
+        "streak-10": {
+          "title": "Ten-week streak",
+          "desc": "Reach your weekly goal 10 weeks in a row."
+        },
+        "streak-20": {
+          "title": "Twenty-week streak",
+          "desc": "Reach your weekly goal 20 weeks in a row."
+        },
+        "first-pr": {
+          "title": "First record",
+          "desc": "Beat one of your own bests."
+        },
+        "prs-5": {
+          "title": "Record breaker",
+          "desc": "Set 5 personal records."
+        },
+        "workouts-20": {
+          "title": "20 workouts",
+          "desc": "Complete 20 quality workouts."
+        },
+        "workouts-50": {
+          "title": "50 workouts",
+          "desc": "Complete 50 quality workouts."
+        },
+        "workouts-100": {
+          "title": "100 workouts",
+          "desc": "Complete 100 quality workouts."
+        }
+      },
+      "notify": {
+        "badgeTitle": "Unlocked: {title}",
+        "levelTitle": "Level {level} reached",
+        "levelBody": "Your training keeps adding up. See your progress."
       }
     },
     "awards": {
@@ -310,7 +365,7 @@
       "overall": "Overall",
       "workouts": "Workouts",
       "minutes": "Minutes",
-      "bestStreak": "Best streak",
+      "bestStreak": "Best streak, weeks",
       "collection": "Collection",
       "collected": "{n} of {total} collected",
       "aheadOf": "Ahead of {percent} of users",
@@ -339,7 +394,10 @@
         "7": "Champion",
         "8": "Legend"
       },
-      "badges": "Badges"
+      "badges": "Badges",
+      "earned": "Earned",
+      "progress": "Progress",
+      "progressOf": "{n} of {total}"
     },
     "history": {
       "totals": "Totals",

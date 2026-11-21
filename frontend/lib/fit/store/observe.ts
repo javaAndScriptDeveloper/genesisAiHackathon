@@ -27,8 +27,9 @@ export function observeTransition(prev: FitState, next: FitState): void {
 		track("workout_completed", { status: log.status, durationSec: log.durationSec, volumeKg: log.volumeKg, prs: log.prs.length, quality });
 		if (log.status === "partial" && !prev.active.safetyStop) track("workout_abandoned", { setsDone, reason: "ended-early" });
 	}
-	if (prev.profile) {
-		for (const id of Object.keys(next.unlocked)) if (!(id in prev.unlocked)) track("achievement_unlocked", { id });
+	if (prev.profile && next.progressEvents !== prev.progressEvents) {
+		const had = new Set(prev.progressEvents.map((e) => e.id));
+		for (const e of next.progressEvents) if (e.kind === "badge" && !had.has(e.id)) track("achievement_unlocked", { id: e.refId });
 	}
 	if (next.coach.filter((m) => m.from === "user").length > prev.coach.filter((m) => m.from === "user").length) track("coach_used", { intent: "message", voice: false });
 	if (prev.subscription.tier === "free" && next.subscription.tier === "premium") track("subscription_started", { plan: "premium-trial", demo: true });

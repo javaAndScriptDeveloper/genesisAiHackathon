@@ -1,9 +1,9 @@
 import { findExercise } from "../fit/exercises";
 import type { FitState, Perceived, PlannedWorkout } from "../fit/types";
-import { consistencyScore } from "../fit/stats";
+import { consistencyV2 } from "./consistency";
 import { addDays, eachDay, weekStart } from "./dates";
 import { insights, type Insight } from "./insights";
-import type { CheckIn, Exercise, History, IsoDate, PlannedDay, Rpe, SetLog, WorkoutSession } from "./types";
+import type { CheckIn, Exercise, History, IsoDate, PlannedDay, ProgressContext, Rpe, SetLog, WorkoutSession } from "./types";
 
 const RPE: Record<Perceived, Rpe> = { easy: "easy", right: "ok", hard: "hard" };
 
@@ -75,9 +75,12 @@ export function historyFromFit(state: Pick<FitState, "planned" | "history" | "bo
 		const plannedSets = regular ? regular.exercises.reduce((n, b) => n + b.sets.length, 0) : 0;
 		// lib/fit credits the planned workout (even when done on another day); a partial/completed one counts as quality.
 		const credited = regular !== undefined && (regular.status === "partial" || regular.status === "completed");
+		// A workout started early (planned for a later day) counts on the day it was done until its planned day arrives,
+		// so it earns its XP right away instead of sitting in the future.
+		const date = regular ? (regular.date > today ? log.date : regular.date) : log.date;
 		return {
 			id: log.id,
-			date: regular ? regular.date : log.date,
+			date,
 			planned: regular !== undefined,
 			status: "completed",
 			adapted: log.adaptations.length > 0,
@@ -101,12 +104,6 @@ export function historyFromFit(state: Pick<FitState, "planned" | "history" | "bo
 	};
 }
 
-/** Whether the 4-week consistency window ending on `day` (same window as fit/stats) has regular planned sessions. */
-export function hasPlanWindow(planned: PlannedWorkout[], day: IsoDate): boolean {
-	const start = addDays(weekStart(day), -21);
-	return planned.some((w) => !w.adHoc && w.date >= start && w.date <= day);
-}
-
 /** Mondays of full weeks that have a plan entry, newest first, at most 8. */
 export function reportWeeksOf(history: History): IsoDate[] {
 	const current = weekStart(history.today);
@@ -120,7 +117,7 @@ export function reportWeeksOf(history: History): IsoDate[] {
 
 /**
  * Insights for the app screen. The "consistency up" hint uses the same delta as the consistency badge
- * (the app's own score), so the two can never contradict each other.
+ * (consistencyV2), so the two can never contradict each other.
  */
 export function appInsights(h: History, consistencyDelta: number | null, limit = 2): Insight[] {
 	const list = insights(h, 4).filter((i) => i.id !== "consistency_up");
@@ -128,10 +125,12 @@ export function appInsights(h: History, consistencyDelta: number | null, limit =
 	return list.slice(0, limit);
 }
 
-/** Change in the app's consistency score over the last 7 days; the week-ago score only sees workouts up to that day. */
-export function consistencyDeltaOf(planned: PlannedWorkout[], today: IsoDate): number | null {
-	const weekAgo = addDays(today, -7);
-	const past = planned.filter((w) => w.date <= weekAgo);
-	if (!hasPlanWindow(planned, today) && !hasPlanWindow(past, weekAgo)) return null;
-	return consistencyScore(planned, today) - consistencyScore(past, weekAgo);
+/**
+ * Change of the consistency score (consistencyV2, the number on the ring) against the score a week ago.
+ * The score only moves when a week finishes, so this is "since last week". Null while either side has no score.
+ */
+export function consistencyDeltaOf(h: History, ctx: ProgressContext): number | null {
+	const now = consistencyV2(h, ctx).score;
+	const before = consistencyV2({ ...h, today: addDays(h.today, -7) }, ctx).score;
+	return now === null || before === null ? null : now - before;
 }

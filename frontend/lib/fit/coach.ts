@@ -1,5 +1,4 @@
 import { getExercise } from "./exercises";
-import { levelInfo } from "./stats";
 import type { CoachAction, Equipment, Limitation, PlannedWorkout, Profile } from "./types";
 
 export interface CoachContext {
@@ -8,11 +7,13 @@ export interface CoachContext {
 	next: PlannedWorkout | undefined;
 	todayDone: boolean;
 	inSession: boolean;
+	/** Streak in weeks: weeks in a row where the weekly goal was met (lib/progress). */
 	streak: number;
 	weekDone: number;
 	weekPlanned: number;
 	consistency: number;
 	xp: number;
+	level: number;
 	sessions: number;
 	lastPr: string | null;
 	premium: boolean;
@@ -124,16 +125,15 @@ export function coachReply(input: string, ctx: CoachContext): CoachReply {
 
 	if (/exhaust|tired|fatigue|drained|no energy|burn(ed|t) out|worn out|sore|sleep/.test(text)) {
 		const actions: CoachAction[] = [{ id: "tired", label: `Lighter version of ${where}`, type: "adapt", op: { kind: "tired" } }];
-		if (!ctx.inSession && ctx.next && !ctx.todayDone) actions.push({ id: "recover", label: "Take a recovery day (keeps your streak)", type: "recovery-day" });
-		return { text: "Listening to your body is part of training. You can do a lighter session, or take a full recovery day. A recovery skip won't break your streak.", actions };
+		if (!ctx.inSession && ctx.next && !ctx.todayDone) actions.push({ id: "recover", label: "Take a recovery day", type: "recovery-day" });
+		return { text: "Listening to your body is part of training. You can do a lighter session, or take a full recovery day. Your streak counts weeks at your weekly goal, so one recovery day rarely costs it.", actions };
 	}
 
 	if (/progress|how am i|how('?s| is) it going|doing|stats|streak|level/.test(text)) {
-		const lvl = levelInfo(ctx.xp);
 		const parts = [
-			`You're level ${lvl.level} with ${ctx.xp.toLocaleString("en-US")} XP and ${ctx.sessions} workouts logged.`,
-			`This week: ${ctx.weekDone} of ${ctx.weekPlanned} planned sessions done. Consistency over the last 4 weeks is ${ctx.consistency}%.`,
-			ctx.streak > 0 ? `Your streak is ${ctx.streak} planned session${ctx.streak === 1 ? "" : "s"} in a row, and rest days never break it.` : "Your streak restarts with your next planned session.",
+			`You're level ${ctx.level} with ${ctx.xp.toLocaleString("en-US")} XP and ${ctx.sessions} workouts logged.`,
+			`This week: ${ctx.weekDone} of ${ctx.weekPlanned} planned sessions done. Consistency over your last 4 finished weeks is ${ctx.consistency}%.`,
+			ctx.streak > 0 ? `Your streak is ${ctx.streak} week${ctx.streak === 1 ? "" : "s"} in a row at your weekly goal. A paused week never breaks it.` : "Your streak starts with the next week you reach your weekly goal.",
 			ctx.lastPr ? `Latest personal record: ${ctx.lastPr}.` : "",
 		];
 		return { text: parts.filter(Boolean).join(" "), actions: [go("see-progress", "Open Progress", "/progress")] };
@@ -151,7 +151,7 @@ export function coachReply(input: string, ctx: CoachContext): CoachReply {
 
 	if (/\brest\b|recover|day off|skip/.test(text)) {
 		return {
-			text: "Taking a recovery day is a smart move when you need it. It counts as neutral for your streak, and I'll keep your plan on track.",
+			text: "Taking a recovery day is a smart move when you need it. Your streak counts weeks at your weekly goal, and you can pause it for illness or holidays. I'll keep your plan on track.",
 			actions: ctx.next && !ctx.inSession ? [{ id: "recover", label: "Take a recovery day", type: "recovery-day" }] : [],
 		};
 	}

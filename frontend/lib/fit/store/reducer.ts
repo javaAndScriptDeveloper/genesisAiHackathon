@@ -3,13 +3,17 @@ import { MAX_PAUSE_DAYS } from "../../progress/consistency";
 import type { Units } from "../units";
 import { findExercise, getExercise } from "../exercises";
 import { applyAdapt, replaceBlock, replaceUnavailable } from "../adapt";
-import { evaluateAchievements, achievementById, totalXp } from "../gamification";
 import { ACCEPT_DELAY_MS, MAX_CHAT_MESSAGES } from "../community";
 import { deriveNotifications } from "../notifications";
 import { buildAdHocWorkout, estimateMinutes, generatePlan, nextUpcoming } from "../plan";
 import { defaultWeeklyGoal, emptyState, newProgressToken, seedHistory, WATER_MAX_ML } from "../seed";
 import type { ArchiveItem, ProgressEvent } from "../../progress/types";
-import { applyProgression, detectPrs, mean, sessionXp, volumeOf, weekStats } from "../stats";
+import { applyProgression, detectPrs, mean, volumeOf } from "../stats";
+import { detectEvents, reportReadyEvent } from "../../progress/events";
+import { historyFromFit } from "../../progress/fromFit";
+import { xpForSession } from "../../progress/xp";
+import { t } from "../../messages";
+import { progressCtx, progressOf } from "./progressStats";
 import type {
 	ActiveSession,
 	AdaptOp,
@@ -148,6 +152,14 @@ function advanceAfterRest(a: ActiveSession): ActiveSession {
 	return { ...a, phase: "work", restLeft: 0, index: stay ? a.index : Math.max(0, nextIndexAfter(a.exercises, a.index)) };
 }
 
+/** State with a finished session applied: log appended, its planned workout closed, progression pushed forward. */
+function withLog(state: FitState, a: ActiveSession, log: SessionLog, today: ISODate): FitState {
+	let planned = state.planned;
+	if (a.plannedId) planned = planned.map((w) => (w.id === a.plannedId ? { ...w, status: log.status, logId: log.id, exercises: a.exercises } : w));
+	planned = applyProgression(planned, log, today);
+	return { ...state, history: [...state.history, log], planned };
+}
+
 export function previewLog(state: FitState, a: ActiveSession, today: ISODate): SessionLog {
 	const exercises = a.exercises.map((b) => ({
 		exerciseId: b.exerciseId,
@@ -156,9 +168,7 @@ export function previewLog(state: FitState, a: ActiveSession, today: ISODate): S
 	}));
 	const status = allDone(a.exercises) ? "completed" : "partial";
 	const prs = detectPrs(state.history, exercises);
-	const planned = a.plannedId ? state.planned.find((w) => w.id === a.plannedId) : undefined;
-	const extra = !!planned?.adHoc && weekStats(state.planned, state.history, today).remaining === 0;
-	return {
+	const log: SessionLog = {
 		id: `l-${a.id}`,
 		plannedId: a.plannedId,
 		date: today,
@@ -171,9 +181,12 @@ export function previewLog(state: FitState, a: ActiveSession, today: ISODate): S
 		adaptations: a.adaptations,
 		avgHr: a.hrSamples.length ? Math.round(mean(a.hrSamples)) : undefined,
 		hrDemo: a.hrSamples.length ? true : undefined,
-		xp: sessionXp({ status, durationSec: a.elapsedSec, prs: prs.length, adHocExtra: !!planned?.adHoc && extra }),
+		xp: 0,
 		prs,
 	};
+	// XP is the engine's (lib/progress): what this session adds once it is in the history.
+	const after = historyFromFit(withLog(state, a, log, today), today);
+	return { ...log, xp: xpForSession(after, progressCtx(state), log.id).total };
 }
 
 function adaptTarget(state: FitState, op: AdaptOp, today: ISODate): { state: FitState; message: string; changed: boolean } {
@@ -204,16 +217,21 @@ function rebuildUpcoming(state: FitState, profile: Profile, today: ISODate): Fit
 	return { ...state, profile, planned: [...kept, ...upcoming].sort((a, b) => a.date.localeCompare(b.date)) };
 }
 
-function unlockNew(state: FitState, today: ISODate, now: string): FitState {
-	const ids = evaluateAchievements(state, today);
-	if (ids.length === 0) return state;
-	const unlocked = { ...state.unlocked, ...Object.fromEntries(ids.map((id) => [id, today])) };
-	const notes: AppNotification[] = ids.flatMap((id) => {
-		const def = achievementById(id);
-		if (!def || !state.notificationSettings.enabled.achievement) return [];
-		return [{ id: `n-ach-${id}`, kind: "achievement" as NotificationKind, title: `Unlocked: ${def.title}`, body: `${def.description} +${def.xp} XP`, createdAt: now, read: false, href: "/progress" }];
+/**
+ * New badges, level-ups and records between two states, recorded as progress events in the same step
+ * (the engine is the only judge; legacy `state.unlocked` / `state.celebrate` are no longer written).
+ */
+function recordProgress(before: FitState, after: FitState, today: ISODate, now: string): FitState {
+	const events = detectEvents(progressOf(before, today), progressOf(after, today), now);
+	if (events.length === 0) return after;
+	const next = reducer(after, { type: "record-events", events });
+	if (!after.notificationSettings.enabled.achievement) return next;
+	const notes = events.flatMap((e): AppNotification[] => {
+		if (e.kind === "badge") return [{ id: `n-badge-${e.refId}`, kind: "achievement", title: t("fit.progress.notify.badgeTitle", { title: t(`fit.progress.badge.${e.refId}.title`) }), body: t(`fit.progress.badge.${e.refId}.desc`), createdAt: now, read: false, href: "/progress" }];
+		if (e.kind === "level") return [{ id: `n-level-${e.refId}`, kind: "achievement", title: t("fit.progress.notify.levelTitle", { level: e.refId }), body: t("fit.progress.notify.levelBody"), createdAt: now, read: false, href: "/progress" }];
+		return [];
 	});
-	return appendNotifications({ ...state, unlocked, celebrate: [...state.celebrate, ...ids] }, notes);
+	return appendNotifications(next, notes);
 }
 
 function finishSession(state: FitState, today: ISODate, now: string): FitState {
@@ -221,12 +239,8 @@ function finishSession(state: FitState, today: ISODate, now: string): FitState {
 	if (!a || a.phase !== "summary") return state;
 	if (a.outcome === "empty") return { ...state, active: null };
 	const log = previewLog(state, a, today);
-	const history = [...state.history, log];
-	let planned = state.planned;
-	if (a.plannedId) planned = planned.map((w) => (w.id === a.plannedId ? { ...w, status: log.status, logId: log.id, exercises: a.exercises } : w));
-	planned = applyProgression(planned, log, today);
-	let next: FitState = { ...state, history, planned, active: null };
-	next = unlockNew(next, today, now);
+	let next: FitState = { ...withLog(state, a, log, today), active: null };
+	next = recordProgress(state, next, today, now);
 	return appendNotifications(next, deriveNotifications(next, new Date(now)));
 }
 
@@ -281,8 +295,13 @@ export function reducer(state: FitState, action: Action): FitState {
 			return state.profile ? reducer(state, { type: "update-profile", profile: { ...state.profile, goal: action.goal, goalText: action.goalText }, units: state.units, today: action.today }) : state;
 		case "set-trainer":
 			return { ...state, trainerId: action.trainerId };
-		case "sync":
-			return state.profile ? appendNotifications(state, deriveNotifications(state, new Date(action.now))) : state;
+		case "sync": {
+			if (!state.profile) return state;
+			const s = appendNotifications(state, deriveNotifications(state, new Date(action.now)));
+			// From Monday on, last week's report is "new" until opened. Ids are per week, so this never duplicates.
+			const report = reportReadyEvent(historyFromFit(state, toISO(new Date(action.now))), progressCtx(state), action.now);
+			return report ? reducer(s, { type: "record-events", events: [report] }) : s;
+		}
 		case "start-workout": {
 			const w = state.planned.find((p) => p.id === action.plannedId);
 			if (!w) return state;
@@ -390,7 +409,7 @@ export function reducer(state: FitState, action: Action): FitState {
 		case "discard-active":
 			return { ...state, active: null };
 		case "skip-planned":
-			return unlockNew(patchPlanned(state, action.id, (w) => ({ ...w, status: "skipped", skipReason: action.reason })), toISO(new Date()), new Date().toISOString());
+			return patchPlanned(state, action.id, (w) => ({ ...w, status: "skipped", skipReason: action.reason }));
 		case "move-planned": {
 			const clash = state.planned.some((w) => w.date === action.date && w.id !== action.id && !w.adHoc);
 			if (clash) return state;
@@ -434,7 +453,7 @@ export function reducer(state: FitState, action: Action): FitState {
 				next = rebuildUpcoming(state, state.profile, action.today);
 			}
 			const coach = next.coach.map((m) => (m.id === action.messageId ? { ...m, appliedAction: a.id } : m));
-			return unlockNew({ ...next, coach: [...coach, action.reply].slice(-80) }, action.today, action.now);
+			return { ...next, coach: [...coach, action.reply].slice(-80) };
 		}
 		case "notification-read":
 			return { ...state, notifications: state.notifications.map((n) => (n.id === action.id ? { ...n, read: true } : n)) };
@@ -444,8 +463,7 @@ export function reducer(state: FitState, action: Action): FitState {
 			return { ...state, notificationSettings: action.settings };
 		case "water": {
 			const current = state.water[action.date] ?? 0;
-			const next = { ...state, water: { ...state.water, [action.date]: Math.max(0, Math.min(Math.max(current, WATER_MAX_ML), current + action.delta)) } };
-			return unlockNew(next, action.date, new Date().toISOString());
+			return { ...state, water: { ...state.water, [action.date]: Math.max(0, Math.min(Math.max(current, WATER_MAX_ML), current + action.delta)) } };
 		}
 		case "water-goal":
 			return { ...state, waterGoalMl: Math.max(1000, Math.min(6000, action.ml)) };
@@ -575,4 +593,4 @@ function applyProfileChange(state: FitState, profile: Profile, today: ISODate): 
 	return { ...state, profile, planned, active };
 }
 
-export { findExercise, totalXp };
+export { findExercise };

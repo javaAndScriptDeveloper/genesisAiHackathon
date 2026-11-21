@@ -141,7 +141,7 @@ export function Today() {
 				<WeekStrip planned={state.planned} today={today} />
 
 				<div className={styles.stats}>
-					<Stat label={t("fit.today.streak")} value={stats.streak.current} hint={t("fit.today.streakHint")} icon={<Icon icon={FireIcon} size={14} />} />
+					<Stat label={t("fit.today.streak")} value={stats.streak.current} hint={t(stats.streak.current === 1 ? "fit.today.streakHintOne" : "fit.today.streakHint")} icon={<Icon icon={FireIcon} size={14} />} />
 					<Stat label={t("fit.today.level")} value={stats.level.level} hint={`${stats.level.into}/${stats.level.span} XP`} icon={<Icon icon={Medal01Icon} size={14} />} />
 				</div>
 				<ProgressBar value={stats.level.pct} label={t("fit.today.xpProgress")} />

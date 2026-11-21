@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { addDays, mondayOf } from "@/lib/fit/dates";
 import { SCENARIO_IDS, scenarioState, type ScenarioId } from "@/lib/fit/scenarios";
 import type { FitState } from "@/lib/fit/types";
-import { badges, consistencyV2, isPausedWeek, levelFor, personalRecords, streakV2, xpLedger } from "@/lib/progress";
+import { badges, celebrationGroup, consistencyV2, isPausedWeek, levelFor, personalRecords, progressSnapshot, streakV2, unseen, visibleHistoryFrom, xpLedger } from "@/lib/progress";
 import { historyFromFit } from "@/lib/progress/fromFit";
 import { weekStart } from "@/lib/progress/dates";
 
@@ -99,6 +99,24 @@ describe("progress scenarios", () => {
 		expect(pro.subscription.tier).toBe("premium");
 		expect({ ...free, subscription: pro.subscription }).toEqual(pro);
 		expect({ ...free, subscription: pro.subscription, progressToken: "" }).toEqual({ ...scenarioState("S2", today), subscription: pro.subscription, progressToken: "" });
+	});
+
+	describe("R16: checks that need events, advice and premium", () => {
+		it("S0: advice is the start hint", () => {
+			const a = analyse(scenarioState("S0", today));
+			expect(progressSnapshot(a.h, a.ctx).advice?.id).toBe("start");
+		});
+		it("S6: free sees 13 weeks back, premium sees everything", () => {
+			expect(visibleHistoryFrom(today, false)).toBe(addDays(today, -91));
+			expect(visibleHistoryFrom(today, true)).toBeNull();
+		});
+		it("S2: unseen events form one celebration with 2 badges and the level", () => {
+			const s = scenarioState("S2", today);
+			expect(unseen(s.progressEvents).any).toBe(true);
+			const g = celebrationGroup(s.progressEvents);
+			expect(g?.badges).toHaveLength(2);
+			expect(g?.level).toBe(analyse(s).level.level);
+		});
 	});
 
 	it.each(SCENARIO_IDS)("%s is deterministic and NaN-free", (id: ScenarioId) => {

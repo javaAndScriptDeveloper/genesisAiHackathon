@@ -1,7 +1,10 @@
-import { addDays, formatDay, toISO, weekKey } from "./dates";
+import { addDays, formatDay, mondayOf, toISO, weekKey } from "./dates";
 import { weeklyChallenge } from "./gamification";
-import { computeStreak, weekStats } from "./stats";
-import { fmtMass } from "./units";
+import { weekStats } from "./stats";
+import { historyFromFit } from "../progress/fromFit";
+import { weeklyReportV2 } from "../progress/report";
+import { t } from "../messages";
+import { progressCtx } from "./store/progressStats";
 import type { AppNotification, FitState, NotificationKind, NotificationSettings } from "./types";
 
 export const NOTIFICATION_LABELS: Record<NotificationKind, { label: string; hint: string }> = {
@@ -58,7 +61,9 @@ export function deriveNotifications(state: FitState, now: Date): AppNotification
 	if (now.getDay() === 1 || state.history.length > 0) {
 		const last = weekStats(state.planned, state.history, today, -1);
 		if (last.planned > 0) {
-			push({ id: `n-summary-${weekKey(addDays(today, -7))}`, kind: "weekly-summary", title: "Your week in review", body: `${last.done} of ${last.planned} sessions, ${last.minutes} min training, ${fmtMass(last.volume, state.units)} lifted. Streak: ${computeStreak(state.planned, today).current}.`, href: "/progress" });
+			// Text comes from the engine's weekly report (stub for a real Monday 9:00 local push).
+			const { pushText } = weeklyReportV2(historyFromFit(state, today), progressCtx(state), addDays(mondayOf(today), -7));
+			push({ id: `n-summary-${weekKey(addDays(today, -7))}`, kind: "weekly-summary", title: "Your week in review", body: t(pushText.key, pushText.params), href: "/progress" });
 		}
 	}
 
