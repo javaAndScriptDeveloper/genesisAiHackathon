@@ -63,7 +63,6 @@ export function WorkoutStage({ onAdjust, onUnwell, sample }: { onAdjust: () => v
 								<span className={styles.pulse} aria-label={t("fit.health.title")}>
 									<Icon icon={FavouriteIcon} size={14} />
 									{sample?.hr ?? "--"} <small>{t("fit.health.bpm")}</small>
-									{sample?.simulated && <small>· {t("fit.health.demo")}</small>}
 								</span>
 							</div>
 						</div>

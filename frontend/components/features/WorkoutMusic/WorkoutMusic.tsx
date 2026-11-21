@@ -1,6 +1,6 @@
 "use client";
 
-import { MusicNote01Icon, NextIcon, PauseIcon, PlayIcon, PowerIcon, PreviousIcon, RepeatIcon, VolumeHighIcon, VolumeOffIcon } from "@hugeicons/core-free-icons";
+import { MusicNote01Icon, NextIcon, PauseIcon, PlayIcon, PreviousIcon, StopCircleIcon, RepeatIcon, VolumeHighIcon, VolumeOffIcon } from "@hugeicons/core-free-icons";
 import clsx from "clsx";
 import { useRef, useState } from "react";
 import { Button, Icon, IconButton, SegmentedControl, Sheet } from "@/components/ui";
@@ -157,7 +157,7 @@ export function WorkoutMusic({ open, onClose }: { open: boolean; onClose: () => 
 
 					<SegmentedControl label={t("fit.music.choose")} value={track} onChange={(id) => selectTrack(TRACKS.indexOf(id))} options={TRACKS.map((id) => ({ id, label: t(`fit.music.tracks.${id}`) }))} />
 					{error && <p role="alert" className={styles.error}>{t("fit.music.error")}</p>}
-					<Button variant="secondary" iconLeft={PowerIcon} onClick={stop}>{t("fit.music.off")}</Button>
+					<Button variant="secondary" iconLeft={StopCircleIcon} onClick={stop}>{t("fit.music.off")}</Button>
 				</div>
 			</Sheet>
 		</>

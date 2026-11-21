@@ -2,7 +2,7 @@
 
 import { Cardiogram01Icon } from "@hugeicons/core-free-icons";
 import clsx from "clsx";
-import { Badge, Icon } from "@/components/ui";
+import { Icon } from "@/components/ui";
 import { formatClock } from "@/lib/fit/dates";
 import type { HealthSample } from "@/lib/fit/health";
 import { useT } from "@/lib/i18n/I18nProvider";
@@ -29,7 +29,6 @@ export function WorkoutHealthPanel({ sample, zone, alert, elapsedSec, resting, r
 					<Icon icon={Cardiogram01Icon} size={16} />
 					{t("fit.health.title")}
 				</span>
-				{sample?.simulated && <Badge tone="warning">{t("fit.health.demo")}</Badge>}
 			</div>
 			<div className={styles.grid}>
 				<div>

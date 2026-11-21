@@ -48,7 +48,7 @@ export function Devices() {
 									</span>
 								</div>
 								<div className={kit.rowHead}>
-									<Badge tone={linked ? "warning" : "neutral"}>{linked ? t("fit.devices.linkedDemo") : t("fit.devices.notLinked")}</Badge>
+									<Badge tone={linked ? "success" : "neutral"}>{linked ? t("fit.devices.linkedDemo") : t("fit.devices.notLinked")}</Badge>
 									<Button size="sm" variant="secondary" className={kit.pushRight} onClick={() => { dispatch({ type: "device", id: p.id, connected: !linked }); toast.show(linked ? t("fit.devices.disconnected", { name: p.name }) : t("fit.devices.connected", { name: p.name }), linked ? "info" : "success"); }}>
 										{linked ? t("fit.devices.disconnect") : t("fit.devices.connect")}
 									</Button>

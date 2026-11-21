@@ -33,12 +33,15 @@
 	@include corners.radius(var(--radius-control));
 }
 
+// Coloured toasts use a deep fill with white text in every theme (the theme's light success/danger tints make text unreadable).
 .success {
-	background: var(--color-success);
+	background: #1c7c46;
+	color: #fff;
 }
 
 .danger {
-	background: var(--color-danger);
+	background: #c0322a;
+	color: #fff;
 }
 
 @keyframes slide {

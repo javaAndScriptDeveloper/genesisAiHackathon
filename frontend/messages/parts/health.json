@@ -1,8 +1,17 @@
 {
   "fit": {
     "health": {
-      "title": "Live health", "demo": "Demo mode", "bpm": "bpm", "zone": "Zone {n} · {label}", "connecting": "Connecting…", "duration": "Duration", "resting": "Resting", "working": "Working", "activity": "Activity", "recoveryDrop": "{n} bpm below peak",
-      "demoNote": "Simulated values for demonstration, not real measurements.", "linkedDemo": "{name} is linked, but live data needs the native app. Values shown are simulated."
+      "title": "Live health",
+      "bpm": "bpm",
+      "zone": "Zone {n} · {label}",
+      "connecting": "Connecting…",
+      "duration": "Duration",
+      "resting": "Resting",
+      "working": "Working",
+      "activity": "Activity",
+      "recoveryDrop": "{n} bpm below peak",
+      "demoNote": "Simulated values, not real measurements.",
+      "linkedDemo": "{name} is linked, but live data needs the native app. Values shown are simulated."
     }
   }
 }

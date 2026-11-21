@@ -1,11 +1,16 @@
-// Planning assumptions from docs/Fitness Companion — Market Evidence & Unit Economics Report.md, §4.
+// Monetization and paid acquisition assumptions from the market report, §4.
+const marketBase = { annualShare: 0.55, annualRenewal: 0.30, monthlyLifetime: 4, conversion: 0.03, cpi: 3.77 };
+const marketBudget = { organicPercent: 50, fixedCosts: 5000 };
+
 export const scenarios = {
-	conservative: { annualShare: 0.45, annualRenewal: 0.23, monthlyLifetime: 3, conversion: 0.018, cpi: 4.70 },
-	base: { annualShare: 0.55, annualRenewal: 0.30, monthlyLifetime: 4, conversion: 0.03, cpi: 3.77 },
-	optimistic: { annualShare: 0.60, annualRenewal: 0.36, monthlyLifetime: 5, conversion: 0.045, cpi: 3 },
+	pilot: { ...marketBase, organicPercent: 90, fixedCosts: 50 },
+	conservative: { ...marketBudget, annualShare: 0.45, annualRenewal: 0.23, monthlyLifetime: 3, conversion: 0.018, cpi: 4.70 },
+	base: { ...marketBase, ...marketBudget },
+	optimistic: { ...marketBudget, annualShare: 0.60, annualRenewal: 0.36, monthlyLifetime: 5, conversion: 0.045, cpi: 3 },
 };
 
 export type Scenario = keyof typeof scenarios;
+export const defaultScenario: Scenario = "pilot";
 
 const kickoffMinute = 10 * 60 + 30;
 const demoMinute = 17 * 60 + 50;
@@ -16,8 +21,6 @@ export const assumptions = {
 	annualPrice: 59.99,
 	storeFee: 0.15,
 	infraPerMonth: 0.10,
-	defaultOrganicPercent: 50,
-	defaultFixedCosts: 5000,
 	defaultCombinedHourlyRate: 50,
 };
 
@@ -70,10 +73,13 @@ export function modelEconomics(scenario: Scenario, organicShare: number, fixedCo
 	};
 }
 
-// This covers the one-time build labor from new payers' first-year contribution after CAC.
-export function estimateBuildPayback(hourlyRate: number, firstYearContribution: number, blendedCac: number) {
+// Compares each new payer's first 12 months with one year of overhead and the one-time build labor.
+export function estimateBuildPayback(hourlyRate: number, firstYearContribution: number, blendedCac: number, fixedCosts = 0) {
 	const cost = buildMinutes * hourlyRate / 60;
+	const firstYearCost = cost + 12 * fixedCosts;
 	const contributionAfterCac = firstYearContribution - blendedCac;
-	const payers = cost === 0 ? 0 : contributionAfterCac > 0 ? Math.ceil(cost / contributionAfterCac) : null;
-	return { cost, contributionAfterCac, payers };
+	const payers = contributionAfterCac < 0 || (contributionAfterCac === 0 && firstYearCost > 0)
+		? null
+		: firstYearCost === 0 ? 0 : Math.ceil(firstYearCost / contributionAfterCac);
+	return { cost, firstYearCost, contributionAfterCac, payers };
 }

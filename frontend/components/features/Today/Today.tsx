@@ -1,6 +1,6 @@
 "use client";
 
-import { Add01Icon, Alert02Icon, CheckmarkCircle01Icon, MinusSignIcon, Calendar03Icon, DropletIcon, FireIcon, Medal01Icon, Target01Icon, Notification03Icon, PlayIcon, UserCircleIcon } from "@hugeicons/core-free-icons";
+import { Add01Icon, Alert02Icon, CheckmarkCircle01Icon, MinusSignIcon, Calendar03Icon, DropletIcon, FireIcon, Medal01Icon, Target01Icon, Notification03Icon, PlayIcon } from "@hugeicons/core-free-icons";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ScreenHeader } from "@/components/features/ScreenHeader/ScreenHeader";
@@ -55,7 +55,6 @@ export function Today() {
 							<IconButton icon={Notification03Icon} label={t("fit.today.notifications", { n: unread })} onClick={() => router.push("/notifications")} />
 							{unread > 0 && <span className={styles.badge} aria-hidden>{unread}</span>}
 						</span>
-						<IconButton icon={UserCircleIcon} label={t("fit.today.profile")} onClick={() => router.push("/profile")} />
 					</>
 				}
 			/>
@@ -169,7 +168,7 @@ export function Today() {
 						</div>
 						<div className={styles.waterActions}>
 							<IconButton icon={MinusSignIcon} variant="secondary" label={t("fit.today.waterRemove", { ml: WATER_STEP_ML })} disabled={water <= 0} onClick={() => dispatch({ type: "water", date: today, delta: -WATER_STEP_ML })} />
-							<Button size="sm" iconLeft={Add01Icon} disabled={water >= WATER_MAX_ML} onClick={() => dispatch({ type: "water", date: today, delta: WATER_STEP_ML })}>{WATER_STEP_ML} ml</Button>
+							<Button iconLeft={Add01Icon} disabled={water >= WATER_MAX_ML} onClick={() => dispatch({ type: "water", date: today, delta: WATER_STEP_ML })}>{WATER_STEP_ML} ml</Button>
 						</div>
 					</div>
 					<ProgressBar value={Math.min(100, (water / state.waterGoalMl) * 100)} label={t("fit.today.water")} tone={water >= state.waterGoalMl ? "success" : "accent"} />
