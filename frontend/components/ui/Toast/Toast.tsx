@@ -19,12 +19,14 @@ interface ToastApi {
 const ToastContext = createContext<ToastApi | null>(null);
 const ICONS = { info: InformationCircleIcon, success: CheckmarkCircle02Icon, danger: Alert02Icon } as const;
 let counter = 0;
+const MAX_TOASTS = 3;
 
 export function ToastProvider({ children }: { children: ReactNode }) {
 	const [toasts, setToasts] = useState<ToastItem[]>([]);
 	const show = useCallback((message: string, tone: Tone = "info") => {
 		const id = ++counter;
-		setToasts((list) => [...list, { id, message, tone }]);
+		// At most three toasts at a time: the oldest one makes room for a new one.
+		setToasts((list) => [...list, { id, message, tone }].slice(-MAX_TOASTS));
 		window.setTimeout(() => setToasts((list) => list.filter((t) => t.id !== id)), 4000);
 	}, []);
 	const api = useMemo(() => ({ show }), [show]);

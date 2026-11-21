@@ -131,7 +131,7 @@ export function WeeklyReport({ week }: { week: string }) {
 					<p className={styles.p}>{t("fit.progress.report.goalHint")}</p>
 					<div className={styles.goals} role="group" aria-label={t("fit.progress.report.goalTitle")}>
 						{options.map((o) => (
-							<button key={o.value} type="button" className={styles.goal} aria-pressed={o.selected} data-selected={o.selected || undefined} onClick={() => pick(o.value)}>
+							<button key={o.value} type="button" className={styles.goal} aria-pressed={o.selected} data-selected={o.selected || undefined} disabled={o.selected} onClick={() => pick(o.value)}>
 								<strong>{o.value}</strong>
 								<span>{t("fit.progress.report.goalOption", { n: o.value })}</span>
 								{o.selected && <span className={styles.cur}>{t("fit.progress.report.currentGoal")}</span>}
@@ -141,9 +141,10 @@ export function WeeklyReport({ week }: { week: string }) {
 					</div>
 				</Card>
 
-				<Card>
-					<h3 className={styles.h3}>{t("fit.progress.report.records")}</h3>
-					{records.length === 0 ? <p className={styles.p}>{t("fit.progress.report.noRecords")}</p> : (
+				{/* Nothing to show without records, so the card is left out instead of saying "no records". */}
+				{records.length > 0 && (
+					<Card>
+						<h3 className={styles.h3}>{t("fit.progress.report.records")}</h3>
 						<ul className={styles.list}>
 							{records.map((r) => (
 								<li key={`${r.exerciseId}:${r.metric}:${r.date}`} className={styles.record}>
@@ -152,8 +153,8 @@ export function WeeklyReport({ week }: { week: string }) {
 								</li>
 							))}
 						</ul>
-					)}
-				</Card>
+					</Card>
+				)}
 
 				{insight && <ProgressInsights insights={[insight]} />}
 
