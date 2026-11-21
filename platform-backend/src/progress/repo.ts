@@ -71,20 +71,24 @@ async function findUserId(db: Knex, token: string): Promise<number | null> {
 export async function resolveUser(db: Knex, token: string, opts: { create: boolean }): Promise<number | null> {
   const existing = await findUserId(db, token);
   if (existing !== null || !opts.create) return existing;
-  const rollback = new Error("token claimed concurrently");
-  try {
-    return await db.transaction(async (trx) => {
-      const [user] = await trx("users").insert({ name: "Guest", email: guestEmail(token) }).returning("id");
-      const inserted = await trx("user_progress_settings").insert({ userId: user.id, clientToken: token }).onConflict("clientToken").ignore().returning("userId");
-      if (inserted.length === 0) throw rollback; // a concurrent first sync won: drop our user, re-select theirs
-      return Number(user.id);
-    });
-  } catch (err) {
-    if (err !== rollback) throw err;
-    const winner = await findUserId(db, token);
-    if (winner === null) throw err;
-    return winner;
-  }
+  return db.transaction(async (trx) => {
+    // Serialize first-time creation per token (held until commit): a concurrent claimant waits, then re-selects.
+    await trx.raw("select pg_advisory_xact_lock(hashtext(?))", [token]);
+    const again = await findUserId(trx, token);
+    if (again !== null) return again;
+    const [user] = await trx("users").insert({ name: "Guest", email: guestEmail(token) }).returning("id");
+    await trx("user_progress_settings").insert({ userId: user.id, clientToken: token });
+    return Number(user.id);
+  });
+}
+
+// Resolves (creating if needed) the guest and runs the write in ONE transaction: a write that fails
+// (400/409/...) rolls back the freshly created guest too, so no orphan users are left behind.
+export async function withGuestUser<T>(db: Knex, token: string, fn: (trx: Knex.Transaction, userId: number) => Promise<T>): Promise<T> {
+  return db.transaction(async (trx) => {
+    const userId = await resolveUser(trx, token, { create: true });
+    return fn(trx, userId as number);
+  });
 }
 
 function toWorkoutDto(w: ProgressWorkoutModel): WorkoutDto {
@@ -222,7 +226,8 @@ export async function syncSnapshot(db: Knex, userId: number, body: SyncBody) {
 
 export async function markEventsSeen(db: Knex, userId: number | null, ids: string[], seenAt: string): Promise<number> {
   if (userId === null || ids.length === 0) return 0;
-  return ProgressEventModel.query(db).patch({ seenAt: new Date(seenAt) }).where({ userId }).whereIn("id", ids);
+  // First seen wins: rows that already have seen_at are left alone and not counted.
+  return ProgressEventModel.query(db).patch({ seenAt: new Date(seenAt) }).where({ userId }).whereNull("seenAt").whereIn("id", ids);
 }
 
 // Append-only archive: this module only inserts into / selects from user_progress_snapshots.
@@ -235,10 +240,14 @@ export async function archiveSnapshot(db: Knex, userId: number, input: ArchiveIn
     );
     return res.rowCount === 1;
   }
-  const latest = await ProgressSnapshotModel.query(db).where({ userId }).orderBy("takenAt", "desc").orderBy("id", "desc").first();
-  if (latest && latest.payloadHash === input.payloadHash) return false;
-  await db("user_progress_snapshots").insert(row);
-  return true;
+  // check-then-insert must be atomic per user: serialize concurrent change archives on an advisory lock.
+  return db.transaction(async (trx) => {
+    await trx.raw("select pg_advisory_xact_lock(?)", [userId]);
+    const latest = await ProgressSnapshotModel.query(trx).where({ userId }).orderBy("takenAt", "desc").orderBy("id", "desc").first();
+    if (latest && latest.payloadHash === input.payloadHash) return false;
+    await trx("user_progress_snapshots").insert(row);
+    return true;
+  });
 }
 
 export async function listArchive(db: Knex, userId: number | null, q: { from?: string; to?: string; period?: "weekly" | "change" }) {

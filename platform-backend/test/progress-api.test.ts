@@ -118,7 +118,8 @@ describe("progress API", () => {
 
   it("trainingId must belong to the same user", async () => {
     await call("POST", "/api/progress/sync", A, body());
-    const other = (await call("POST", "/api/progress/sync", B, body()), await db("users").where({ email: `guest-${B}@guest.invalid` }).first());
+    await call("POST", "/api/progress/sync", B, { weights: [{ date: "2026-11-23", kg: 70 }] });
+    const other = await db("users").where({ email: `guest-${B}@guest.invalid` }).first();
     const [tr] = await db("user_trainings").insert({ userId: other.id, planData: JSON.stringify({}) }).returning("id");
     const b = body();
     (b.workouts[0] as { trainingId: number | null }).trainingId = Number(tr.id);
@@ -195,6 +196,24 @@ describe("progress API", () => {
     const users = await count("users");
     const unknown = await call("POST", "/api/progress/events/seen", "cccccccc-cccc-4ccc-8ccc-cccccccccccc", { ids: ["e1"], seenAt });
     expect(unknown.json()).toEqual({ updated: 0 });
+    expect(await count("users")).toBe(users);
+  });
+
+  it("events/seen: first seen wins and updated counts only newly seen rows", async () => {
+    await call("POST", "/api/progress/sync", A, body());
+    const first = "2026-11-24T08:00:00.000Z";
+    expect((await call("POST", "/api/progress/events/seen", A, { ids: ["e1"], seenAt: first })).json()).toEqual({ updated: 1 });
+    const again = await call("POST", "/api/progress/events/seen", A, { ids: ["e1"], seenAt: "2026-11-25T08:00:00.000Z" });
+    expect(again.json()).toEqual({ updated: 0 });
+    expect((await call("GET", "/api/progress/snapshot", A)).json().events[0].seenAt).toBe(first);
+  });
+
+  it("a rejected first sync leaves no orphan guest user", async () => {
+    await call("POST", "/api/progress/sync", A, body());
+    const users = await count("users");
+    expect((await call("POST", "/api/progress/sync", B, body())).statusCode).toBe(409); // ids owned by A
+    expect(await count("users")).toBe(users);
+    expect(await count("user_progress_settings")).toBe(users);
     expect(await count("users")).toBe(users);
   });
 
@@ -295,6 +314,14 @@ describe("progress API", () => {
       const rows = await db("user_progress_snapshots");
       expect(rows).toHaveLength(1);
       expect(rows[0].payload).toEqual({ n: 1 });
+      expect(await count("users")).toBe(1);
+    });
+
+    it("concurrent change archives with the same hash write one row", async () => {
+      const c = { period: "change", weekStart: null, takenAt: "2026-11-20T10:00:00.000Z", engineVersion: "2", payload: { n: 1 }, payloadHash: "same" };
+      const res = await Promise.all([1, 2, 3, 4].map(() => call("POST", "/api/progress/archive", A, c)));
+      expect(res.map((r) => r.statusCode).sort()).toEqual([200, 200, 200, 201]);
+      expect(await count("user_progress_snapshots")).toBe(1);
       expect(await count("users")).toBe(1);
     });
 
