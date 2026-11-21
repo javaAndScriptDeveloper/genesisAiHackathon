@@ -101,6 +101,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+      packages: read # the VPS logs in to GHCR with this token to pull the images
     steps:
       - uses: actions/checkout@v4
 
