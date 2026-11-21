@@ -60,6 +60,11 @@ export function emptyState(): FitState {
 		lastProgressDay: null,
 		archivedWeeks: [],
 		archiveQueue: [],
+		backend: null,
+		planWishes: [],
+		planSource: "rules",
+		planSummary: null,
+		daily: null,
 	};
 }
 

@@ -16,6 +16,7 @@ import { generatePlan } from "@/lib/fit/plan";
 import { createUser } from "@/lib/api/users";
 import { useFit } from "@/lib/fit/store/FitProvider";
 import { useActionNavigate } from "@/lib/fit/store/hooks";
+import { useAiPlan } from "@/lib/fit/store/useAiPlan";
 import type { Profile } from "@/lib/fit/types";
 import { useT } from "@/lib/i18n/I18nProvider";
 import styles from "./Onboarding.module.scss";
@@ -59,6 +60,7 @@ export function Onboarding({ mode }: { mode: "create" | "edit" }) {
 	const router = useRouter();
 	const { state, today } = useFit();
 	const go = useActionNavigate();
+	const { rebuild } = useAiPlan();
 	const [step, setStep] = useState(0);
 	const [demoHistory, setDemoHistory] = useState(true);
 	const [units, setUnits] = useState<Units>(state.units);
@@ -86,7 +88,11 @@ export function Onboarding({ mode }: { mode: "create" | "edit" }) {
 		// Fire and forget: the app works offline, the server copy is created when reachable.
 		if (mode === "create") void createUser(profile, state.trainerId, state.progressToken);
 		if (mode === "create") go("/today", { type: "complete-onboarding", profile, units, demoHistory, today, now: new Date().toISOString() }, { replace: true });
-		else go("/profile", { type: "update-profile", profile, units, today }, { replace: true });
+		else {
+			// The rule-based rebuild applies at once; the AI trainer then re-saves the user and recreates the plan with the stored wishes.
+			go("/profile", { type: "update-profile", profile, units, today }, { replace: true });
+			void rebuild({ profile });
+		}
 	};
 
 	const preview = useMemo(() => {

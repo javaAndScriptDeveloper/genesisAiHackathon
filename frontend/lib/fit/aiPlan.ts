@@ -1,117 +1,204 @@
 import { z } from "zod";
+import { applyAdapt } from "./adapt";
+import type { DailyStatus } from "./dailyStats";
 import { addDays, mondayOf, type ISODate } from "./dates";
-import { EXERCISES, isUsable } from "./exercises";
-import { EQUIPMENT, EXPERIENCES, GENDERS, GOALS, LIMITATIONS, LOCATIONS, WEARABLES } from "./options";
-import { DAY_PATTERNS, buildBlock, estimateMinutes, generatePlan } from "./plan";
-import type { ExerciseBlock, Profile, PlannedWorkout } from "./types";
+import { EXERCISES, findExercise, getExercise, isUsable } from "./exercises";
+import { EQUIPMENT, GOALS, LIMITATIONS, LOCATIONS } from "./options";
+import { DAY_PATTERNS, buildAdHocWorkout, difficultyOf, estimateMinutes, generatePlan, nextBlockId, roundLoad, startingWeight } from "./plan";
+import type { Exercise, ExerciseBlock, PlannedWorkout, Profile, SetEntry } from "./types";
 
-// An AI-written plan is a one-week template (one session per training day). The model only picks from our
-// exercise library and sets the dose; dates, loads and durations are computed here, so a bad reply can never
-// produce an exercise the user cannot do or a nonsense schedule.
-
-/** Request body of `POST /api/plan`: the profile plus the chosen coach's voice. */
-export const planRequestSchema = z.object({
-	profile: z.object({
-		name: z.string().max(30),
-		age: z.number().int().min(14).max(90),
-		gender: z.enum(GENDERS).nullable(),
-		heightCm: z.number().min(120).max(230),
-		weightKg: z.number().min(30).max(250),
-		goal: z.enum(GOALS),
-		goalText: z.string().max(500).optional(),
-		experience: z.enum(EXPERIENCES),
-		location: z.enum(LOCATIONS),
-		equipment: z.array(z.enum(EQUIPMENT)),
-		durationMin: z.number().int().min(10).max(120),
-		daysPerWeek: z.number().int().min(1).max(6),
-		limitations: z.array(z.enum(LIMITATIONS)),
-		limitationNote: z.string().max(500),
-		wearable: z.enum(WEARABLES),
-	}),
-	trainer: z.object({ name: z.string().max(60), tov: z.string().max(500) }).optional(),
-});
-export type PlanRequest = z.infer<typeof planRequestSchema>;
-
-const clampInt =(min: number, max: number) => z.coerce.number().transform((n) => Math.round(Math.min(max, Math.max(min, n))));
-
-export const aiPlanSchema = z.object({
-	summary: z.string().trim().max(400).default(""),
-	why: z.array(z.string().trim().min(1).max(200)).max(5).default([]),
-	sessions: z
-		.array(
-			z.object({
-				title: z.string().trim().min(1).max(40),
-				exercises: z
-					.array(z.object({ id: z.string(), sets: clampInt(1, 6), reps: clampInt(1, 90), restSec: clampInt(10, 240) }))
-					.min(1)
-					.max(10),
-			}),
-		)
-		.min(1)
-		.max(7),
-});
-export type AiPlan = z.infer<typeof aiPlanSchema>;
-
-/** Parses the model's text (plain JSON or fenced) into a template; `null` when it is unusable. */
-export function parseAiPlan(text: string): AiPlan | null {
-	const json = text.replace(/^\s*```(?:json)?\s*/i, "").replace(/\s*```\s*$/, "");
-	try {
-		const parsed = aiPlanSchema.safeParse(JSON.parse(json));
-		return parsed.success ? parsed.data : null;
-	} catch {
-		return null;
-	}
-}
+// The AI writes plans only from our exercise library: the model picks exercise ids and the dose; dates, loads and
+// durations are computed here, so a bad reply can never produce an exercise the user cannot do or a nonsense schedule.
 
 /** The part of the library the user can actually do, in the compact shape sent to the model. */
 export function exerciseCatalog(profile: Pick<Profile, "location" | "equipment" | "limitations">) {
 	return EXERCISES.filter((e) => isUsable(e, profile)).map((e) => ({ id: e.id, name: e.name, muscle: e.muscle, kind: e.kind, level: e.level, timed: Boolean(e.timed) }));
 }
 
-const capitalize = (s: string) => (s[0]?.toUpperCase() ?? "") + s.slice(1);
+export const aiExerciseSchema = z.object({
+	exerciseId: z.string(),
+	sets: z.number(),
+	reps: z.number().optional(),
+	seconds: z.number().optional(),
+	restSec: z.number(),
+});
+export const aiWeekSchema = z.object({
+	summary: z.string(),
+	/** 3-4 short reasons that point to the person's own data (goal, age, schedule, equipment, level). */
+	why: z.array(z.string()).max(5).default([]),
+	sessions: z.array(z.object({ weekday: z.number().int(), title: z.string(), focus: z.string(), exercises: z.array(aiExerciseSchema) })),
+});
+export const aiSessionSchema = z.object({ note: z.string(), title: z.string(), exercises: z.array(aiExerciseSchema) });
+export type AiWeek = z.infer<typeof aiWeekSchema>;
+export type AiSession = z.infer<typeof aiSessionSchema>;
+export const profileChangesSchema = z
+	.object({
+		equipment: z.array(z.enum(EQUIPMENT)),
+		location: z.enum(LOCATIONS),
+		limitations: z.array(z.enum(LIMITATIONS)),
+		limitationNote: z.string().max(200),
+		daysPerWeek: z.number().int().min(1).max(6),
+		durationMin: z.number().int().min(10).max(90),
+		goal: z.enum(GOALS),
+	})
+	.partial();
+export const coachAiReplySchema = z.object({
+	reply: z.string().min(1),
+	rebuild: z.object({ wishes: z.array(z.string()).max(10), profileChanges: profileChangesSchema.nullable(), summary: z.string() }).nullable(),
+});
+export type CoachAiReply = z.infer<typeof coachAiReplySchema>;
+export type ProfileChanges = z.infer<typeof profileChangesSchema>;
+type AiExercise = z.infer<typeof aiExerciseSchema>;
 
-/**
- * Lays the template onto the user's training days for `weeks` weeks from `from`. Unknown or unusable exercises are
- * dropped; a session left with fewer than two falls back to the rule-based workout for that date.
- */
-export function planFromAi(template: AiPlan, profile: Profile, from: ISODate, weeks = 4): PlannedWorkout[] {
-	const fallback = new Map(generatePlan(profile, from, weeks).map((w) => [w.date, w]));
-	const byId = new Map(EXERCISES.filter((e) => isUsable(e, profile)).map((e) => [e.id, e]));
-	const days = DAY_PATTERNS[profile.daysPerWeek] ?? DAY_PATTERNS[3] ?? [];
-	const start = mondayOf(from);
-	const out: PlannedWorkout[] = [];
-	let count = 0;
+const clamp = (n: number, min: number, max: number) => Math.min(max, Math.max(min, Math.round(n)));
+const trim40 = (s: string) => s.trim().slice(0, 40);
+
+interface Cleaned {
+	exercise: Exercise;
+	sets: number;
+	target: number;
+	restSec: number;
+	weight: number | undefined;
+}
+
+/** Keeps only library exercises the user can do, without duplicates, with clamped numbers. */
+function cleanExercises(list: AiExercise[], profile: Profile): Cleaned[] {
+	const seen = new Set<string>();
+	const out: Cleaned[] = [];
+	for (const item of list) {
+		const exercise = findExercise(item.exerciseId);
+		if (!exercise || !isUsable(exercise, profile) || seen.has(exercise.id)) continue;
+		seen.add(exercise.id);
+		out.push({
+			exercise,
+			sets: clamp(item.sets, 1, 6),
+			target: exercise.timed ? clamp(item.seconds ?? item.reps ?? 30, 15, 120) : clamp(item.reps ?? 10, 3, 30),
+			restSec: clamp(item.restSec, 15, 180),
+			weight: startingWeight(exercise, profile),
+		});
+	}
+	return out;
+}
+
+function toBlock(c: Cleaned, week: number): ExerciseBlock {
+	const timed = Boolean(c.exercise.timed);
+	let target = c.target;
+	let weight = c.weight;
+	if (week > 0) {
+		if (timed) target = clamp(target + 5 * week, 15, 120);
+		else if (weight === undefined) target += week;
+		else weight = roundLoad(weight * (1 + 0.025 * week));
+	}
+	const sets: SetEntry[] = Array.from({ length: c.sets }, () => ({ target, targetWeight: weight, done: false }));
+	return { id: nextBlockId(), exerciseId: c.exercise.id, restSec: c.restSec, sets };
+}
+
+function trimToDuration(blocks: ExerciseBlock[], durationMin: number): ExerciseBlock[] {
+	const out = [...blocks];
+	while (estimateMinutes(out) > durationMin + 10 && out.length > 2) out.pop();
+	return out;
+}
+
+export function buildPlanFromAi(week: AiWeek, profile: Profile, today: ISODate, weeks = 4): { planned: PlannedWorkout[]; valid: boolean } {
+	interface Slot {
+		weekday: number;
+		title: string;
+		focus: string;
+		cleaned: Cleaned[];
+	}
+	const byDay = new Map<number, Slot>();
+	for (const s of week.sessions) {
+		if (s.weekday < 0 || s.weekday > 6 || byDay.has(s.weekday)) continue;
+		const cleaned = cleanExercises(s.exercises, profile);
+		if (cleaned.length < 2) continue;
+		byDay.set(s.weekday, { weekday: s.weekday, title: s.title, focus: s.focus, cleaned });
+	}
+	const slots = [...byDay.values()].sort((a, b) => a.weekday - b.weekday).slice(0, profile.daysPerWeek);
+	const valid = slots.length >= Math.ceil(profile.daysPerWeek / 2);
+
+	const used = new Set(slots.map((s) => s.weekday));
+	const pattern = DAY_PATTERNS[profile.daysPerWeek] ?? DAY_PATTERNS[3] ?? [];
+	const fillDays = pattern.filter((d) => !used.has(d)).slice(0, Math.max(0, profile.daysPerWeek - slots.length));
+	const rule = new Map(generatePlan(profile, today, weeks).map((w) => [w.date, w]));
+
+	const start = mondayOf(today);
+	const planned: PlannedWorkout[] = [];
 	for (let w = 0; w < weeks; w += 1) {
-		for (const day of days) {
-			const date = addDays(start, w * 7 + day);
-			if (date < from) continue;
-			const session = template.sessions[count % template.sessions.length];
-			count += 1;
-			const seen = new Set<string>();
-			const blocks: ExerciseBlock[] = [];
-			for (const item of session?.exercises ?? []) {
-				const exercise = byId.get(item.id);
-				if (!exercise || seen.has(exercise.id)) continue;
-				seen.add(exercise.id);
-				blocks.push(buildBlock(exercise, profile, 1, { sets: item.sets, reps: item.reps, rest: item.restSec }));
-			}
-			const rule = fallback.get(date);
-			if (!session || blocks.length < 2) {
-				if (rule) out.push(rule);
+		const days = [...slots.map((s) => s.weekday), ...fillDays].sort((a, b) => a - b);
+		for (const weekday of days) {
+			const date = addDays(start, w * 7 + weekday);
+			if (date < today) continue;
+			const slot = slots.find((s) => s.weekday === weekday);
+			if (!slot) {
+				const filled = rule.get(date);
+				if (filled) planned.push(filled);
 				continue;
 			}
-			const muscles = Array.from(new Set(blocks.map((b) => byId.get(b.exerciseId)?.muscle).filter((m) => m && m !== "mobility")));
-			out.push({
+			const exercises = trimToDuration(slot.cleaned.map((c) => toBlock(c, w)), profile.durationMin);
+			planned.push({
 				id: `w-${date}`,
 				date,
-				title: session.title,
-				focus: muscles.slice(0, 3).map((m) => capitalize(m ?? "")).join(" · "),
-				durationMin: estimateMinutes(blocks),
-				difficulty: rule?.difficulty ?? 2,
-				exercises: blocks,
+				title: trim40(slot.title),
+				focus: trim40(slot.focus),
+				durationMin: estimateMinutes(exercises),
+				difficulty: difficultyOf(profile, exercises),
+				exercises,
 				status: "planned",
 			});
 		}
 	}
-	return out;
+	return { planned, valid };
+}
+
+const totalSets = (blocks: ExerciseBlock[]) => blocks.reduce((n, b) => n + b.sets.length, 0);
+
+export function buildDailySession(ai: AiSession, original: PlannedWorkout, status: Exclude<DailyStatus, "unchanged">, profile: Profile): PlannedWorkout | null {
+	const cleaned = cleanExercises(ai.exercises, profile);
+	if (cleaned.length < 2) return null;
+	if (status === "recovery" && cleaned.some((c) => c.exercise.kind !== "mobility" && c.exercise.kind !== "cardio" && c.exercise.muscle !== "core")) return null;
+	const exercises = cleaned.map((c) => toBlock(c, 0));
+	const minutes = estimateMinutes(exercises);
+	const maxMinutes = status === "recovery" ? Math.min(30, original.durationMin) : original.durationMin;
+	if (totalSets(exercises) > totalSets(original.exercises) || minutes > maxMinutes) return null;
+	return {
+		...original,
+		title: status === "recovery" ? trim40(ai.title) || "Active recovery" : original.title,
+		focus: status === "recovery" ? "Active recovery" : original.focus,
+		durationMin: minutes,
+		difficulty: Math.min(original.difficulty, difficultyOf(profile, exercises)) as PlannedWorkout["difficulty"],
+		exercises,
+	};
+}
+
+export function fallbackDaily(original: PlannedWorkout, status: Exclude<DailyStatus, "unchanged">, profile: Profile): PlannedWorkout {
+	if (status === "lighter") {
+		const { exercises } = applyAdapt(original.exercises, { kind: "tired" }, { profile, startIndex: 0 });
+		return { ...original, exercises, durationMin: estimateMinutes(exercises) };
+	}
+	const { adHoc: _adHoc, ...rest } = buildAdHocWorkout("mobility", original.date, profile);
+	const maxMinutes = Math.min(30, original.durationMin);
+	const maxSets = totalSets(original.exercises);
+	let blocks = rest.exercises;
+	const fits = () => totalSets(blocks) <= maxSets && estimateMinutes(blocks) <= maxMinutes;
+	while (!fits() && blocks.length > 1) blocks = blocks.slice(0, -1);
+	while (!fits()) {
+		const biggest = blocks.reduce((a, b) => (b.sets.length > a.sets.length ? b : a));
+		if (biggest.sets.length <= 1) break;
+		blocks = blocks.map((b) => (b === biggest ? { ...b, sets: b.sets.slice(0, -1) } : b));
+	}
+	return { ...rest, id: original.id, exercises: blocks, durationMin: estimateMinutes(blocks) };
+}
+
+function weekNames(plan: PlannedWorkout[], today: ISODate): string[] {
+	const end = addDays(today, 7);
+	return plan
+		.filter((w) => w.status === "planned" && w.date >= today && w.date < end)
+		.flatMap((w) => w.exercises.map((b) => getExercise(b.exerciseId).name));
+}
+
+export function diffPlans(before: PlannedWorkout[], after: PlannedWorkout[], today: ISODate): { added: string[]; removed: string[] } {
+	const b = weekNames(before, today);
+	const a = weekNames(after, today);
+	const only = (x: string[], y: string[]) => [...new Set(x.filter((n) => !y.includes(n)))].sort();
+	return { added: only(a, b), removed: only(b, a) };
 }

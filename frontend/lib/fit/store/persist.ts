@@ -1,4 +1,5 @@
 import { dropOldestChatPhoto } from "../community";
+import { tokenBackend } from "../aiFlow";
 import { emptyState } from "../seed";
 import type { FitState } from "../types";
 
@@ -19,7 +20,9 @@ export function loadState(): FitState {
 		const fresh = emptyState();
 		// Notification switches added after the save was written default to on.
 		const saved = parsed.notificationSettings;
-		return { ...fresh, ...parsed, notificationSettings: { ...fresh.notificationSettings, ...saved, enabled: { ...fresh.notificationSettings.enabled, ...saved?.enabled } } };
+		const state: FitState = { ...fresh, ...parsed, notificationSettings: { ...fresh.notificationSettings, ...saved, enabled: { ...fresh.notificationSettings.enabled, ...saved?.enabled } } };
+		// Older saves keep a `{ userId, deviceId }` from before the token-scoped backend routes.
+		return { ...state, backend: tokenBackend(state.backend) };
 	} catch {
 		return emptyState();
 	}

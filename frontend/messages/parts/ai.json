@@ -1,0 +1,68 @@
+{
+  "fit": {
+    "ai": {
+      "fallbackSummary": "{name} here. I built this week from your goal, schedule and equipment. Tell me what you'd like to change and I'll rebuild it.",
+      "noStats": "No device data for today yet, so your plan stays as it is.",
+      "dailyFine": "You look good to go today. Stick with the plan.",
+      "dailyLighter": "You're a bit worn down today, so I made this session lighter.",
+      "dailyRecovery": "Your body needs rest today, so I cut this down to a short, easy session.",
+      "restDayLighter": "It's a rest day, and you're a bit worn down. Rest well today; a gentle walk at most.",
+      "restDayRecovery": "It's a rest day, and your body really needs it after that night. Take it easy; a gentle walk at most.",
+      "rebuilding": "Your trainer is rebuilding your plan…",
+      "rebuilt": "Your plan is updated.",
+      "rebuildFailed": "Couldn't rebuild with AI. Your current plan stays.",
+      "daily": {
+        "title": "Today's check-in",
+        "undo": "Undo",
+        "undone": "Back to your original session.",
+        "sleep": "Sleep",
+        "restingHr": "Resting HR",
+        "hrv": "HRV",
+        "readiness": "Readiness",
+        "sleepValue": "{h} h",
+        "hrValue": "{bpm} bpm",
+        "hrvValue": "{ms} ms",
+        "readinessValue": "{n}/100",
+        "loading": "Checking how you feel today…",
+        "simulated": "Simulated device data, not real measurements.",
+        "eyebrow": "Daily check-in"
+      },
+      "trainerFallback": "Your trainer",
+      "planCard": {
+        "eyebrow": "Your plan",
+        "title": "{name} · Your plan",
+        "ai": "Written by your trainer",
+        "standard": "Standard plan"
+      },
+      "recreate": "Recreate my plan",
+      "recreating": "Recreating…",
+      "rebuildingChat": "{name} is rebuilding your plan…",
+      "none": "none",
+      "added": "Added: {list}",
+      "removed": "Removed: {list}",
+      "change": {
+        "location": "Location: {from} → {to}",
+        "equipment": "Equipment: {from} → {to}",
+        "limitations": "Limitations: {from} → {to}",
+        "limitationNote": "Limitation note: {from} → {to}",
+        "daysPerWeek": "Days per week: {from} → {to}",
+        "durationMin": "Session length: {from} → {to} min",
+        "goal": "Goal: {from} → {to}"
+      },
+      "simulate": {
+        "title": "Simulate tonight",
+        "note": "Pick how last night went. The values are simulated, not real measurements. Your trainer reads them and may adjust today's session.",
+        "label": "Last night",
+        "normal": "Normal",
+        "tired": "Tired",
+        "badNight": "Bad night",
+        "run": "Simulate",
+        "fine": "Stats synced. Your plan stays as it is.",
+        "lighter": "Your trainer made today's session lighter.",
+        "recovery": "Your trainer switched today to recovery.",
+        "restDay": "Rest day: your trainer suggests taking it easy.",
+        "failed": "Couldn't run the check. Try again."
+      }
+    }
+  }
+}

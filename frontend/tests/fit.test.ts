@@ -1,13 +1,15 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { applyAdapt } from "@/lib/fit/adapt";
 import { coachReply, isSafetyConcern, type CoachContext } from "@/lib/fit/coach";
+import { chatHistory, mergeProfile, planSummaryText, profileDiff } from "@/lib/fit/coachChat";
 import { toISO } from "@/lib/fit/dates";
 import { DEFAULT_TRAINER_ID, activeTrainerId } from "@/lib/fit/options";
 import { estimateMinutes, generatePlan, nextUpcoming } from "@/lib/fit/plan";
 import { emptyState } from "@/lib/fit/seed";
+import { loadState } from "@/lib/fit/store/persist";
 import { progressOf } from "@/lib/fit/store/progressStats";
 import { reducer, type Action } from "@/lib/fit/store/reducer";
-import type { FitState, Profile } from "@/lib/fit/types";
+import type { FitState, PlannedWorkout, Profile } from "@/lib/fit/types";
 
 const profile: Profile = {
 	name: "Alex", age: 30, gender: null, heightCm: 178, weightKg: 80, goal: "build-muscle", experience: "intermediate",
@@ -146,5 +148,166 @@ describe("goalText survives preference edits", () => {
 	it("update-profile drops goalText when the preset goal itself was changed", () => {
 		const { goalText: _drop, ...edited } = { ...profile, goal: "lose-fat" as const };
 		expect(run(base, { type: "update-profile", profile: edited, units: "metric", today }).profile?.goalText).toBeUndefined();
+	});
+});
+
+describe("AI plan state", () => {
+	const aiSession = (id: string, date: string): PlannedWorkout => {
+		const base = generatePlan(profile, today, 4)[0];
+		if (!base) throw new Error("no workout");
+		return { ...base, id, date, title: "AI session", status: "planned" };
+	};
+	const tomorrow = toISO(new Date(Date.now() + 86_400_000));
+	const nextWeek = toISO(new Date(Date.now() + 7 * 86_400_000));
+
+	afterEach(() => vi.unstubAllGlobals());
+
+	it("apply-ai-plan keeps history, completed and adHoc sessions", () => {
+		let s = run(emptyState(), { type: "complete-onboarding", units: "metric", profile, demoHistory: true, today, now });
+		const todays = aiSession("ai-today-old", today);
+		s = { ...s, planned: [...s.planned.filter((w) => w.date !== today), { ...todays, id: "done-today", status: "completed" }] };
+		s = run(s, { type: "add-adhoc", kind: "mobility", today });
+		const pastBefore = s.planned.filter((w) => w.date < today);
+		const historyBefore = s.history;
+		const adHocIds = s.planned.filter((w) => w.adHoc).map((w) => w.id);
+		const out = run(s, { type: "apply-ai-plan", planned: [aiSession("ai-1", today), aiSession("ai-2", tomorrow), aiSession("ai-3", nextWeek)], summary: "Built for you", source: "ai", wishes: ["more core"], today });
+		expect(out.history).toEqual(historyBefore);
+		expect(out.planned.filter((w) => w.date < today)).toEqual(pastBefore);
+		expect(out.planned.find((w) => w.id === "done-today")?.status).toBe("completed");
+		for (const id of adHocIds) expect(out.planned.some((w) => w.id === id)).toBe(true);
+		const future = out.planned.filter((w) => w.status === "planned" && w.date >= today && !w.adHoc);
+		expect(future.map((w) => w.id).sort()).toEqual(["ai-1", "ai-2", "ai-3"]);
+		expect(out.planSource).toBe("ai");
+		expect(out.planSummary).toBe("Built for you");
+		expect(out.planWishes).toEqual(["more core"]);
+		expect(out.daily).toBeNull();
+	});
+
+	it("apply-daily replaces the session and undo restores it", () => {
+		const original = aiSession("w1", tomorrow);
+		const lighter = { ...original, title: "Lighter", durationMin: 20 };
+		const s0: FitState = { ...emptyState(), profile, planned: [original] };
+		const check = { date: today, status: "lighter" as const, note: "Tired", stats: null, sessionId: "w1" };
+		const s1 = run(s0, { type: "apply-daily", check, session: lighter });
+		expect(s1.planned[0]?.title).toBe("Lighter");
+		expect(s1.daily?.original).toEqual(original);
+		expect(s1.daily?.undone).toBe(false);
+		const s2 = run(s1, { type: "undo-daily" });
+		expect(s2.planned[0]).toEqual(original);
+		expect(s2.daily?.undone).toBe(true);
+		expect(run(s2, { type: "undo-daily" })).toBe(s2);
+		const s3 = run(s0, { type: "apply-daily", check: { ...check, status: "unchanged", sessionId: null }, session: null });
+		expect(s3.daily?.original).toBeNull();
+		expect(s3.planned).toEqual(s0.planned);
+		expect(run(s3, { type: "undo-daily" })).toBe(s3);
+	});
+
+	it("apply-daily keeps the first original across repeated checks", () => {
+		const original = aiSession("w1", tomorrow);
+		const s0: FitState = { ...emptyState(), profile, planned: [original] };
+		const check = { date: today, status: "lighter" as const, note: "Tired", stats: null, sessionId: "w1" };
+		const bad = { ...original, title: "Recovery" };
+		const tired = { ...original, title: "Lighter" };
+		const s1 = run(s0, { type: "apply-daily", check: { ...check, status: "recovery" }, session: bad }, { type: "apply-daily", check, session: tired });
+		expect(s1.planned[0]?.title).toBe("Lighter");
+		expect(s1.daily?.original).toEqual(original);
+		expect(run(s1, { type: "undo-daily" }).planned[0]).toEqual(original);
+	});
+
+	it("an unchanged daily check reverts today's earlier adjustment", () => {
+		const original = aiSession("w1", tomorrow);
+		const s0: FitState = { ...emptyState(), profile, planned: [original] };
+		const check = { date: today, status: "lighter" as const, note: "Tired", stats: null, sessionId: "w1" };
+		const s1 = run(s0, { type: "apply-daily", check, session: { ...original, title: "Lighter" } });
+		const s2 = run(s1, { type: "apply-daily", check: { ...check, status: "unchanged", sessionId: null }, session: null });
+		expect(s2.planned[0]).toEqual(original);
+		expect(s2.daily?.status).toBe("unchanged");
+		expect(s2.daily?.original).toBeNull();
+	});
+
+	it("coach chat helpers: profile diff, merge, plan summary and history", () => {
+		const changes = { location: "home" as const, daysPerWeek: profile.daysPerWeek };
+		expect(profileDiff(profile, changes).map((c) => c.field)).toEqual(profile.location === "home" ? [] : ["location"]);
+		expect(profileDiff(profile, null)).toEqual([]);
+		expect(mergeProfile(profile, changes).location).toBe("home");
+		expect(mergeProfile(profile, null)).toBe(profile);
+		const near = aiSession("near", tomorrow);
+		const far = aiSession("far", toISO(new Date(Date.now() + 9 * 86_400_000)));
+		const text = planSummaryText([far, near, { ...aiSession("done", today), status: "completed" }], today);
+		expect(text.split("\n")).toHaveLength(1);
+		expect(text.startsWith(`${tomorrow} AI session: `)).toBe(true);
+		const many = Array.from({ length: 20 }, (_, i) => ({ id: `m${i}`, from: "user" as const, text: "x".repeat(700), at: now }));
+		const history = chatHistory(many);
+		expect(history).toHaveLength(12);
+		expect(history[0]?.text).toHaveLength(600);
+	});
+
+	it("chat history for the AI leaves out symptom messages and safety replies", () => {
+		const msg = (from: "user" | "coach", text: string, safety?: boolean) => ({ id: text, from, text, at: now, safety });
+		const history = chatHistory([msg("user", "I have chest pain"), msg("coach", "Please stop", true), msg("user", "fewer leg days")]);
+		expect(history).toEqual([{ from: "user", text: "fewer leg days" }]);
+		expect(chatHistory([msg("user", "more cardio"), msg("user", "I feel dizzy")])).toEqual([]);
+		expect(chatHistory([msg("user", "more cardio"), msg("coach", "Sure")])).toEqual([]);
+	});
+
+	it("old saved state without new fields loads with defaults", () => {
+		const old = { version: 1, units: "metric", profile: null, trainerId: null, planned: [], history: [], active: null, notifications: [], water: {}, subscription: { tier: "free", trialEndsAt: null }, coach: [] };
+		vi.stubGlobal("window", { localStorage: { getItem: () => JSON.stringify(old), setItem: () => undefined } });
+		const s = loadState();
+		expect(s.backend).toBeNull();
+		expect(s.planWishes).toEqual([]);
+		expect(s.planSource).toBe("rules");
+		expect(s.planSummary).toBeNull();
+		expect(s.daily).toBeNull();
+	});
+
+	it("old saved state with a numeric-user backend drops it, so a device is registered under the token", () => {
+		const old = { version: 1, units: "metric", profile: null, trainerId: null, planned: [], history: [], active: null, notifications: [], water: {}, subscription: { tier: "free", trialEndsAt: null }, coach: [], backend: { userId: 7, deviceId: 9 } };
+		vi.stubGlobal("window", { localStorage: { getItem: () => JSON.stringify(old), setItem: () => undefined } });
+		expect(loadState().backend).toBeNull();
+		const kept = { ...old, backend: { deviceId: 9 } };
+		vi.stubGlobal("window", { localStorage: { getItem: () => JSON.stringify(kept), setItem: () => undefined } });
+		expect(loadState().backend).toEqual({ deviceId: 9 });
+		// The same rule on hydrate (dev scenarios, restores).
+		const legacy: FitState = JSON.parse(JSON.stringify({ ...emptyState(), backend: { userId: 7, deviceId: 9 } }));
+		expect(run(emptyState(), { type: "hydrate", state: legacy }).backend).toBeNull();
+	});
+
+	it("complete-onboarding with ai uses the AI plan and stores the backend device", () => {
+		const token = "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb";
+		for (const demoHistory of [false, true]) {
+			const s = run(emptyState(), { type: "complete-onboarding", units: "metric", profile, demoHistory, today, now, planned: [aiSession("ai-a", tomorrow)], ai: { backend: { deviceId: 9 }, summary: "Hello", source: "fallback", progressToken: token } });
+			expect(s.backend).toEqual({ deviceId: 9 });
+			expect(s.progressToken).toBe(token);
+			expect(s.planSummary).toBe("Hello");
+			expect(s.planSource).toBe("fallback");
+			expect(s.planned.some((w) => w.id === "ai-a")).toBe(true);
+			expect(s.planned.some((w) => w.status === "planned" && w.date >= today && w.id !== "ai-a" && !w.adHoc)).toBe(false);
+			const plain = run(emptyState(), { type: "complete-onboarding", units: "metric", profile, demoHistory, today, now });
+			expect(plain.planSource).toBe("rules");
+			expect(plain.planSummary).toBeNull();
+			expect(plain.backend).toBeNull();
+		}
+	});
+
+	it("plan-replacing actions clear today's daily check so it runs again", () => {
+		const w = { ...aiSession("w1", today), title: "Recovery" };
+		const daily = { date: today, status: "recovery" as const, note: "Rest", stats: null, sessionId: "w1", original: aiSession("w1", today), undone: false };
+		const s0: FitState = { ...emptyState(), profile: { ...profile, equipment: ["dumbbells", "bench"] }, planned: [w], daily, subscription: { tier: "premium", trialEndsAt: null } };
+		expect(run(s0, { type: "update-profile", profile: { ...profile, daysPerWeek: 4 }, units: "metric", today }).daily).toBeNull();
+		expect(run(s0, { type: "set-goal", goal: "lose-fat", goalText: "", today }).daily).toBeNull();
+		const reply = { id: "r", from: "coach" as const, text: "ok", at: now };
+		const apply = (action: Extract<Action, { type: "coach-apply" }>["action"]) => run(s0, { type: "coach-apply", messageId: "m", action, today, now, reply }).daily;
+		expect(apply({ id: "a", label: "x", type: "remove-equipment", equipment: "dumbbells" })).toBeNull();
+		expect(apply({ id: "b", label: "x", type: "avoid-limitation", limitation: "knees" })).toBeNull();
+		expect(apply({ id: "c", label: "x", type: "rebuild-plan", premium: true })).toBeNull();
+	});
+
+	it("update-profile sets planSource rules and set-backend stores ids", () => {
+		const s0: FitState = { ...emptyState(), profile, planned: generatePlan(profile, today, 4), planSource: "ai" };
+		expect(run(s0, { type: "update-profile", profile: { ...profile, daysPerWeek: 4 }, units: "metric", today }).planSource).toBe("rules");
+		// A rule-built plan has no trainer summary, so the AI summary card does not describe a plan it didn't make.
+		expect(run({ ...s0, planSummary: "AI week" }, { type: "update-profile", profile: { ...profile, daysPerWeek: 4 }, units: "metric", today }).planSummary).toBeNull();
+		expect(run(s0, { type: "set-backend", backend: { deviceId: 2 } }).backend).toEqual({ deviceId: 2 });
 	});
 });

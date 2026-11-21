@@ -171,14 +171,15 @@ export function OnboardingQuiz() {
 		goStep(step + 1);
 	};
 
-	// The plan is written from the answers once the user reaches the last screen (AI, with a rule-based fallback).
+	// The plan is written from the answers once the user reaches the last screen: the AI trainer flow saves the user
+	// and device under the progress token and builds the plan (rule-based fallback), see lib/api/plan.ts.
 	const planRequest = useMemo(() => {
 		if (current !== "ready") return null;
 		const parsed = schema.safeParse(getValues());
 		if (!parsed.success) return null;
-		return { profile: toProfile(parsed.data), trainer: trainer ? { name: trainer.name, tov: trainer.tov } : undefined };
-	}, [current, schema, getValues, trainer]);
-	const plan = usePersonalPlan(planRequest, today);
+		return { profile: toProfile(parsed.data), trainerSlug: parsed.data.trainerId };
+	}, [current, schema, getValues]);
+	const plan = usePersonalPlan(planRequest, today, state.progressToken);
 	// The next N sessions: late in the week the current week may have none left.
 	const preview = plan.data?.planned.slice(0, planRequest?.profile.daysPerWeek ?? 0) ?? [];
 	const aiWhy = plan.data?.source === "ai" ? plan.data.why : [];
@@ -186,7 +187,9 @@ export function OnboardingQuiz() {
 	const finish = () => {
 		const parsed = schema.safeParse(getValues());
 		if (!parsed.success || plan.isPending) return;
-		go("/today", { type: "complete-onboarding", profile: toProfile(parsed.data), units: state.units, trainerId: parsed.data.trainerId, demoHistory, today, now: new Date().toISOString(), planned: plan.data?.planned }, { replace: true });
+		// The plan's source and the device registered under this token go with it, so later checks and rebuilds reuse them.
+		const ai = plan.data ? { backend: plan.data.backend, summary: plan.data.source === "rules" ? null : plan.data.summary, source: plan.data.source, progressToken: state.progressToken } : undefined;
+		go("/today", { type: "complete-onboarding", profile: toProfile(parsed.data), units: state.units, trainerId: parsed.data.trainerId, demoHistory, today, now: new Date().toISOString(), planned: plan.data?.planned, ai }, { replace: true });
 	};
 
 	const spotty = spottyLine(current, { t, name, values, goalResult, pending: understand.isPending, trainer, planPending: plan.isPending, planSummary: plan.data?.summary ?? "" });

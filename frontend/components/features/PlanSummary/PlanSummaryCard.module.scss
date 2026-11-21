@@ -1,0 +1,42 @@
+// The AI coach's voice: --color-coach / --color-coachSoft (Training UI).
+.root {
+	display: flex;
+	flex-direction: column;
+	gap: var(--space-3);
+	background: var(--color-coachSoft);
+	border-color: var(--color-coachSoft);
+}
+
+.top {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--space-2);
+}
+
+.eyebrow {
+	font-size: 1.2rem;
+	font-weight: 700;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: var(--color-coach);
+}
+
+.head {
+	display: flex;
+	align-items: center;
+	gap: var(--space-2);
+}
+
+.title {
+	flex: 1;
+	min-width: 0;
+	font-size: 1.6rem;
+	line-height: 1.3;
+}
+
+.summary {
+	font-size: 1.5rem;
+	line-height: 1.45;
+	white-space: pre-line;
+}

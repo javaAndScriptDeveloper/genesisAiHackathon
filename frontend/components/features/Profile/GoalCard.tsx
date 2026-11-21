@@ -6,6 +6,7 @@ import { Button, Card, Icon, IconButton, Textarea, useToast } from "@/components
 import { transcribe } from "@/lib/api/stt";
 import { useVoiceRecorder } from "@/lib/hooks/useVoiceRecorder";
 import { matchGoal } from "@/lib/fit/goalClient";
+import { useAiPlan } from "@/lib/fit/store/useAiPlan";
 import { useFit } from "@/lib/fit/store/FitProvider";
 import { useT } from "@/lib/i18n/I18nProvider";
 import kit from "../ScreenKit/ScreenKit.module.scss";
@@ -19,6 +20,7 @@ export function GoalCard() {
 	const [saving, setSaving] = useState(false);
 	const [transcribing, setTranscribing] = useState(false);
 	const recorder = useVoiceRecorder();
+	const { rebuild } = useAiPlan();
 	if (!profile) return null;
 
 	const toggleMic = async () => {
@@ -51,6 +53,9 @@ export function GoalCard() {
 		setSaving(false);
 		if (match.status === "matched") toast.show(t("fit.profile.goalSaved"), "success");
 		else toast.show(t(match.status === "none" ? "fit.profile.goalKept" : "fit.profile.goalUnavailable"), "danger");
+		toast.show(t("fit.ai.rebuilding"), "info");
+		const result = await rebuild({ profile: { ...profile, goal: match.status === "matched" ? match.goal : profile.goal, goalText: wording } });
+		toast.show(t(result === "failed" ? "fit.ai.rebuildFailed" : "fit.ai.rebuilt"), result === "failed" ? "danger" : "success");
 	};
 
 	return (

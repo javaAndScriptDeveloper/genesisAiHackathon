@@ -1,4 +1,5 @@
 import { fromRemote, type RemoteSnapshot } from "../../api/progressSync";
+import { tokenBackend } from "../aiFlow";
 import { daysBetween, toISO, type ISODate } from "../dates";
 import { MAX_PAUSE_DAYS } from "../../progress/consistency";
 import type { Units } from "../units";
@@ -23,6 +24,7 @@ import type {
 	Goal,
 	CoachAction,
 	CoachMessage,
+	DailyCheck,
 	Equipment,
 	ExerciseBlock,
 	FitState,
@@ -39,10 +41,28 @@ import type {
 	SkipReason,
 } from "../types";
 
+type Backend = NonNullable<FitState["backend"]>;
+
 export type Action =
 	| { type: "hydrate"; state: FitState }
 	| { type: "reset" }
-	| { type: "complete-onboarding"; profile: Profile; units: Units; demoHistory: boolean; today: ISODate; now: string; trainerId?: string; /** A plan built before dispatch (the AI plan from onboarding); otherwise the rule-based one. */ planned?: PlannedWorkout[] }
+	| { type: "set-backend"; backend: Backend }
+	| { type: "apply-ai-plan"; planned: PlannedWorkout[]; summary: string; source: "ai" | "fallback"; wishes: string[]; today: ISODate }
+	| { type: "apply-daily"; check: Omit<DailyCheck, "original" | "undone">; session: PlannedWorkout | null }
+	| { type: "undo-daily" }
+	| {
+			type: "complete-onboarding";
+			profile: Profile;
+			units: Units;
+			demoHistory: boolean;
+			today: ISODate;
+			now: string;
+			trainerId?: string;
+			/** A plan built before dispatch (the AI plan from onboarding); otherwise the rule-based one. */
+			planned?: PlannedWorkout[];
+			/** Who built `planned` and the backend device it used; the token is kept, so the user and device saved under it stay this user's. */
+			ai?: { backend: Backend | null; summary: string | null; source: FitState["planSource"]; progressToken: string };
+	  }
 	| { type: "update-profile"; profile: Profile; units: Units; today: ISODate }
 	| { type: "set-goal"; goal: Goal; goalText: string; today: ISODate }
 	| { type: "set-trainer"; trainerId: string }
@@ -74,6 +94,7 @@ export type Action =
 	| { type: "replace-planned-exercise"; id: string; blockId: string; exerciseId: string }
 	| { type: "add-adhoc"; kind: "mobility" | "cardio"; today: ISODate }
 	| { type: "coach-message"; message: CoachMessage }
+	| { type: "coach-mark"; messageId: string; appliedAction: string }
 	| { type: "coach-apply"; messageId: string; action: CoachAction; today: ISODate; now: string; reply: CoachMessage }
 	| { type: "notification-read"; id: string }
 	| { type: "notification-voice"; id: string; text: string }
@@ -218,12 +239,18 @@ function adaptTarget(state: FitState, op: AdaptOp, today: ISODate): { state: Fit
 	return { state: patchPlanned(state, target.id, (w) => ({ ...w, exercises: res.exercises, durationMin: estimateMinutes(res.exercises) })), message: `${target.title}: ${res.message}`, changed: true };
 }
 
-function rebuildUpcoming(state: FitState, profile: Profile, today: ISODate): FitState {
+/** Replaces the still-planned future sessions with `incoming`; history, finished, past and ad-hoc sessions stay. */
+function mergeUpcoming(state: FitState, incoming: PlannedWorkout[], today: ISODate): FitState {
 	const kept = state.planned.filter((w) => w.status !== "planned" || w.date < today || w.adHoc);
 	const keptIds = new Set(kept.map((w) => w.id));
-	let upcoming = generatePlan(profile, today, 4).filter((w) => !keptIds.has(w.id));
+	let upcoming = incoming.filter((w) => !keptIds.has(w.id));
 	for (const log of [...state.history].sort((a, b) => a.date.localeCompare(b.date))) upcoming = applyProgression(upcoming, log, today);
-	return { ...state, profile, planned: [...kept, ...upcoming].sort((a, b) => a.date.localeCompare(b.date)) };
+	return { ...state, planned: [...kept, ...upcoming].sort((a, b) => a.date.localeCompare(b.date)) };
+}
+
+function rebuildUpcoming(state: FitState, profile: Profile, today: ISODate): FitState {
+	// A rule-built plan: no trainer summary, and the new sessions have not been checked against today's readiness yet.
+	return { ...mergeUpcoming(state, generatePlan(profile, today, 4), today), profile, planSource: "rules", planSummary: null, daily: null };
 }
 
 /**
@@ -275,13 +302,14 @@ export function reducer(state: FitState, action: Action): FitState {
 				lastProgressDay: action.state.lastProgressDay ?? toISO(new Date()),
 				archivedWeeks: action.state.archivedWeeks ?? [],
 				archiveQueue: action.state.archiveQueue ?? [],
+				backend: tokenBackend(action.state.backend),
 				photoInsights: (action.state.photoInsights ?? []).map((i) => ({ ...i, beforePhotoId: i.beforePhotoId ?? null, afterPhotoId: i.afterPhotoId ?? null })),
 				photoAiConsentAt: action.state.photoAiConsentAt ?? null,
 			};
 		case "reset":
 			return emptyState();
 		case "complete-onboarding": {
-			const base: FitState = { ...emptyState(), units: action.units, trainerId: action.trainerId ?? null, profile: action.profile, notificationSettings: state.notificationSettings, bodyWeights: [{ date: action.today, kg: action.profile.weightKg }], weeklyGoal: defaultWeeklyGoal(action.profile) };
+			const base: FitState = { ...emptyState(), units: action.units, trainerId: action.trainerId ?? null, profile: action.profile, notificationSettings: state.notificationSettings, bodyWeights: [{ date: action.today, kg: action.profile.weightKg }], weeklyGoal: defaultWeeklyGoal(action.profile), ...(action.ai ? { progressToken: action.ai.progressToken } : {}) };
 			const devices = { apple: action.profile.wearable === "apple", garmin: action.profile.wearable === "garmin" };
 			if (action.demoHistory) {
 				const seeded = seedHistory(action.profile, action.today);
@@ -291,19 +319,41 @@ export function reducer(state: FitState, action: Action): FitState {
 				const planned = action.planned ? [...rest.planned.filter((w) => w.date < action.today), ...action.planned] : rest.planned;
 				let s: FitState = { ...base, ...rest, planned, devices };
 				s = appendNotifications(s, [{ id: "n-welcome", kind: "coach", title: "Your plan is ready", body: "I built it from your goal, schedule and equipment. Ask me to adjust anything.", createdAt: action.now, read: false, href: "/coach" }]);
-				return appendNotifications(s, deriveNotifications(s, new Date(action.now)));
+				return finishOnboarding(s, action);
 			}
 			const planned = action.planned ?? generatePlan(action.profile, action.today, 4);
 			let s: FitState = { ...base, planned, devices };
 			s = appendNotifications(s, [{ id: "n-welcome", kind: "coach", title: "Your plan is ready", body: "I built it from your goal, schedule and equipment. Ask me to adjust anything.", createdAt: action.now, read: false, href: "/coach" }]);
-			return appendNotifications(s, deriveNotifications(s, new Date(action.now)));
+			return finishOnboarding(s, action);
+		}
+		case "set-backend":
+			return { ...state, backend: action.backend };
+		case "apply-ai-plan":
+			return { ...mergeUpcoming(state, action.planned, action.today), planSummary: action.summary, planSource: action.source, planWishes: action.wishes, daily: null };
+		case "apply-daily": {
+			const prev = state.daily;
+			const earlier = prev && prev.date === action.check.date && prev.original && !prev.undone ? prev.original : null;
+			if (action.check.status === "unchanged" && earlier) {
+				const back = earlier;
+				return { ...state, planned: state.planned.map((w) => (w.id === back.id ? back : w)), daily: { ...action.check, original: null, undone: false } };
+			}
+			const keep = prev && prev.date === action.check.date && prev.sessionId === action.check.sessionId && prev.original && !prev.undone ? prev.original : null;
+			const original = keep ?? (action.session ? (state.planned.find((w) => w.id === action.session?.id) ?? null) : null);
+			const session = action.session;
+			const planned = session && original ? state.planned.map((w) => (w.id === session.id ? session : w)) : state.planned;
+			return { ...state, planned, daily: { ...action.check, original, undone: false } };
+		}
+		case "undo-daily": {
+			const original = state.daily?.original;
+			if (!state.daily || !original || state.daily.undone) return state;
+			return { ...state, planned: state.planned.map((w) => (w.id === original.id ? original : w)), daily: { ...state.daily, undone: true } };
 		}
 		case "update-profile": {
 			const devices = { apple: action.profile.wearable === "apple" ? true : state.devices.apple && action.profile.wearable === "none" ? state.devices.apple : state.devices.apple, garmin: state.devices.garmin };
 			// The preferences form does not carry the free-text goal; keep it unless the preset goal changed.
 			const prev = state.profile;
 			const profile = action.profile.goalText === undefined && prev?.goalText && prev.goal === action.profile.goal ? { ...action.profile, goalText: prev.goalText } : action.profile;
-			return rebuildUpcoming({ ...state, devices, units: action.units }, profile, action.today);
+			return rebuildUpcoming({ ...state, devices, units: action.units, planSource: "rules" }, profile, action.today);
 		}
 		case "set-goal-weight":
 			return { ...state, goalWeightKg: action.kg, goalSetAt: action.kg === null ? null : (action.at ?? null) };
@@ -462,6 +512,8 @@ export function reducer(state: FitState, action: Action): FitState {
 		}
 		case "coach-message":
 			return { ...state, coach: [...state.coach, action.message].slice(-80) };
+		case "coach-mark":
+			return { ...state, coach: state.coach.map((m) => (m.id === action.messageId ? { ...m, appliedAction: action.appliedAction } : m)) };
 		case "coach-apply": {
 			let next: FitState = state;
 			const a = action.action;
@@ -635,6 +687,12 @@ export function reducer(state: FitState, action: Action): FitState {
 	}
 }
 
+function finishOnboarding(state: FitState, action: Extract<Action, { type: "complete-onboarding" }>): FitState {
+	const ai = action.ai;
+	const next: FitState = ai ? { ...state, backend: ai.backend, planSummary: ai.summary, planSource: ai.source } : { ...state, planSource: "rules", planSummary: null };
+	return appendNotifications(next, deriveNotifications(next, new Date(action.now)));
+}
+
 /** Profile changes that affect which exercises are possible: update the profile, then swap what no longer fits. */
 function applyProfileChange(state: FitState, profile: Profile, today: ISODate): FitState {
 	let planned = state.planned.map((w) => {
@@ -648,7 +706,7 @@ function applyProfileChange(state: FitState, profile: Profile, today: ISODate): 
 		if (replaced.length) active = { ...active, exercises, adaptations: [...active.adaptations, `Swapped: ${replaced.join(", ")}`] };
 	}
 	planned = planned.map((w) => w);
-	return { ...state, profile, planned, active };
+	return { ...state, profile, planned, active, daily: null };
 }
 
 export { findExercise };

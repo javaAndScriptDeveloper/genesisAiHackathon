@@ -34,177 +34,71 @@
     "time": "Time",
     "unreachable": "The backend is unavailable or returned an unexpected response."
   },
-  "analytics": {
-    "title": "Analytics",
-    "brand": "Personal Coach",
-    "openApp": "Open app",
-    "economics": "Unit economics",
-    "model": {
-      "badge": "Planning model · USD",
-      "subtitle": "Revenue, costs and acquisition per paying subscriber.",
-      "scenario": "Scenario",
-      "scenarios": {
-        "pilot": "Base launch pilot",
-        "conservative": "Conservative",
-        "base": "Market benchmark",
-        "optimistic": "Optimistic"
-      },
-      "metrics": {
-        "ltv": "Contribution LTV",
-        "cac": "Blended CAC",
-        "ratio": "LTV / CAC",
-        "payback": "CAC payback"
-      },
-      "ltvDetail": "Lifetime contribution per subscriber",
-      "cacDetail": "{value} from paid channels alone",
-      "ratioDetail": "1× covers acquisition costs",
-      "paybackDetail": "From recognized contribution",
-      "noPayback": "Not reached",
-      "months": "{value} mo.",
-      "multiple": "{value}×",
-      "chartTitle": "Acquisition payback",
-      "chartDetail": "Cumulative contribution per new subscriber over 24 months",
-      "cumulative": "Cumulative contribution",
-      "axis": "${value}",
-      "chartMonth": "Month {month}",
-      "costPerMonth": "Per month",
-      "costShare": "Share of gross revenue",
-      "costTitle": "Monthly cost breakdown",
-      "costDetail": "Per paid subscriber-month, weighted by plan mix",
-      "gross": "Gross revenue per month",
-      "costs": {
-        "fees": "Store fees",
-        "ai": "AI infrastructure",
-        "infra": "Infrastructure & analytics",
-        "contribution": "Contribution margin"
-      },
-      "breakEven": "Break-even",
-      "breakEvenDetail": "Adjust organic acquisition and monthly overhead.",
-      "organic": "Organic share of installs",
-      "fixed": "Fixed costs per month",
-      "organicError": "Enter 0–100%. Using the scenario default of {value}.",
-      "fixedError": "Enter 0–1 billion USD. Using the scenario default of {value}.",
-      "subscribers": "Active subscribers to cover overhead",
-      "organicThreshold": "Minimum organic share for lifetime payback",
-      "method": "Assumptions and formulas",
-      "inputs": {
-        "monthlyPrice": "Monthly plan price",
-        "annualPrice": "Annual plan price",
-        "annualShare": "Annual share of subscribers",
-        "annualRenewal": "First annual renewal rate",
-        "monthlyLifetime": "Paid months on monthly plan",
-        "cpi": "Paid cost per install",
-        "conversion": "Install-to-paid conversion",
-        "storeFee": "Store commission"
-      },
-      "notes": {
-        "ltv": "Contribution LTV = net subscription revenue minus AI and variable infrastructure costs, weighted across monthly and annual plans.",
-        "cac": "Paid CAC = cost per install ÷ install-to-paid conversion. Blended CAC assumes the same conversion for organic installs and zero incremental organic spend.",
-        "payback": "Payback is the first month cumulative contribution covers blended CAC. The model recognizes annual revenue over each 12-month term and includes one possible renewal.",
-        "fixed": "Operating break-even = fixed costs ÷ monthly contribution per active subscriber, rounded up. Acquisition spend is tracked separately in CAC.",
-        "limits": "The model excludes free-tier usage, voice, taxes, refunds and wearable integration costs. AI infrastructure uses the planned token volumes from the report and Gemini 2.5 Flash-Lite Standard text rates.",
-        "source": "Prices, conversion, paid acquisition and renewal assumptions come from section 4 of the Fitness Companion Market Evidence & Unit Economics Report.",
-        "pilot": "The pilot uses a 90% organic target and a $50 monthly budget assumption. Include ongoing labor, content and other recurring costs in your actual budget."
-      },
-      "pilotPlan": "Launch target: {organic} organic acquisition and a {budget} monthly operating budget."
-    },
-    "build": {
-      "title": "First-year MVP break-even",
-      "subtitle": "Build labor from 10:30 to 17:50 plus 12 months of fixed costs.",
-      "elapsed": "Elapsed build time",
-      "duration": "{hours} h {minutes} min",
-      "hourly": "Combined team rate per hour",
-      "hourlyError": "Enter 0–1 million USD. Using $50 for now.",
-      "cost": "One-time labor cost",
-      "payers": "New paying subscribers to break even",
-      "recoverable": "{value} first-year contribution per payer after blended CAC. Total to cover: {budget} for build labor and 12 months of overhead.",
-      "unrecoverable": "{value} first-year contribution per payer after blended CAC. Covering the {budget} first-year budget requires a positive contribution."
-    },
-    "activity": {
-      "title": "Product activity",
-      "badge": "This browser",
-      "subtitle": "Recorded app events on this browser and device.",
-      "period": "Activity period",
-      "periods": {
-        "week": "7 days",
-        "month": "30 days",
-        "quarter": "90 days"
-      },
-      "metrics": {
-        "onboarding": "Onboarding",
-        "starts": "Workout starts",
-        "completed": "Completed workouts",
-        "quality": "Planned workouts ≥80%"
-      },
-      "details": {
-        "onboarding": "Completed onboarding flows",
-        "starts": "Plan and extra sessions",
-        "completed": "Sessions marked complete",
-        "quality": "At least 80% of planned sets"
-      },
-      "chartTitle": "Event volume",
-      "chartDetail": "All tracked product events",
-      "total": "{count} recorded events",
-      "eventCount": "Recorded events",
-      "empty": "No events in this period",
-      "emptyDetail": "Finish onboarding, start a workout or use the coach to populate this view.",
-      "unavailable": "Browser storage is unavailable",
-      "unavailableDetail": "Allow site storage to record and view activity here.",
-      "eventsTitle": "Events by type",
-      "eventsDetail": "Counts for the selected period",
-      "events": {
-        "onboarding_completed": "Onboarding completed",
-        "workout_started": "Workout started",
-        "workout_paused": "Workout paused",
-        "workout_completed": "Workout logged",
-        "workout_abandoned": "Workout ended early",
-        "workout_adapted": "Workout adapted",
-        "coach_used": "Coach message sent",
-        "achievement_unlocked": "Achievement unlocked",
-        "notification_opened": "Notification opened",
-        "subscription_viewed": "Subscription viewed",
-        "subscription_started": "Trial started"
-      },
-      "coverage": "What the dashboard measures",
-      "notes": {
-        "retention": "Counts start when this dashboard’s event storage is enabled. The browser retains up to 4,000 recent events and shows up to 90 calendar days.",
-        "workouts": "Logged workouts include partial sessions. The 80% metric uses the planned set count after workout adjustments and excludes extra sessions, safety stops and seeded history.",
-        "subscription": "Trials in the app are simulated. Prices, acquisition costs and AI expenses above are planning estimates.",
-        "cohorts": "The product goal is three planned workouts in the first 14 days. Cohort activation and retention require shared user IDs and server-side event collection."
-      },
-      "demoBadge": "Simulated data",
-      "demoSubtitle": "Sample events for a simulated product launch.",
-      "source": "Data source",
-      "sources": {
-        "browser": "This browser",
-        "demo": "Sample data"
-      },
-      "showDemo": "Show sample data"
-    },
-    "cohorts": {
-      "title": "Cohorts",
-      "detail": "Grouped by onboarding week. A dash marks an observation window that’s still open.",
-      "week": "Week",
-      "size": "Users",
-      "metrics": {
-        "d1": "D1",
-        "d7": "D7",
-        "d14": "D14",
-        "d30": "D30",
-        "activation": "Activated",
-        "paid": "Paid D35"
-      },
-      "pending": "Observation window still open",
-      "fraction": "{count} of {total} users",
-      "retention": "Workout retention",
-      "returned": "Users who returned",
-      "comparable": "Same {users} users across all four days, from cohorts with a full 30-day window.",
-      "definitions": "Retention counts users who started a workout on the exact day after onboarding. Activation is three planned workouts with at least 80% of sets completed in the first 14 days. Paid D35 counts the first simulated payment by the end of day 35.",
-      "empty": "Cohort data is unavailable here",
-      "emptyDetail": "Multi-user cohorts need shared user IDs and billing events. Explore the view with a simulated dataset."
-    }
-  },
   "fit": {
+    "ai": {
+      "fallbackSummary": "{name} here. I built this week from your goal, schedule and equipment. Tell me what you'd like to change and I'll rebuild it.",
+      "noStats": "No device data for today yet, so your plan stays as it is.",
+      "dailyFine": "You look good to go today. Stick with the plan.",
+      "dailyLighter": "You're a bit worn down today, so I made this session lighter.",
+      "dailyRecovery": "Your body needs rest today, so I cut this down to a short, easy session.",
+      "restDayLighter": "It's a rest day, and you're a bit worn down. Rest well today; a gentle walk at most.",
+      "restDayRecovery": "It's a rest day, and your body really needs it after that night. Take it easy; a gentle walk at most.",
+      "rebuilding": "Your trainer is rebuilding your plan…",
+      "rebuilt": "Your plan is updated.",
+      "rebuildFailed": "Couldn't rebuild with AI. Your current plan stays.",
+      "daily": {
+        "title": "Today's check-in",
+        "undo": "Undo",
+        "undone": "Back to your original session.",
+        "sleep": "Sleep",
+        "restingHr": "Resting HR",
+        "hrv": "HRV",
+        "readiness": "Readiness",
+        "sleepValue": "{h} h",
+        "hrValue": "{bpm} bpm",
+        "hrvValue": "{ms} ms",
+        "readinessValue": "{n}/100",
+        "loading": "Checking how you feel today…",
+        "simulated": "Simulated device data, not real measurements.",
+        "eyebrow": "Daily check-in"
+      },
+      "trainerFallback": "Your trainer",
+      "planCard": {
+        "eyebrow": "Your plan",
+        "title": "{name} · Your plan",
+        "ai": "Written by your trainer",
+        "standard": "Standard plan"
+      },
+      "recreate": "Recreate my plan",
+      "recreating": "Recreating…",
+      "rebuildingChat": "{name} is rebuilding your plan…",
+      "none": "none",
+      "added": "Added: {list}",
+      "removed": "Removed: {list}",
+      "change": {
+        "location": "Location: {from} → {to}",
+        "equipment": "Equipment: {from} → {to}",
+        "limitations": "Limitations: {from} → {to}",
+        "limitationNote": "Limitation note: {from} → {to}",
+        "daysPerWeek": "Days per week: {from} → {to}",
+        "durationMin": "Session length: {from} → {to} min",
+        "goal": "Goal: {from} → {to}"
+      },
+      "simulate": {
+        "title": "Simulate tonight",
+        "note": "Pick how last night went. The values are simulated, not real measurements. Your trainer reads them and may adjust today's session.",
+        "label": "Last night",
+        "normal": "Normal",
+        "tired": "Tired",
+        "badNight": "Bad night",
+        "run": "Simulate",
+        "fine": "Stats synced. Your plan stays as it is.",
+        "lighter": "Your trainer made today's session lighter.",
+        "recovery": "Your trainer switched today to recovery.",
+        "restDay": "Rest day: your trainer suggests taking it easy.",
+        "failed": "Couldn't run the check. Try again."
+      }
+    },
     "coach": {
       "title": "Personal Coach",
       "subtitle": "Ask, adjust, stay on track",
@@ -1929,6 +1823,176 @@
       "discardTitle": "Discard workout?",
       "discardBody": "This session will not be saved and won't count toward progress.",
       "discardConfirm": "Discard"
+    }
+  },
+  "analytics": {
+    "title": "Analytics",
+    "brand": "Personal Coach",
+    "openApp": "Open app",
+    "economics": "Unit economics",
+    "model": {
+      "badge": "Planning model · USD",
+      "subtitle": "Revenue, costs and acquisition per paying subscriber.",
+      "scenario": "Scenario",
+      "scenarios": {
+        "pilot": "Base launch pilot",
+        "conservative": "Conservative",
+        "base": "Market benchmark",
+        "optimistic": "Optimistic"
+      },
+      "metrics": {
+        "ltv": "Contribution LTV",
+        "cac": "Blended CAC",
+        "ratio": "LTV / CAC",
+        "payback": "CAC payback"
+      },
+      "ltvDetail": "Lifetime contribution per subscriber",
+      "cacDetail": "{value} from paid channels alone",
+      "ratioDetail": "1× covers acquisition costs",
+      "paybackDetail": "From recognized contribution",
+      "noPayback": "Not reached",
+      "months": "{value} mo.",
+      "multiple": "{value}×",
+      "chartTitle": "Acquisition payback",
+      "chartDetail": "Cumulative contribution per new subscriber over 24 months",
+      "cumulative": "Cumulative contribution",
+      "axis": "${value}",
+      "chartMonth": "Month {month}",
+      "costPerMonth": "Per month",
+      "costShare": "Share of gross revenue",
+      "costTitle": "Monthly cost breakdown",
+      "costDetail": "Per paid subscriber-month, weighted by plan mix",
+      "gross": "Gross revenue per month",
+      "costs": {
+        "fees": "Store fees",
+        "ai": "AI infrastructure",
+        "infra": "Infrastructure & analytics",
+        "contribution": "Contribution margin"
+      },
+      "breakEven": "Break-even",
+      "breakEvenDetail": "Adjust organic acquisition and monthly overhead.",
+      "organic": "Organic share of installs",
+      "fixed": "Fixed costs per month",
+      "organicError": "Enter 0–100%. Using the scenario default of {value}.",
+      "fixedError": "Enter 0–1 billion USD. Using the scenario default of {value}.",
+      "subscribers": "Active subscribers to cover overhead",
+      "organicThreshold": "Minimum organic share for lifetime payback",
+      "method": "Assumptions and formulas",
+      "inputs": {
+        "monthlyPrice": "Monthly plan price",
+        "annualPrice": "Annual plan price",
+        "annualShare": "Annual share of subscribers",
+        "annualRenewal": "First annual renewal rate",
+        "monthlyLifetime": "Paid months on monthly plan",
+        "cpi": "Paid cost per install",
+        "conversion": "Install-to-paid conversion",
+        "storeFee": "Store commission"
+      },
+      "notes": {
+        "ltv": "Contribution LTV = net subscription revenue minus AI and variable infrastructure costs, weighted across monthly and annual plans.",
+        "cac": "Paid CAC = cost per install ÷ install-to-paid conversion. Blended CAC assumes the same conversion for organic installs and zero incremental organic spend.",
+        "payback": "Payback is the first month cumulative contribution covers blended CAC. The model recognizes annual revenue over each 12-month term and includes one possible renewal.",
+        "fixed": "Operating break-even = fixed costs ÷ monthly contribution per active subscriber, rounded up. Acquisition spend is tracked separately in CAC.",
+        "limits": "The model excludes free-tier usage, voice, taxes, refunds and wearable integration costs. AI infrastructure uses the planned token volumes from the report and Gemini 2.5 Flash-Lite Standard text rates.",
+        "source": "Prices, conversion, paid acquisition and renewal assumptions come from section 4 of the Fitness Companion Market Evidence & Unit Economics Report.",
+        "pilot": "The pilot uses a 90% organic target and a $50 monthly budget assumption. Include ongoing labor, content and other recurring costs in your actual budget."
+      },
+      "pilotPlan": "Launch target: {organic} organic acquisition and a {budget} monthly operating budget."
+    },
+    "build": {
+      "title": "First-year MVP break-even",
+      "subtitle": "Build labor from 10:30 to 17:50 plus 12 months of fixed costs.",
+      "elapsed": "Elapsed build time",
+      "duration": "{hours} h {minutes} min",
+      "hourly": "Combined team rate per hour",
+      "hourlyError": "Enter 0–1 million USD. Using $50 for now.",
+      "cost": "One-time labor cost",
+      "payers": "New paying subscribers to break even",
+      "recoverable": "{value} first-year contribution per payer after blended CAC. Total to cover: {budget} for build labor and 12 months of overhead.",
+      "unrecoverable": "{value} first-year contribution per payer after blended CAC. Covering the {budget} first-year budget requires a positive contribution."
+    },
+    "activity": {
+      "title": "Product activity",
+      "badge": "This browser",
+      "subtitle": "Recorded app events on this browser and device.",
+      "period": "Activity period",
+      "periods": {
+        "week": "7 days",
+        "month": "30 days",
+        "quarter": "90 days"
+      },
+      "metrics": {
+        "onboarding": "Onboarding",
+        "starts": "Workout starts",
+        "completed": "Completed workouts",
+        "quality": "Planned workouts ≥80%"
+      },
+      "details": {
+        "onboarding": "Completed onboarding flows",
+        "starts": "Plan and extra sessions",
+        "completed": "Sessions marked complete",
+        "quality": "At least 80% of planned sets"
+      },
+      "chartTitle": "Event volume",
+      "chartDetail": "All tracked product events",
+      "total": "{count} recorded events",
+      "eventCount": "Recorded events",
+      "empty": "No events in this period",
+      "emptyDetail": "Finish onboarding, start a workout or use the coach to populate this view.",
+      "unavailable": "Browser storage is unavailable",
+      "unavailableDetail": "Allow site storage to record and view activity here.",
+      "eventsTitle": "Events by type",
+      "eventsDetail": "Counts for the selected period",
+      "events": {
+        "onboarding_completed": "Onboarding completed",
+        "workout_started": "Workout started",
+        "workout_paused": "Workout paused",
+        "workout_completed": "Workout logged",
+        "workout_abandoned": "Workout ended early",
+        "workout_adapted": "Workout adapted",
+        "coach_used": "Coach message sent",
+        "achievement_unlocked": "Achievement unlocked",
+        "notification_opened": "Notification opened",
+        "subscription_viewed": "Subscription viewed",
+        "subscription_started": "Trial started"
+      },
+      "coverage": "What the dashboard measures",
+      "notes": {
+        "retention": "Counts start when this dashboard’s event storage is enabled. The browser retains up to 4,000 recent events and shows up to 90 calendar days.",
+        "workouts": "Logged workouts include partial sessions. The 80% metric uses the planned set count after workout adjustments and excludes extra sessions, safety stops and seeded history.",
+        "subscription": "Trials in the app are simulated. Prices, acquisition costs and AI expenses above are planning estimates.",
+        "cohorts": "The product goal is three planned workouts in the first 14 days. Cohort activation and retention require shared user IDs and server-side event collection."
+      },
+      "demoBadge": "Simulated data",
+      "demoSubtitle": "Sample events for a simulated product launch.",
+      "source": "Data source",
+      "sources": {
+        "browser": "This browser",
+        "demo": "Sample data"
+      },
+      "showDemo": "Show sample data"
+    },
+    "cohorts": {
+      "title": "Cohorts",
+      "detail": "Grouped by onboarding week. A dash marks an observation window that’s still open.",
+      "week": "Week",
+      "size": "Users",
+      "metrics": {
+        "d1": "D1",
+        "d7": "D7",
+        "d14": "D14",
+        "d30": "D30",
+        "activation": "Activated",
+        "paid": "Paid D35"
+      },
+      "pending": "Observation window still open",
+      "fraction": "{count} of {total} users",
+      "retention": "Workout retention",
+      "returned": "Users who returned",
+      "comparable": "Same {users} users across all four days, from cohorts with a full 30-day window.",
+      "definitions": "Retention counts users who started a workout on the exact day after onboarding. Activation is three planned workouts with at least 80% of sets completed in the first 14 days. Paid D35 counts the first simulated payment by the end of day 35.",
+      "empty": "Cohort data is unavailable here",
+      "emptyDetail": "Multi-user cohorts need shared user IDs and billing events. Explore the view with a simulated dataset."
     }
   },
   "landing": {

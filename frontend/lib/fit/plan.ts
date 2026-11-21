@@ -127,7 +127,7 @@ function pickCandidates(muscle: Muscle, profile: Profile, used: Set<string>): Ex
 	});
 }
 
-function difficultyOf(profile: Profile, blocks: ExerciseBlock[]): PlannedWorkout["difficulty"] {
+export function difficultyOf(profile: Profile, blocks: ExerciseBlock[]): PlannedWorkout["difficulty"] {
 	const sets = blocks.reduce((n, b) => n + b.sets.length, 0);
 	const score = EXPERIENCE_LEVEL[profile.experience] + (sets >= 16 ? 1 : 0) + (profile.goal === "get-stronger" ? 1 : 0);
 	return Math.min(5, Math.max(1, score)) as PlannedWorkout["difficulty"];

@@ -79,6 +79,7 @@ describe("DB schema migrations", () => {
       level: { type: "character varying", nullable: true },
       days_per_week: { type: "smallint", nullable: true },
       duration_min: { type: "smallint", nullable: true },
+      onboarding: { type: "jsonb", nullable: true },
       ...ts,
     });
     expect(await columns("user_devices")).toMatchObject({

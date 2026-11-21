@@ -5,6 +5,21 @@ import { TrainerModel } from "./trainers.js";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
+// The rest of the onboarding answers (the AI plan's inputs), stored as-is in users.onboarding.
+const onboardingSchema = {
+  type: "object",
+  additionalProperties: false,
+  properties: {
+    goal: { enum: ["lose-fat", "build-muscle", "get-stronger", "stay-fit", "endurance"] },
+    goalText: { type: "string", maxLength: 500 },
+    equipment: { type: "array", maxItems: 10, uniqueItems: true, items: { enum: ["dumbbells", "bench", "barbell", "machines", "bands", "jump-rope"] } },
+    location: { enum: ["home", "gym", "hybrid"] },
+    limitations: { type: "array", maxItems: 10, uniqueItems: true, items: { enum: ["knees", "lower-back", "shoulders", "wrists", "heart-bp"] } },
+    limitationNote: { type: "string", maxLength: 1000 },
+    wearable: { enum: ["none", "apple", "garmin"] },
+  },
+} as const;
+
 const bodySchema = {
   type: "object",
   additionalProperties: false,
@@ -18,6 +33,7 @@ const bodySchema = {
     trainerId: { type: "string", minLength: 1, maxLength: 64 },
     daysPerWeek: { type: "integer", minimum: 1, maximum: 7 },
     durationMin: { type: "integer", minimum: 1, maximum: 600 },
+    onboarding: onboardingSchema,
   },
 } as const;
 
@@ -30,6 +46,7 @@ interface UserBody {
   trainerId?: string;
   daysPerWeek?: number;
   durationMin?: number;
+  onboarding?: Record<string, unknown>;
 }
 
 // The browser has no login yet, so a user is the device's progress token: the same guest user that progress sync
@@ -59,6 +76,7 @@ export function usersRoutes(db: Knex) {
           trainerId: trainerRowId,
           daysPerWeek: b.daysPerWeek ?? null,
           durationMin: b.durationMin ?? null,
+          onboarding: b.onboarding === undefined ? null : JSON.stringify(b.onboarding),
           updatedAt: db.fn.now(),
         });
         return reply.code(existed ? 200 : 201).send({

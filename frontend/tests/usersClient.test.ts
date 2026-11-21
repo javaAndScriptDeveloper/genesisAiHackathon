@@ -9,7 +9,13 @@ afterEach(() => vi.unstubAllGlobals());
 
 describe("userPayload", () => {
 	it("maps the onboarding profile to the API body", () => {
-		expect(userPayload(profile, "hanna")).toEqual({ name: "Kate", gender: "female", weightKg: 62.5, heightCm: 170, level: "beginner", daysPerWeek: 3, durationMin: 30, trainerId: "hanna" });
+		expect(userPayload(profile, "hanna")).toEqual({
+			name: "Kate", gender: "female", weightKg: 62.5, heightCm: 170, level: "beginner", daysPerWeek: 3, durationMin: 30, trainerId: "hanna",
+			onboarding: { goal: "stay-fit", equipment: [], location: "home", limitations: [], limitationNote: "", wearable: "none" },
+		});
+	});
+	it("sends the free-text goal with the onboarding answers", () => {
+		expect(userPayload({ ...profile, goalText: "run a 10k", limitations: ["knees"], limitationNote: "old injury" }, null).onboarding).toMatchObject({ goalText: "run a 10k", limitations: ["knees"], limitationNote: "old injury" });
 	});
 	it("omits gender and trainer when not chosen", () => {
 		const body = userPayload({ ...profile, gender: null }, null);

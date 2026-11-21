@@ -36,6 +36,11 @@ export const SAFETY_TEXT = [
 
 const SAFETY = /chest (pain|tight|pressure)|dizz|light-?headed|faint|pass(ed|ing)? out|short(ness)? of breath|can'?t breathe|numb|palpitation|heart (racing|pounding)|severe (pain|discomfort)|sharp pain|nausea/;
 
+/** The fixed reply for symptom messages, shared by the regex coach and the AI coach route. */
+export function safetyReplyText(): string {
+	return `Please stop and look after yourself first. ${SAFETY_TEXT.join(" ")} I won't change your plan for this, since the priority is how you feel right now.`;
+}
+
 export function isSafetyConcern(text: string): boolean {
 	return SAFETY.test(text.toLowerCase());
 }
@@ -70,7 +75,7 @@ export function coachReply(input: string, ctx: CoachContext): CoachReply {
 	if (isSafetyConcern(text)) {
 		return {
 			safety: true,
-			text: `Please stop and look after yourself first. ${SAFETY_TEXT.join(" ")} I won't change your plan for this, since the priority is how you feel right now.`,
+			text: safetyReplyText(),
 			actions: [],
 		};
 	}

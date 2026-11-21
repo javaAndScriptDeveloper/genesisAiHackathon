@@ -1,5 +1,6 @@
 import Fastify, { type FastifyInstance } from "fastify";
 import type { Knex } from "knex";
+import { meRoutes } from "./me.js";
 import { listTrainers } from "./trainers.js";
 import { progressRoutes } from "./progress/routes.js";
 import { usersRoutes } from "./users.js";
@@ -38,6 +39,7 @@ export function buildApp(db: Knex): FastifyInstance {
 
   app.register(progressRoutes(db));
   app.register(usersRoutes(db));
+  app.register(meRoutes(db));
 
   return app;
 }

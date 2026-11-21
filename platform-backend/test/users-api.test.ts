@@ -84,6 +84,21 @@ describe("users API", () => {
     expect(await count("users")).toBe(0);
   });
 
+  it("stores the onboarding answers and replaces them on a re-POST", async () => {
+    const onboarding = { goal: "build-muscle", goalText: "bigger arms", equipment: ["dumbbells", "bench"], location: "home", limitations: ["knees"], limitationNote: "old injury", wearable: "apple" };
+    expect((await call(A, { ...profile(), onboarding })).statusCode).toBe(201);
+    expect((await db("users").first("onboarding")).onboarding).toEqual(onboarding);
+    expect((await call(A, { ...profile(), onboarding: { ...onboarding, location: "gym" } })).statusCode).toBe(200);
+    expect((await db("users").first("onboarding")).onboarding.location).toBe("gym");
+  });
+
+  it("rejects invalid onboarding answers with 400", async () => {
+    for (const onboarding of [{ goal: "fly" }, { equipment: ["rocket"] }, { location: "moon" }, { limitations: ["eyes"] }, { wearable: "fitbit" }, { extra: 1 }, { goalText: "x".repeat(501) }]) {
+      expect((await call(A, { name: "Kate", onboarding })).statusCode).toBe(400);
+    }
+    expect(await count("users")).toBe(0);
+  });
+
   it("rejects an unknown trainer with 400", async () => {
     expect((await call(A, { name: "Kate", trainerId: "nobody" })).statusCode).toBe(400);
     expect(await count("users")).toBe(0);
