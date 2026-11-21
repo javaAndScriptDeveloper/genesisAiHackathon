@@ -314,7 +314,8 @@
         "empty": "Log this exercise twice to see your trend.",
         "best": "Best: {value} {unit}",
         "records": "Recent records",
-        "chart": "{name} trend"
+        "chart": "{name} trend",
+        "estimateNote": "Strength is an estimate (Brzycki formula), not a tested max."
       },
       "levels": {
         "1": "Starter",
@@ -394,6 +395,56 @@
         "badgeTitle": "Unlocked: {title}",
         "levelTitle": "Level {level} reached",
         "levelBody": "Your training keeps adding up. See your progress."
+      },
+      "chart": {
+        "periodLabel": "Chart period",
+        "p4w": "4 weeks",
+        "p3m": "3 months",
+        "pyear": "Year",
+        "empty": "No sessions in this period. Try a longer one.",
+        "prev": "Previous point",
+        "next": "Next point",
+        "change": "{value} {unit} over this period",
+        "onePoint": "One session so far",
+        "expand": "Expand",
+        "lockedTitle": "The full year is Premium",
+        "lockedBody": "Free shows the last 3 months of your trend. Premium unlocks a year of history."
+      },
+      "recordsScreen": {
+        "title": "Records",
+        "subtitle": "Your personal bests. Strength numbers are estimates.",
+        "filterLabel": "Exercise type",
+        "all": "All",
+        "weighted": "Weighted",
+        "bodyweight": "Bodyweight",
+        "exerciseLabel": "Exercise",
+        "emptyTitle": "No records yet",
+        "emptyBody": "Finish a couple of workouts and your personal bests appear here. Your first session sets the baseline.",
+        "emptyAction": "Go to Today",
+        "emptyFilter": "No exercises of this type yet.",
+        "metric": {
+          "e1rm": "Estimated 1RM",
+          "weight": "Heaviest weight",
+          "reps": "Most reps in a set",
+          "time": "Longest hold"
+        },
+        "chartLabel": "{name}, {metric}",
+        "best": "Best so far",
+        "bestEstimate": "Best estimate",
+        "sourceTitle": "Where this number comes from",
+        "sourceBody": "This is an estimate, not a tested max. We use the Brzycki formula (weight × 36 ÷ (37 − reps)) on your best set of 10 reps or fewer.",
+        "sourceExample": "{weight} × {reps} → ≈ {e1rm}",
+        "sourceNone": "No set of 1 to 10 reps with weight yet, so the chart shows your heaviest weight instead.",
+        "setRecordsTitle": "Set records",
+        "setRecordsHint": "Heaviest weight for exactly this many reps",
+        "setRecordsRepsLabel": "{reps} reps",
+        "setRecordsEmpty": "Log a set of 5, 8 or 10 reps to fill these in.",
+        "listTitle": "Record history",
+        "new": "New",
+        "gain": "+{value}",
+        "gainFirst": "up from {previous}",
+        "estimateNote": "estimate",
+        "allRecords": "All records for this exercise"
       }
     },
     "awards": {

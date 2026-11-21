@@ -46,3 +46,13 @@
 	color: var(--color-textMuted);
 	font-size: 1.4rem;
 }
+
+.link {
+	display: inline-flex;
+	align-items: center;
+	min-height: 4.4rem;
+	margin-top: var(--space-2);
+	color: var(--color-accentText);
+	font-size: 1.4rem;
+	font-weight: 600;
+}

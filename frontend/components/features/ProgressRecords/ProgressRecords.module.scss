@@ -1,0 +1,147 @@
+@use "partials/corners";
+
+.root {
+	padding-bottom: var(--space-6);
+
+	.content {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-4);
+		padding: 0 var(--space-4);
+	}
+
+	.skeleton {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-3);
+	}
+
+	.card {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-4);
+	}
+
+	.h2 {
+		margin-bottom: var(--space-2);
+		font-size: 1.6rem;
+	}
+
+	.h4 {
+		margin: 0;
+		font-size: 1.4rem;
+	}
+
+	.hint {
+		margin: 0;
+		color: var(--color-textMuted);
+		font-size: 1.3rem;
+		line-height: 1.5;
+	}
+
+	.block {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-2);
+	}
+
+	.formula {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-2);
+		padding: var(--space-3);
+		background: var(--color-surfaceMuted);
+		@include corners.radius(var(--radius-card));
+	}
+
+	.formulaTitle {
+		display: flex;
+		align-items: center;
+		gap: var(--space-1);
+		margin: 0;
+		font-size: 1.4rem;
+	}
+
+	.example {
+		margin: 0;
+		font-size: 1.8rem;
+		font-weight: 700;
+		font-variant-numeric: tabular-nums;
+	}
+
+	.sets {
+		display: grid;
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		gap: var(--space-2);
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	.set {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-1);
+		padding: var(--space-2) var(--space-3);
+		border: 0.1rem solid var(--color-border);
+		font-size: 1.6rem;
+		@include corners.radius(var(--radius-card));
+	}
+
+	.setLabel {
+		color: var(--color-textSubtle);
+		font-size: 1.2rem;
+	}
+
+	.list {
+		display: flex;
+		flex-direction: column;
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	.row {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) auto;
+		gap: var(--space-1) var(--space-3);
+		padding: var(--space-3) 0;
+		border-bottom: 0.1rem solid var(--color-border);
+
+		&:first-child {
+			padding-top: 0;
+		}
+
+		&:last-child {
+			padding-bottom: 0;
+			border-bottom: 0;
+		}
+	}
+
+	.rowName {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: var(--space-2);
+		font-size: 1.5rem;
+		font-weight: 600;
+	}
+
+	.rowValue {
+		font-size: 1.5rem;
+		text-align: right;
+		font-variant-numeric: tabular-nums;
+	}
+
+	.rowMeta {
+		color: var(--color-textSubtle);
+		font-size: 1.2rem;
+	}
+
+	.rowGain {
+		color: var(--color-successText);
+		font-size: 1.2rem;
+		font-weight: 600;
+		text-align: right;
+	}
+}
