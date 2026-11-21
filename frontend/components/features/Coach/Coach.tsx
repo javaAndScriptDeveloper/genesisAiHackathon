@@ -58,7 +58,7 @@ export function Coach() {
 	useEffect(() => {
 		if (!awaiting) return;
 		const { added, removed } = diffPlans(awaiting.before, state.planned, today);
-		const lines = [state.planSummary ?? t("fit.ai.rebuilt")];
+		const lines = [state.planSummary || t("fit.ai.rebuilt")];
 		if (added.length) lines.push(t("fit.ai.added", { list: added.join(", ") }));
 		if (removed.length) lines.push(t("fit.ai.removed", { list: removed.join(", ") }));
 		dispatch({ type: "coach-message", message: { id: uid(), from: "coach", text: lines.join("\n"), at: new Date().toISOString() } });

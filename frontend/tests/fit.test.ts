@@ -290,6 +290,8 @@ describe("AI plan state", () => {
 	it("update-profile sets planSource rules and set-backend stores ids", () => {
 		const s0: FitState = { ...emptyState(), profile, planned: generatePlan(profile, today, 4), planSource: "ai" };
 		expect(run(s0, { type: "update-profile", profile: { ...profile, daysPerWeek: 4 }, units: "metric", today }).planSource).toBe("rules");
+		// A rule-built plan has no trainer summary, so the AI summary card does not describe a plan it didn't make.
+		expect(run({ ...s0, planSummary: "AI week" }, { type: "update-profile", profile: { ...profile, daysPerWeek: 4 }, units: "metric", today }).planSummary).toBeNull();
 		expect(run(s0, { type: "set-backend", backend: { userId: 1, deviceId: 2 } }).backend).toEqual({ userId: 1, deviceId: 2 });
 	});
 });

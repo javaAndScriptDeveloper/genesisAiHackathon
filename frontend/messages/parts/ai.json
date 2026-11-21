@@ -44,6 +44,11 @@
         "failed": "Couldn't run the check. Try again."
       },
       "trainerFallback": "Your trainer",
+      "planCard": {
+        "title": "{name} · Your plan",
+        "ai": "AI plan",
+        "standard": "Standard plan"
+      },
       "recreate": "Recreate my plan",
       "recreating": "Recreating…",
       "rebuildingChat": "{name} is rebuilding your plan…",

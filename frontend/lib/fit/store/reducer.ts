@@ -198,8 +198,8 @@ function mergeUpcoming(state: FitState, incoming: PlannedWorkout[], today: ISODa
 }
 
 function rebuildUpcoming(state: FitState, profile: Profile, today: ISODate): FitState {
-	// The new sessions have not been checked against today's readiness yet: clear the check so it runs again.
-	return { ...mergeUpcoming(state, generatePlan(profile, today, 4), today), profile, daily: null };
+	// A rule-built plan: no trainer summary, and the new sessions have not been checked against today's readiness yet.
+	return { ...mergeUpcoming(state, generatePlan(profile, today, 4), today), profile, planSource: "rules", planSummary: null, daily: null };
 }
 
 function unlockNew(state: FitState, today: ISODate, now: string): FitState {
