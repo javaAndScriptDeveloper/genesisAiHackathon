@@ -132,12 +132,13 @@ export function registerUserRoutes(app: FastifyInstance, db: Knex): void {
     { schema: syncSchema },
     async (req, reply) => {
       const { id: userId, deviceId } = req.params;
-      const { date, scenario = "normal" } = req.body;
+      const { date, scenario } = req.body;
       const device = await db("user_devices").where({ id: deviceId, userId }).first("id");
       if (!device) return reply.code(404).send({ error: "device not found" });
 
-      const snapshot = generateDailyStats(userId, date, scenario);
-      await db.transaction(async (trx) => {
+      // A sync without a scenario is idempotent for a date that already has data: it never overwrites a
+      // simulated night with a "normal" one. An explicit scenario always appends (latest row per date wins).
+      const snapshot = await db.transaction(async (trx) => {
         const previous = Array.from({ length: 6 }, (_, i) => shiftDate(date, i - 6));
         const have = await trx("user_device_data_snapshots")
           .where({ userId, deviceId })
@@ -147,8 +148,17 @@ export function registerUserRoutes(app: FastifyInstance, db: Knex): void {
         const rows = previous
           .filter((d) => !existing.has(d))
           .map((d) => ({ userId, deviceId, data: JSON.stringify(generateDailyStats(userId, d, "normal")) }));
-        rows.push({ userId, deviceId, data: JSON.stringify(snapshot) });
-        await trx("user_device_data_snapshots").insert(rows);
+        const current: { data: DailyStats } | undefined = scenario
+          ? undefined
+          : await trx("user_device_data_snapshots")
+              .where({ userId, deviceId })
+              .whereRaw("data->>'date' = ?", [date])
+              .orderBy("id", "desc")
+              .first("data");
+        const result = current?.data ?? generateDailyStats(userId, date, scenario ?? "normal");
+        if (!current) rows.push({ userId, deviceId, data: JSON.stringify(result) });
+        if (rows.length > 0) await trx("user_device_data_snapshots").insert(rows);
+        return result;
       });
       return { snapshot };
     },

@@ -130,6 +130,29 @@ describe("users and devices endpoints", () => {
       expect(await db("user_device_data_snapshots").where({ userId })).toHaveLength(8);
     });
 
+    it("a sync without scenario keeps an existing bad night for that date", async () => {
+      const { userId, sync, snaps } = await setup();
+      await sync({ date: "2026-11-21", scenario: "bad-night" });
+      const count = (await db("user_device_data_snapshots").where({ userId })).length;
+      const res = await sync({ date: "2026-11-21" });
+      expect(res.statusCode).toBe(200);
+      expect(res.json().snapshot.scenario).toBe("bad-night");
+      expect(res.json().snapshot.readiness).toBeLessThan(40);
+      const list = await snaps("?days=7");
+      expect(list[6].scenario).toBe("bad-night");
+      expect(list[6].readiness).toBeLessThan(40);
+      expect(await db("user_device_data_snapshots").where({ userId })).toHaveLength(count);
+    });
+
+    it("an explicit scenario still appends a new row", async () => {
+      const { userId, sync, snaps } = await setup();
+      await sync({ date: "2026-11-21", scenario: "bad-night" });
+      const res = await sync({ date: "2026-11-21", scenario: "normal" });
+      expect(res.json().snapshot.scenario).toBe("normal");
+      expect((await snaps("?days=7"))[6].scenario).toBe("normal");
+      expect(await db("user_device_data_snapshots").where({ userId })).toHaveLength(8);
+    });
+
     it("sync rejects a device of another user", async () => {
       const a = await setup();
       const b = await setup();
