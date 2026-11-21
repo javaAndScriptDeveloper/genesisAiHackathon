@@ -3,6 +3,7 @@ import { getExercise } from "./exercises";
 import { badges } from "../progress/badges";
 import { progressOf } from "./store/progressStats";
 import { reducer } from "./store/reducer";
+import { DEMO_PHOTO_AFTER, DEMO_PHOTO_BEFORE } from "./demoPhotos";
 import { emptyState } from "./seed";
 import type { FitState, PlannedWorkout, Profile, SessionLog } from "./types";
 
@@ -73,7 +74,16 @@ function s2(today: ISODate): FitState {
 	const createdAt = `${today}T08:00:00.000Z`;
 	const ev = (id: string, kind: "badge" | "level" | "report", refId: string) => ({ id, kind, refId, createdAt, seenAt: null });
 	const progressEvents = [...lastTwo.map((id) => ev(`badge:${id}`, "badge", id)), ev(`level:${level.level}`, "level", String(level.level)), ev(`report:${addDays(mondayOf(today), -7)}`, "report", addDays(mondayOf(today), -7))];
-	return { ...state, progressEvents };
+	// Synthetic (illustrated, demo) check-in photos at the start and end of the 12-week history, for AI photo analysis testing.
+	const weights = state.bodyWeights;
+	const nearest = (date: ISODate) => weights.reduce<{ date: string; kg: number } | undefined>((best, w) => (!best || Math.abs(Date.parse(w.date) - Date.parse(date)) < Math.abs(Date.parse(best.date) - Date.parse(date)) ? w : best), undefined)?.kg;
+	const firstDate = addDays(today, -7 * 12 + 3);
+	const lastDate = addDays(today, -3);
+	const photos = [
+		{ id: "demo-photo-before", date: firstDate, dataUrl: DEMO_PHOTO_BEFORE, weightKg: nearest(firstDate) },
+		{ id: "demo-photo-after", date: lastDate, dataUrl: DEMO_PHOTO_AFTER, weightKg: nearest(lastDate) },
+	];
+	return { ...state, progressEvents, photos };
 }
 
 export function scenarioState(id: ScenarioId, today: ISODate, opts: { premium?: boolean } = {}): FitState {

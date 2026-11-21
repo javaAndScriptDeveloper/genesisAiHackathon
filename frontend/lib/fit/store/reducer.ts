@@ -34,6 +34,7 @@ import type {
 	NotificationSettings,
 	Perceived,
 	PhotoCheckIn,
+	PhotoInsight,
 	PlannedWorkout,
 	Profile,
 	SessionLog,
@@ -96,6 +97,8 @@ export type Action =
 	| { type: "coach-mark"; messageId: string; appliedAction: string }
 	| { type: "coach-apply"; messageId: string; action: CoachAction; today: ISODate; now: string; reply: CoachMessage }
 	| { type: "notification-read"; id: string }
+	| { type: "notification-voice"; id: string; text: string }
+	| { type: "notification-voice-failed"; id: string }
 	| { type: "notifications-read-all" }
 	| { type: "notification-settings"; settings: NotificationSettings }
 	| { type: "water"; date: ISODate; delta: number }
@@ -107,6 +110,8 @@ export type Action =
 	| { type: "add-bp"; systolic: number; diastolic: number; now: string }
 	| { type: "remove-bp"; id: string }
 	| { type: "add-photo"; photo: PhotoCheckIn }
+	| { type: "photo-ai-consent"; at: string }
+	| { type: "add-photo-insight"; insight: PhotoInsight }
 	| { type: "remove-photo"; id: string }
 	| { type: "add-body-weight"; date: ISODate; kg: number; at?: string }
 	| { type: "partner"; id: string; status: "invited" | "accepted" | null; now?: string }
@@ -264,8 +269,8 @@ function recordEvents(state: FitState, events: ProgressEvent[], now: string): Fi
 	const next = reducer(state, { type: "record-events", events: fresh });
 	if (!state.notificationSettings.enabled.achievement) return next;
 	const notes = fresh.flatMap((e): AppNotification[] => {
-		if (e.kind === "badge") return [{ id: `n-badge-${e.refId}`, kind: "achievement", title: t("fit.progress.notify.badgeTitle", { title: t(`fit.progress.badge.${e.refId}.title`) }), body: t(`fit.progress.badge.${e.refId}.desc`), createdAt: now, read: false, href: "/progress" }];
-		if (e.kind === "level") return [{ id: `n-level-${e.refId}`, kind: "achievement", title: t("fit.progress.notify.levelTitle", { level: e.refId }), body: t("fit.progress.notify.levelBody"), createdAt: now, read: false, href: "/progress" }];
+		if (e.kind === "badge") return [{ id: `n-badge-${e.refId}`, kind: "achievement", title: t("fit.progress.notify.badgeTitle", { title: t(`fit.progress.badge.${e.refId}.title`) }), body: t(`fit.progress.badge.${e.refId}.desc`), createdAt: now, read: false, href: "/progress", nudge: { kind: "achievement", facts: { title: t(`fit.progress.badge.${e.refId}.title`) } } }];
+		if (e.kind === "level") return [{ id: `n-level-${e.refId}`, kind: "achievement", title: t("fit.progress.notify.levelTitle", { level: e.refId }), body: t("fit.progress.notify.levelBody"), createdAt: now, read: false, href: "/progress", nudge: { kind: "achievement", facts: { title: t("fit.progress.notify.levelTitle", { level: e.refId }) } } }];
 		return [];
 	});
 	return appendNotifications(next, notes);
@@ -298,6 +303,8 @@ export function reducer(state: FitState, action: Action): FitState {
 				archivedWeeks: action.state.archivedWeeks ?? [],
 				archiveQueue: action.state.archiveQueue ?? [],
 				backend: tokenBackend(action.state.backend),
+				photoInsights: (action.state.photoInsights ?? []).map((i) => ({ ...i, beforePhotoId: i.beforePhotoId ?? null, afterPhotoId: i.afterPhotoId ?? null })),
+				photoAiConsentAt: action.state.photoAiConsentAt ?? null,
 			};
 		case "reset":
 			return emptyState();
@@ -527,6 +534,17 @@ export function reducer(state: FitState, action: Action): FitState {
 		}
 		case "notification-read":
 			return { ...state, notifications: state.notifications.map((n) => (n.id === action.id ? { ...n, read: true } : n)) };
+		case "notification-voice": {
+			const text = action.text.trim();
+			const target = state.notifications.find((n) => n.id === action.id);
+			if (!target || text === "" || target.aiText !== undefined) return state;
+			return { ...state, notifications: state.notifications.map((n) => (n.id === action.id ? { ...n, aiText: text } : n)) };
+		}
+		case "notification-voice-failed": {
+			const target = state.notifications.find((n) => n.id === action.id);
+			if (!target || target.aiFailed) return state;
+			return { ...state, notifications: state.notifications.map((n) => (n.id === action.id ? { ...n, aiFailed: true } : n)) };
+		}
 		case "notifications-read-all":
 			return { ...state, notifications: state.notifications.map((n) => ({ ...n, read: true })) };
 		case "notification-settings":
@@ -554,6 +572,10 @@ export function reducer(state: FitState, action: Action): FitState {
 			return { ...state, bloodPressure: state.bloodPressure.filter((b) => b.id !== action.id) };
 		case "add-photo":
 			return { ...state, photos: [action.photo, ...state.photos].slice(0, 12) };
+		case "photo-ai-consent":
+			return { ...state, photoAiConsentAt: action.at };
+		case "add-photo-insight":
+			return state.photoInsights.some((i) => i.id === action.insight.id) ? state : { ...state, photoInsights: [action.insight, ...state.photoInsights] };
 		case "remove-photo":
 			return { ...state, photos: state.photos.filter((p) => p.id !== action.id) };
 		case "add-body-weight":
@@ -643,6 +665,8 @@ export function reducer(state: FitState, action: Action): FitState {
 			const freshDevice = state.history.length === 0;
 			const have = new Set(state.progressEvents.map((e) => e.id));
 			const events = (r.progressEvents ?? []).filter((e) => !have.has(e.id));
+			const haveInsight = new Set(state.photoInsights.map((i) => i.id));
+			const insights = (r.photoInsights ?? []).filter((i) => !haveInsight.has(i.id));
 			return {
 				...state,
 				history: freshDevice && r.history ? r.history : state.history,
@@ -652,6 +676,7 @@ export function reducer(state: FitState, action: Action): FitState {
 				goalWeightKg: state.goalWeightKg === null && r.goalWeightKg != null ? r.goalWeightKg : state.goalWeightKg,
 				goalSetAt: state.goalWeightKg === null && r.goalWeightKg != null ? r.goalSetAt ?? null : state.goalSetAt,
 				progressEvents: events.length ? [...state.progressEvents, ...events] : state.progressEvents,
+				photoInsights: insights.length ? [...state.photoInsights, ...insights] : state.photoInsights,
 			};
 		}
 		case "remove-pause": {

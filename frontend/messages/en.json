@@ -209,6 +209,28 @@
       "demoNote": "Simulated values, not real measurements.",
       "linkedDemo": "{name} is linked, but live data needs the native app. Values shown are simulated."
     },
+    "nudges": {
+      "streakChip": "{n}-week streak",
+      "levelChip": "Level {n}",
+      "dismiss": "Dismiss",
+      "open": "Open",
+      "fromTrainer": "From {name}",
+      "achievementsTitle": "Achievements",
+      "achievementsAll": "See all",
+      "achievementsNext": "Next up",
+      "achievementsEmpty": "Finish a workout to earn your first badge.",
+      "badgeProgress": "{current} of {target}",
+      "share": "Share",
+      "shareStreak": "Share streak",
+      "shareStreakText": "{n}-week streak in Personal Coach. Consistency is the whole game.",
+      "streakHeadline": "Streak",
+      "streakLine": "weeks in a row",
+      "shareReportText": "My week: {n} workouts done in Personal Coach.",
+      "reportHeadline": "My week",
+      "reportLine": "workouts done",
+      "achievementHeadline": "Unlocked",
+      "levelHeadline": "Level up"
+    },
     "opt": {
       "gender": {
         "female": "Female",
@@ -392,16 +414,6 @@
     "gate": {
       "cta": "See Premium"
     },
-    "insight": {
-      "headNone": "Your insights start with your first workout",
-      "headDone": "Weekly goal reached. Well done.",
-      "headSome": "On track, {left} more to go this week",
-      "headFresh": "A fresh week, start with your next session",
-      "tipConsistent": "Consistency is your superpower. Keep protecting your rest days.",
-      "tipVolumeDown": "Volume dipped compared with last week. Normal after a lighter week, so build back gradually.",
-      "tipStreak": "{n} weeks in a row at your weekly goal. Rest days never break it.",
-      "tipDefault": "Small, steady sessions beat rare heroic ones. Aim for your next planned day."
-    },
     "progress": {
       "push": {
         "weekly": "Week done: {done} of {goal} · streak {streak} weeks"
@@ -417,40 +429,17 @@
       "toGain": "to gain to reach your goal",
       "title": "Progress",
       "subtitle": "Your training, in numbers",
-      "overview": "Overview",
-      "history": "History",
-      "awards": "Awards",
-      "checkins": "Check-ins",
-      "demoNote": "Includes 5 weeks of sample history. Remove it anytime in Settings.",
-      "period": "Period",
+      "demoNote": "Includes 5 weeks of demo history. Remove it anytime in Settings.",
       "thisWeek": "This week",
-      "last4": "Last 4 weeks",
-      "sessions": "Sessions",
-      "completedVsPlanned": "done / planned",
-      "ofWeeklyGoal": "of weekly goal",
       "time": "Training time",
-      "volume": "Volume",
-      "streakLabel": "Streak",
-      "longest": "best {n} wk",
-      "consistency": "Consistency",
-      "consistencyBody": "Your last 4 finished weeks, recent ones weigh more. Paused weeks are skipped.",
       "consistencyEmpty": "Your score appears after your first full week of training.",
-      "insight": "Training insight",
-      "summaryNone": "Finish your first workout and your personal summary shows up here.",
-      "summary": "You've done {done} of {planned} planned sessions this week with {score}% consistency over four weeks. Your training volume is {trend} compared with last week.",
-      "trendUp": "up or steady",
-      "trendDown": "lower",
       "shareTitle": "My progress",
       "shareText": "This week: {done}/{planned} workouts toward my weekly goal, {streak}-week streak, level {level} in Personal Coach.",
       "shareAwards": "Level {level}, {xp} XP and {badges} badges in Personal Coach.",
       "shared": "Shared",
       "shareAchievements": "Share my achievements",
-      "weeklyVolume": "Weekly volume",
-      "noData": "Not enough data yet.",
       "calendar": {
         "title": "Training calendar",
-        "open": "Open calendar",
-        "openAria": "Training calendar, open the full calendar",
         "screenTitle": "Calendar",
         "screenSubtitle": "Your plan, workouts and streak",
         "prevMonth": "Previous month",
@@ -568,13 +557,6 @@
           "removed": "Pause removed"
         }
       },
-      "bodyWeight": "Body weight",
-      "weightNeedMore": "Log your weight at least twice to see a trend.",
-      "insightsLockedTitle": "Advanced training insights",
-      "insightsLockedBody": "Strength progression per exercise and muscle-group balance, built from your own history.",
-      "strength": "Strength progression",
-      "muscles": "Muscle balance",
-      "premiumActive": "Premium active",
       "historyEmpty": "No workouts yet",
       "historyEmptyBody": "Your completed sessions will appear here.",
       "adaptedCount": "{n} adjustments",
@@ -588,7 +570,7 @@
       "logWeight": "Log your weight",
       "weightSaved": "Weight saved",
       "photos": "Photo check-ins",
-      "photosNote": "Photos are stored only in this browser and never uploaded.",
+      "photosNote": "Photos are stored only in this browser. If you ask for an AI analysis, the two photos you pick are sent once and not saved.",
       "addPhoto": "Add photo",
       "photoAdded": "Photo added",
       "photoError": "Couldn't read that photo",
@@ -601,7 +583,6 @@
       "removeConfirm": "Remove",
       "photosLockedTitle": "Unlimited photo check-ins",
       "photosLockedBody": "Free includes {n} photos. Premium keeps your whole journey.",
-      "consistencyDelta": "{sign}{n} vs last week",
       "weekdays": {
         "0": "Monday",
         "1": "Tuesday",
@@ -660,14 +641,51 @@
         "next": "Next week's plan",
         "nextEmpty": "No plan for next week yet.",
         "workoutDay": "Workout",
-        "restDay": "Rest"
+        "restDay": "Rest",
+        "noData": "Nothing to report yet",
+        "noDataBody": "Log your first workout and this week's report will show up here.",
+        "push": "Notification preview",
+        "creditedTitle": "Week counted toward your streak",
+        "notCreditedTitle": "Week not counted this time",
+        "pausedTitle": "Paused week",
+        "pausedBody": "You paused this week, so your streak stays as it was.",
+        "doneOfGoal": "{done} of {goal} workouts",
+        "creditedBody": "You reached your weekly goal.",
+        "notCreditedBody": "Every workout still counts. A fresh week starts Monday.",
+        "compare": "Compared with the week before",
+        "col": {
+          "metric": "Metric",
+          "now": "This week",
+          "before": "Before"
+        },
+        "metric": {
+          "workouts": "Workouts",
+          "minutes": "Minutes",
+          "qualitySets": "Quality sets",
+          "xp": "XP"
+        },
+        "delta": {
+          "up": "{n} more",
+          "down": "{n} fewer",
+          "same": "No change"
+        },
+        "improvement": "What improved",
+        "noImprovement": "Nothing to compare yet. Keep logging and it will show up here.",
+        "advice": "One suggestion",
+        "goalTitle": "Goal for next week",
+        "goalHint": "Quality workouts per week, 2 to 5.",
+        "goalOption": "{n} workouts",
+        "recommended": "Recommended",
+        "currentGoal": "Current",
+        "goalSaved": "Weekly goal set to {n}."
       },
       "exercise": {
         "title": "Your progress",
         "empty": "Log this exercise twice to see your trend.",
         "best": "Best: {value} {unit}",
         "records": "Recent records",
-        "chart": "{name} trend"
+        "chart": "{name} trend",
+        "estimateNote": "Strength is an estimate (Brzycki formula), not a tested max."
       },
       "levels": {
         "1": "Starter",
@@ -685,7 +703,8 @@
         "start": "Start with one short planned session. Your progress picks up from there.",
         "goal-remaining": "{n} more quality sessions to reach this week's goal. You still have time.",
         "near-record": "You are close to your best on {exercise}. Another go could reach {target}.",
-        "plateau": "{exercise} has held steady for a while. Try a small change, like one more rep or a slower tempo."
+        "plateau": "{exercise} has held steady for a while. Try a small change, like one more rep or a slower tempo.",
+        "goal-remaining-one": "1 more quality session to reach this week's goal. You still have time."
       },
       "improvements": {
         "record": "{exercise}: {before} to {now}, up {delta}",
@@ -746,12 +765,211 @@
         "badgeTitle": "Unlocked: {title}",
         "levelTitle": "Level {level} reached",
         "levelBody": "Your training keeps adding up. See your progress."
-      }
+      },
+      "main": {
+        "report": {
+          "title": "Your weekly report is ready",
+          "open": "Open"
+        },
+        "goal": {
+          "title": "Weekly goal",
+          "count": "{done} of {goal}",
+          "unit": "quality workouts",
+          "left": "{n} more workouts to reach your goal this week.",
+          "leftOne": "One more workout and this week counts towards your streak.",
+          "reached": "Goal reached. This week counts towards your streak.",
+          "paused": "This week is paused. Train if you feel like it, no pressure.",
+          "start": "Start workout",
+          "stripAria": "This week, {summary}. Open the calendar",
+          "day": "{day}: {state}",
+          "state": {
+            "done": "done",
+            "rest": "rest day",
+            "today": "today",
+            "upcoming": "workout ahead",
+            "missed": "not done"
+          },
+          "ofGoal": "of {goal}",
+          "counts": "Every quality workout this week still counts. Monday starts a fresh week."
+        },
+        "consistency": {
+          "title": "Consistency",
+          "of": "/100",
+          "note": "4 weeks, recent ones weigh more",
+          "barsAria": "Week scores, oldest to newest: {list}"
+        },
+        "streak": {
+          "title": "Streak",
+          "weeks": "weeks",
+          "week": "week",
+          "best": "Best {n}",
+          "zero": "Reach your weekly goal to start one.",
+          "share": "Share your progress"
+        },
+        "first": {
+          "title": "Your first workout starts your progress",
+          "body": "Consistency and streak show up once you start training."
+        },
+        "level": {
+          "title": "Level {level} · {name}",
+          "xp": "{into} / {span} XP",
+          "toNext": "{n} XP to level {next}",
+          "empty": "Every quality workout earns XP.",
+          "new": "New level"
+        },
+        "achievements": {
+          "next": "Next achievements",
+          "recent": "Recently earned",
+          "more": "{n} more"
+        },
+        "improved": {
+          "title": "What improved"
+        },
+        "next": {
+          "title": "What next",
+          "start": "Start workout",
+          "calendar": "Open calendar"
+        },
+        "records": {
+          "title": "New records",
+          "new": "New",
+          "estimate": "≈ {value}",
+          "up": "up {delta}",
+          "e1rm": "estimated 1RM",
+          "weight": "best weight",
+          "reps": "best reps",
+          "time": "best time"
+        },
+        "nav": {
+          "title": "More",
+          "calendar": "Calendar",
+          "calendarHint": "Plan, streak and pauses",
+          "weight": "Body weight",
+          "weightHint": "Weigh-ins and trend",
+          "report": "Weekly report",
+          "reportHint": "Week of {date}",
+          "reportNone": "Your first report arrives on Monday",
+          "achievements": "Achievements",
+          "achievementsHint": "{n} of {total} earned",
+          "history": "History",
+          "historyHint": "Every finished workout",
+          "checkins": "Check-ins",
+          "checkinsHint": "Photos and weight log",
+          "new": "New",
+          "newCount": "+{n}"
+        }
+      },
+      "unit": {
+        "reps": "reps",
+        "s": "s"
+      },
+      "chart": {
+        "periodLabel": "Chart period",
+        "p4w": "4 weeks",
+        "p3m": "3 months",
+        "pyear": "Year",
+        "empty": "No sessions in this period. Try a longer one.",
+        "prev": "Previous point",
+        "next": "Next point",
+        "change": "{value} {unit} over this period",
+        "onePoint": "One session so far",
+        "expand": "Expand",
+        "lockedTitle": "The full year is Premium",
+        "lockedBody": "Free shows the last 3 months of your trend. Premium unlocks a year of history."
+      },
+      "recordsScreen": {
+        "title": "Records",
+        "subtitle": "Your personal bests. Strength numbers are estimates.",
+        "filterLabel": "Exercise type",
+        "all": "All",
+        "weighted": "Weighted",
+        "bodyweight": "Bodyweight",
+        "exerciseLabel": "Exercise",
+        "emptyTitle": "No records yet",
+        "emptyBody": "Finish a couple of workouts and your personal bests appear here. Your first session sets the baseline.",
+        "emptyAction": "Go to Today",
+        "emptyFilter": "No exercises of this type yet.",
+        "metric": {
+          "e1rm": "Estimated 1RM",
+          "weight": "Heaviest weight",
+          "reps": "Most reps in a set",
+          "time": "Longest hold"
+        },
+        "chartLabel": "{name}, {metric}",
+        "sourceTitle": "Where this number comes from",
+        "sourceBody": "This is an estimate, not a tested max. We use the Brzycki formula (weight × 36 ÷ (37 − reps)) on your best set of 10 reps or fewer.",
+        "sourceExample": "{weight} × {reps} → ≈ {e1rm}",
+        "sourceNone": "No set of 1 to 10 reps with weight yet, so the chart shows your heaviest weight instead.",
+        "setRecordsTitle": "Set records",
+        "setRecordsHint": "Heaviest weight for exactly this many reps",
+        "setRecordsRepsLabel": "{reps} reps",
+        "setRecordsEmpty": "Log a set of 5, 8 or 10 reps to fill these in.",
+        "listTitle": "Record history",
+        "new": "New",
+        "gain": "+{value}",
+        "estimateNote": "estimate",
+        "allRecords": "All records for this exercise",
+        "approx": "≈ {value}"
+      },
+      "weight": {
+        "screenTitle": "Body weight",
+        "screenSubtitle": "Your trend, not the daily noise",
+        "start": "Start",
+        "current": "Now",
+        "change": "Change",
+        "periods": {
+          "label": "Period",
+          "month": "Month",
+          "3m": "3 months",
+          "year": "Year"
+        },
+        "chartLabel": "Body weight chart",
+        "chartHint": "Grey dots are weigh-ins, the line is the 7-day average. Daily swings are normal, follow the line.",
+        "chartSummary": "{n} weigh-ins from {from} to {to}, latest {last}",
+        "avg": "7-day average",
+        "weighIn": "Weigh-in",
+        "expand": "Expand",
+        "goalLine": "Goal",
+        "scrub": "Use the left and right arrow keys to move between weigh-ins.",
+        "empty": "No weigh-ins yet",
+        "emptyBody": "Enter your weight below. A trend appears after your second weigh-in.",
+        "singleBody": "Weigh in again to see how it changes.",
+        "periodEmpty": "No weigh-ins in this period",
+        "periodEmptyBody": "Pick a longer period or add a weigh-in below.",
+        "lockedTitle": "A full year of weight",
+        "lockedBody": "Free keeps the last 3 months. Premium shows your whole history.",
+        "bmiTitle": "Body mass index",
+        "bmiValue": "BMI {value}",
+        "bmiScale": "BMI scale by WHO classification",
+        "bmi": {
+          "under": "Below 18.5",
+          "normal": "18.5–24.9",
+          "over": "25–29.9",
+          "obese": "30 and above"
+        },
+        "bmiText": {
+          "under": "Your BMI is below the 18.5 mark of the WHO classification.",
+          "normal": "Your BMI is within the 18.5–24.9 range by WHO classification.",
+          "over": "Your BMI is within the 25–29.9 range by WHO classification.",
+          "obese": "Your BMI is 30 or above by WHO classification."
+        },
+        "bmiNote": "BMI ignores muscle mass, so it can read high for people who train. Treat it as one number, not a verdict.",
+        "bmiNeed": "Add your height in your profile and a weigh-in to see BMI.",
+        "todayTitle": "Weight today",
+        "todayLabel": "Weight",
+        "save": "Save",
+        "saved": "Weight saved",
+        "goalLeft": "{n} {unit} to goal",
+        "goalNone": "Set a goal weight in Check-ins to track the distance.",
+        "goalReached": "You are at your goal weight.",
+        "errorRange": "Enter a weight between {min} and {max} {unit}."
+      },
+      "overview": "Overview",
+      "history": "History",
+      "awards": "Awards",
+      "checkins": "Check-ins"
     },
     "awards": {
-      "sharePreview": "Preview to share",
-      "copySummary": "Copy summary",
-      "copyManually": "The text is selected. Copy it using your device’s menu.",
       "level": "Level",
       "overall": "Overall",
       "workouts": "Workouts",
@@ -760,7 +978,7 @@
       "collection": "Collection",
       "collected": "{n} of {total} collected",
       "aheadOf": "Ahead of {percent} of users",
-      "demoRarity": "{pct}% of users unlock this",
+      "demoRarity": "Demo rarity: {pct}% unlocked",
       "tier": {
         "common": "Common",
         "rare": "Rare",
@@ -788,7 +1006,10 @@
       "badges": "Badges",
       "earned": "Earned",
       "progress": "Progress",
-      "progressOf": "{n} of {total}"
+      "progressOf": "{n} of {total}",
+      "sharePreview": "Preview to share",
+      "copySummary": "Copy summary",
+      "copyManually": "The text is selected. Copy it using your device’s menu."
     },
     "history": {
       "totals": "Totals",
@@ -807,7 +1028,44 @@
       "history": "Weight history",
       "entryCount": "{n} entries",
       "historyEmpty": "No entries yet",
-      "historyEmptyBody": "Every weight you save appears here with the date and time."
+      "historyEmptyBody": "Every weight you save appears here with the date and time.",
+      "showAll": "Show all ({n})",
+      "showLess": "Show less"
+    },
+    "photoAi": {
+      "button": "Analyze with AI",
+      "title": "AI photo analysis",
+      "pickTitle": "Choose two photos",
+      "pickHint": "We compare an earlier photo with a later one. Tap to change your choice.",
+      "selectedBefore": "Selected: before",
+      "selectedAfter": "Selected: after",
+      "notSelected": "Not selected",
+      "needTwo": "Pick two photos taken on different days.",
+      "run": "Analyze",
+      "consentTitle": "Send photos to AI?",
+      "consentBody": "The two photos you chose are sent once to our AI for analysis. They are not saved on our servers.",
+      "consentHttp": "Demo note: this connection is not encrypted yet (HTTP), so only use photos you are comfortable sharing.",
+      "consentRemember": "Don't ask again",
+      "consentSend": "Send",
+      "consentCancel": "Cancel",
+      "loading": "Looking at your photos...",
+      "resultTitle": "Your analysis",
+      "period": "{before} to {after}",
+      "observations": "What stands out",
+      "disclaimer": "Generated by AI. Not a medical assessment.",
+      "unsuitable": "These photos could not be compared. Try two photos in similar light and framing.",
+      "history": "Past analyses",
+      "historyEmpty": "Your analyses will be listed here.",
+      "analysedCount": "Analysed {n}×",
+      "errRateLimited": "You have reached today's limit of analyses. Try again tomorrow.",
+      "errUnavailable": "Analysis is unavailable right now.",
+      "errFailed": "We couldn't complete the analysis. Please try again in a moment.",
+      "errNetwork": "No connection. Check your network and try again.",
+      "errInvalid": "These photos can't be analyzed. Pick two other photos.",
+      "retry": "Try again",
+      "lockedTitle": "More AI photo analyses",
+      "lockedBody": "Your first analysis is free. Premium keeps every comparison going.",
+      "close": "Close"
     },
     "quiz": {
       "skip": "Skip for now",
@@ -903,7 +1161,8 @@
         "sync": "Last step. Connect your watch so I can see heart rate and recovery.",
         "ready": "{name}, your plan is ready. Week one starts now. Easy pace, steady progress.",
         "building": "Give me a moment, {name}. I'm building your plan from everything you told me."
-      }
+      },
+      "language": "Language"
     },
     "theme": {
       "title": "Appearance",
@@ -987,7 +1246,7 @@
       "unitsNote": "Changes how weights and height are shown. Your data is stored once and converted on the fly.",
       "language": "Language",
       "languageLabel": "Show the app in",
-      "languageNote": "More languages are on the way. Anything not translated yet appears in English.",
+      "languageNote": "Not every screen is translated into every language yet. Anything missing appears in English.",
       "reminders": "Reminders",
       "remindersNote": "Fewer, kinder notifications. You choose which ones you want.",
       "reminderTime": "Workout reminder time",
@@ -1735,5 +1994,170 @@
       "empty": "Cohort data is unavailable here",
       "emptyDetail": "Multi-user cohorts need shared user IDs and billing events. Explore the view with a simulated dataset."
     }
+  },
+  "landing": {
+    "brand": "Spotter AI",
+    "nav": {
+      "features": "Features",
+      "how": "How it works",
+      "faq": "FAQ",
+      "open": "Open the app"
+    },
+    "hero": {
+      "eyebrow": "Your AI spotter",
+      "title": "Train smarter. Your spotter plans, guides and cheers.",
+      "body": "Answer a few questions and get a plan built around your goal, time and equipment. Then follow guided workouts with video, track real progress and keep going with an AI coach that adapts when life does.",
+      "cta": "Start free",
+      "secondary": "See how it works",
+      "note": "No card needed · Works in your browser · {n} languages",
+      "chipPlan": "Plan built from your answers",
+      "chipStreak": "{n}-week streak",
+      "chipCoach": "Too hard? One tap to adjust"
+    },
+    "facts": {
+      "exercises": "guided exercises",
+      "achievements": "achievements to earn",
+      "langs": "languages",
+      "minutes": "minutes to your first plan"
+    },
+    "how": {
+      "title": "From first question to first rep in minutes",
+      "steps": {
+        "quiz": {
+          "title": "Tell us about you",
+          "body": "A short, friendly quiz: your goal, level, equipment, days and the coach style you like."
+        },
+        "plan": {
+          "title": "Get a plan that fits",
+          "body": "Your weekly schedule is built from your answers, with sessions, rest and recovery days."
+        },
+        "train": {
+          "title": "Train with a spotter",
+          "body": "Follow each exercise with video, log sets, and let the app adapt the rest of the workout."
+        }
+      }
+    },
+    "features": {
+      "title": "Everything you need to keep showing up",
+      "workout": {
+        "tag": "Guided workouts",
+        "title": "A video for every exercise",
+        "body": "Each move plays on a loop with the sets, reps and rest next to it. Log a set in one tap, or say it out loud.",
+        "points": {
+          "1": "Looped demo for every exercise",
+          "2": "Rest timer and up-next preview",
+          "3": "Heart-rate zones and safety stop"
+        }
+      },
+      "awards": {
+        "tag": "Progress and awards",
+        "title": "See your progress, feel the wins",
+        "body": "Levels, streaks, personal records and badges turn consistency into something you can see.",
+        "points": {
+          "1": "Levels and XP for every session",
+          "2": "Rare badges with motivating notes",
+          "3": "History, calendar and check-ins"
+        }
+      },
+      "community": {
+        "tag": "Gym buddies",
+        "title": "Stay accountable with people",
+        "body": "Find buddies at your level, see their streaks and keep each other honest with quick messages.",
+        "points": {
+          "1": "Experience and streak badges",
+          "2": "Share workouts and photos",
+          "3": "Gentle nudges, never pressure"
+        }
+      },
+      "nutrition": {
+        "tag": "Nutrition and water",
+        "title": "Small habits that add up",
+        "body": "Simple daily targets for calories, protein and water, with meal ideas that fit your goal.",
+        "points": {
+          "1": "Daily targets from your profile",
+          "2": "One-tap water tracking with a safe limit",
+          "3": "Meal ideas, not strict diets"
+        }
+      },
+      "adapt": {
+        "title": "Adapts when you do",
+        "body": "Too hard, tired or short on time? Make it easier, trim to 20 minutes or swap an exercise. Completed sets are always kept."
+      },
+      "coach": {
+        "title": "An AI coach that knows your plan",
+        "body": "Ask what to train, why, or how to change it. Pick a style: calm, direct or playful."
+      },
+      "safe": {
+        "title": "Safety first",
+        "body": "Feeling unwell? Stop in one tap and get clear guidance. Estimates are for planning, not medical advice."
+      }
+    },
+    "spotty": {
+      "title": "Meet Spotty",
+      "body": "Your pocket spotter. Spotty cheers your first rep, reacts to your answers and keeps the mood light, so training feels like a habit, not a chore."
+    },
+    "pricing": {
+      "title": "Start free. Go further when you want",
+      "free": {
+        "name": "Free",
+        "price": "Free forever",
+        "points": {
+          "1": "Your personal plan",
+          "2": "Guided workouts with video",
+          "3": "Progress, history and awards",
+          "4": "Water and nutrition basics"
+        },
+        "cta": "Start free"
+      },
+      "premium": {
+        "name": "Premium",
+        "price": "7-day free trial",
+        "points": {
+          "1": "Everything in Free",
+          "2": "Deeper insights and strength trends",
+          "3": "More photo check-ins",
+          "4": "Priority coach tools"
+        },
+        "cta": "Try Premium",
+        "badge": "Popular"
+      },
+      "note": "No payment is taken in this version. It shows how Premium would work."
+    },
+    "faq": {
+      "title": "Questions, answered",
+      "items": {
+        "q1": {
+          "q": "Do I need equipment?",
+          "a": "No. You choose what you have, from nothing to a full gym, and the plan is built around it."
+        },
+        "q2": {
+          "q": "I'm a complete beginner. Is this for me?",
+          "a": "Yes. The quiz sets your level, and every exercise has a how-to video, tips and common mistakes."
+        },
+        "q3": {
+          "q": "Can I change the plan later?",
+          "a": "Anytime. Adjust a workout, move it, skip it or ask the coach to rebuild your week."
+        },
+        "q4": {
+          "q": "Is my data private?",
+          "a": "Your progress is stored in your browser. Photos stay on your device and are never uploaded."
+        },
+        "q5": {
+          "q": "Is it medical advice?",
+          "a": "No. Spotter AI gives general training guidance. If you have a health condition or feel unwell, talk to a professional."
+        }
+      }
+    },
+    "cta": {
+      "title": "Your first workout is five minutes away",
+      "body": "Take the quiz, get your plan and start with a spotter by your side.",
+      "button": "Start free"
+    },
+    "footer": {
+      "rights": "© Spotter AI",
+      "disclaimer": "General fitness guidance, not medical advice.",
+      "app": "Open the app"
+    },
+    "lang": "Language"
   }
 }

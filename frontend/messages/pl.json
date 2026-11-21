@@ -1,0 +1,57 @@
+{
+  "fit": {
+    "nav": {
+      "today": "Dziś",
+      "training": "Trening",
+      "progress": "Postępy",
+      "community": "Społeczność",
+      "profile": "Profil"
+    },
+    "common": {
+      "back": "Wstecz",
+      "save": "Zapisz",
+      "cancel": "Anuluj",
+      "done": "Gotowe",
+      "continue": "Kontynuuj",
+      "next": "Dalej",
+      "start": "Zacznij"
+    },
+    "quiz": {
+      "skip": "Pomiń na razie",
+      "nameLabel": "Twoje imię",
+      "hello": {
+        "cta": "Poznajmy się",
+        "plan": "Plan oparty na Twoim celu, harmonogramie i sprzęcie",
+        "coach": "Trener AI, który dostosowuje się po każdym treningu",
+        "honest": "Bez rejestracji, zajmuje około minuty"
+      },
+      "steps": {
+        "name": {
+          "title": "Jak mam się do Ciebie zwracać?"
+        },
+        "gender": {
+          "title": "Opowiedz mi trochę o sobie"
+        },
+        "goal": {
+          "title": "Jaki jest Twój cel, {name}?"
+        },
+        "body": {
+          "title": "Twój punkt wyjścia"
+        },
+        "level": {
+          "title": "Twój poziom"
+        },
+        "days": {
+          "title": "Jak często możesz trenować?"
+        }
+      },
+      "language": "Język"
+    },
+    "settings": {
+      "languageLabel": "Język"
+    }
+  },
+  "common": {
+    "close": "Zamknij"
+  }
+}

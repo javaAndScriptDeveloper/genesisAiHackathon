@@ -7,7 +7,7 @@ import { Button, EmptyState, Icon, ProgressBar, ProgressRing, Sheet, SportIcon, 
 import { BADGE_ICON, awardInfo, tierOf, type Tier } from "@/lib/fit/awardsInfo";
 import { formatDay } from "@/lib/fit/dates";
 import { getExercise } from "@/lib/fit/exercises";
-import { shareText } from "@/lib/fit/share";
+import { useShare } from "@/lib/hooks/useShare";
 import { useFit } from "@/lib/fit/store/FitProvider";
 import { useFitStats, useProgress, useUnits } from "@/lib/fit/store/hooks";
 import { useI18n, useT } from "@/lib/i18n/I18nProvider";
@@ -44,10 +44,8 @@ export function Awards() {
 		}
 	}
 
-	const share = async (text: string) => {
-		const r = await shareText(t("fit.progress.shareTitle"), text);
-		toast.show(r === "copied" ? t("fit.common.copied") : r === "failed" ? t("fit.common.shareFailed") : t("fit.progress.shared"), r === "failed" ? "danger" : "success");
-	};
+	const shareWith = useShare();
+	const share = (title: string, text: string) => shareWith(t("fit.progress.shareTitle"), text, { headline: t("fit.nudges.achievementHeadline"), value: title, line: "Personal Coach" });
 
 	return (
 		<>
@@ -191,7 +189,7 @@ export function Awards() {
 						<>
 							<Button variant="secondary" onClick={() => setOpenId(null)}>{t("fit.awards.close")}</Button>
 							{current.unlocked && (
-								<Button iconLeft={Share08Icon} onClick={() => share(t("fit.awards.shareText", { title: t(`fit.progress.badge.${current.id}.title`) }))}>{t("fit.awards.share")}</Button>
+								<Button iconLeft={Share08Icon} onClick={() => share(t(`fit.progress.badge.${current.id}.title`), t("fit.awards.shareText", { title: t(`fit.progress.badge.${current.id}.title`) }))}>{t("fit.awards.share")}</Button>
 							)}
 						</>
 					)

@@ -1,0 +1,57 @@
+{
+  "fit": {
+    "nav": {
+      "today": "Täna",
+      "training": "Treening",
+      "progress": "Edusammud",
+      "community": "Kogukond",
+      "profile": "Profiil"
+    },
+    "common": {
+      "back": "Tagasi",
+      "save": "Salvesta",
+      "cancel": "Tühista",
+      "done": "Valmis",
+      "continue": "Jätka",
+      "next": "Järgmine",
+      "start": "Alusta"
+    },
+    "quiz": {
+      "skip": "Jäta praegu vahele",
+      "nameLabel": "Sinu nimi",
+      "hello": {
+        "cta": "Tutvume",
+        "plan": "Plaan, mis on loodud sinu eesmärgi, ajakava ja varustuse järgi",
+        "coach": "Tehisintellekti treener, kes kohandub pärast iga treeningut",
+        "honest": "Registreerimist pole vaja, võtab umbes minuti"
+      },
+      "steps": {
+        "name": {
+          "title": "Kuidas ma sind kutsun?"
+        },
+        "gender": {
+          "title": "Räägi endast pisut"
+        },
+        "goal": {
+          "title": "Mis on sinu eesmärk, {name}?"
+        },
+        "body": {
+          "title": "Sinu stardipunkt"
+        },
+        "level": {
+          "title": "Sinu tase"
+        },
+        "days": {
+          "title": "Kui tihti saad treenida?"
+        }
+      },
+      "language": "Keel"
+    },
+    "settings": {
+      "languageLabel": "Keel"
+    }
+  },
+  "common": {
+    "close": "Sulge"
+  }
+}

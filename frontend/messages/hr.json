@@ -1,0 +1,57 @@
+{
+  "fit": {
+    "nav": {
+      "today": "Danas",
+      "training": "Trening",
+      "progress": "Napredak",
+      "community": "Zajednica",
+      "profile": "Profil"
+    },
+    "common": {
+      "back": "Natrag",
+      "save": "Spremi",
+      "cancel": "Odustani",
+      "done": "Gotovo",
+      "continue": "Nastavi",
+      "next": "Dalje",
+      "start": "Započni"
+    },
+    "quiz": {
+      "skip": "Preskoči za sada",
+      "nameLabel": "Tvoje ime",
+      "hello": {
+        "cta": "Upoznajmo se",
+        "plan": "Plan izrađen prema tvom cilju, rasporedu i opremi",
+        "coach": "AI trener koji se prilagođava nakon svakog treninga",
+        "honest": "Bez registracije, traje otprilike minutu"
+      },
+      "steps": {
+        "name": {
+          "title": "Kako da te zovem?"
+        },
+        "gender": {
+          "title": "Reci mi nešto o sebi"
+        },
+        "goal": {
+          "title": "Koji je tvoj cilj, {name}?"
+        },
+        "body": {
+          "title": "Tvoja početna točka"
+        },
+        "level": {
+          "title": "Tvoja razina"
+        },
+        "days": {
+          "title": "Koliko često možeš trenirati?"
+        }
+      },
+      "language": "Jezik"
+    },
+    "settings": {
+      "languageLabel": "Jezik"
+    }
+  },
+  "common": {
+    "close": "Zatvori"
+  }
+}

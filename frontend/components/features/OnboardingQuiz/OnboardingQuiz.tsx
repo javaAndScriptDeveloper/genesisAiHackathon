@@ -7,6 +7,7 @@ import clsx from "clsx";
 import { useMemo, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
+import { LanguageSelect } from "@/components/features/LanguageSelect/LanguageSelect";
 import { OptionCard } from "@/components/features/OptionCard/OptionCard";
 import { Spotty, type SpottyMood } from "@/components/features/Spotty/Spotty";
 import { ThemeToggle } from "@/components/features/ThemeToggle/ThemeToggle";
@@ -216,6 +217,8 @@ export function OnboardingQuiz() {
 								</li>
 							))}
 						</ul>
+						{/* Optional: English is the default, anyone can switch before the quiz starts. */}
+						<LanguageSelect label={t("fit.quiz.language")} placement="up" />
 					</div>
 				) : (
 					<>

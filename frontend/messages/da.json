@@ -1,0 +1,57 @@
+{
+  "fit": {
+    "nav": {
+      "today": "I dag",
+      "training": "Træning",
+      "progress": "Fremskridt",
+      "community": "Fællesskab",
+      "profile": "Profil"
+    },
+    "common": {
+      "back": "Tilbage",
+      "save": "Gem",
+      "cancel": "Annuller",
+      "done": "Færdig",
+      "continue": "Fortsæt",
+      "next": "Næste",
+      "start": "Start"
+    },
+    "quiz": {
+      "skip": "Spring over for nu",
+      "nameLabel": "Dit navn",
+      "hello": {
+        "cta": "Lad os lære hinanden at kende",
+        "plan": "En plan bygget omkring dit mål, din tid og dit udstyr",
+        "coach": "En AI-træner, der tilpasser sig efter hver træning",
+        "honest": "Ingen tilmelding, tager cirka et minut"
+      },
+      "steps": {
+        "name": {
+          "title": "Hvad skal jeg kalde dig?"
+        },
+        "gender": {
+          "title": "Fortæl mig lidt om dig selv"
+        },
+        "goal": {
+          "title": "Hvad er dit mål, {name}?"
+        },
+        "body": {
+          "title": "Dit udgangspunkt"
+        },
+        "level": {
+          "title": "Dit niveau"
+        },
+        "days": {
+          "title": "Hvor ofte kan du træne?"
+        }
+      },
+      "language": "Sprog"
+    },
+    "settings": {
+      "languageLabel": "Sprog"
+    }
+  },
+  "common": {
+    "close": "Luk"
+  }
+}

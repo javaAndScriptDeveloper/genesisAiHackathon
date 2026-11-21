@@ -1,0 +1,173 @@
+@use "partials/corners";
+
+.section {
+	display: flex;
+	flex-direction: column;
+	gap: var(--space-3);
+}
+
+.stack {
+	display: flex;
+	flex-direction: column;
+	gap: var(--space-3);
+}
+
+.h3 {
+	font-size: 1.6rem;
+}
+
+.h4 {
+	margin: 0 0 var(--space-2);
+	font-size: 1.3rem;
+	font-weight: 700;
+}
+
+.note {
+	color: var(--color-textSubtle);
+	font-size: 1.3rem;
+}
+
+.err {
+	font-size: 1.5rem;
+}
+
+.grid {
+	display: grid;
+	grid-template-columns: repeat(2, 1fr);
+	gap: var(--space-3);
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.thumb {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	gap: 0.4rem;
+	width: 100%;
+	padding: 0.4rem;
+	background: transparent;
+	border: 2px solid var(--color-border);
+	color: inherit;
+	text-align: left;
+	cursor: pointer;
+	@include corners.radius(var(--radius-control));
+
+	img {
+		width: 100%;
+		aspect-ratio: 3 / 4;
+		object-fit: cover;
+		@include corners.radius(var(--radius-control));
+	}
+
+	&[aria-pressed="true"] {
+		border-color: var(--color-accent);
+		background: var(--color-accentSoft);
+	}
+}
+
+.tick {
+	position: absolute;
+	top: 1rem;
+	right: 1rem;
+	display: grid;
+	place-items: center;
+	width: 2.8rem;
+	height: 2.8rem;
+	border-radius: 50%;
+	background: var(--color-accent);
+	color: #fff;
+}
+
+.caption {
+	display: flex;
+	flex-direction: column;
+	padding: 0 0.4rem 0.4rem;
+	font-size: 1.2rem;
+
+	span {
+		color: var(--color-textSubtle);
+	}
+}
+
+.actions {
+	display: flex;
+	gap: var(--space-3);
+	justify-content: flex-end;
+	margin-top: var(--space-4);
+}
+
+.result,
+.body {
+	display: flex;
+	flex-direction: column;
+	gap: var(--space-3);
+}
+
+.summary {
+	font-size: 1.5rem;
+	line-height: 1.5;
+}
+
+.obs {
+	display: flex;
+	flex-direction: column;
+	gap: var(--space-2);
+	margin: 0;
+	padding: 0;
+	list-style: none;
+
+	li {
+		display: flex;
+		flex-direction: column;
+		font-size: 1.4rem;
+	}
+
+	span {
+		color: var(--color-textSubtle);
+	}
+}
+
+.encourage {
+	font-weight: 600;
+	font-size: 1.4rem;
+}
+
+.disclaimer {
+	color: var(--color-textSubtle);
+	font-size: 1.2rem;
+}
+
+.history {
+	display: flex;
+	flex-direction: column;
+	gap: var(--space-2);
+	margin: 0;
+	padding: 0;
+	list-style: none;
+
+	summary {
+		cursor: pointer;
+		min-height: 4.4rem;
+		display: flex;
+		align-items: center;
+		font-size: 1.4rem;
+		font-weight: 600;
+	}
+}
+
+.historyPhotos {
+	display: flex;
+	gap: var(--space-2);
+	margin: 0 0 var(--space-2);
+	padding: 0;
+	list-style: none;
+
+	img {
+		width: 6rem;
+		aspect-ratio: 3 / 4;
+		object-fit: cover;
+		@include corners.radius(var(--radius-control));
+	}
+}

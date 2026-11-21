@@ -1,0 +1,43 @@
+import type { Locale } from "./config";
+
+type Dict = { [key: string]: string | Dict };
+
+// Each language is its own chunk, fetched only when someone picks it. English is bundled; Ukrainian ships with the app.
+export const LOADERS: Partial<Record<Locale, () => Promise<Dict>>> = {
+	be: () => import("@/messages/be.json").then((m) => m.default),
+	bg: () => import("@/messages/bg.json").then((m) => m.default),
+	bs: () => import("@/messages/bs.json").then((m) => m.default),
+	ca: () => import("@/messages/ca.json").then((m) => m.default),
+	cs: () => import("@/messages/cs.json").then((m) => m.default),
+	cy: () => import("@/messages/cy.json").then((m) => m.default),
+	da: () => import("@/messages/da.json").then((m) => m.default),
+	de: () => import("@/messages/de.json").then((m) => m.default),
+	el: () => import("@/messages/el.json").then((m) => m.default),
+	es: () => import("@/messages/es.json").then((m) => m.default),
+	et: () => import("@/messages/et.json").then((m) => m.default),
+	eu: () => import("@/messages/eu.json").then((m) => m.default),
+	fi: () => import("@/messages/fi.json").then((m) => m.default),
+	fr: () => import("@/messages/fr.json").then((m) => m.default),
+	ga: () => import("@/messages/ga.json").then((m) => m.default),
+	gl: () => import("@/messages/gl.json").then((m) => m.default),
+	hr: () => import("@/messages/hr.json").then((m) => m.default),
+	hu: () => import("@/messages/hu.json").then((m) => m.default),
+	is: () => import("@/messages/is.json").then((m) => m.default),
+	it: () => import("@/messages/it.json").then((m) => m.default),
+	lb: () => import("@/messages/lb.json").then((m) => m.default),
+	lt: () => import("@/messages/lt.json").then((m) => m.default),
+	lv: () => import("@/messages/lv.json").then((m) => m.default),
+	mk: () => import("@/messages/mk.json").then((m) => m.default),
+	mt: () => import("@/messages/mt.json").then((m) => m.default),
+	nb: () => import("@/messages/nb.json").then((m) => m.default),
+	nl: () => import("@/messages/nl.json").then((m) => m.default),
+	pl: () => import("@/messages/pl.json").then((m) => m.default),
+	pt: () => import("@/messages/pt.json").then((m) => m.default),
+	ro: () => import("@/messages/ro.json").then((m) => m.default),
+	sk: () => import("@/messages/sk.json").then((m) => m.default),
+	sl: () => import("@/messages/sl.json").then((m) => m.default),
+	sq: () => import("@/messages/sq.json").then((m) => m.default),
+	sr: () => import("@/messages/sr.json").then((m) => m.default),
+	sv: () => import("@/messages/sv.json").then((m) => m.default),
+	tr: () => import("@/messages/tr.json").then((m) => m.default),
+};

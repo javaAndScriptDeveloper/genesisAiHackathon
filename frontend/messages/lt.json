@@ -1,0 +1,57 @@
+{
+  "fit": {
+    "nav": {
+      "today": "Šiandien",
+      "training": "Treniruotės",
+      "progress": "Pažanga",
+      "community": "Bendruomenė",
+      "profile": "Profilis"
+    },
+    "common": {
+      "back": "Atgal",
+      "save": "Išsaugoti",
+      "cancel": "Atšaukti",
+      "done": "Baigta",
+      "continue": "Tęsti",
+      "next": "Toliau",
+      "start": "Pradėti"
+    },
+    "quiz": {
+      "skip": "Kol kas praleisti",
+      "nameLabel": "Tavo vardas",
+      "hello": {
+        "cta": "Susipažinkime",
+        "plan": "Planas, sukurtas pagal tavo tikslą, grafiką ir įrangą",
+        "coach": "DI treneris, prisitaikantis po kiekvienos treniruotės",
+        "honest": "Be registracijos, užtrunka apie minutę"
+      },
+      "steps": {
+        "name": {
+          "title": "Kaip turėčiau tave vadinti?"
+        },
+        "gender": {
+          "title": "Papasakok šiek tiek apie save"
+        },
+        "goal": {
+          "title": "Koks tavo tikslas, {name}?"
+        },
+        "body": {
+          "title": "Tavo pradžios taškas"
+        },
+        "level": {
+          "title": "Tavo lygis"
+        },
+        "days": {
+          "title": "Kaip dažnai gali treniruotis?"
+        }
+      },
+      "language": "Kalba"
+    },
+    "settings": {
+      "languageLabel": "Kalba"
+    }
+  },
+  "common": {
+    "close": "Uždaryti"
+  }
+}

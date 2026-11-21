@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { toISO } from "../fit/dates";
 import { findExercise } from "../fit/exercises";
-import type { FitState, LoggedExercise, Perceived, SessionLog } from "../fit/types";
+import type { FitState, LoggedExercise, Perceived, PhotoInsight, SessionLog } from "../fit/types";
 import { addDays, ENGINE_VERSION, progressSnapshot, snapshotHash, weekStart, type ProgressSnapshot } from "../progress";
 import { historyFromFit } from "../progress/fromFit";
 import type { ArchiveItem, IsoDate } from "../progress/types";
@@ -36,6 +36,25 @@ const workoutSchema = z.object({
 	sets: z.array(setSchema),
 });
 
+const photoInsightSchema = z.object({
+	id: z.string().min(1),
+	analyzedAt: dateTime,
+	beforeDate: date,
+	afterDate: date,
+	beforePhotoId: z.string().max(100).nullish(),
+	afterPhotoId: z.string().max(100).nullish(),
+	beforeWeightKg: nullableNum,
+	afterWeightKg: nullableNum,
+	model: z.string().min(1),
+	engineVersion: z.string().min(1),
+	suitable: z.boolean(),
+	result: z.object({
+		summary: z.string(),
+		observations: z.array(z.object({ area: z.string(), text: z.string() })).max(4),
+		encouragement: z.string(),
+	}),
+});
+
 export const remoteSnapshotSchema = z.object({
 	settings: z.object({ weeklyGoal: z.number().int().min(2).max(5), units: z.enum(["metric", "imperial"]), heightCm: nullableNum.optional() }),
 	planDays: z.array(z.object({ date, type: z.enum(["training", "rest"]), workoutRef: z.string().nullable().optional() })),
@@ -44,6 +63,7 @@ export const remoteSnapshotSchema = z.object({
 	weights: z.array(z.object({ date, kg: z.number() })),
 	events: z.array(z.object({ id: z.string().min(1), kind: z.enum(["badge", "level", "pr", "report"]), refId: z.string(), payload: z.unknown().optional(), createdAt: dateTime, seenAt: dateTime.nullable().optional() })),
 	checkIns: z.array(z.object({ id: z.string().min(1), kind: z.enum(["weight", "goal", "photo"]), date, takenAt: dateTime, weightKg: nullableNum.optional(), goalKg: nullableNum.optional() })),
+	photoInsights: z.array(photoInsightSchema).optional(),
 });
 export type RemoteSnapshot = z.infer<typeof remoteSnapshotSchema>;
 type RemoteWorkout = RemoteSnapshot["workouts"][number];
@@ -88,6 +108,22 @@ function workoutOf(state: FitState, log: SessionLog): RemoteWorkout {
 	};
 }
 
+/** Explicit field copy: only analysis text leaves the device, never anything image-like. */
+const insightOf = (i: Omit<PhotoInsight, "beforePhotoId" | "afterPhotoId"> & Partial<Pick<PhotoInsight, "beforePhotoId" | "afterPhotoId">>): PhotoInsight => ({
+	id: i.id,
+	analyzedAt: i.analyzedAt,
+	beforeDate: i.beforeDate,
+	afterDate: i.afterDate,
+	beforePhotoId: i.beforePhotoId ?? null,
+	afterPhotoId: i.afterPhotoId ?? null,
+	beforeWeightKg: i.beforeWeightKg,
+	afterWeightKg: i.afterWeightKg,
+	model: i.model,
+	engineVersion: i.engineVersion,
+	suitable: i.suitable,
+	result: { summary: i.result.summary, observations: i.result.observations.map((o) => ({ area: o.area, text: o.text })), encouragement: i.result.encouragement },
+});
+
 /** FitState -> raw facts for the backend. `today` only affects the synthetic initial goal check-in date. */
 export function toRemote(full: FitState, today: IsoDate = toISO(new Date())): RemoteSnapshot {
 	const state = syncableState(full);
@@ -111,6 +147,7 @@ export function toRemote(full: FitState, today: IsoDate = toISO(new Date())): Re
 			weightKg: c.weightKg ?? null,
 			goalKg: c.goalKg ?? null,
 		})),
+		photoInsights: state.photoInsights.map(insightOf),
 	};
 }
 
@@ -147,6 +184,7 @@ export function fromRemote(s: RemoteSnapshot): Partial<FitState> {
 		...(goal ? { goalWeightKg: goal.goalKg ?? null, goalSetAt: goal.takenAt } : {}),
 		progressEvents: s.events.map((e) => ({ id: e.id, kind: e.kind, refId: e.refId, createdAt: e.createdAt, seenAt: e.seenAt ?? null })),
 		history: s.workouts.flatMap((w) => logOf(w) ?? []),
+		photoInsights: (s.photoInsights ?? []).map(insightOf),
 	};
 }
 

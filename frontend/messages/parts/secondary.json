@@ -75,7 +75,7 @@
       "unitsNote": "Changes how weights and height are shown. Your data is stored once and converted on the fly.",
       "language": "Language",
       "languageLabel": "Show the app in",
-      "languageNote": "More languages are on the way. Anything not translated yet appears in English.",
+      "languageNote": "Not every screen is translated into every language yet. Anything missing appears in English.",
       "reminders": "Reminders",
       "remindersNote": "Fewer, kinder notifications. You choose which ones you want.",
       "reminderTime": "Workout reminder time",

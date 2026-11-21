@@ -1,0 +1,57 @@
+{
+  "fit": {
+    "nav": {
+      "today": "Gaur",
+      "training": "Entrenamendua",
+      "progress": "Aurrerapena",
+      "community": "Komunitatea",
+      "profile": "Profila"
+    },
+    "common": {
+      "back": "Atzera",
+      "save": "Gorde",
+      "cancel": "Utzi",
+      "done": "Eginda",
+      "continue": "Jarraitu",
+      "next": "Hurrengoa",
+      "start": "Hasi"
+    },
+    "quiz": {
+      "skip": "Orain saltatu",
+      "nameLabel": "Zure izena",
+      "hello": {
+        "cta": "Elkar ezagutu dezagun",
+        "plan": "Zure helburuan, ordutegian eta materialean oinarritutako plana",
+        "coach": "Entrenamendu bakoitzaren ondoren egokitzen den AA entrenatzailea",
+        "honest": "Izen-emaitzarik gabe, minutu bat inguru behar da"
+      },
+      "steps": {
+        "name": {
+          "title": "Nola deitu behar zaitut?"
+        },
+        "gender": {
+          "title": "Kontatu pixka bat zeure buruaz"
+        },
+        "goal": {
+          "title": "Zein da zure helburua, {name}?"
+        },
+        "body": {
+          "title": "Zure abiapuntua"
+        },
+        "level": {
+          "title": "Zure maila"
+        },
+        "days": {
+          "title": "Zenbatean behin entrena dezakezu?"
+        }
+      },
+      "language": "Hizkuntza"
+    },
+    "settings": {
+      "languageLabel": "Hizkuntza"
+    }
+  },
+  "common": {
+    "close": "Itxi"
+  }
+}

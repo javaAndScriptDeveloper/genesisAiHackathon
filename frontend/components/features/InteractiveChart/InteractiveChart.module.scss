@@ -1,0 +1,180 @@
+@use "partials/corners";
+
+.root {
+	display: flex;
+	flex-direction: column;
+	gap: var(--space-3);
+
+	.periods {
+		display: flex;
+		gap: var(--space-2);
+	}
+
+	.period {
+		display: inline-flex;
+		flex: 1;
+		align-items: center;
+		justify-content: center;
+		gap: var(--space-1);
+		min-height: 4.4rem;
+		padding: 0 var(--space-3);
+		border: 0.1rem solid var(--color-border);
+		background: var(--color-surface);
+		color: var(--color-textMuted);
+		font: inherit;
+		font-size: 1.4rem;
+		font-weight: 500;
+		cursor: pointer;
+		@include corners.radius(var(--radius-control));
+
+		&.activePeriod {
+			border-color: var(--color-accent);
+			background: var(--color-accentSoft);
+			color: var(--color-accentText);
+			font-weight: 700;
+		}
+
+		&:focus-visible {
+			outline: 0.2rem solid var(--color-focusRing);
+			outline-offset: 0.2rem;
+		}
+	}
+
+	.readout {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: var(--space-2);
+	}
+
+	.value {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: baseline;
+		gap: var(--space-1) var(--space-2);
+		min-width: 0;
+
+		strong {
+			font-size: 2.8rem;
+			line-height: 1.1;
+			font-variant-numeric: tabular-nums;
+		}
+	}
+
+	.unit {
+		color: var(--color-textMuted);
+		font-size: 1.5rem;
+	}
+
+	.date {
+		color: var(--color-textSubtle);
+		font-size: 1.3rem;
+	}
+
+	.steppers {
+		display: flex;
+		flex-shrink: 0;
+	}
+
+	.scroll {
+		width: 100%;
+	}
+
+	.scrollWide {
+		overflow-x: auto;
+	}
+
+	.svg {
+		display: block;
+		width: 100%;
+		height: auto;
+		overflow: visible;
+		touch-action: pan-y;
+		cursor: crosshair;
+		user-select: none;
+	}
+
+	.svgWide {
+		max-width: none;
+		touch-action: auto;
+	}
+
+	.base {
+		stroke: var(--color-border);
+		stroke-width: 1;
+	}
+
+	.line {
+		stroke: var(--color-accent);
+	}
+
+	.cursor {
+		stroke: var(--color-textSubtle);
+		stroke-width: 1;
+	}
+
+	.dot {
+		fill: var(--color-surface);
+		stroke: var(--color-accent);
+		stroke-width: 2;
+	}
+
+	.dotActive {
+		fill: var(--color-accent);
+		stroke: var(--color-surface);
+		stroke-width: 3;
+	}
+
+	.axis {
+		fill: var(--color-textSubtle);
+		font-size: 10px;
+	}
+
+	.foot {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: var(--space-2);
+	}
+
+	.change {
+		color: var(--color-textMuted);
+		font-size: 1.3rem;
+	}
+
+	.expand {
+		display: inline-flex;
+		align-items: center;
+		gap: var(--space-1);
+		min-height: 4.4rem;
+		padding: 0 var(--space-2);
+		border: 0;
+		background: none;
+		color: var(--color-accentText);
+		font: inherit;
+		font-size: 1.4rem;
+		font-weight: 600;
+		cursor: pointer;
+
+		&:focus-visible {
+			outline: 0.2rem solid var(--color-focusRing);
+			outline-offset: 0.2rem;
+		}
+	}
+
+	.empty {
+		margin: 0;
+		color: var(--color-textMuted);
+		font-size: 1.4rem;
+		line-height: 1.5;
+	}
+
+	.srOnly {
+		position: absolute;
+		width: 0.1rem;
+		height: 0.1rem;
+		overflow: hidden;
+		clip-path: inset(50%);
+		white-space: nowrap;
+	}
+}

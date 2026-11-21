@@ -1,0 +1,57 @@
+{
+  "fit": {
+    "nav": {
+      "today": "Vandaag",
+      "training": "Training",
+      "progress": "Voortgang",
+      "community": "Community",
+      "profile": "Profiel"
+    },
+    "common": {
+      "back": "Terug",
+      "save": "Opslaan",
+      "cancel": "Annuleren",
+      "done": "Klaar",
+      "continue": "Doorgaan",
+      "next": "Volgende",
+      "start": "Start"
+    },
+    "quiz": {
+      "skip": "Nu overslaan",
+      "nameLabel": "Je naam",
+      "hello": {
+        "cta": "Laten we kennismaken",
+        "plan": "Een plan rond jouw doel, schema en apparatuur",
+        "coach": "Een AI-coach die zich na elke training aanpast",
+        "honest": "Geen aanmelding, duurt ongeveer een minuut"
+      },
+      "steps": {
+        "name": {
+          "title": "Hoe mag ik je noemen?"
+        },
+        "gender": {
+          "title": "Vertel me iets over jezelf"
+        },
+        "goal": {
+          "title": "Wat is je doel, {name}?"
+        },
+        "body": {
+          "title": "Je startpunt"
+        },
+        "level": {
+          "title": "Je niveau"
+        },
+        "days": {
+          "title": "Hoe vaak kun je trainen?"
+        }
+      },
+      "language": "Taal"
+    },
+    "settings": {
+      "languageLabel": "Taal"
+    }
+  },
+  "common": {
+    "close": "Sluiten"
+  }
+}

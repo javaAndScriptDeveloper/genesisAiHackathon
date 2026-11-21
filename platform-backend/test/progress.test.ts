@@ -8,6 +8,7 @@ const PROGRESS_TABLES = [
   "user_progress_checkins",
   "user_progress_events",
   "user_progress_pauses",
+  "user_progress_photo_insights",
   "user_progress_plan_days",
   "user_progress_sets",
   "user_progress_settings",
@@ -125,6 +126,22 @@ describe("progress schema", () => {
       goal_kg: { type: "numeric", nullable: true },
       created_at: { type: tz, nullable: false },
     });
+    expect(await columns("user_progress_photo_insights")).toEqual({
+      id: { type: "text", nullable: false },
+      user_id: { type: "bigint", nullable: false },
+      analyzed_at: { type: tz, nullable: false },
+      before_date: { type: "date", nullable: false },
+      after_date: { type: "date", nullable: false },
+      before_photo_id: { type: "text", nullable: true },
+      after_photo_id: { type: "text", nullable: true },
+      before_weight_kg: { type: "numeric", nullable: true },
+      after_weight_kg: { type: "numeric", nullable: true },
+      model: { type: "text", nullable: false },
+      engine_version: { type: "text", nullable: false },
+      suitable: { type: "boolean", nullable: false },
+      result: { type: "jsonb", nullable: false },
+      created_at: { type: tz, nullable: false },
+    });
     expect(await columns("user_progress_snapshots")).toMatchObject({
       id: { type: "bigint", nullable: false },
       user_id: { type: "bigint", nullable: false },
@@ -139,6 +156,8 @@ describe("progress schema", () => {
     expect(rows).toEqual([
       { table_name: "user_progress_checkins", column_name: "goal_kg", p: 5, s: 2 },
       { table_name: "user_progress_checkins", column_name: "weight_kg", p: 5, s: 2 },
+      { table_name: "user_progress_photo_insights", column_name: "after_weight_kg", p: 5, s: 2 },
+      { table_name: "user_progress_photo_insights", column_name: "before_weight_kg", p: 5, s: 2 },
       { table_name: "user_progress_sets", column_name: "weight_kg", p: 6, s: 2 },
       { table_name: "user_progress_weights", column_name: "kg", p: 5, s: 2 },
     ]);

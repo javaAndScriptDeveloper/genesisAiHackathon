@@ -1,0 +1,167 @@
+{
+  "landing": {
+    "brand": "Spotter AI",
+    "nav": {
+      "features": "Features",
+      "how": "How it works",
+      "faq": "FAQ",
+      "open": "Open the app"
+    },
+    "hero": {
+      "eyebrow": "Your AI spotter",
+      "title": "Train smarter. Your spotter plans, guides and cheers.",
+      "body": "Answer a few questions and get a plan built around your goal, time and equipment. Then follow guided workouts with video, track real progress and keep going with an AI coach that adapts when life does.",
+      "cta": "Start free",
+      "secondary": "See how it works",
+      "note": "No card needed · Works in your browser · {n} languages",
+      "chipPlan": "Plan built from your answers",
+      "chipStreak": "{n}-week streak",
+      "chipCoach": "Too hard? One tap to adjust"
+    },
+    "facts": {
+      "exercises": "guided exercises",
+      "achievements": "achievements to earn",
+      "langs": "languages",
+      "minutes": "minutes to your first plan"
+    },
+    "how": {
+      "title": "From first question to first rep in minutes",
+      "steps": {
+        "quiz": {
+          "title": "Tell us about you",
+          "body": "A short, friendly quiz: your goal, level, equipment, days and the coach style you like."
+        },
+        "plan": {
+          "title": "Get a plan that fits",
+          "body": "Your weekly schedule is built from your answers, with sessions, rest and recovery days."
+        },
+        "train": {
+          "title": "Train with a spotter",
+          "body": "Follow each exercise with video, log sets, and let the app adapt the rest of the workout."
+        }
+      }
+    },
+    "features": {
+      "title": "Everything you need to keep showing up",
+      "workout": {
+        "tag": "Guided workouts",
+        "title": "A video for every exercise",
+        "body": "Each move plays on a loop with the sets, reps and rest next to it. Log a set in one tap, or say it out loud.",
+        "points": {
+          "1": "Looped demo for every exercise",
+          "2": "Rest timer and up-next preview",
+          "3": "Heart-rate zones and safety stop"
+        }
+      },
+      "awards": {
+        "tag": "Progress and awards",
+        "title": "See your progress, feel the wins",
+        "body": "Levels, streaks, personal records and badges turn consistency into something you can see.",
+        "points": {
+          "1": "Levels and XP for every session",
+          "2": "Rare badges with motivating notes",
+          "3": "History, calendar and check-ins"
+        }
+      },
+      "community": {
+        "tag": "Gym buddies",
+        "title": "Stay accountable with people",
+        "body": "Find buddies at your level, see their streaks and keep each other honest with quick messages.",
+        "points": {
+          "1": "Experience and streak badges",
+          "2": "Share workouts and photos",
+          "3": "Gentle nudges, never pressure"
+        }
+      },
+      "nutrition": {
+        "tag": "Nutrition and water",
+        "title": "Small habits that add up",
+        "body": "Simple daily targets for calories, protein and water, with meal ideas that fit your goal.",
+        "points": {
+          "1": "Daily targets from your profile",
+          "2": "One-tap water tracking with a safe limit",
+          "3": "Meal ideas, not strict diets"
+        }
+      },
+      "adapt": {
+        "title": "Adapts when you do",
+        "body": "Too hard, tired or short on time? Make it easier, trim to 20 minutes or swap an exercise. Completed sets are always kept."
+      },
+      "coach": {
+        "title": "An AI coach that knows your plan",
+        "body": "Ask what to train, why, or how to change it. Pick a style: calm, direct or playful."
+      },
+      "safe": {
+        "title": "Safety first",
+        "body": "Feeling unwell? Stop in one tap and get clear guidance. Estimates are for planning, not medical advice."
+      }
+    },
+    "spotty": {
+      "title": "Meet Spotty",
+      "body": "Your pocket spotter. Spotty cheers your first rep, reacts to your answers and keeps the mood light, so training feels like a habit, not a chore."
+    },
+    "pricing": {
+      "title": "Start free. Go further when you want",
+      "free": {
+        "name": "Free",
+        "price": "Free forever",
+        "points": {
+          "1": "Your personal plan",
+          "2": "Guided workouts with video",
+          "3": "Progress, history and awards",
+          "4": "Water and nutrition basics"
+        },
+        "cta": "Start free"
+      },
+      "premium": {
+        "name": "Premium",
+        "price": "7-day free trial",
+        "points": {
+          "1": "Everything in Free",
+          "2": "Deeper insights and strength trends",
+          "3": "More photo check-ins",
+          "4": "Priority coach tools"
+        },
+        "cta": "Try Premium",
+        "badge": "Popular"
+      },
+      "note": "No payment is taken in this version. It shows how Premium would work."
+    },
+    "faq": {
+      "title": "Questions, answered",
+      "items": {
+        "q1": {
+          "q": "Do I need equipment?",
+          "a": "No. You choose what you have, from nothing to a full gym, and the plan is built around it."
+        },
+        "q2": {
+          "q": "I'm a complete beginner. Is this for me?",
+          "a": "Yes. The quiz sets your level, and every exercise has a how-to video, tips and common mistakes."
+        },
+        "q3": {
+          "q": "Can I change the plan later?",
+          "a": "Anytime. Adjust a workout, move it, skip it or ask the coach to rebuild your week."
+        },
+        "q4": {
+          "q": "Is my data private?",
+          "a": "Your progress is stored in your browser. Photos stay on your device and are never uploaded."
+        },
+        "q5": {
+          "q": "Is it medical advice?",
+          "a": "No. Spotter AI gives general training guidance. If you have a health condition or feel unwell, talk to a professional."
+        }
+      }
+    },
+    "cta": {
+      "title": "Your first workout is five minutes away",
+      "body": "Take the quiz, get your plan and start with a spotter by your side.",
+      "button": "Start free"
+    },
+    "footer": {
+      "rights": "© Spotter AI",
+      "disclaimer": "General fitness guidance, not medical advice.",
+      "app": "Open the app"
+    },
+    "lang": "Language"
+  }
+}

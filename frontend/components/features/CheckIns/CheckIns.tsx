@@ -2,6 +2,7 @@
 
 import { ArrowDownRight01Icon, ArrowUpRight01Icon, Camera01Icon, Clock01Icon, ScaleIcon } from "@hugeicons/core-free-icons";
 import { useRef, useState } from "react";
+import { PhotoInsightSection } from "@/components/features/PhotoInsight/PhotoInsight";
 import { PremiumGate, usePremium } from "@/components/features/PremiumGate/PremiumGate";
 import { Button, Card, EmptyState, Icon, Input, ProgressBar, Sheet, useToast } from "@/components/ui";
 import { formatDay } from "@/lib/fit/dates";
@@ -20,6 +21,9 @@ function formatStamp(iso: string | undefined, fallbackDay: string): string {
 	return `${formatDay(fallbackDay)}, ${d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`;
 }
 
+/** Weight entries shown before "Show all". */
+const WEIGHT_PREVIEW = 3;
+
 export function CheckIns() {
 	const t = useT();
 	const u = useUnits();
@@ -32,6 +36,8 @@ export function CheckIns() {
 	const [goalDraft, setGoalDraft] = useState<string | null>(null);
 	const [busy, setBusy] = useState(false);
 	const [removing, setRemoving] = useState<string | null>(null);
+	const [showAllWeights, setShowAllWeights] = useState(false);
+	const analysed = (id: string) => state.photoInsights.filter((i) => i.beforePhotoId === id || i.afterPhotoId === id).length;
 	const limited = !premium && state.photos.length >= FREE_PHOTOS;
 
 	const entries = state.bodyWeights;
@@ -160,8 +166,9 @@ export function CheckIns() {
 				{history.length === 0 ? (
 					<EmptyState title={t("fit.checkins.historyEmpty")} description={t("fit.checkins.historyEmptyBody")} />
 				) : (
-					<ol className={styles.timeline}>
-						{history.map((e) => (
+					<>
+					<ol className={styles.timeline} id="weight-history">
+						{(showAllWeights ? history : history.slice(0, WEIGHT_PREVIEW)).map((e) => (
 							<li key={`${e.date}-${e.at ?? ""}`} className={styles.entry}>
 								<span className={styles.entryDot} aria-hidden>
 									<Icon icon={e.at ? Clock01Icon : ScaleIcon} size={14} />
@@ -179,6 +186,12 @@ export function CheckIns() {
 							</li>
 						))}
 					</ol>
+					{history.length > WEIGHT_PREVIEW && (
+						<Button variant="secondary" size="sm" aria-expanded={showAllWeights} aria-controls="weight-history" onClick={() => setShowAllWeights((v) => !v)}>
+							{showAllWeights ? t("fit.checkins.showLess") : t("fit.checkins.showAll", { n: history.length })}
+						</Button>
+					)}
+					</>
 				)}
 			</section>
 
@@ -194,11 +207,13 @@ export function CheckIns() {
 								{/* eslint-disable-next-line @next/next/no-img-element -- local data URL, not optimizable */}
 								<img src={p.dataUrl} alt={t("fit.progress.photoAlt", { day: formatDay(p.date) })} />
 								<span>{formatDay(p.date)}</span>
+								{analysed(p.id) > 0 && <span className={styles.analysed}>{t("fit.photoAi.analysedCount", { n: analysed(p.id) })}</span>}
 								<button type="button" className={styles.remove} onClick={() => setRemoving(p.id)}>{t("fit.progress.removePhoto")}</button>
 							</li>
 						))}
 					</ul>
 				)}
+				<PhotoInsightSection />
 			</Card>
 			<Sheet open={!!removing} onClose={() => setRemoving(null)} title={t("fit.progress.removeTitle")} closeLabel={t("common.close")} variant="center" footer={
 				<>

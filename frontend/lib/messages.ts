@@ -3,7 +3,16 @@ import uk from "@/messages/uk.json";
 import { DEFAULT_LOCALE, type Locale } from "@/lib/i18n/config";
 
 type Dict = { [key: string]: string | Dict };
-const DICTS: Record<Locale, Dict> = { en, uk };
+// English and Ukrainian are bundled; every other language registers itself after it has been loaded (see lib/i18n/loaders.ts).
+const DICTS: Partial<Record<Locale, Dict>> = { en, uk };
+
+export function registerDict(locale: Locale, dict: Dict): void {
+	DICTS[locale] = dict;
+}
+
+export function hasDict(locale: Locale): boolean {
+	return DICTS[locale] !== undefined;
+}
 
 export type Params = Record<string, string | number>;
 
@@ -22,7 +31,7 @@ function lookup(dict: Dict, key: string): string | undefined {
  * In client components prefer `useT()` (reads the user's locale); this function defaults to English.
  */
 export function t(key: string, params?: Params, locale: Locale = DEFAULT_LOCALE): string {
-	const raw = lookup(DICTS[locale], key) ?? lookup(DICTS[DEFAULT_LOCALE], key) ?? key;
+	const raw = lookup(DICTS[locale] ?? {}, key) ?? lookup(DICTS[DEFAULT_LOCALE] ?? {}, key) ?? key;
 	return params ? interpolate(raw, params) : raw;
 }
 

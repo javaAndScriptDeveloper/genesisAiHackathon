@@ -3,407 +3,90 @@
 
 .root {
 	padding-bottom: var(--space-6);
-}
 
-.content {
-	display: flex;
-	flex-direction: column;
-	gap: var(--space-4);
-	padding: 0 var(--space-4);
-}
-
-.demoNote {
-	padding: var(--space-2) var(--space-3);
-	background: var(--color-warningSoft);
-	color: var(--color-warningText);
-	font-size: 1.2rem;
-	@include corners.radius(var(--radius-control));
-}
-
-.grid2 {
-	display: grid;
-	grid-template-columns: 1fr 1fr;
-	gap: var(--space-3);
-}
-
-.row {
-	display: flex;
-	align-items: center;
-	gap: var(--space-4);
-
-	h3 {
-		font-size: 1.6rem;
+	.content {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-4);
+		padding: 0 var(--space-4);
 	}
 
-	p {
-		margin-top: 0.2rem;
-		color: var(--color-textMuted);
-		font-size: 1.3rem;
-		line-height: 1.4;
-	}
-}
-
-.h2 {
-	font-size: 1.8rem;
-}
-
-.h3 {
-	margin-bottom: var(--space-2);
-	font-size: 1.6rem;
-}
-
-.p {
-	margin-bottom: var(--space-3);
-	color: var(--color-textMuted);
-	font-size: 1.4rem;
-	line-height: 1.5;
-}
-
-.sub {
-	display: block;
-	color: var(--color-textSubtle);
-	font-size: 1.2rem;
-}
-
-.eyebrow {
-	color: var(--color-accentText);
-	font-size: 1.2rem;
-	font-weight: 700;
-	letter-spacing: 0.08em;
-	text-transform: uppercase;
-}
-
-.cal {
-	display: grid;
-	grid-template-columns: repeat(7, 1fr);
-	gap: 0.4rem;
-}
-
-.calHead {
-	color: var(--color-textSubtle);
-	font-size: 1.1rem;
-	font-weight: 600;
-	text-align: center;
-}
-
-.calCell {
-	display: grid;
-	place-items: center;
-	aspect-ratio: 1;
-	background: var(--color-surfaceMuted);
-	color: var(--color-textSubtle);
-	font-size: 1.2rem;
-	font-weight: 600;
-	@include corners.radius(0.8rem);
-
-	&[data-state="done"] {
-		background: var(--color-success);
-		color: var(--color-onSuccess);
+	.week {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-3);
 	}
 
-	&[data-state="partial"] {
-		background: var(--color-successMuted);
-		color: var(--color-onSuccessMuted);
+	.h2 {
+		margin: 0;
+		font-size: 1.8rem;
+		font-weight: 700;
 	}
 
-	&[data-state="planned"] {
-		background: var(--color-accentSoft);
-		color: var(--color-accentText);
+	.grid2 {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: var(--space-3);
 	}
 
-	&[data-state="skipped"] {
-		background: var(--color-warningSoft);
-		color: var(--color-warningText);
-	}
-
-	&[data-state="missed"] {
-		background: var(--color-dangerSoft);
-		color: var(--color-dangerText);
-	}
-
-	&[data-today] {
-		outline: 0.2rem solid var(--color-text);
-		outline-offset: 0.1rem;
-	}
-}
-
-.legend {
-	display: flex;
-	flex-wrap: wrap;
-	gap: var(--space-3);
-	margin: var(--space-3) 0 0;
-	padding: 0;
-	list-style: none;
-	color: var(--color-textSubtle);
-	font-size: 1.2rem;
-
-	li {
+	// "Weekly report ready": accent card that stays until the report is opened (at most until the next Sunday).
+	.report {
 		display: flex;
 		align-items: center;
-		gap: 0.4rem;
-	}
-}
-
-.legendDot {
-	width: 1rem;
-	height: 1rem;
-	@include corners.radius(0.3rem);
-	background: var(--color-surfaceMuted);
-
-	&[data-state="done"] {
-		background: var(--color-success);
-	}
-
-	&[data-state="partial"] {
-		background: var(--color-successMuted);
-	}
-
-	&[data-state="planned"] {
+		gap: var(--space-3);
+		min-height: var(--hit-target);
+		padding: var(--space-4);
 		background: var(--color-accentSoft);
 		border: 0.1rem solid var(--color-accent);
+		color: var(--color-text);
+		text-decoration: none;
+		transition: box-shadow var(--transition-fast);
+		@include corners.radius(var(--radius-card));
+		@include mixins.focus-ring;
+
+		&:hover {
+			box-shadow: var(--shadow-popover);
+		}
 	}
 
-	&[data-state="skipped"] {
-		background: var(--color-warningSoft);
-		border: 0.1rem solid var(--color-warning);
-	}
-
-	&[data-state="missed"] {
-		background: var(--color-dangerSoft);
-		border: 0.1rem solid var(--color-danger);
-	}
-}
-
-.muscles {
-	display: flex;
-	flex-direction: column;
-	gap: var(--space-2);
-	margin: 0 0 var(--space-3);
-	padding: 0;
-	list-style: none;
-	font-size: 1.3rem;
-
-	li {
-		display: grid;
-		grid-template-columns: 7rem 1fr 3.6rem;
+	.reportIcon {
+		display: flex;
+		flex-shrink: 0;
 		align-items: center;
-		gap: var(--space-2);
-	}
-}
-
-
-.log {
-	background: var(--color-surface);
-	border: 0.1rem solid var(--color-border);
-	@include corners.radius(var(--radius-card));
-}
-
-.logSummary {
-	list-style: none;
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	gap: var(--space-2);
-	min-height: 6rem;
-	padding: var(--space-3);
-	font-size: 1.5rem;
-	cursor: pointer;
-	@include mixins.focus-ring;
-}
-
-.logBadges {
-	display: flex;
-	flex-direction: column;
-	align-items: flex-end;
-	gap: 0.4rem;
-}
-
-.logBody {
-	display: flex;
-	flex-direction: column;
-	gap: var(--space-2);
-	margin: 0;
-	padding: 0 var(--space-3) var(--space-3);
-	list-style: none;
-	font-size: 1.3rem;
-
-	li {
-		display: flex;
-		flex-direction: column;
-	}
-
-	span {
-		color: var(--color-textMuted);
-	}
-}
-
-.pr {
-	color: var(--color-accentText);
-	font-weight: 600;
-}
-
-.levelCard {
-	display: flex;
-	flex-direction: column;
-	gap: var(--space-3);
-}
-
-.levelTop {
-	display: flex;
-	align-items: flex-end;
-	justify-content: space-between;
-}
-
-.levelNum {
-	font-family: var(--font-display);
-	font-size: 4.4rem;
-	line-height: 1;
-}
-
-.levelRight {
-	display: flex;
-	flex-direction: column;
-	align-items: flex-end;
-	font-size: 1.4rem;
-
-	span {
-		color: var(--color-textSubtle);
-		font-size: 1.2rem;
-	}
-}
-
-.badgesGrid {
-	display: grid;
-	grid-template-columns: repeat(2, 1fr);
-	gap: var(--space-3);
-	margin: 0;
-	padding: 0;
-	list-style: none;
-}
-
-.badgeItem {
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	text-align: center;
-	gap: var(--space-2);
-	padding: var(--space-3);
-	background: var(--color-surface);
-	border: 0.1rem solid var(--color-border);
-	@include corners.radius(var(--radius-card));
-
-	strong {
-		font-size: 1.4rem;
-	}
-
-	span {
-		color: var(--color-textSubtle);
-		font-size: 1.2rem;
-		line-height: 1.35;
-	}
-
-	&[data-locked] strong {
-		color: var(--color-textMuted);
-	}
-}
-
-
-.stack {
-	display: flex;
-	flex-direction: column;
-	gap: var(--space-3);
-}
-
-.photos {
-	display: grid;
-	grid-template-columns: repeat(2, 1fr);
-	gap: var(--space-3);
-	margin: 0;
-	padding: 0;
-	list-style: none;
-
-	li {
-		display: flex;
-		flex-direction: column;
-		gap: 0.4rem;
-		font-size: 1.2rem;
-		color: var(--color-textSubtle);
-	}
-
-	img {
-		width: 100%;
-		aspect-ratio: 3 / 4;
-		object-fit: cover;
+		justify-content: center;
+		width: 4rem;
+		height: 4rem;
+		background: var(--color-accent);
+		color: var(--color-onAccent);
 		@include corners.radius(var(--radius-control));
 	}
-}
 
-.remove {
-	align-self: flex-start;
-	min-height: 3.6rem;
-	color: var(--color-dangerText);
-	font-size: 1.3rem;
-	font-weight: 600;
-	@include mixins.focus-ring;
-}
+	.reportText {
+		display: flex;
+		flex: 1;
+		flex-direction: column;
+		gap: 0.2rem;
+		min-width: 0;
 
-.logSummary::-webkit-details-marker {
-	display: none;
-}
+		strong {
+			font-size: 1.5rem;
+			line-height: 1.3;
+		}
 
-.chevron {
-	flex: none;
-	color: var(--color-textSubtle);
-	transition: transform var(--transition-base);
-}
-
-.log[open] .chevron {
-	transform: rotate(180deg);
-}
-
-.inline {
-	display: flex;
-	align-items: flex-start;
-	gap: var(--space-2);
-
-	> button {
-		flex: none;
-		margin-top: 2.8rem; // aligns with the field, below its label
+		span {
+			color: var(--color-textMuted);
+			font-size: 1.3rem;
+			line-height: 1.4;
+		}
 	}
-}
 
-.grow {
-	flex: 1;
-}
-
-.rowHead {
-	display: flex;
-	flex-wrap: wrap;
-	align-items: center;
-	gap: var(--space-2);
-}
-
-.calLink {
-	display: block;
-	color: inherit;
-	text-decoration: none;
-	@include corners.radius(var(--radius-card));
-	@include mixins.focus-ring;
-}
-
-.calTitle {
-	display: flex;
-	align-items: baseline;
-	justify-content: space-between;
-	gap: var(--space-3);
-}
-
-.calOpen {
-	display: inline-flex;
-	align-items: center;
-	gap: var(--space-1);
-	color: var(--color-accentText);
-	font-size: 1.3rem;
-	font-weight: 600;
-	white-space: nowrap;
+	.reportOpen {
+		display: flex;
+		flex-shrink: 0;
+		align-items: center;
+		gap: var(--space-1);
+		color: var(--color-accentText);
+		font-size: 1.4rem;
+		font-weight: 650;
+	}
 }

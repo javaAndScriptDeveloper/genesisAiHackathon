@@ -1,0 +1,57 @@
+{
+  "fit": {
+    "nav": {
+      "today": "Í dag",
+      "training": "Þjálfun",
+      "progress": "Framfarir",
+      "community": "Samfélag",
+      "profile": "Prófíll"
+    },
+    "common": {
+      "back": "Til baka",
+      "save": "Vista",
+      "cancel": "Hætta við",
+      "done": "Lokið",
+      "continue": "Áfram",
+      "next": "Næsta",
+      "start": "Byrja"
+    },
+    "quiz": {
+      "skip": "Sleppa í bili",
+      "nameLabel": "Nafnið þitt",
+      "hello": {
+        "cta": "Kynnumst",
+        "plan": "Áætlun byggð á markmiði þínu, tímaáætlun og búnaði",
+        "coach": "Gervigreindarþjálfari sem aðlagast eftir hverja æfingu",
+        "honest": "Engin skráning, tekur um mínútu"
+      },
+      "steps": {
+        "name": {
+          "title": "Hvað á ég að kalla þig?"
+        },
+        "gender": {
+          "title": "Segðu mér aðeins frá þér"
+        },
+        "goal": {
+          "title": "Hvert er markmið þitt, {name}?"
+        },
+        "body": {
+          "title": "Upphafspunkturinn þinn"
+        },
+        "level": {
+          "title": "Stig þitt"
+        },
+        "days": {
+          "title": "Hversu oft getur þú æft?"
+        }
+      },
+      "language": "Tungumál"
+    },
+    "settings": {
+      "languageLabel": "Tungumál"
+    }
+  },
+  "common": {
+    "close": "Loka"
+  }
+}

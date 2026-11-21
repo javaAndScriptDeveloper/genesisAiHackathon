@@ -3,19 +3,19 @@
 import { Globe02Icon, Notification03Icon, RulerIcon, Shield01Icon } from "@hugeicons/core-free-icons";
 import { useState } from "react";
 import { ScreenHeader } from "@/components/features/ScreenHeader/ScreenHeader";
-import { Button, Card, Icon, SegmentedControl, Select, Sheet, Switch, TimePicker, useToast } from "@/components/ui";
+import { Button, Card, Icon, SegmentedControl, Sheet, Switch, TimePicker, useToast } from "@/components/ui";
 import { NOTIFICATION_LABELS } from "@/lib/fit/notifications";
 import { useFit } from "@/lib/fit/store/FitProvider";
 import { useActionNavigate } from "@/lib/fit/store/hooks";
 import type { NotificationKind } from "@/lib/fit/types";
-import { LOCALES, LOCALE_LABELS, isLocale } from "@/lib/i18n/config";
+import { LanguageSelect } from "@/components/features/LanguageSelect/LanguageSelect";
 import { useI18n } from "@/lib/i18n/I18nProvider";
 import kit from "../ScreenKit/ScreenKit.module.scss";
 
 type Confirm = null | "demo" | "reset";
 
 export function Settings() {
-	const { t, locale, setLocale } = useI18n();
+	const { t } = useI18n();
 	const toast = useToast();
 	const go = useActionNavigate();
 	const { state, dispatch, today } = useFit();
@@ -39,7 +39,7 @@ export function Settings() {
 			<div className={kit.content}>
 				<Card className={kit.stack}>
 					<h2 className={`${kit.h2} ${kit.heading}`}><Icon icon={Globe02Icon} size={20} />{t("fit.settings.language")}</h2>
-					<Select label={t("fit.settings.languageLabel")} value={locale} options={LOCALES.map((l) => ({ value: l, label: LOCALE_LABELS[l] }))} onChange={(v) => isLocale(v) && setLocale(v)} />
+					<LanguageSelect />
 					<p className={kit.note}>{t("fit.settings.languageNote")}</p>
 				</Card>
 

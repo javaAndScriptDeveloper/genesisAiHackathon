@@ -17,7 +17,10 @@ export function loadState(): FitState {
 		if (!raw) return emptyState();
 		const parsed: unknown = JSON.parse(raw);
 		if (!isFitState(parsed)) return emptyState();
-		const state: FitState = { ...emptyState(), ...parsed };
+		const fresh = emptyState();
+		// Notification switches added after the save was written default to on.
+		const saved = parsed.notificationSettings;
+		const state: FitState = { ...fresh, ...parsed, notificationSettings: { ...fresh.notificationSettings, ...saved, enabled: { ...fresh.notificationSettings.enabled, ...saved?.enabled } } };
 		// Older saves keep a `{ userId, deviceId }` from before the token-scoped backend routes.
 		return { ...state, backend: tokenBackend(state.backend) };
 	} catch {

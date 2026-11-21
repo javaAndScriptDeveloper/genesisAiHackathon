@@ -1,0 +1,57 @@
+{
+  "fit": {
+    "nav": {
+      "today": "Sot",
+      "training": "Stërvitje",
+      "progress": "Progresi",
+      "community": "Komuniteti",
+      "profile": "Profili"
+    },
+    "common": {
+      "back": "Mbrapa",
+      "save": "Ruaj",
+      "cancel": "Anulo",
+      "done": "Gati",
+      "continue": "Vazhdo",
+      "next": "Tjetra",
+      "start": "Fillo"
+    },
+    "quiz": {
+      "skip": "Kalo tani",
+      "nameLabel": "Emri yt",
+      "hello": {
+        "cta": "Të njihemi",
+        "plan": "Një plan i ndërtuar sipas qëllimit, orarit dhe pajisjeve të tua",
+        "coach": "Një trajner AI që përshtatet pas çdo stërvitjeje",
+        "honest": "Pa regjistrim, merr rreth një minutë"
+      },
+      "steps": {
+        "name": {
+          "title": "Si duhet të të quaj?"
+        },
+        "gender": {
+          "title": "Më trego pak për veten"
+        },
+        "goal": {
+          "title": "Cili është qëllimi yt, {name}?"
+        },
+        "body": {
+          "title": "Pika jote e nisjes"
+        },
+        "level": {
+          "title": "Niveli yt"
+        },
+        "days": {
+          "title": "Sa shpesh mund të stërvitesh?"
+        }
+      },
+      "language": "Gjuha"
+    },
+    "settings": {
+      "languageLabel": "Gjuha"
+    }
+  },
+  "common": {
+    "close": "Mbyll"
+  }
+}

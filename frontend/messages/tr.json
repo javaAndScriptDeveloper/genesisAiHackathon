@@ -1,0 +1,57 @@
+{
+  "fit": {
+    "nav": {
+      "today": "Bugün",
+      "training": "Antrenman",
+      "progress": "İlerleme",
+      "community": "Topluluk",
+      "profile": "Profil"
+    },
+    "common": {
+      "back": "Geri",
+      "save": "Kaydet",
+      "cancel": "İptal",
+      "done": "Bitti",
+      "continue": "Devam",
+      "next": "Sonraki",
+      "start": "Başla"
+    },
+    "quiz": {
+      "skip": "Şimdilik atla",
+      "nameLabel": "Adınız",
+      "hello": {
+        "cta": "Tanışalım",
+        "plan": "Hedefinize, programınıza ve ekipmanınıza göre hazırlanan bir plan",
+        "coach": "Her antrenmandan sonra uyum sağlayan yapay zekâ koçu",
+        "honest": "Kayıt gerekmez, yaklaşık bir dakika sürer"
+      },
+      "steps": {
+        "name": {
+          "title": "Size nasıl hitap edeyim?"
+        },
+        "gender": {
+          "title": "Bana kendinizden biraz bahsedin"
+        },
+        "goal": {
+          "title": "Hedefiniz nedir, {name}?"
+        },
+        "body": {
+          "title": "Başlangıç noktanız"
+        },
+        "level": {
+          "title": "Seviyeniz"
+        },
+        "days": {
+          "title": "Ne sıklıkla antrenman yapabilirsiniz?"
+        }
+      },
+      "language": "Dil"
+    },
+    "settings": {
+      "languageLabel": "Dil"
+    }
+  },
+  "common": {
+    "close": "Kapat"
+  }
+}

@@ -1,0 +1,57 @@
+{
+  "fit": {
+    "nav": {
+      "today": "Hoxe",
+      "training": "Adestramento",
+      "progress": "Progreso",
+      "community": "Comunidade",
+      "profile": "Perfil"
+    },
+    "common": {
+      "back": "Atrás",
+      "save": "Gardar",
+      "cancel": "Cancelar",
+      "done": "Feito",
+      "continue": "Continuar",
+      "next": "Seguinte",
+      "start": "Comezar"
+    },
+    "quiz": {
+      "skip": "Omitir por agora",
+      "nameLabel": "O teu nome",
+      "hello": {
+        "cta": "Imos coñecernos",
+        "plan": "Un plan feito arredor do teu obxectivo, horario e material",
+        "coach": "Un adestrador de IA que se adapta despois de cada adestramento",
+        "honest": "Sen rexistro, leva uns un minuto"
+      },
+      "steps": {
+        "name": {
+          "title": "Como te debo chamar?"
+        },
+        "gender": {
+          "title": "Cóntame algo sobre ti"
+        },
+        "goal": {
+          "title": "Cal é o teu obxectivo, {name}?"
+        },
+        "body": {
+          "title": "O teu punto de partida"
+        },
+        "level": {
+          "title": "O teu nivel"
+        },
+        "days": {
+          "title": "Con que frecuencia podes adestrar?"
+        }
+      },
+      "language": "Idioma"
+    },
+    "settings": {
+      "languageLabel": "Idioma"
+    }
+  },
+  "common": {
+    "close": "Pechar"
+  }
+}

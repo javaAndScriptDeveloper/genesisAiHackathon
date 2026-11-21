@@ -1,4 +1,5 @@
 import type { CoachAiReply } from "./aiPlan";
+import type { NudgeFacts, NudgeKind } from "./nudge";
 import type { ISODate } from "./dates";
 import type { DailyStats, DailyStatus } from "./dailyStats";
 import type { ArchiveItem, ProgressEvent } from "../progress/types";
@@ -141,7 +142,7 @@ export interface ActiveSession {
 	perceived: Perceived | null;
 }
 
-export type NotificationKind = "workout" | "missed" | "achievement" | "weekly-goal" | "recovery" | "coach" | "weekly-summary";
+export type NotificationKind = "workout" | "missed" | "achievement" | "weekly-goal" | "recovery" | "coach" | "weekly-summary" | "streak";
 
 export interface AppNotification {
 	id: string;
@@ -151,6 +152,12 @@ export interface AppNotification {
 	createdAt: string;
 	read: boolean;
 	href?: string;
+	/** Set on kinds the trainer writes in their own voice: what to ask Gemini. */
+	nudge?: { kind: NudgeKind; facts: NudgeFacts };
+	/** The trainer-voice text once Gemini has written it; the template `body` stays as the fallback. */
+	aiText?: string;
+	/** The trainer-voice request failed once; never ask again (also after a reload). */
+	aiFailed?: boolean;
 }
 
 export interface NotificationSettings {
@@ -213,6 +220,22 @@ export interface PhotoCheckIn {
 	weightKg?: number;
 }
 
+export interface PhotoInsight {
+	id: string;
+	analyzedAt: string;
+	beforeDate: string;
+	afterDate: string;
+	/** Local photo ids (FitState.photos). Null on old insights; the photo may since have been deleted. */
+	beforePhotoId: string | null;
+	afterPhotoId: string | null;
+	beforeWeightKg: number | null;
+	afterWeightKg: number | null;
+	model: string;
+	engineVersion: string;
+	suitable: boolean;
+	result: { summary: string; observations: { area: string; text: string }[]; encouragement: string };
+}
+
 export interface ChatMessage {
 	id: string;
 	from: "me" | "buddy";
@@ -254,6 +277,10 @@ export interface FitState {
 	devices: DeviceState;
 	bloodPressure: BloodPressureEntry[];
 	photos: PhotoCheckIn[];
+	/** Text-only results of AI photo analyses. The photos themselves are never stored remotely. */
+	photoInsights: PhotoInsight[];
+	/** When the user agreed to send photos to the AI; null means ask every time. */
+	photoAiConsentAt: string | null;
 	/** `at` is the moment the entry was saved (absent on demo seed data). */
 	bodyWeights: { date: ISODate; kg: number; at?: string }[];
 	goalWeightKg: number | null;

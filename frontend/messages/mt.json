@@ -1,0 +1,57 @@
+{
+  "fit": {
+    "nav": {
+      "today": "Illum",
+      "training": "Taħriġ",
+      "progress": "Progress",
+      "community": "Komunità",
+      "profile": "Profil"
+    },
+    "common": {
+      "back": "Lura",
+      "save": "Issejvja",
+      "cancel": "Ikkanċella",
+      "done": "Lest",
+      "continue": "Kompli",
+      "next": "Li jmiss",
+      "start": "Ibda"
+    },
+    "quiz": {
+      "skip": "Aqbeż għalissa",
+      "nameLabel": "Ismek",
+      "hello": {
+        "cta": "Ejja nitkellmu",
+        "plan": "Pjan mibni madwar l-għan, l-iskeda u t-tagħmir tiegħek",
+        "coach": "Kowċ tal-AI li jadatta wara kull taħriġ",
+        "honest": "Ebda reġistrazzjoni, jieħu madwar minuta"
+      },
+      "steps": {
+        "name": {
+          "title": "Kif għandi nsejjaħlek?"
+        },
+        "gender": {
+          "title": "Għidli ftit dwarek"
+        },
+        "goal": {
+          "title": "X'inhu l-għan tiegħek, {name}?"
+        },
+        "body": {
+          "title": "In-nukqa tal-bidu tiegħek"
+        },
+        "level": {
+          "title": "Il-livell tiegħek"
+        },
+        "days": {
+          "title": "Kemm-il darba tista' titħarreġ?"
+        }
+      },
+      "language": "Lingwa"
+    },
+    "settings": {
+      "languageLabel": "Lingwa"
+    }
+  },
+  "common": {
+    "close": "Għalaq"
+  }
+}

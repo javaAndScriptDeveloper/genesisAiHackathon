@@ -1,0 +1,57 @@
+{
+  "fit": {
+    "nav": {
+      "today": "Haut",
+      "training": "Training",
+      "progress": "Fortschrëtt",
+      "community": "Communautéit",
+      "profile": "Profil"
+    },
+    "common": {
+      "back": "Zréck",
+      "save": "Späicheren",
+      "cancel": "Ofbriechen",
+      "done": "Fäerdeg",
+      "continue": "Weider",
+      "next": "Nächst",
+      "start": "Ufänken"
+    },
+    "quiz": {
+      "skip": "Elo iwwersprangen",
+      "nameLabel": "Däin Numm",
+      "hello": {
+        "cta": "Loosse mir eis kenneléieren",
+        "plan": "E Plang ronderëm däin Ziel, däin Zäitplang an däin Material",
+        "coach": "En KI-Coach deen sech no all Training upasst",
+        "honest": "Keng Umeldung, dauert ongeféier eng Minutt"
+      },
+      "steps": {
+        "name": {
+          "title": "Wéi soll ech dech nennen?"
+        },
+        "gender": {
+          "title": "Erzielt mir e bëssen iwwer dech"
+        },
+        "goal": {
+          "title": "Wat ass däin Ziel, {name}?"
+        },
+        "body": {
+          "title": "Däi Startpunkt"
+        },
+        "level": {
+          "title": "Däin Niveau"
+        },
+        "days": {
+          "title": "Wéi dacks kanns du trainéieren?"
+        }
+      },
+      "language": "Sprooch"
+    },
+    "settings": {
+      "languageLabel": "Sprooch"
+    }
+  },
+  "common": {
+    "close": "Zoumaachen"
+  }
+}
