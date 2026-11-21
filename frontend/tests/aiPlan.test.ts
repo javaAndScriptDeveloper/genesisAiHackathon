@@ -1,4 +1,9 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it } from "vitest";
+import { AiConfigError } from "@/lib/ai/errors";
+import { askJson } from "@/lib/ai/planner";
+import { coachAiReplySchema } from "@/lib/fit/aiPlan";
+import { systemFor, usableExerciseList, weekPrompt } from "@/lib/fit/aiPrompts";
+import { z } from "zod";
 import { statsSummary, statusForReadiness, type DailyStats } from "@/lib/fit/dailyStats";
 import { toBackendUser } from "@/lib/fit/backendUser";
 import { buildDailySession, buildPlanFromAi, diffPlans, fallbackDaily } from "@/lib/fit/aiPlan";
@@ -195,3 +200,48 @@ describe("daily sessions", () => {
 function totalSetsOf(w: PlannedWorkout): number {
 	return w.exercises.reduce((n, b) => n + b.sets.length, 0);
 }
+
+describe("aiPrompts", () => {
+	const bare: Profile = { ...profile, location: "home", equipment: [], limitations: ["knees"] };
+	it("usableExerciseList excludes equipment and knee-stressing moves", () => {
+		const list = usableExerciseList(bare);
+		expect(list.length).toBeGreaterThan(0);
+		for (const item of list) {
+			const ex = getExercise(item.id);
+			expect(ex.equipment).toEqual([]);
+			expect(ex.stresses).not.toContain("knees");
+		}
+	});
+	it("weekPrompt carries sessions, ids, wishes and stats", () => {
+		const stats = [stat("2026-11-20", 70), stat("2026-11-21", 55)];
+		const text = weekPrompt({ profile: bare, stats, wishes: ["more core", "no burpees"] });
+		expect(text).toContain("3 sessions");
+		for (const item of usableExerciseList(bare)) expect(text).toContain(item.id);
+		expect(text).toContain("more core");
+		expect(text).toContain("no burpees");
+		expect(text).toContain(statsSummary(stats));
+	});
+	it("systemFor includes the tone of voice", () => {
+		expect(systemFor({ name: "Rex", tov: "gruff but kind" })).toContain("gruff but kind");
+	});
+});
+
+describe("coachAiReplySchema", () => {
+	it("rejects out-of-range days and accepts null rebuild", () => {
+		const bad = { reply: "ok", rebuild: { wishes: [], profileChanges: { daysPerWeek: 9 }, summary: "s" } };
+		expect(coachAiReplySchema.safeParse(bad).success).toBe(false);
+		expect(coachAiReplySchema.safeParse({ reply: "ok", rebuild: null }).success).toBe(true);
+	});
+});
+
+describe("askJson", () => {
+	const saved = process.env.GEMINI_API_KEY;
+	afterEach(() => {
+		if (saved === undefined) delete process.env.GEMINI_API_KEY;
+		else process.env.GEMINI_API_KEY = saved;
+	});
+	it("throws AiConfigError without a key", async () => {
+		delete process.env.GEMINI_API_KEY;
+		await expect(askJson(z.object({ a: z.string() }), { system: "s", prompt: "p" })).rejects.toBeInstanceOf(AiConfigError);
+	});
+});

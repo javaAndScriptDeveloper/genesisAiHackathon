@@ -5,13 +5,13 @@ import { parseGoalReply } from "@/lib/fit/goalParse";
 import type { Goal } from "@/lib/fit/types";
 import type { AskOptions } from "./claude";
 
-function client() {
+export function client() {
 	const apiKey = process.env.GEMINI_API_KEY;
 	if (!apiKey) throw new AiConfigError("GEMINI_API_KEY");
 	return new GoogleGenAI({ apiKey });
 }
 
-const model = (override?: string) => override ?? process.env.GEMINI_MODEL ?? "gemini-2.5-flash";
+export const model = (override?: string) => override ?? process.env.GEMINI_MODEL ?? "gemini-2.5-flash";
 
 export async function askGemini({ prompt, system, model: m }: AskOptions): Promise<string> {
 	const res = await client().models.generateContent({

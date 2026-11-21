@@ -3,6 +3,7 @@ import { applyAdapt } from "./adapt";
 import type { DailyStatus } from "./dailyStats";
 import { addDays, mondayOf, type ISODate } from "./dates";
 import { findExercise, getExercise, isUsable } from "./exercises";
+import { EQUIPMENT, GOALS, LIMITATIONS, LOCATIONS } from "./options";
 import { DAY_PATTERNS, buildAdHocWorkout, difficultyOf, estimateMinutes, generatePlan, nextBlockId, roundLoad, startingWeight } from "./plan";
 import type { Exercise, ExerciseBlock, PlannedWorkout, Profile, SetEntry } from "./types";
 
@@ -20,6 +21,23 @@ export const aiWeekSchema = z.object({
 export const aiSessionSchema = z.object({ note: z.string(), title: z.string(), exercises: z.array(aiExerciseSchema) });
 export type AiWeek = z.infer<typeof aiWeekSchema>;
 export type AiSession = z.infer<typeof aiSessionSchema>;
+export const profileChangesSchema = z
+	.object({
+		equipment: z.array(z.enum(EQUIPMENT)),
+		location: z.enum(LOCATIONS),
+		limitations: z.array(z.enum(LIMITATIONS)),
+		limitationNote: z.string().max(200),
+		daysPerWeek: z.number().int().min(1).max(6),
+		durationMin: z.number().int().min(10).max(90),
+		goal: z.enum(GOALS),
+	})
+	.partial();
+export const coachAiReplySchema = z.object({
+	reply: z.string().min(1),
+	rebuild: z.object({ wishes: z.array(z.string()).max(10), profileChanges: profileChangesSchema.nullable(), summary: z.string() }).nullable(),
+});
+export type CoachAiReply = z.infer<typeof coachAiReplySchema>;
+export type ProfileChanges = z.infer<typeof profileChangesSchema>;
 type AiExercise = z.infer<typeof aiExerciseSchema>;
 
 const clamp = (n: number, min: number, max: number) => Math.min(max, Math.max(min, Math.round(n)));
