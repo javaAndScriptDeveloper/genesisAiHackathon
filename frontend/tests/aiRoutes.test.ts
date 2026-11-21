@@ -1,17 +1,20 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { AiWeek } from "@/lib/fit/aiPlan";
-import { plannedWorkoutSchema, type DailyResponse, type PlanResponse } from "@/lib/fit/aiApi";
+import { plannedWorkoutSchema, type CoachResponse, type DailyResponse, type PlanResponse } from "@/lib/fit/aiApi";
 import { buildPlanFromAi } from "@/lib/fit/aiPlan";
 import { generatePlan } from "@/lib/fit/plan";
 import type { DailyStats } from "@/lib/fit/dailyStats";
 import type { Profile } from "@/lib/fit/types";
 
-vi.mock("@/lib/ai/planner", () => ({ generateWeek: vi.fn(), adjustSession: vi.fn() }));
+vi.mock("@/lib/ai/planner", () => ({ generateWeek: vi.fn(), adjustSession: vi.fn(), coachChat: vi.fn() }));
 vi.mock("@/lib/api/platform", () => ({ getSnapshots: vi.fn(), saveTraining: vi.fn(), getTrainerTov: vi.fn() }));
 
 import { POST } from "@/app/api/plan/route";
 import { POST as DAILY } from "@/app/api/plan/daily/route";
-import { adjustSession, generateWeek } from "@/lib/ai/planner";
+import { POST as COACH } from "@/app/api/coach/route";
+import { AiConfigError } from "@/lib/ai/errors";
+import { adjustSession, coachChat, generateWeek } from "@/lib/ai/planner";
+import { safetyReplyText } from "@/lib/fit/coach";
 import { getSnapshots, getTrainerTov, saveTraining } from "@/lib/api/platform";
 
 const profile: Profile = {
@@ -172,6 +175,51 @@ describe("POST /api/plan/daily", () => {
 	it("rejects an invalid body with 400", async () => {
 		expect((await DAILY(dreq({ ...dbase, today: "x" }))).status).toBe(400);
 		expect((await DAILY(new Request("http://x/api/plan/daily", { method: "POST", body: "nope" }))).status).toBe(400);
+	});
+});
+
+describe("POST /api/coach", () => {
+	const creq = (body: unknown) => new Request("http://x/api/coach", { method: "POST", body: JSON.stringify(body) });
+	const cbase = { userId: 7, profile, trainerSlug: "john", wishes: [], planSummary: "plan", messages: [{ from: "user", text: "make it shorter" }] };
+	const run = async (body: unknown): Promise<{ status: number; json: CoachResponse & { error?: string } }> => {
+		const res = await COACH(creq(body));
+		return { status: res.status, json: await res.json() };
+	};
+
+	it("answers symptoms with the safety reply and never calls Gemini", async () => {
+		const { status, json } = await run({ ...cbase, messages: [{ from: "user", text: "I have chest pain" }] });
+		expect(status).toBe(200);
+		expect(json.safety).toBe(true);
+		expect(json.rebuild).toBeNull();
+		expect(json.reply).toBe(safetyReplyText());
+		expect(coachChat).not.toHaveBeenCalled();
+	});
+
+	it("passes the AI reply and rebuild through", async () => {
+		const rebuild = { wishes: ["shorter"], profileChanges: { durationMin: 20 }, summary: "Shorter plan" };
+		vi.mocked(coachChat).mockResolvedValue({ reply: "Sure thing", rebuild });
+		const { status, json } = await run(cbase);
+		expect(status).toBe(200);
+		expect(json).toEqual({ reply: "Sure thing", rebuild, safety: false });
+	});
+
+	it("returns 503 when Gemini fails", async () => {
+		vi.mocked(coachChat).mockRejectedValue(new Error("daysPerWeek 9 invalid"));
+		const { status, json } = await run(cbase);
+		expect(status).toBe(503);
+		expect(json.error).toBe("Coach unavailable");
+	});
+
+	it("returns 503 when the key is missing", async () => {
+		vi.mocked(coachChat).mockRejectedValue(new AiConfigError("GEMINI_API_KEY"));
+		expect((await run(cbase)).status).toBe(503);
+	});
+
+	it("rejects an invalid body with 400", async () => {
+		expect((await COACH(creq({ ...cbase, messages: [] }))).status).toBe(400);
+		expect((await COACH(creq({ ...cbase, messages: [{ from: "coach", text: "hi" }] }))).status).toBe(400);
+		expect((await COACH(creq({ ...cbase, messages: [{ from: "user", text: "x".repeat(601) }] }))).status).toBe(400);
+		expect((await COACH(new Request("http://x/api/coach", { method: "POST", body: "nope" }))).status).toBe(400);
 	});
 });
 

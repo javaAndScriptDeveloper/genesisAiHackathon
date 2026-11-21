@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { coachAiReplySchema, type CoachAiReply } from "./aiPlan";
 import { dailyStatsSchema, type DailyStats, type DailyStatus } from "./dailyStats";
 import { EQUIPMENT, GENDERS, GOALS, LIMITATIONS, LOCATIONS, EXPERIENCES, WEARABLES } from "./options";
 import type { ExerciseBlock, PlannedWorkout, Profile, SetEntry } from "./types";
@@ -94,3 +95,24 @@ export const dailyResponseSchema: z.ZodType<{ status: DailyStatus; session: Plan
 	createdBy: z.enum(["ai", "fallback"]),
 });
 export type DailyResponse = z.infer<typeof dailyResponseSchema>;
+
+export const coachRequestSchema = z.object({
+	userId: z.number().int().positive().nullable(),
+	profile: profileSchema,
+	trainerSlug: z.string().min(1).max(100),
+	wishes: z.array(z.string().max(200)).max(10),
+	planSummary: z.string().max(4000),
+	messages: z
+		.array(z.object({ from: z.enum(["user", "coach"]), text: z.string().max(600) }))
+		.min(1)
+		.max(12)
+		.refine((m) => m[m.length - 1]?.from === "user", "Last message must be from the user"),
+});
+export type CoachRequest = z.infer<typeof coachRequestSchema>;
+
+export const coachResponseSchema: z.ZodType<{ reply: string; rebuild: CoachAiReply["rebuild"]; safety: boolean }> = z.object({
+	reply: z.string(),
+	rebuild: coachAiReplySchema.shape.rebuild,
+	safety: z.boolean(),
+});
+export type CoachResponse = z.infer<typeof coachResponseSchema>;
