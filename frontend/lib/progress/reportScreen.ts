@@ -1,6 +1,11 @@
 import type { Advice, Improvement } from "./improvements";
-import type { WeekTotals } from "./report";
-import type { Exercise } from "./types";
+import { weeklyReportV2, type WeekTotals, type WeeklyReportV2 } from "./report";
+import type { Exercise, History, IsoDate, ProgressContext } from "./types";
+
+/** Report of a past week graded with the goal captured when the screen opened, so a later goal change never re-grades it. */
+export function reportView(h: History, ctx: ProgressContext, week: IsoDate, frozenGoal: number): WeeklyReportV2 {
+	return weeklyReportV2(h, { ...ctx, weeklyGoal: frozenGoal }, week);
+}
 
 export type ComparisonMetric = "workouts" | "minutes" | "qualitySets" | "xp";
 

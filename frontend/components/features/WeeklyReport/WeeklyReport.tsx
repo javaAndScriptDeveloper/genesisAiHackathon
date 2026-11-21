@@ -2,17 +2,17 @@
 
 import { CheckmarkCircle02Icon, Notification03Icon, PauseIcon, Target02Icon } from "@hugeicons/core-free-icons";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { ProgressInsights } from "@/components/features/ProgressInsights/ProgressInsights";
 import { ScreenHeader } from "@/components/features/ScreenHeader/ScreenHeader";
 import { Badge, Button, Card, EmptyState, Icon, useToast } from "@/components/ui";
 import { formatDay, formatMonthDay } from "@/lib/fit/dates";
 import { useFit } from "@/lib/fit/store/FitProvider";
 import { useProgress, useUnits } from "@/lib/fit/store/hooks";
-import { useT } from "@/lib/i18n/I18nProvider";
+import { useI18n, useT } from "@/lib/i18n/I18nProvider";
 import { addDays } from "@/lib/progress/dates";
-import { isValidReportWeek, weeklyReport, weeklyReportV2 } from "@/lib/progress/report";
-import { adviceCopy, comparisonRows, goalOptions, improvementCopy } from "@/lib/progress/reportScreen";
+import { isValidReportWeek, weeklyReport } from "@/lib/progress/report";
+import { adviceCopy, comparisonRows, goalOptions, improvementCopy, reportView } from "@/lib/progress/reportScreen";
 import type { RecordMetric } from "@/lib/progress/records";
 import styles from "./WeeklyReport.module.scss";
 
@@ -20,14 +20,20 @@ const UNIT: Record<RecordMetric, "kg" | "reps" | "s"> = { e1rm: "kg", weight: "k
 
 export function WeeklyReport({ week }: { week: string }) {
 	const t = useT();
+	const { locale } = useI18n();
+	const nf = useMemo(() => new Intl.NumberFormat(locale), [locale]);
 	const router = useRouter();
 	const toast = useToast();
 	const units = useUnits();
-	const { today, dispatch } = useFit();
+	const { today, dispatch, ready } = useFit();
+	const frozen = useRef<number | null>(null);
 	const { history, ctx } = useProgress();
 	const valid = isValidReportWeek(week, today);
 	const report = useMemo(() => (valid ? weeklyReport(history, week) : null), [valid, history, week]);
-	const v2 = useMemo(() => (valid ? weeklyReportV2(history, ctx, week) : null), [valid, history, ctx, week]);
+	// The viewed week is graded with the goal from when the screen opened; the picker only affects next week.
+	if (frozen.current === null && ready) frozen.current = ctx.weeklyGoal;
+	const goal = frozen.current ?? ctx.weeklyGoal;
+	const v2 = useMemo(() => (valid ? reportView(history, ctx, week, goal) : null), [valid, history, ctx, week, goal]);
 
 	// Opening the report clears its "new" dot and card (the event's refId is that Monday).
 	useEffect(() => {
@@ -80,7 +86,7 @@ export function WeeklyReport({ week }: { week: string }) {
 						<Badge tone={credited ? "success" : "neutral"}>{t("fit.progress.report.doneOfGoal", { done: pushText.params.done, goal: pushText.params.goal })}</Badge>
 					</div>
 				</Card>
-				{summary.workouts === 0 && <p className={styles.quiet}>{t("fit.progress.report.empty")}</p>}
+				{summary.workouts === 0 && !paused && <p className={styles.quiet}>{t("fit.progress.report.empty")}</p>}
 
 				<Card>
 					<h3 className={styles.h3}>{t("fit.progress.report.compare")}</h3>
@@ -97,10 +103,10 @@ export function WeeklyReport({ week }: { week: string }) {
 								<tr key={r.metric}>
 									<th scope="row">{t(`fit.progress.report.metric.${r.metric}`)}</th>
 									<td>
-										<strong>{r.now}</strong>
-										<span className={styles.delta} data-tone={r.tone}>{t(`fit.progress.report.delta.${r.direction}`, { n: Math.abs(r.delta) })}</span>
+										<strong>{nf.format(r.now)}</strong>
+										<span className={styles.delta} data-tone={r.tone}>{t(`fit.progress.report.delta.${r.direction}`, { n: nf.format(Math.abs(r.delta)) })}</span>
 									</td>
-									<td>{r.before}</td>
+									<td>{nf.format(r.before)}</td>
 								</tr>
 							))}
 						</tbody>
@@ -126,6 +132,7 @@ export function WeeklyReport({ week }: { week: string }) {
 							<button key={o.value} type="button" className={styles.goal} aria-pressed={o.selected} data-selected={o.selected || undefined} onClick={() => pick(o.value)}>
 								<strong>{o.value}</strong>
 								<span>{t("fit.progress.report.goalOption", { n: o.value })}</span>
+								{o.selected && <span className={styles.cur}>{t("fit.progress.report.currentGoal")}</span>}
 								{o.recommended && <Badge tone="accent" className={styles.rec}>{t("fit.progress.report.recommended")}</Badge>}
 							</button>
 						))}

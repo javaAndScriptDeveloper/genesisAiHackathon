@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { adviceCopy, comparisonRows, goalOptions, improvementCopy } from "@/lib/progress/reportScreen";
+import { demoHistory } from "@/lib/api/mock/progressDb";
+import { adviceCopy, reportView, comparisonRows, goalOptions, improvementCopy } from "@/lib/progress/reportScreen";
 
 const t = (workouts: number, minutes: number, qualitySets: number, xp: number) => ({ workouts, minutes, qualitySets, xp });
 
@@ -35,5 +36,18 @@ describe("copy helpers", () => {
 	it("uses a singular key for one remaining session", () => {
 		expect(adviceCopy({ id: "goal-remaining", vars: { n: 1 } }, ex, String).key).toBe("fit.progress.advice.goal-remaining-one");
 		expect(adviceCopy({ id: "goal-remaining", vars: { n: 2 } }, ex, String).key).toBe("fit.progress.advice.goal-remaining");
+	});
+});
+
+describe("reportView", () => {
+	it("is graded by the frozen goal, not by a later ctx goal change", () => {
+		const h = demoHistory();
+		const week = "2026-11-09";
+		const before = reportView(h, { weeklyGoal: 2, pauses: [] }, week, 2);
+		const after = reportView(h, { weeklyGoal: 5, pauses: [] }, week, 2);
+		expect(after.credited).toBe(before.credited);
+		expect(after.pushText).toEqual(before.pushText);
+		expect(after.pushText.params.goal).toBe(2);
+		expect(reportView(h, { weeklyGoal: 2, pauses: [] }, week, 5).pushText.params.goal).toBe(5);
 	});
 });
