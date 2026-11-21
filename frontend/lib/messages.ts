@@ -23,18 +23,13 @@ function lookup(dict: Dict, key: string): string | undefined {
  */
 export function t(key: string, params?: Params, locale: Locale = DEFAULT_LOCALE): string {
 	const raw = lookup(DICTS[locale], key) ?? lookup(DICTS[DEFAULT_LOCALE], key) ?? key;
-	if (!params) return raw;
-	return raw.replace(/\{(\w+)\}/g, (_, name: string) => String(params[name] ?? `{${name}}`));
+	return params ? interpolate(raw, params) : raw;
 }
 
 /** Replaces every `{name}` in the template; unknown placeholders are left as-is. */
-export function interpolate(template: string, vars: Record<string, string | number>): string {
+export function interpolate(template: string, vars: Params): string {
 	return template.replace(/\{(\w+)\}/g, (match, name: string) => {
 		const v = vars[name];
 		return v === undefined ? match : String(v);
 	});
-}
-
-export function tf(key: string, vars: Record<string, string | number>): string {
-	return interpolate(t(key), vars);
 }
