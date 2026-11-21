@@ -65,6 +65,11 @@
     },
     "training": {
       "filterMuscle": "Фільтр за групою м’язів",
+      "onlyMine": "Підходить мені",
+      "onlyMineHint": "Лише вправи під моє спорядження й обмеження",
+      "medium": "Середній",
+      "pro": "PRO",
+      "proLevel": "Рівень PRO: є складні вправи",
       "exerciseCount": {
         "one": "{count} вправа",
         "few": "{count} вправи",

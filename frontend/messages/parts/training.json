@@ -97,7 +97,11 @@
       "search": "Search exercises",
       "searchPlaceholder": "Squat, row, plank…",
       "filterMuscle": "Filter by muscle",
-      "onlyMine": "Only exercises that fit my equipment and limits",
+      "onlyMine": "Fits my setup",
+      "onlyMineHint": "Only exercises that fit my equipment and limits",
+      "medium": "Medium",
+      "pro": "PRO",
+      "proLevel": "PRO difficulty: hard exercises available",
       "noResults": "No exercises found",
       "noResultsBody": "Try another search or show everything.",
       "clearFilters": "Show all exercises"
