@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { estimate1RM, exerciseSeries, mainMetric, personalRecords } from "@/lib/progress/records";
+import { estimate1RM, exerciseSeries, mainMetric, personalRecords, setRecords } from "@/lib/progress/records";
 import type { Exercise, History, SetLog, WorkoutSession } from "@/lib/progress/types";
 
 const exercises: Exercise[] = [
@@ -17,8 +17,11 @@ const wt = (exerciseId: string, reps: number, weightKg: number): SetLog => ({ ex
 const hist = (sessions: WorkoutSession[]): History => ({ today: "2026-11-21", exercises, plan: [], sessions, body: [], device: null });
 
 describe("records", () => {
-	it("Epley з округленням до 0.5", () => {
-		expect(estimate1RM(20, 8)).toBe(25.5);
+	it("Brzycki з округленням до 0.1", () => {
+		expect(estimate1RM(32, 5)).toBe(36);
+		expect(estimate1RM(24, 7)).toBe(28.8);
+		expect(estimate1RM(20, 8)).toBe(24.8);
+		expect(estimate1RM(20, 11)).toBeNull();
 		expect(estimate1RM(20, 12)).toBeNull();
 		expect(estimate1RM(20, 0)).toBeNull();
 	});
@@ -46,7 +49,7 @@ describe("records", () => {
 	it("weighted: one metric per exercise (no mixed e1rm/weight)", () => {
 		const h = hist([sess("a", "2026-11-10", [wt("squat", 10, 10)]), sess("b", "2026-11-12", [wt("squat", 12, 12)])]);
 		// e1RM metric is used for all; the 12-rep session has no qualifying set and is skipped
-		expect(exerciseSeries(h, "squat").map((p) => p.value)).toEqual([13.5]);
+		expect(exerciseSeries(h, "squat").map((p) => p.value)).toEqual([13.3]);
 	});
 	it("покинуті сесії не дають рекордів", () => {
 		const h = hist([sess("a", "2026-11-10", [bw(8)]), sess("b", "2026-11-12", [bw(20)], "abandoned")]);
@@ -66,5 +69,28 @@ describe("records", () => {
 		expect(mainMetric("weighted")).toBe("e1rm");
 		expect(mainMetric("bodyweight")).toBe("reps");
 		expect(mainMetric("timed")).toBe("time");
+	});
+
+	it("setRecords: найбільша вага для рівно 5/8/10 з датою першого досягнення", () => {
+		const h = hist([
+			sess("a", "2026-11-10", [wt("squat", 5, 40), wt("squat", 8, 30), wt("squat", 6, 99)]),
+			sess("b", "2026-11-12", [wt("squat", 5, 50), wt("squat", 8, 30)]),
+			sess("c", "2026-11-14", [wt("squat", 5, 50), wt("squat", 10, 20)]),
+			sess("d", "2026-11-15", [wt("squat", 5, 80)], "abandoned"),
+		]);
+		expect(setRecords(h, "squat")).toEqual([
+			{ reps: 5, weightKg: 50, date: "2026-11-12" },
+			{ reps: 8, weightKg: 30, date: "2026-11-10" },
+			{ reps: 10, weightKg: 20, date: "2026-11-14" },
+		]);
+		expect(setRecords(hist([sess("a", "2026-11-10", [wt("squat", 5, 40)])]), "squat")).toEqual([{ reps: 5, weightKg: 40, date: "2026-11-10" }]);
+		expect(setRecords(h, "plank")).toEqual([]);
+	});
+	it("підхід 20 × 12 іде в reps-серію, не в e1RM", () => {
+		const h = hist([sess("a", "2026-11-10", [wt("squat", 12, 20)]), sess("b", "2026-11-12", [wt("squat", 12, 20)])]);
+		expect(exerciseSeries(h, "squat").map((p) => p.value)).toEqual([20, 20]);
+		expect(personalRecords(h).filter((r) => r.metric === "e1rm")).toEqual([]);
+		const bwh = hist([sess("a", "2026-11-10", [{ exerciseId: "pushup", reps: 12, weightKg: 20, durationSec: null }])]);
+		expect(exerciseSeries(bwh, "pushup").map((p) => p.value)).toEqual([12]);
 	});
 });

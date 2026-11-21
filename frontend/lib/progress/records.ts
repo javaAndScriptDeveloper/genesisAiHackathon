@@ -14,11 +14,12 @@ export interface SeriesPoint {
 	value: number;
 }
 
-const roundHalf = (x: number): number => Math.round(x * 2) / 2;
+const round1 = (x: number): number => Math.round(x * 10) / 10;
 
+/** Brzycki estimate: w × 36 / (37 − r), valid for 1..10 reps, rounded to 0.1 kg. */
 export function estimate1RM(weightKg: number, reps: number): number | null {
-	if (reps < 1 || reps > 10) return null;
-	return roundHalf(weightKg * (1 + reps / 30));
+	if (!Number.isInteger(reps) || reps < 1 || reps > 10) return null;
+	return round1((weightKg * 36) / (37 - reps));
 }
 
 export function mainMetric(kind: ExerciseKind): RecordMetric {
@@ -101,4 +102,30 @@ export function personalRecords(h: History): PersonalRecord[] {
 		}
 	}
 	return out;
+}
+
+export interface SetRecord {
+	reps: 5 | 8 | 10;
+	weightKg: number;
+	date: IsoDate;
+}
+
+const SET_RECORD_REPS = [5, 8, 10] as const;
+
+/** Heaviest weight lifted for exactly 5, 8 and 10 reps (completed sessions), dated by first achievement. */
+export function setRecords(h: History, exerciseId: string): SetRecord[] {
+	const best = new Map<number, SetRecord>();
+	for (const s of chronological(h)) {
+		for (const set of s.sets) {
+			if (set.exerciseId !== exerciseId || set.weightKg === null) continue;
+			const reps = SET_RECORD_REPS.find((r) => r === set.reps);
+			if (reps === undefined) continue;
+			const cur = best.get(reps);
+			if (!cur || set.weightKg > cur.weightKg) best.set(reps, { reps, weightKg: set.weightKg, date: s.date });
+		}
+	}
+	return SET_RECORD_REPS.flatMap((r) => {
+		const x = best.get(r);
+		return x ? [x] : [];
+	});
 }
