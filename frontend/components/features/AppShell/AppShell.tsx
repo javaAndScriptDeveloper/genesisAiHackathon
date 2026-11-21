@@ -6,6 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useLayoutEffect, useRef, ViewTransition, type ReactNode } from "react";
 import { BottomNav } from "@/components/features/BottomNav/BottomNav";
 import { Celebration } from "@/components/features/Celebration/Celebration";
+import { ScenarioLoader } from "@/components/features/AppShell/ScenarioLoader";
 import { PhoneFrame } from "@/components/features/PhoneFrame/PhoneFrame";
 import { Icon, Skeleton, ToastProvider } from "@/components/ui";
 import { formatClock } from "@/lib/fit/dates";
@@ -84,6 +85,7 @@ function LoadingScreen() {
 export function AppShell({ children }: { children: ReactNode }) {
 	return (
 		<FitProvider>
+			<ScenarioLoader />
 			<PhoneFrame>
 				<ToastProvider>
 					<Screen>{children}</Screen>
