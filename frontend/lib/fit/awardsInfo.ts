@@ -56,9 +56,3 @@ export function tierOf(pct: number): Tier {
 export function awardInfo(id: string): AwardInfo {
 	return (isBadgeId(id) ? AWARD_INFO[id] : undefined) ?? { rarityPct: 50, tip: "Keep going. Small steady steps add up." };
 }
-
-export const LEVEL_NAMES = ["Rookie", "Mover", "Regular", "Athlete", "Pro", "Elite", "Champion", "Legend"];
-
-export function levelName(level: number): string {
-	return LEVEL_NAMES[Math.min(Math.max(level, 1), LEVEL_NAMES.length) - 1] ?? "Rookie";
-}

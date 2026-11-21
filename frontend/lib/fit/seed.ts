@@ -55,6 +55,7 @@ export function emptyState(): FitState {
 		progressToken: newProgressToken(),
 		weeklyGoal: 3,
 		progressEvents: [],
+		lastProgressDay: null,
 		archivedWeeks: [],
 		archiveQueue: [],
 	};

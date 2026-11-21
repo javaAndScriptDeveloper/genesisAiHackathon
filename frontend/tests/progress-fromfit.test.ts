@@ -172,10 +172,20 @@ describe("historyFromFit: plan-credited sessions", () => {
 		expect(isQualitySession(h.sessions[0]!)).toBe(true);
 		expect(dayStatus(h, "2026-11-18")).toBe("completed");
 	});
-	it("a workout done before its planned day counts on the day it was done until that day arrives", () => {
-		const state = mk([planned("p1", "2026-11-23", { status: "completed", logId: "l1" })], [log({ date: "2026-11-21" })]);
-		expect(historyFromFit(state, "2026-11-21").sessions[0]?.date).toBe("2026-11-21");
-		expect(historyFromFit(state, "2026-11-24").sessions[0]?.date).toBe("2026-11-23");
+	it("same-week early start keeps the planned day; the date never changes later", () => {
+		// 2026-11-18 (Wed) done for the plan of 2026-11-20 (Fri): same Monday-week.
+		const state = mk([planned("p1", "2026-11-20", { status: "completed", logId: "l1" })], [log({ date: "2026-11-18" })]);
+		expect(historyFromFit(state, "2026-11-18").sessions[0]?.date).toBe("2026-11-20");
+		expect(historyFromFit(state, "2026-11-25").sessions[0]?.date).toBe("2026-11-20");
+	});
+	it("across a week boundary the session counts on the day it was done, before and after the planned day", () => {
+		// Done Sun 2026-11-22 for the plan of Mon 2026-11-23.
+		const early = mk([planned("p1", "2026-11-23", { status: "completed", logId: "l1" })], [log({ date: "2026-11-22" })]);
+		expect(historyFromFit(early, "2026-11-22").sessions[0]?.date).toBe("2026-11-22");
+		expect(historyFromFit(early, "2026-11-30").sessions[0]?.date).toBe("2026-11-22");
+		// A missed Friday done the next Monday counts on Monday.
+		const late = mk([planned("p1", "2026-11-20", { status: "completed", logId: "l1" })], [log({ date: "2026-11-23" })]);
+		expect(historyFromFit(late, "2026-11-23").sessions[0]?.date).toBe("2026-11-23");
 	});
 	it("ad-hoc log stays on its own date, unplanned", () => {
 		const h = historyFromFit(mk([planned("a", "2026-11-19", { adHoc: true, status: "completed" })], [log({ plannedId: "a", date: "2026-11-19" })]), "2026-11-21");

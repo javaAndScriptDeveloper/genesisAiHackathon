@@ -55,7 +55,7 @@
       "weekGoal": "Weekly goal",
       "sessions": "sessions",
       "noPlanThisWeek": "Nothing planned this week.",
-      "goalDone": "All planned sessions done. Enjoy the rest.",
+      "goalDone": "Weekly goal reached. Enjoy the rest.",
       "goalLeft": "{n} more to hit your goal.",
       "streak": "Streak",
       "streakHint": "weeks in a row at your goal",

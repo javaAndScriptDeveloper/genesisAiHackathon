@@ -92,7 +92,6 @@ export type Action =
 	| { type: "partners-sync"; now: string }
 	| { type: "chat-send"; buddyId: string; message: ChatMessage }
 	| { type: "joint-workout"; workoutId: string; partnerId: string | null }
-	| { type: "dismiss-celebration" }
 	| { type: "clear-demo-history"; today: ISODate }
 	| { type: "add-pause"; from: ISODate; to: ISODate }
 	| { type: "remove-pause"; from: ISODate }
@@ -186,8 +185,11 @@ export function previewLog(state: FitState, a: ActiveSession, today: ISODate): S
 		xp: 0,
 		prs,
 	};
-	// XP is the engine's (lib/progress): what this session adds once it is in the history.
-	const after = historyFromFit(withLog(state, a, log, today), today);
+	// XP is the engine's (lib/progress): what this session adds once it is in the history. A same-week early start is
+	// dated on its planned day, so read it as of that day (the engine only counts sessions up to "today").
+	const plannedDate = a.plannedId ? state.planned.find((w) => w.id === a.plannedId)?.date : undefined;
+	const asOf = plannedDate !== undefined && plannedDate > today ? plannedDate : today;
+	const after = historyFromFit(withLog(state, a, log, today), asOf);
 	return { ...log, xp: xpForSession(after, progressCtx(state), log.id).total };
 }
 
@@ -224,11 +226,17 @@ function rebuildUpcoming(state: FitState, profile: Profile, today: ISODate): Fit
  * (the engine is the only judge; legacy `state.unlocked` / `state.celebrate` are no longer written).
  */
 function recordProgress(before: FitState, after: FitState, today: ISODate, now: string): FitState {
-	const events = detectEvents(progressOf(before, today), progressOf(after, today), now);
-	if (events.length === 0) return after;
-	const next = reducer(after, { type: "record-events", events });
-	if (!after.notificationSettings.enabled.achievement) return next;
-	const notes = events.flatMap((e): AppNotification[] => {
+	return recordEvents(after, detectEvents(progressOf(before, today), progressOf(after, today), now), now);
+}
+
+/** Records events not seen before (by id) and announces new badges/levels in the notification list. */
+function recordEvents(state: FitState, events: ProgressEvent[], now: string): FitState {
+	const have = new Set(state.progressEvents.map((e) => e.id));
+	const fresh = events.filter((e) => !have.has(e.id));
+	if (fresh.length === 0) return state;
+	const next = reducer(state, { type: "record-events", events: fresh });
+	if (!state.notificationSettings.enabled.achievement) return next;
+	const notes = fresh.flatMap((e): AppNotification[] => {
 		if (e.kind === "badge") return [{ id: `n-badge-${e.refId}`, kind: "achievement", title: t("fit.progress.notify.badgeTitle", { title: t(`fit.progress.badge.${e.refId}.title`) }), body: t(`fit.progress.badge.${e.refId}.desc`), createdAt: now, read: false, href: "/progress" }];
 		if (e.kind === "level") return [{ id: `n-level-${e.refId}`, kind: "achievement", title: t("fit.progress.notify.levelTitle", { level: e.refId }), body: t("fit.progress.notify.levelBody"), createdAt: now, read: false, href: "/progress" }];
 		return [];
@@ -258,6 +266,8 @@ export function reducer(state: FitState, action: Action): FitState {
 				progressToken: action.state.progressToken ?? newProgressToken(),
 				weeklyGoal: action.state.weeklyGoal ?? defaultWeeklyGoal(action.state.profile ?? null),
 				progressEvents: action.state.progressEvents ?? [],
+				// Old saves start diffing from today, so badges they already hold are never announced retroactively.
+				lastProgressDay: action.state.lastProgressDay ?? toISO(new Date()),
 				archivedWeeks: action.state.archivedWeeks ?? [],
 				archiveQueue: action.state.archiveQueue ?? [],
 			};
@@ -299,9 +309,15 @@ export function reducer(state: FitState, action: Action): FitState {
 			return { ...state, trainerId: action.trainerId };
 		case "sync": {
 			if (!state.profile) return state;
-			const s = appendNotifications(state, deriveNotifications(state, new Date(action.now)));
+			const day = toISO(new Date(action.now));
+			let s = appendNotifications(state, deriveNotifications(state, new Date(action.now)));
+			// Day/week rollover: a finished week can credit a perfect week, week XP or rest XP (new badges, levels).
+			// Diff the snapshot of the last synced day against today's; event ids make repeats harmless.
+			const last = state.lastProgressDay;
+			if (last !== null && last < day) s = recordEvents(s, detectEvents(progressOf(state, last), progressOf(state, day), action.now), action.now);
+			if (last !== day) s = { ...s, lastProgressDay: day };
 			// From Monday on, last week's report is "new" until opened. Ids are per week, so this never duplicates.
-			const report = reportReadyEvent(historyFromFit(state, toISO(new Date(action.now))), progressCtx(state), action.now);
+			const report = reportReadyEvent(historyFromFit(state, day), progressCtx(state), action.now);
 			return report ? reducer(s, { type: "record-events", events: [report] }) : s;
 		}
 		case "start-workout": {
@@ -518,8 +534,6 @@ export function reducer(state: FitState, action: Action): FitState {
 		}
 		case "joint-workout":
 			return patchPlanned(state, action.workoutId, (w) => ({ ...w, partnerId: action.partnerId ?? undefined }));
-		case "dismiss-celebration":
-			return { ...state, celebrate: [] };
 		case "clear-demo-history": {
 			const keepLogs = state.history.filter((l) => !l.demo);
 			const keepIds = new Set(keepLogs.map((l) => l.id));

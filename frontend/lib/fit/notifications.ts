@@ -4,7 +4,7 @@ import { weekStats } from "./stats";
 import { historyFromFit } from "../progress/fromFit";
 import { weeklyReportV2 } from "../progress/report";
 import { t } from "../messages";
-import { progressCtx } from "./store/progressStats";
+import { progressCtx, progressOf } from "./store/progressStats";
 import type { AppNotification, FitState, NotificationKind, NotificationSettings } from "./types";
 
 export const NOTIFICATION_LABELS: Record<NotificationKind, { label: string; hint: string }> = {
@@ -53,9 +53,9 @@ export function deriveNotifications(state: FitState, now: Date): AppNotification
 		push({ id: `n-recovery-${today}`, kind: "recovery", title: "Time for a lighter day", body: "Three sessions in three days. Recovery is where the gains happen, so keep tomorrow easy.", href: "/coach" });
 	}
 
-	const stats = weekStats(state.planned, state.history, today);
-	if (stats.planned > 0 && stats.done === stats.planned) {
-		push({ id: `n-goal-${weekKey(today)}`, kind: "weekly-goal", title: "Weekly goal complete", body: `All ${stats.planned} planned sessions done this week. Enjoy the rest.`, href: "/progress" });
+	const { week: goal } = progressOf(state, today);
+	if (goal.quality >= goal.goal) {
+		push({ id: `n-goal-${weekKey(today)}`, kind: "weekly-goal", title: "Weekly goal complete", body: `${goal.quality} of ${goal.goal} quality workouts done this week. Enjoy the rest.`, href: "/progress" });
 	}
 
 	if (now.getDay() === 1 || state.history.length > 0) {

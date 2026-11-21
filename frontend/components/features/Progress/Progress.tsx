@@ -73,7 +73,8 @@ function Overview() {
 		const plan = state.planned.filter((w) => !w.adHoc && w.date >= start && (w.date < today || w.status !== "planned"));
 		return { planned: plan.length, done: plan.filter((w) => w.status === "completed" || w.status === "partial").length, minutes: Math.round(logs.reduce((n, l) => n + l.durationSec, 0) / 60), volume: logs.reduce((n, l) => n + l.volumeKg, 0) };
 	})();
-	const view = period === "week" ? { planned: stats.week.planned, done: stats.week.done, minutes: stats.week.minutes, volume: stats.week.volume } : month;
+	// This week: the weekly goal from lib/progress (quality workouts / goal). Last 4 weeks: the plan (done / planned).
+	const view = period === "week" ? { planned: stats.goal.target, done: stats.goal.done, minutes: stats.week.minutes, volume: stats.week.volume } : month;
 
 	const weeks = historyByWeek(state.history, today, 6);
 	const monday = mondayOf(today);
@@ -105,15 +106,15 @@ function Overview() {
 			{state.hasDemoHistory && <Notice tone="info">{t("fit.progress.demoNote")}</Notice>}
 			<SegmentedControl label={t("fit.progress.period")} value={period} onChange={setPeriod} options={[{ id: "week", label: t("fit.progress.thisWeek") }, { id: "month", label: t("fit.progress.last4") }]} />
 			<div className={styles.grid2}>
-				<Stat label={t("fit.progress.sessions")} value={<><AnimatedNumber value={view.done} />/<AnimatedNumber value={view.planned} /></>} hint={t("fit.progress.completedVsPlanned")} icon={<Icon icon={Calendar03Icon} size={14} />} />
+				<Stat label={t("fit.progress.sessions")} value={<><AnimatedNumber value={view.done} />/<AnimatedNumber value={view.planned} /></>} hint={period === "week" ? t("fit.progress.ofWeeklyGoal") : t("fit.progress.completedVsPlanned")} icon={<Icon icon={Calendar03Icon} size={14} />} />
 				<Stat label={t("fit.progress.time")} value={view.minutes} hint={t("fit.common.minShort")} icon={<Icon icon={Clock01Icon} size={14} />} />
 				<Stat label={t("fit.progress.volume")} value={u.mass(view.volume)} hint={u.unit} icon={<Icon icon={Dumbbell01Icon} size={14} />} />
 				<Stat label={t("fit.progress.streakLabel")} value={stats.streak.current} hint={t("fit.progress.longest", { n: stats.streak.longest })} icon={<Icon icon={FireIcon} size={14} />} />
 			</div>
 
 			<Card className={styles.row}>
-				<ProgressRing value={stats.consistency} label={t("fit.progress.consistency")} size={84}>
-					<strong><AnimatedNumber value={stats.consistency} suffix="%" /></strong>
+				<ProgressRing value={stats.consistency ?? 0} label={t("fit.progress.consistency")} size={84}>
+					<strong>{stats.consistency === null ? "–" : <AnimatedNumber value={stats.consistency} suffix="%" />}</strong>
 				</ProgressRing>
 				<div>
 					<div className={styles.rowHead}>
@@ -122,7 +123,7 @@ function Overview() {
 							<Badge tone={consistencyDelta > 0 ? "success" : "neutral"}>{t("fit.progress.consistencyDelta", { sign: consistencyDelta > 0 ? "+" : "−", n: Math.abs(consistencyDelta) })}</Badge>
 						)}
 					</div>
-					<p>{t("fit.progress.consistencyBody")}</p>
+					<p>{stats.consistency === null ? t("fit.progress.consistencyEmpty") : t("fit.progress.consistencyBody")}</p>
 				</div>
 			</Card>
 

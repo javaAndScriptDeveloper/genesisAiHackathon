@@ -75,9 +75,10 @@ export function historyFromFit(state: Pick<FitState, "planned" | "history" | "bo
 		const plannedSets = regular ? regular.exercises.reduce((n, b) => n + b.sets.length, 0) : 0;
 		// lib/fit credits the planned workout (even when done on another day); a partial/completed one counts as quality.
 		const credited = regular !== undefined && (regular.status === "partial" || regular.status === "completed");
-		// A workout started early (planned for a later day) counts on the day it was done until its planned day arrives,
-		// so it earns its XP right away instead of sitting in the future.
-		const date = regular ? (regular.date > today ? log.date : regular.date) : log.date;
+		// A session linked to a planned workout keeps the planned day when it was done in the same Monday-week
+		// (moved or started early within the week); across a week boundary it counts on the day it was done.
+		// Both are fixed values, so a session's date (and the week it credits) never changes later.
+		const date = regular && weekStart(regular.date) === weekStart(log.date) ? regular.date : log.date;
 		return {
 			id: log.id,
 			date,

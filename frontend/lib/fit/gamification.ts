@@ -1,5 +1,6 @@
 import { addDays, mondayOf, weekKey, type ISODate } from "./dates";
 import { weekStats } from "./stats";
+import { progressOf } from "./store/progressStats";
 import { massUnit, massValue, type Units } from "./units";
 import type { FitState } from "./types";
 
@@ -17,7 +18,7 @@ export interface Challenge {
 	weekKey: string;
 }
 
-export function weeklyChallenge(state: Pick<FitState, "history" | "planned" | "water" | "waterGoalMl"> & { units?: Units }, today: ISODate): Challenge {
+export function weeklyChallenge(state: FitState, today: ISODate): Challenge {
 	const units: Units = state.units ?? "metric";
 	const key = weekKey(today);
 	const week = Number(key.split("-W")[1] ?? 0);
@@ -26,7 +27,11 @@ export function weeklyChallenge(state: Pick<FitState, "history" | "planned" | "w
 	const variant = week % 3;
 	const make = (c: Omit<Challenge, "complete" | "weekKey">): Challenge => ({ ...c, complete: c.target > 0 && c.progress >= c.target, weekKey: key });
 	if (variant === 0)
-		return make({ id: "planned", title: "Show up for the plan", description: "Finish every session planned this week. Rest days are part of it.", progress: stats.done, target: Math.max(1, stats.planned), unit: "sessions" });
+	{
+		// The weekly goal is the engine's (lib/progress): quality workouts this week of the user's 2–5 target.
+		const { week: goal } = progressOf(state, today);
+		return make({ id: "planned", title: "Reach your weekly goal", description: `Complete ${goal.goal} quality workouts this week. Rest days are part of it.`, progress: goal.quality, target: goal.goal, unit: "workouts" });
+	}
 	if (variant === 1)
 	{
 		const target = units === "metric" ? 4000 : 10_000;

@@ -15,7 +15,7 @@ export function TrainingInsight() {
 	const toast = useToast();
 	const { state } = useFit();
 	const stats = useFitStats();
-	const { week, lastWeek, consistency, streak } = stats;
+	const { week, lastWeek, consistency, streak, goal } = stats;
 
 	const change = lastWeek.volume > 0 ? Math.round(((week.volume - lastWeek.volume) / lastWeek.volume) * 100) : null;
 	const up = change === null || change >= 0;
@@ -23,17 +23,17 @@ export function TrainingInsight() {
 	const headline =
 		state.history.length === 0
 			? t("fit.insight.headNone")
-			: week.planned > 0 && week.done >= week.planned
+			: goal.done >= goal.target
 				? t("fit.insight.headDone")
-				: week.done > 0
-					? t("fit.insight.headSome", { left: Math.max(0, week.planned - week.done) })
+				: goal.done > 0
+					? t("fit.insight.headSome", { left: Math.max(0, goal.target - goal.done) })
 					: t("fit.insight.headFresh");
 
 	const tip =
-		consistency >= 90 ? t("fit.insight.tipConsistent") : change !== null && change < -15 ? t("fit.insight.tipVolumeDown") : streak.current >= 3 ? t("fit.insight.tipStreak", { n: streak.current }) : t("fit.insight.tipDefault");
+		consistency !== null && consistency >= 90 ? t("fit.insight.tipConsistent") : change !== null && change < -15 ? t("fit.insight.tipVolumeDown") : streak.current >= 3 ? t("fit.insight.tipStreak", { n: streak.current }) : t("fit.insight.tipDefault");
 
 	const share = async () => {
-		const r = await shareText(t("fit.progress.shareTitle"), t("fit.progress.shareText", { done: week.done, planned: week.planned, streak: streak.current, level: stats.level.level }));
+		const r = await shareText(t("fit.progress.shareTitle"), t("fit.progress.shareText", { done: goal.done, planned: goal.target, streak: streak.current, level: stats.level.level }));
 		toast.show(r === "copied" ? t("fit.common.copied") : r === "failed" ? t("fit.common.shareFailed") : t("fit.progress.shared"), r === "failed" ? "danger" : "success");
 	};
 
@@ -57,7 +57,7 @@ export function TrainingInsight() {
 						{t("fit.progress.sessions")}
 					</span>
 					<strong className={styles.tileValue}>
-						<AnimatedNumber value={week.done} />/<AnimatedNumber value={week.planned} />
+						<AnimatedNumber value={goal.done} />/<AnimatedNumber value={goal.target} />
 					</strong>
 				</div>
 				<div className={styles.tile}>
@@ -66,7 +66,7 @@ export function TrainingInsight() {
 						{t("fit.progress.consistency")}
 					</span>
 					<strong className={styles.tileValue}>
-						<AnimatedNumber value={consistency} suffix="%" />
+						{consistency === null ? "–" : <AnimatedNumber value={consistency} suffix="%" />}
 					</strong>
 				</div>
 				<div className={styles.tile}>

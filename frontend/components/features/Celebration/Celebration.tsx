@@ -6,7 +6,7 @@ import { BADGE_ICON, isBadgeId } from "@/lib/fit/awardsInfo";
 import { shareText } from "@/lib/fit/share";
 import { useFit } from "@/lib/fit/store/FitProvider";
 import { useProgress } from "@/lib/fit/store/hooks";
-import { useT } from "@/lib/i18n/I18nProvider";
+import { useI18n } from "@/lib/i18n/I18nProvider";
 import { celebrationGroup } from "@/lib/progress/events";
 import { LEVEL_NAMES } from "@/lib/progress/levels";
 import styles from "./Celebration.module.scss";
@@ -15,7 +15,7 @@ import styles from "./Celebration.module.scss";
 export function Celebration() {
 	const { state, dispatch, ready } = useFit();
 	const { level: current } = useProgress();
-	const t = useT();
+	const { t, locale } = useI18n();
 	const toast = useToast();
 	const group = celebrationGroup(state.progressEvents ?? []);
 	const busy = !!state.active && state.active.phase !== "summary";
@@ -45,7 +45,7 @@ export function Celebration() {
 						<AchievementBadge icon="medal" />
 						<span className={styles.text}>
 							<strong>{t("fit.celebration.level", { level, name: levelName })}</strong>
-							<span>{t("fit.celebration.levelBody", { xp: current.xp })}</span>
+							<span>{t("fit.celebration.levelBody", { xp: new Intl.NumberFormat(locale).format(current.xp) })}</span>
 						</span>
 					</li>
 				)}

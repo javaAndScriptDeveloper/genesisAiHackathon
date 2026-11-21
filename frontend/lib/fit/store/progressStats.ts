@@ -39,11 +39,16 @@ export function progressOf(state: FitState, today: ISODate): ProgressView {
 	return view;
 }
 
-/** The progress fields of `useFitStats()`, read from the engine. Streak is in weeks (credited weeks in a row). */
-export function fitStatsFromSnapshot(p: Pick<ProgressView, "streak" | "consistency" | "level" | "xp">) {
+/**
+ * The progress fields of `useFitStats()`, read from the engine. Streak is in weeks (credited weeks in a row).
+ * `consistency` is null until a finished week exists (screens show a hint, never a verdict-like 0%).
+ * `goal` is the weekly goal: quality workouts this week of the user's 2–5 target (not the planned-session count).
+ */
+export function fitStatsFromSnapshot(p: Pick<ProgressView, "streak" | "consistency" | "level" | "xp" | "week">) {
 	return {
 		streak: { current: p.streak.current, longest: p.streak.best },
-		consistency: p.consistency.score ?? 0,
+		consistency: p.consistency.score,
+		goal: { done: p.week.quality, target: p.week.goal },
 		level: p.level,
 		xp: p.xp,
 	};

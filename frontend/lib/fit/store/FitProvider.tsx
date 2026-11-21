@@ -34,11 +34,14 @@ export function FitProvider({ children }: { children: ReactNode }) {
 	const ready = useSyncExternalStore(noopSubscribe, () => true, () => false);
 	const [today, setToday] = useState(() => toISO(new Date()));
 	const prev = useRef<FitState>(state);
+	// Set when a hydrate is dispatched, so the next observed transition is not treated as user progress.
+	const hydrated = useRef(false);
 
 	useEffect(() => {
 		if (!ready) return;
 		saveState(state);
-		if (prev.current !== state) observeTransition(prev.current, state);
+		if (prev.current !== state) observeTransition(prev.current, state, { hydrated: hydrated.current });
+		hydrated.current = false;
 		prev.current = state;
 	}, [state, ready]);
 
@@ -66,7 +69,10 @@ export function FitProvider({ children }: { children: ReactNode }) {
 		}
 	}, [state.notifications, state.notificationSettings.browserPush, ready]);
 
-	const dispatch = useCallback<Dispatch<Action>>((a) => rawDispatch(a), []);
+	const dispatch = useCallback<Dispatch<Action>>((a) => {
+		if (a.type === "hydrate") hydrated.current = true;
+		rawDispatch(a);
+	}, []);
 	const api = useMemo(() => ({ state, dispatch, ready, today }), [state, dispatch, ready, today]);
 	return (
 		<FitContext.Provider value={api}>

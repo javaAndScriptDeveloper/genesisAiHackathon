@@ -9,9 +9,11 @@ export interface CoachContext {
 	inSession: boolean;
 	/** Streak in weeks: weeks in a row where the weekly goal was met (lib/progress). */
 	streak: number;
+	/** Weekly goal: quality workouts done this week / the user's goal (2–5). */
 	weekDone: number;
 	weekPlanned: number;
-	consistency: number;
+	/** Consistency score; null until the first finished week. */
+	consistency: number | null;
 	xp: number;
 	level: number;
 	sessions: number;
@@ -132,7 +134,8 @@ export function coachReply(input: string, ctx: CoachContext): CoachReply {
 	if (/progress|how am i|how('?s| is) it going|doing|stats|streak|level/.test(text)) {
 		const parts = [
 			`You're level ${ctx.level} with ${ctx.xp.toLocaleString("en-US")} XP and ${ctx.sessions} workouts logged.`,
-			`This week: ${ctx.weekDone} of ${ctx.weekPlanned} planned sessions done. Consistency over your last 4 finished weeks is ${ctx.consistency}%.`,
+			`This week: ${ctx.weekDone} of ${ctx.weekPlanned} workouts toward your weekly goal.`,
+			ctx.consistency === null ? "Your consistency score appears after your first full week." : `Consistency over your last 4 finished weeks is ${ctx.consistency}%.`,
 			ctx.streak > 0 ? `Your streak is ${ctx.streak} week${ctx.streak === 1 ? "" : "s"} in a row at your weekly goal. A paused week never breaks it.` : "Your streak starts with the next week you reach your weekly goal.",
 			ctx.lastPr ? `Latest personal record: ${ctx.lastPr}.` : "",
 		];

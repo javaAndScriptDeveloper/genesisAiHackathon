@@ -3,7 +3,7 @@ import { track } from "../analytics";
 import type { FitState } from "../types";
 
 /** Derives analytics events from state transitions so the reducer and components stay free of tracking calls. */
-export function observeTransition(prev: FitState, next: FitState): void {
+export function observeTransition(prev: FitState, next: FitState, opts: { hydrated?: boolean } = {}): void {
 	if (prev.profile && !next.profile) {
 		clearBrowserEvents();
 		return;
@@ -27,7 +27,8 @@ export function observeTransition(prev: FitState, next: FitState): void {
 		track("workout_completed", { status: log.status, durationSec: log.durationSec, volumeKg: log.volumeKg, prs: log.prs.length, quality });
 		if (log.status === "partial" && !prev.active.safetyStop) track("workout_abandoned", { setsDone, reason: "ended-early" });
 	}
-	if (prev.profile && next.progressEvents !== prev.progressEvents) {
+	// A hydrate (saved state, dev scenario, restore) brings events that were not earned now: never re-track them.
+	if (prev.profile && !opts.hydrated && next.progressEvents !== prev.progressEvents) {
 		const had = new Set(prev.progressEvents.map((e) => e.id));
 		for (const e of next.progressEvents) if (e.kind === "badge" && !had.has(e.id)) track("achievement_unlocked", { id: e.refId });
 	}
