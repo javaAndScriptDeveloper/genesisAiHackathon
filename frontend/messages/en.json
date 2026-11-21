@@ -399,6 +399,9 @@
       "tipDefault": "Small, steady sessions beat rare heroic ones. Aim for your next planned day."
     },
     "progress": {
+      "push": {
+        "weekly": "Week done: {done} of {goal} · streak {streak} weeks"
+      },
       "calories": "Calories",
       "goal": "Goal",
       "goalWeight": "Goal weight",

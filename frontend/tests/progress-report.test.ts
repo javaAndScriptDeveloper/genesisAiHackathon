@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { demoHistory } from "@/lib/api/mock/progressDb";
-import { isValidReportWeek, weeklyReport } from "@/lib/progress/report";
+import { addDays } from "@/lib/progress/dates";
+import { isValidReportWeek, weeklyReport, weeklyReportV2 } from "@/lib/progress/report";
+import type { History, ProgressContext, WorkoutSession } from "@/lib/progress/types";
 
 describe("isValidReportWeek", () => {
 	const today = "2026-11-19";
@@ -34,4 +36,48 @@ describe("weeklyReport", () => {
 		for (const w of ["2026-11-02", "2026-11-09"]) expect(weeklyReport(h, w).insight?.id).not.toBe("consistency_up");
 	});
 	it("insight is null or has an id", () => expect(r.insight === null || typeof r.insight.id === "string").toBe(true));
+});
+
+describe("weeklyReportV2", () => {
+	const ctx: ProgressContext = { weeklyGoal: 3, pauses: [] };
+	const q = (date: string, id = `s-${date}`): WorkoutSession => ({
+		id, date, planned: true, status: "completed", adapted: false, durationMin: 30,
+		setsPlanned: 10, sets: Array.from({ length: 10 }, () => ({ exerciseId: "squat", reps: 8, weightKg: 40, durationSec: null })), rpe: null,
+	});
+	const mk = (dates: string[]): History => ({
+		today: "2026-12-31", exercises: [{ id: "squat", name: "Squat", kind: "weighted" }],
+		plan: dates.map((date) => ({ date, type: "workout" as const })),
+		sessions: dates.map((d) => q(d)), body: [], checkIns: [], device: null,
+	});
+	const MON = "2026-11-02"; // weeks: 10-12, 10-19, 10-26, 11-02
+
+	it("recommendedGoal is the mean of 2/3/4/3 -> 3", () => {
+		const week = (ws: string, n: number) => Array.from({ length: n }, (_, i) => addDays(ws, i));
+		const h = mk([...week("2026-10-12", 2), ...week("2026-10-19", 3), ...week("2026-10-26", 4), ...week(MON, 3)]);
+		expect(weeklyReportV2(h, ctx, MON).recommendedGoal).toBe(3);
+	});
+	it("clamps recommendedGoal to 2..5", () => {
+		expect(weeklyReportV2(mk([MON]), ctx, MON).recommendedGoal).toBe(2);
+		expect(weeklyReportV2(mk(Array.from({ length: 7 }, (_, i) => addDays(MON, i))), ctx, MON).recommendedGoal).toBe(5);
+	});
+	it("paused week is not credited", () => {
+		const h = mk([MON, addDays(MON, 1), addDays(MON, 2)]);
+		const r = weeklyReportV2(h, { ...ctx, pauses: [{ from: MON, to: addDays(MON, 6) }] }, MON);
+		expect(r.paused).toBe(true);
+		expect(r.credited).toBe(false);
+		expect(weeklyReportV2(h, ctx, MON).credited).toBe(true);
+	});
+	it("summary, previous and push text", () => {
+		const h = mk(["2026-10-26", MON, addDays(MON, 1), addDays(MON, 2)]);
+		const r = weeklyReportV2(h, ctx, MON);
+		expect(r.summary).toMatchObject({ workouts: 3, minutes: 90, qualitySets: 30 });
+		expect(r.summary.xp).toBeGreaterThan(0);
+		expect(r.previous).toMatchObject({ workouts: 1, minutes: 30, qualitySets: 10 });
+		expect(r.pushText).toEqual({ key: "fit.progress.push.weekly", params: { done: 3, goal: 3, streak: 1 } });
+	});
+	it("an old week's report is unchanged by later sessions", () => {
+		const base = mk(["2026-10-26", MON, addDays(MON, 1), addDays(MON, 2)]);
+		const later = mk(["2026-10-26", MON, addDays(MON, 1), addDays(MON, 2), "2026-11-09", "2026-11-10", "2026-11-11", "2026-11-12"]);
+		expect(weeklyReportV2(later, ctx, MON)).toEqual(weeklyReportV2(base, ctx, MON));
+	});
 });
