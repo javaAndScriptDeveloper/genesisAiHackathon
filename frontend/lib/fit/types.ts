@@ -238,4 +238,11 @@ export interface FitState {
 	partners: Record<string, "invited" | "accepted">;
 	hasDemoHistory: boolean;
 	celebrate: string[];
+	/** Streak pauses (illness, holiday): whole weeks from a Monday, at most 4 weeks each, never overlapping. */
+	pauses: Pause[];
+}
+
+export interface Pause {
+	from: ISODate;
+	to: ISODate;
 }

@@ -33,6 +33,7 @@ export function emptyState(): FitState {
 		partners: {},
 		hasDemoHistory: false,
 		celebrate: [],
+		pauses: [],
 	};
 }
 

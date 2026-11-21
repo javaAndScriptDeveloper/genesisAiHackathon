@@ -1,4 +1,4 @@
-import { toISO, type ISODate } from "../dates";
+import { daysBetween, toISO, type ISODate } from "../dates";
 import type { Units } from "../units";
 import { findExercise, getExercise } from "../exercises";
 import { applyAdapt, replaceBlock, replaceUnavailable } from "../adapt";
@@ -28,6 +28,9 @@ import type {
 	SessionLog,
 	SkipReason,
 } from "../types";
+
+/** A pause covers at most 4 weeks: to − from ≤ 27 days. */
+const MAX_PAUSE_DAYS = 27;
 
 export type Action =
 	| { type: "hydrate"; state: FitState }
@@ -82,7 +85,9 @@ export type Action =
 	| { type: "partner"; id: string; status: "invited" | "accepted" | null }
 	| { type: "joint-workout"; workoutId: string; partnerId: string | null }
 	| { type: "dismiss-celebration" }
-	| { type: "clear-demo-history"; today: ISODate };
+	| { type: "clear-demo-history"; today: ISODate }
+	| { type: "add-pause"; from: ISODate; to: ISODate }
+	| { type: "remove-pause"; from: ISODate };
 
 const uid = (p: string) => `${p}${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
 
@@ -217,7 +222,8 @@ function finishSession(state: FitState, today: ISODate, now: string): FitState {
 export function reducer(state: FitState, action: Action): FitState {
 	switch (action.type) {
 		case "hydrate":
-			return action.state;
+			// Older saved state has no pauses yet.
+			return { ...emptyState(), ...action.state, pauses: action.state.pauses ?? [] };
 		case "reset":
 			return emptyState();
 		case "complete-onboarding": {
@@ -459,6 +465,19 @@ export function reducer(state: FitState, action: Action): FitState {
 			const planned = state.planned.filter((w) => w.date >= action.today || (w.logId && keepIds.has(w.logId)));
 			const unlocked = Object.fromEntries(Object.entries(state.unlocked).filter(([id]) => keepLogs.length > 0 && id !== "none"));
 			return { ...state, history: keepLogs, planned, hasDemoHistory: false, unlocked: keepLogs.length ? unlocked : {}, bodyWeights: state.bodyWeights.slice(-1), water: {} };
+		}
+		case "add-pause": {
+			const pauses = state.pauses ?? [];
+			const len = daysBetween(action.from, action.to);
+			// 1 day … 4 weeks (to − from ≤ 27), never overlapping an existing pause.
+			if (len < 0 || len > MAX_PAUSE_DAYS) return state;
+			if (pauses.some((p) => p.from <= action.to && p.to >= action.from)) return state;
+			return { ...state, pauses: [...pauses, { from: action.from, to: action.to }].sort((a, b) => a.from.localeCompare(b.from)) };
+		}
+		case "remove-pause": {
+			const pauses = state.pauses ?? [];
+			if (!pauses.some((p) => p.from === action.from)) return state;
+			return { ...state, pauses: pauses.filter((p) => p.from !== action.from) };
 		}
 	}
 }

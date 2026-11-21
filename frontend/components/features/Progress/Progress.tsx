@@ -1,6 +1,7 @@
 "use client";
 
-import { Calendar03Icon, Clock01Icon, Dumbbell01Icon, FireIcon } from "@hugeicons/core-free-icons";
+import { ArrowRight01Icon, Calendar03Icon, Clock01Icon, Dumbbell01Icon, FireIcon } from "@hugeicons/core-free-icons";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useState } from "react";
 import { Awards } from "@/components/features/Awards/Awards";
@@ -14,8 +15,8 @@ import { TrainingInsight } from "@/components/features/TrainingInsight/TrainingI
 import { Notice } from "@/components/features/Notice/Notice";
 import { ScreenHeader } from "@/components/features/ScreenHeader/ScreenHeader";
 import { Stat } from "@/components/features/Stat/Stat";
-import { AnimatedNumber, Badge, Card, Icon, ProgressBar, ProgressRing, SegmentedControl } from "@/components/ui";
-import { addDays, formatDay, formatMonthDay, mondayOf, weekdayIndex, WEEKDAYS } from "@/lib/fit/dates";
+import { AnimatedNumber, Badge, Card, Icon, IconButton, ProgressBar, ProgressRing, SegmentedControl } from "@/components/ui";
+import { addDays, formatMonthDay, mondayOf, weekdayIndex, WEEKDAYS } from "@/lib/fit/dates";
 import { kcalFor } from "@/lib/fit/calories";
 import { getExercise } from "@/lib/fit/exercises";
 import { historyByWeek } from "@/lib/fit/stats";
@@ -28,10 +29,14 @@ import styles from "./Progress.module.scss";
 type Tab = "overview" | "history" | "awards" | "checkins";
 export function Progress() {
 	const t = useT();
+	const router = useRouter();
 	const [tab, setTab] = useTabMemory<Tab>("progress.tab", "overview");
 	return (
 		<div className={styles.root}>
-			<ScreenHeader title={t("fit.progress.title")} />
+			<ScreenHeader
+				title={t("fit.progress.title")}
+				actions={<IconButton icon={Calendar03Icon} label={t("fit.progress.calendar.screenTitle")} onClick={() => router.push("/progress/calendar", { transitionTypes: ["nav-forward"] })} />}
+			/>
 			<div className={styles.content}>
 				<SegmentedControl
 					label={t("fit.progress.title")}
@@ -151,20 +156,28 @@ function Overview() {
 				{state.history.length === 0 ? <p className={styles.p}>{t("fit.progress.noData")}</p> : <BarChart data={weeks.map((w) => ({ label: w.label, value: u.mass(w.volume) }))} label={t("fit.progress.weeklyVolume")} unit={` ${u.unit}`} />}
 			</Card>
 
-			<Card>
-				<h3 className={styles.h3}>{t("fit.progress.calendar")}</h3>
-				<div className={styles.cal} role="grid" aria-label={t("fit.progress.calendar")}>
-					{WEEKDAYS.map((d) => <span key={d} className={styles.calHead} role="columnheader">{d[0]}</span>)}
-					{cells.map((d) => {
-						const w = state.planned.find((p) => p.date === d && !p.adHoc);
-						const st = !w ? "rest" : w.status === "completed" ? "done" : w.status === "partial" ? "partial" : w.status === "skipped" ? "skipped" : d < today ? "missed" : "planned";
-						return <span key={d} role="gridcell" className={styles.calCell} data-state={st} data-today={d === today || undefined} title={`${formatDay(d)}: ${w ? w.title : t("fit.week.state.rest")}`} aria-label={`${formatDay(d)}: ${w ? `${w.title}, ${t(`fit.week.state.${st}`)}` : t("fit.week.state.rest")}`}>{Number(d.slice(8))}</span>;
-					})}
-				</div>
-				<ul className={styles.legend}>
-					{(["done", "partial", "planned", "skipped", "missed"] as const).map((s) => <li key={s}><span className={styles.legendDot} data-state={s} />{t(`fit.week.state.${s}`)}</li>)}
-				</ul>
-			</Card>
+			<Link href="/progress/calendar" transitionTypes={["nav-forward"]} className={styles.calLink} aria-label={t("fit.progress.calendar.openAria")}>
+				<Card interactive>
+					<div className={styles.calTitle}>
+						<h3 className={styles.h3}>{t("fit.progress.calendar.title")}</h3>
+						<span className={styles.calOpen}>
+							{t("fit.progress.calendar.open")}
+							<Icon icon={ArrowRight01Icon} size={16} />
+						</span>
+					</div>
+					<div className={styles.cal} aria-hidden>
+						{WEEKDAYS.map((d) => <span key={d} className={styles.calHead}>{d[0]}</span>)}
+						{cells.map((d) => {
+							const w = state.planned.find((p) => p.date === d && !p.adHoc);
+							const st = !w ? "rest" : w.status === "completed" ? "done" : w.status === "partial" ? "partial" : w.status === "skipped" ? "skipped" : d < today ? "missed" : "planned";
+							return <span key={d} className={styles.calCell} data-state={st} data-today={d === today || undefined}>{Number(d.slice(8))}</span>;
+						})}
+					</div>
+					<ul className={styles.legend} aria-hidden>
+						{(["done", "partial", "planned", "skipped", "missed"] as const).map((s) => <li key={s}><span className={styles.legendDot} data-state={s} />{t(`fit.week.state.${s}`)}</li>)}
+					</ul>
+				</Card>
+			</Link>
 
 			<Card>
 				<h3 className={styles.h3}>{t("fit.progress.bodyWeight")}</h3>

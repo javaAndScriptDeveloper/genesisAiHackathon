@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { startTransition, useCallback, useMemo } from "react";
 import { appInsights, consistencyDeltaOf, historyFromFit, reportWeeksOf } from "../../progress/fromFit";
+import type { ProgressContext } from "../../progress/types";
 import { weeklyChallenge, levelOf, totalXp } from "../gamification";
 import { nextUpcoming } from "../plan";
 import { computeStreak, consistencyScore, daysSinceLastWorkout, personalRecords, weekStats } from "../stats";
@@ -85,4 +86,14 @@ export function useProgressAnalytics() {
 		const consistencyDelta = consistencyDeltaOf(state.planned, today);
 		return { history, insights: appInsights(history, consistencyDelta), consistencyDelta, reportWeeks: reportWeeksOf(history) };
 	}, [state, today]);
+}
+
+/** Progress v2 inputs for the calendar: analytics history plus the context (weekly goal 2–5, pauses). */
+export function useProgressCalendar() {
+	const { state, today, ready } = useFit();
+	return useMemo(() => {
+		const history = historyFromFit(state, today);
+		const ctx: ProgressContext = { weeklyGoal: Math.min(5, Math.max(2, state.profile?.daysPerWeek ?? 3)), pauses: state.pauses ?? [] };
+		return { history, ctx, today, ready, pauses: ctx.pauses };
+	}, [state, today, ready]);
 }
