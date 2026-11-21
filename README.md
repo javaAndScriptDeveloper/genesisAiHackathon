@@ -1,5 +1,42 @@
 # Fitness Training Companion – Product Context
 
+## How we built the MVP
+
+### MVP stages and how we chose the idea
+
+We started with research. We analysed the market, looked for user pains, and wrote down pains we had faced ourselves. For each pain we checked that the problem is real: we looked at existing solutions and at their download numbers on Google Play and the App Store. Then each of us pitched an idea to the team, and we picked the one that resonated with everyone. A personal training companion that plans, guides, tracks, adapts and motivates.
+
+### Roles
+
+The whole team did the market and pain research and the brainstorming together. Together we also defined the core user pains, the core value loop and the architecture.
+
+- **Dmytro Krupenko**, team captain: the core hypothesis and the product idea; built the workout flow and the design system.
+- **Kyrylo**: product vision and architecture.
+- **Alina**: user onboarding.
+- **Oksana**: progress analytics for the user.
+- **Dmytro Fedorchenko**: unit economics and market research.
+
+### Key decisions
+
+**Architecture.** Next.js frontend (mobile-first, TypeScript) → Fastify backend (Node 24, Knex/Objection) → PostgreSQL, with migrations that run on boot. AI calls go through narrow server endpoints: goal parsing, plan generation, voice input. A push to `main` runs the tests, builds Docker images and deploys to a Hetzner VPS. A health check gates every deploy.
+
+**Trade-offs.**
+
+- Web app instead of native: one codebase and demo by URL, but no native push and no direct access to HealthKit/Garmin yet.
+- AI proposes the plan, rules set the numbers. The model picks only from a filtered exercise catalog, and loads and dates are computed in code. This is safe and predictable, but the plans are less "creative".
+- Every AI call has a rule-based fallback, so the app keeps working when the provider is down.
+- The coach is rule-based for now: no LLM cost, and safety keywords always pause the workout.
+- One VPS with Docker Compose: fast and cheap, but no high availability and no TLS yet.
+
+**Costs.** Price is $9.99/month or $59.99/year. LLM cost is about $0.22 per paying user per month, about 4% of net revenue. The runtime currently uses cheaper Gemini Flash-Lite, so this figure is an upper bound. The main risk is acquisition cost (CAC), not AI: LTV is about $52 against a paid CAC of about $126. Details: [Market Evidence & Unit Economics Report](docs/Fitness%20Companion%20—%20Market%20Evidence%20&%20Unit%20Economics%20Report.md).
+
+**How we used AI tools.**
+
+- **Development:** Claude Code with project rules (`CLAUDE.md`, `AGENTS.md`) and skills; bigger features went spec → plan → code (`docs/superpowers`).
+- **Research:** market research and the unit-economics model.
+- **Images:** ChatGPT for image generation: award badges, workout-category illustrations and marketing creatives.
+- **In the product:** Gemini for goal parsing, plan generation and voice input. The UI presents a personal trainer, not "AI".
+
 ## 1. Загальна ідея продукту
 
 Ми розробляємо мобільний fitness-застосунок для персоналізованих тренувань удома та в спортзалі.
