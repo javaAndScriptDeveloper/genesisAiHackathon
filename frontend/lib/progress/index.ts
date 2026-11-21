@@ -8,3 +8,4 @@ export * from "./summary";
 export * from "./levels";
 export * from "./badges";
 export * from "./insights";
+export * from "./bodyWeight";
