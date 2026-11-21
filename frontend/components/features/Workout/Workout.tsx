@@ -101,11 +101,11 @@ export function Workout() {
 							<Icon icon={Alert02Icon} size={16} />
 							{t("fit.workout.tooHardPrompt")}
 						</p>
-						<Button variant="secondary" className={styles.onDark} iconLeft={ArrowDown01Icon} onClick={() => regenerate({ kind: "too-hard" })}>{t("fit.workout.regenEasier")}</Button>
-						<Button variant="secondary" className={styles.onDark} iconLeft={Timer02Icon} onClick={() => regenerate({ kind: "shorten", minutes: 15 })}>{t("fit.workout.regenShort")}</Button>
+						<Button variant="secondary" onDark iconLeft={ArrowDown01Icon} onClick={() => regenerate({ kind: "too-hard" })}>{t("fit.workout.regenEasier")}</Button>
+						<Button variant="secondary" onDark iconLeft={Timer02Icon} onClick={() => regenerate({ kind: "shorten", minutes: 15 })}>{t("fit.workout.regenShort")}</Button>
 					</div>
 					<Button size="lg" iconLeft={PlayIcon} onClick={() => dispatch({ type: "resume" })}>{t("fit.workout.resume")}</Button>
-					<Button variant="secondary" className={styles.onDark} onClick={() => setSheet("end")}>{t("fit.workout.end")}</Button>
+					<Button variant="secondary" onDark onClick={() => setSheet("end")}>{t("fit.workout.end")}</Button>
 				</div>
 			)}
 

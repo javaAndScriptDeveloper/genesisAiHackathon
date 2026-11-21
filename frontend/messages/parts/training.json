@@ -6,6 +6,7 @@
     "guide": { "title": "Exercise guide", "short": { "steps": "How to", "tips": "Tips", "breathing": "Breathing", "mistakes": "Mistakes" }, "steps": "How to do it", "tips": "Technique tips", "breathing": "Breathing", "mistakes": "Common mistakes" },
     "exercise": { "title": "Exercise", "notFound": "Exercise not found", "backToLibrary": "Back to library", "noEquipment": "No equipment" },
     "training": {
+      "today": "Today", "upNext": "Up next · {day}",
       "title": "Training", "subtitle": "Your plan and exercise library", "plan": "Plan", "library": "Library",
       "prevWeek": "Previous week", "nextWeek": "Next week", "thisWeek": "This week",
       "emptyWeek": "Nothing planned", "emptyWeekBody": "This week is all recovery. Use it well.",

@@ -227,6 +227,7 @@ export interface FitState {
 	bloodPressure: BloodPressureEntry[];
 	photos: PhotoCheckIn[];
 	bodyWeights: { date: ISODate; kg: number }[];
+	goalWeightKg: number | null;
 	partners: Record<string, "invited" | "accepted">;
 	hasDemoHistory: boolean;
 	celebrate: string[];

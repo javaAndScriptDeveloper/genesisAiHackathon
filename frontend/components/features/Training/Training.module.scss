@@ -116,6 +116,7 @@
 }
 
 .exName {
+	flex: 1;
 	min-width: 0;
 	font-size: 1.5rem;
 	font-weight: 600;
@@ -125,4 +126,100 @@
 	display: flex;
 	flex: none;
 	gap: var(--space-1);
+}
+
+// Timeline: a dotted rail with a dot per session (done, next, upcoming, skipped, missed).
+.timeline {
+	display: flex;
+	flex-direction: column;
+	gap: var(--space-2);
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.step {
+	position: relative;
+	padding-left: 3.2rem;
+
+	&::before {
+		content: "";
+		position: absolute;
+		top: 2.4rem;
+		bottom: calc(var(--space-2) * -1 - 2.4rem);
+		left: 0.9rem;
+		border-left: 0.2rem dashed var(--color-borderStrong);
+	}
+
+	&:last-child::before {
+		display: none;
+	}
+}
+
+.dot {
+	position: absolute;
+	top: 1.4rem;
+	left: 0;
+	z-index: 1;
+	display: grid;
+	place-items: center;
+	width: 2rem;
+	height: 2rem;
+	background: var(--color-canvas);
+	border: 0.2rem solid var(--color-borderStrong);
+	color: #fff;
+	border-radius: 50%;
+
+	[data-state="done"] > & {
+		background: var(--color-success);
+		border-color: var(--color-success);
+	}
+
+	[data-state="current"] > & {
+		background: var(--color-accent);
+		border-color: var(--color-accent);
+		box-shadow: 0 0 0 0.5rem var(--color-accentSoft);
+	}
+
+	[data-state="skipped"] > & {
+		border-color: var(--color-warning);
+	}
+
+	[data-state="missed"] > & {
+		border-color: var(--color-danger);
+	}
+}
+
+// Muscle picker for the library: round body diagrams, like a body-part menu.
+.muscleGrid {
+	display: grid;
+	grid-template-columns: repeat(4, 1fr);
+	gap: var(--space-3) var(--space-2);
+}
+
+.muscleTile {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 0.6rem;
+	color: var(--color-textMuted);
+	font-size: 1.2rem;
+	font-weight: 600;
+	@include mixins.focus-ring;
+
+	&[aria-pressed="true"] {
+		color: var(--color-text);
+		font-weight: 700;
+	}
+}
+
+.exIcon {
+	display: grid;
+	flex: none;
+	place-items: center;
+	width: 3.6rem;
+	height: 3.6rem;
+	background: var(--color-accentSoft);
+	color: var(--color-accent);
+	@include corners.nested(var(--radius-card), 0.8rem);
 }

@@ -136,3 +136,30 @@
 }
 
 
+
+.targets {
+	display: flex;
+	align-items: center;
+	gap: var(--space-4);
+}
+
+.targetMap {
+	flex: none;
+	width: 11rem;
+	padding: var(--space-2);
+	background: var(--color-surfaceMuted);
+	@include corners.nested(var(--radius-card), var(--space-4));
+}
+
+.targetInfo {
+	display: flex;
+	flex: 1;
+	flex-direction: column;
+	gap: var(--space-2);
+	min-width: 0;
+}
+
+.h3 {
+	margin-top: var(--space-1);
+	font-size: 1.4rem;
+}

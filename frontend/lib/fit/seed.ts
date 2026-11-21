@@ -28,6 +28,7 @@ export function emptyState(): FitState {
 		bloodPressure: [],
 		photos: [],
 		bodyWeights: [],
+		goalWeightKg: null,
 		partners: {},
 		hasDemoHistory: false,
 		celebrate: [],

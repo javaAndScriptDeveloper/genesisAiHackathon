@@ -99,3 +99,26 @@
 		transform: rotate(360deg);
 	}
 }
+
+// Dark / saturated surfaces (hero cards, workout overlays). Selectors out-rank the variants' own :hover rules.
+.onDark {
+	&.secondary {
+		background: transparent;
+		border-color: rgba(255, 255, 255, 0.35);
+		color: #fff;
+
+		&:hover:not(:disabled) {
+			background: rgba(255, 255, 255, 0.14);
+			color: #fff;
+		}
+	}
+
+	&.ghost {
+		color: rgba(255, 255, 255, 0.85);
+
+		&:hover:not(:disabled) {
+			background: rgba(255, 255, 255, 0.12);
+			color: #fff;
+		}
+	}
+}

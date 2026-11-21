@@ -8,6 +8,8 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 	variant?: "primary" | "secondary" | "ghost" | "danger";
 	size?: "sm" | "md" | "lg";
 	loading?: boolean;
+	/** Use on dark or saturated surfaces: secondary/ghost get light outlines and readable hover states. */
+	onDark?: boolean;
 	iconLeft?: IconDefinition;
 	iconRight?: IconDefinition;
 	children: ReactNode;
@@ -17,6 +19,7 @@ export function Button({
 	variant = "primary",
 	size = "md",
 	loading = false,
+	onDark = false,
 	iconLeft,
 	iconRight,
 	disabled,
@@ -28,7 +31,7 @@ export function Button({
 	return (
 		<button
 			type={type}
-			className={clsx(styles.button, styles[variant], styles[size], loading && styles.loading, className)}
+			className={clsx(styles.button, styles[variant], styles[size], loading && styles.loading, onDark && styles.onDark, className)}
 			disabled={disabled || loading}
 			aria-busy={loading || undefined}
 			{...rest}

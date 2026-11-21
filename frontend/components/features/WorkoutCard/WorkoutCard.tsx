@@ -1,8 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { Dumbbell03Icon, Clock01Icon } from "@hugeicons/core-free-icons";
-import { Badge, Icon } from "@/components/ui";
+import { Clock01Icon } from "@hugeicons/core-free-icons";
+import { Badge, Icon, KIND_ICON, SportIcon } from "@/components/ui";
+import { kcalFor } from "@/lib/fit/calories";
+import { useFit } from "@/lib/fit/store/FitProvider";
 import { formatDay } from "@/lib/fit/dates";
 import { getExercise } from "@/lib/fit/exercises";
 import type { PlannedWorkout } from "@/lib/fit/types";
@@ -13,11 +15,13 @@ const TONE = { planned: "accent", completed: "success", partial: "warning", skip
 
 export function WorkoutCard({ workout, showDate = true }: { workout: PlannedWorkout; showDate?: boolean }) {
 	const t = useT();
+	const { state } = useFit();
+	const kcal = kcalFor(workout.exercises.map((b) => b.exerciseId), state.profile?.weightKg ?? 70, workout.durationMin);
 	const names = workout.exercises.slice(0, 3).map((b) => getExercise(b.exerciseId).name);
 	return (
 		<Link href={`/training/session/${workout.id}`} transitionTypes={["nav-forward"]} className={styles.card}>
 			<span className={styles.icon}>
-				<Icon icon={Dumbbell03Icon} size={22} />
+				<SportIcon name={KIND_ICON[getExercise(workout.exercises[0]?.exerciseId ?? "push-up").kind]} size={22} />
 			</span>
 			<span className={styles.body}>
 				<span className={styles.row}>
@@ -30,7 +34,10 @@ export function WorkoutCard({ workout, showDate = true }: { workout: PlannedWork
 						<Icon icon={Clock01Icon} size={14} />
 						{workout.durationMin} {t("fit.common.minShort")}
 					</span>
-					<span>{t("fit.session.level", { n: workout.difficulty })}</span>
+					<span className={styles.metaItem}>
+						<SportIcon name="flame" size={14} />
+						{kcal} kcal
+					</span>
 				</span>
 				<span className={styles.names}>{names.join(", ")}{workout.exercises.length > 3 ? ` +${workout.exercises.length - 3}` : ""}</span>
 			</span>

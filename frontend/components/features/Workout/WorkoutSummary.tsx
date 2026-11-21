@@ -1,9 +1,10 @@
 "use client";
 
-import { Clock01Icon, Dumbbell01Icon, FlashIcon, Tick02Icon } from "@hugeicons/core-free-icons";
+import { Clock01Icon, Dumbbell01Icon, FlashIcon } from "@hugeicons/core-free-icons";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { AnimatedNumber, Badge, Button, Card, EmptyState, Icon, Sheet } from "@/components/ui";
+import { AnimatedNumber, Badge, Button, Card, EmptyState, Icon, Sheet, SportIcon } from "@/components/ui";
+import { kcalFor } from "@/lib/fit/calories";
 import { OptionCard } from "@/components/features/OptionCard/OptionCard";
 import { getExercise } from "@/lib/fit/exercises";
 import { useFit } from "@/lib/fit/store/FitProvider";
@@ -63,10 +64,11 @@ export function WorkoutSummary() {
 
 			<div className={styles.sumGrid}>
 				<Card className={styles.sumStat}><Icon icon={Clock01Icon} size={16} /><strong><AnimatedNumber value={Math.max(1, Math.round(log.durationSec / 60))} /></strong><span>{t("fit.common.minShort")}</span></Card>
-				<Card className={styles.sumStat}><Icon icon={Tick02Icon} size={16} /><strong><AnimatedNumber value={sets} /></strong><span>{t("fit.common.sets")}</span></Card>
+				<Card className={styles.sumStat}><SportIcon name="flame" size={16} /><strong><AnimatedNumber value={kcalFor(log.exercises.filter((e) => !e.skipped).map((e) => e.exerciseId), state.profile?.weightKg ?? 70, log.durationSec / 60)} /></strong><span>kcal</span></Card>
 				<Card className={styles.sumStat}><Icon icon={Dumbbell01Icon} size={16} /><strong><AnimatedNumber value={u.mass(log.volumeKg)} /></strong><span>{u.unit}</span></Card>
 				<Card className={styles.sumStat}><Icon icon={FlashIcon} size={16} /><strong><AnimatedNumber value={log.xp} prefix="+" /></strong><span>XP</span></Card>
 			</div>
+			<p className={styles.note}>{t("fit.summary.setsLine", { sets, exercises: log.exercises.filter((e) => !e.skipped).length })}</p>
 			{log.avgHr && <p className={styles.note}>{t("fit.summary.avgHr", { n: log.avgHr })}</p>}
 
 			{log.prs.length > 0 && (

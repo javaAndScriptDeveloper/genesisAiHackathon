@@ -5,12 +5,14 @@ import { useRef, useState } from "react";
 import { AchievementBadge } from "@/components/features/AchievementBadge/AchievementBadge";
 import { BarChart, LineChart } from "@/components/features/Charts/Charts";
 import { PremiumGate, usePremium } from "@/components/features/PremiumGate/PremiumGate";
+import { WeekBars } from "@/components/features/WeekBars/WeekBars";
 import { TrainingInsight } from "@/components/features/TrainingInsight/TrainingInsight";
 import { Notice } from "@/components/features/Notice/Notice";
 import { ScreenHeader } from "@/components/features/ScreenHeader/ScreenHeader";
 import { Stat } from "@/components/features/Stat/Stat";
 import { AnimatedNumber, Badge, Button, Card, EmptyState, Icon, Input, ProgressBar, ProgressRing, SegmentedControl, Sheet, useToast } from "@/components/ui";
-import { addDays, formatDay, formatMonthDay, mondayOf, WEEKDAYS } from "@/lib/fit/dates";
+import { addDays, formatDay, formatMonthDay, mondayOf, weekdayIndex, WEEKDAYS } from "@/lib/fit/dates";
+import { kcalFor } from "@/lib/fit/calories";
 import { getExercise } from "@/lib/fit/exercises";
 import { ACHIEVEMENTS } from "@/lib/fit/gamification";
 import { shareText } from "@/lib/fit/share";
@@ -89,6 +91,10 @@ function Overview() {
 	const view = period === "week" ? { planned: stats.week.planned, done: stats.week.done, minutes: stats.week.minutes, volume: stats.week.volume } : month;
 
 	const weeks = historyByWeek(state.history, today, 6);
+	const monday = mondayOf(today);
+	const weekLogs = Array.from({ length: 7 }, (_, i) => state.history.filter((l) => l.date === addDays(monday, i)));
+	const dayMinutes = weekLogs.map((logs) => Math.round(logs.reduce((n, l) => n + l.durationSec, 0) / 60));
+	const dayKcal = weekLogs.map((logs) => logs.reduce((n, l) => n + kcalFor(l.exercises.filter((e) => !e.skipped).map((e) => e.exerciseId), state.profile?.weightKg ?? 70, l.durationSec / 60), 0));
 	const weights = state.bodyWeights.slice(-6).map((b) => ({ label: formatMonthDay(b.date), value: u.mass(b.kg, 1) }));
 
 	// Calendar: last 5 weeks as a grid of planned/completed days, built from the same planned sessions as everywhere else.
@@ -132,6 +138,11 @@ function Overview() {
 
 			<TrainingInsight />
 
+			<div className={styles.grid2}>
+				<WeekBars title={t("fit.progress.time")} unit={t("fit.common.minShort")} values={dayMinutes} todayIndex={weekdayIndex(today)} tone="neutral" sport="stopwatch" />
+				<WeekBars title={t("fit.progress.calories")} unit="kcal" values={dayKcal} todayIndex={weekdayIndex(today)} tone="accent" sport="flame" />
+			</div>
+
 			<Card>
 				<h3 className={styles.h3}>{t("fit.progress.weeklyVolume")}</h3>
 				{state.history.length === 0 ? <p className={styles.p}>{t("fit.progress.noData")}</p> : <BarChart data={weeks.map((w) => ({ label: w.label, value: u.mass(w.volume) }))} label={t("fit.progress.weeklyVolume")} unit={` ${u.unit}`} />}
@@ -154,7 +165,7 @@ function Overview() {
 
 			<Card>
 				<h3 className={styles.h3}>{t("fit.progress.bodyWeight")}</h3>
-				{weights.length < 2 ? <p className={styles.p}>{t("fit.progress.weightNeedMore")}</p> : <LineChart data={weights} label={t("fit.progress.bodyWeight")} unit={` ${u.unit}`} />}
+				{weights.length < 2 ? <p className={styles.p}>{t("fit.progress.weightNeedMore")}</p> : <LineChart data={weights} label={t("fit.progress.bodyWeight")} unit={` ${u.unit}`} goal={state.goalWeightKg ? u.mass(state.goalWeightKg, 1) : undefined} goalLabel={t("fit.progress.goal")} />}
 			</Card>
 
 			<PremiumGate title={t("fit.progress.insightsLockedTitle")} body={t("fit.progress.insightsLockedBody")} source="insights">
@@ -289,6 +300,7 @@ function CheckIns() {
 	const premium = usePremium();
 	const input = useRef<HTMLInputElement>(null);
 	const [weight, setWeight] = useState("");
+	const [goal, setGoal] = useState("");
 	const [busy, setBusy] = useState(false);
 	const [removing, setRemoving] = useState<string | null>(null);
 	const limited = !premium && state.photos.length >= FREE_PHOTOS;
@@ -312,6 +324,8 @@ function CheckIns() {
 	const entered = Number(weight);
 	const kg = u.toKg(entered);
 	const validWeight = weight !== "" && kg >= 30 && kg <= 250;
+	const goalKg = u.toKg(Number(goal));
+	const validGoal = goal !== "" && goalKg >= 30 && goalKg <= 250;
 
 	return (
 		<>
@@ -320,6 +334,19 @@ function CheckIns() {
 				<div className={styles.inline}>
 					<Input className={styles.grow} label={t("fit.onboarding.weight")} type="number" inputMode="decimal" step="0.1" suffix={u.unit} value={weight} onChange={(e) => setWeight(e.target.value)} error={weight !== "" && !validWeight ? t("fit.onboarding.errors.weight") : undefined} />
 					<Button disabled={!validWeight} onClick={() => { dispatch({ type: "add-body-weight", date: today, kg }); setWeight(""); toast.show(t("fit.progress.weightSaved"), "success"); }}>{t("fit.common.save")}</Button>
+				</div>
+			</Card>
+
+			<Card className={styles.stack}>
+				<h3 className={styles.h3}>{t("fit.progress.goalWeight")}</h3>
+				<p className={styles.p}>{state.goalWeightKg ? (() => {
+					const now = state.bodyWeights[state.bodyWeights.length - 1]?.kg ?? state.profile?.weightKg ?? 0;
+					const diff = u.mass(Math.abs(now - state.goalWeightKg), 1);
+					return diff === 0 ? t("fit.progress.goalReached") : t("fit.progress.toGoal", { n: diff, unit: u.unit, dir: now > state.goalWeightKg ? t("fit.progress.toLose") : t("fit.progress.toGain") });
+				})() : t("fit.progress.goalHint")}</p>
+				<div className={styles.inline}>
+					<Input className={styles.grow} label={t("fit.progress.goalWeight")} type="number" inputMode="decimal" step="0.1" suffix={u.unit} value={goal} onChange={(e) => setGoal(e.target.value)} error={goal !== "" && !validGoal ? t("fit.onboarding.errors.weight") : undefined} />
+					<Button variant="secondary" disabled={!validGoal} onClick={() => { dispatch({ type: "set-goal-weight", kg: goalKg }); setGoal(""); toast.show(t("fit.progress.goalSaved"), "success"); }}>{t("fit.common.save")}</Button>
 				</div>
 			</Card>
 

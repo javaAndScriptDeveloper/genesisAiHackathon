@@ -30,6 +30,7 @@
       "endTitle": "End workout?", "endBody": "Your {n} completed sets will be saved as a partial workout.", "endEmpty": "You haven't logged any sets. Leave without saving?", "keepGoing": "Keep going", "endSave": "End and save", "endLeave": "Leave workout"
     },
     "summary": {
+      "setsLine": "{sets} sets across {exercises} exercises.",
       "title": "Workout complete", "partialTitle": "Good effort", "complete": "Completed", "partial": "Partial",
       "lead": "{title} is done. Here's how it went.", "partialLead": "You stopped early and that's fine. What you did still counts.",
       "emptyTitle": "No sets logged", "emptyBody": "Nothing to save this time. Come back whenever you're ready.",

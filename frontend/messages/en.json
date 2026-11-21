@@ -261,6 +261,15 @@
       "tipDefault": "Small, steady sessions beat rare heroic ones. Aim for your next planned day."
     },
     "progress": {
+      "calories": "Calories",
+      "goal": "Goal",
+      "goalWeight": "Goal weight",
+      "goalHint": "Set a goal and it shows as a line on your chart.",
+      "goalSaved": "Goal saved",
+      "goalReached": "You are at your goal weight.",
+      "toGoal": "{n} {unit} {dir}",
+      "toLose": "to lose to reach your goal",
+      "toGain": "to gain to reach your goal",
       "title": "Progress",
       "subtitle": "Your training, in numbers",
       "overview": "Overview",
@@ -561,6 +570,10 @@
       }
     },
     "session": {
+      "targets": "Muscles worked",
+      "equipmentTitle": "Equipment",
+      "friendly": "{part}-friendly",
+      "bodyweightOnly": "No equipment needed",
       "title": "Workout",
       "notFound": "Workout not found",
       "notFoundBody": "It may have been replaced when your plan was updated.",
@@ -768,6 +781,8 @@
       "noEquipment": "No equipment"
     },
     "training": {
+      "today": "Today",
+      "upNext": "Up next · {day}",
       "title": "Training",
       "subtitle": "Your plan and exercise library",
       "plan": "Plan",
@@ -893,6 +908,7 @@
       "endLeave": "Leave workout"
     },
     "summary": {
+      "setsLine": "{sets} sets across {exercises} exercises.",
       "title": "Workout complete",
       "partialTitle": "Good effort",
       "complete": "Completed",

@@ -42,7 +42,7 @@ function Screen({ children }: { children: ReactNode }) {
 	}, [pathname, ready]);
 
 	const active = state.active;
-	const showResume = !!active && active.phase !== "summary" && pathname !== "/workout";
+	const showResume = ready && !!active && active.phase !== "summary" && pathname !== "/workout";
 
 	return (
 		<>

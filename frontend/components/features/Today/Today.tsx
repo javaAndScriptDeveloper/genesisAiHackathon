@@ -8,6 +8,7 @@ import { Stat } from "@/components/features/Stat/Stat";
 import { WeekStrip } from "@/components/features/WeekStrip/WeekStrip";
 import { WorkoutCard } from "@/components/features/WorkoutCard/WorkoutCard";
 import { AnimatedNumber, Button, Card, EmptyState, Icon, IconButton, ProgressBar, ProgressRing, useToast } from "@/components/ui";
+import { kcalFor } from "@/lib/fit/calories";
 import { daysBetween, formatDay } from "@/lib/fit/dates";
 import { motivationFor } from "@/lib/fit/gamification";
 import { unreadCount } from "@/lib/fit/notifications";
@@ -71,11 +72,11 @@ export function Today() {
 						<p className={styles.eyebrow}>{t("fit.today.todaysWorkout")}</p>
 						<h2 className={styles.heroTitle}>{todays.title}</h2>
 						<p className={styles.heroMeta}>
-							{todays.durationMin} {t("fit.common.minShort")} · {t("fit.session.exercises", { n: todays.exercises.length })} · {todays.focus}
+							{todays.durationMin} {t("fit.common.minShort")} · {kcalFor(todays.exercises.map((b) => b.exerciseId), profile.weightKg, todays.durationMin)} kcal · {t("fit.session.exercises", { n: todays.exercises.length })}
 						</p>
 						<div className={styles.heroActions}>
 							<Button size="lg" iconLeft={PlayIcon} onClick={() => start(todays.id)}>{t("fit.today.start")}</Button>
-							<Button size="lg" variant="secondary" onClick={() => router.push(`/training/session/${todays.id}`)}>{t("fit.today.preview")}</Button>
+							<Button size="lg" variant="secondary" onDark onClick={() => router.push(`/training/session/${todays.id}`)}>{t("fit.today.preview")}</Button>
 						</div>
 					</Card>
 				) : doneToday ? (
@@ -83,7 +84,7 @@ export function Today() {
 						<p className={styles.eyebrow}>{t("fit.today.doneEyebrow")}</p>
 						<h2 className={styles.heroTitle}>{t("fit.today.doneTitle")}</h2>
 						<p className={styles.heroMeta}>{t("fit.today.doneBody")}</p>
-						<Button variant="secondary" onClick={() => router.push("/progress")}>{t("fit.today.seeProgress")}</Button>
+						<Button variant="secondary" onDark onClick={() => router.push("/progress")}>{t("fit.today.seeProgress")}</Button>
 					</Card>
 				) : state.planned.length > 0 ? (
 					<Card className={styles.hero}>
@@ -92,7 +93,7 @@ export function Today() {
 						<p className={styles.heroMeta}>{t("fit.today.recoveryBody")}</p>
 						<div className={styles.heroActions}>
 							{next && <Button iconLeft={PlayIcon} onClick={() => start(next.id)}>{t("fit.today.startEarly")}</Button>}
-							<Button variant="secondary" onClick={() => {
+							<Button variant="secondary" onDark onClick={() => {
 								dispatch({ type: "add-adhoc", kind: "mobility", today });
 								router.push(`/training/session/x-${today}-mobility`);
 							}}>{t("fit.today.mobility")}</Button>

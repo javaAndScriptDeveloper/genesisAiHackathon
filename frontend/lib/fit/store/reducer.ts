@@ -34,6 +34,7 @@ export type Action =
 	| { type: "complete-onboarding"; profile: Profile; units: Units; demoHistory: boolean; today: ISODate; now: string }
 	| { type: "update-profile"; profile: Profile; units: Units; today: ISODate }
 	| { type: "set-units"; units: Units }
+	| { type: "set-goal-weight"; kg: number | null }
 	| { type: "sync"; now: string }
 	| { type: "start-workout"; plannedId: string; now: string }
 	| { type: "go-to"; index: number }
@@ -235,6 +236,8 @@ export function reducer(state: FitState, action: Action): FitState {
 			const devices = { apple: action.profile.wearable === "apple" ? true : state.devices.apple && action.profile.wearable === "none" ? state.devices.apple : state.devices.apple, garmin: state.devices.garmin };
 			return rebuildUpcoming({ ...state, devices, units: action.units }, action.profile, action.today);
 		}
+		case "set-goal-weight":
+			return { ...state, goalWeightKg: action.kg };
 		case "set-units": {
 			return { ...state, units: action.units };
 		}
