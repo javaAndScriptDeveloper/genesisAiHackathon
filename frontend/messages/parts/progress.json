@@ -14,6 +14,9 @@
       "tipDefault": "Small, steady sessions beat rare heroic ones. Aim for your next planned day."
     },
     "progress": {
+      "push": {
+        "weekly": "Week done: {done} of {goal} · streak {streak} weeks"
+      },
       "calories": "Calories",
       "goal": "Goal",
       "goalWeight": "Goal weight",
@@ -29,7 +32,7 @@
       "history": "History",
       "awards": "Awards",
       "checkins": "Check-ins",
-      "demoNote": "Includes 5 weeks of demo history. Remove it anytime in Settings.",
+      "demoNote": "Includes 5 weeks of sample history. Remove it anytime in Settings.",
       "period": "Period",
       "thisWeek": "This week",
       "last4": "Last 4 weeks",
@@ -53,14 +56,134 @@
       "shareAchievements": "Share my achievements",
       "weeklyVolume": "Weekly volume",
       "noData": "Not enough data yet.",
-      "calendar": "Training calendar",
+      "calendar": {
+        "title": "Training calendar",
+        "open": "Open calendar",
+        "openAria": "Training calendar, open the full calendar",
+        "screenTitle": "Calendar",
+        "screenSubtitle": "Your plan, workouts and streak",
+        "prevMonth": "Previous month",
+        "nextMonth": "Next month",
+        "today": "Today",
+        "weekCol": "Wk",
+        "weekColAria": "Week",
+        "swipeHint": "Swipe or use the arrows to change month",
+        "state": {
+          "training-done": "workout done",
+          "rest-credited": "rest day credited",
+          "rest": "rest day",
+          "missed": "missed workout",
+          "paused": "paused",
+          "planned": "workout planned",
+          "today": "today",
+          "none": "nothing planned"
+        },
+        "legend": {
+          "training-done": "Workout",
+          "rest-credited": "Rest credited",
+          "missed": "Missed",
+          "paused": "Pause",
+          "planned": "Planned",
+          "today": "Today"
+        },
+        "dayAria": "{date}: {state}",
+        "todaySuffix": "today",
+        "weekMark": {
+          "credited": "credited",
+          "paused": "paused",
+          "current": "current week",
+          "none": "not credited",
+          "future": "upcoming"
+        },
+        "weekAria": "Week of {date}: {status}. Show how it counted",
+        "legendNote": "The last column is the week: credited towards the streak, paused, or the current week.",
+        "day": {
+          "workoutPlanned": "Workout planned",
+          "restPlanned": "Rest day",
+          "nothingPlanned": "Nothing planned this day.",
+          "minutes": "{n} min",
+          "sets": "{done} of {planned} sets",
+          "setsShort": "{n} sets",
+          "quality": "Counts as a quality workout",
+          "notQuality": "Under 70% of planned sets, so it doesn't count towards consistency",
+          "extra": "Extra session outside the plan",
+          "missed": "This planned workout wasn't done. One missed day is fine; the next one is what counts.",
+          "upcoming": "Planned for this day.",
+          "paused": "This day is in a pause. It doesn't affect your streak or consistency.",
+          "restCredited": "Rest credited",
+          "restNotCredited": "Rest not credited",
+          "reason": {
+            "nearest-done": "Your nearest workout ({date}) was done, so this rest day counts.",
+            "nearest-not-done": "Your nearest workout ({date}) wasn't done, so this rest day doesn't count.",
+            "nearest-upcoming": "It will count once your nearest workout ({date}) is done.",
+            "no-training": "No workouts were planned this week.",
+            "future": "Rest days count when the nearest workout is done."
+          }
+        },
+        "week": {
+          "title": "Week of {date}",
+          "score": "Week score",
+          "noScore": "No plan this week",
+          "formula": "({quality} quality workouts + {rest} credited rest days) ÷ {planned} planned days",
+          "quality": "Quality workouts",
+          "restCredited": "Credited rest days",
+          "planned": "Planned days",
+          "goal": "Weekly goal: {n} quality workouts",
+          "credited": "Goal reached: the week counts towards your streak.",
+          "notCredited": "Goal not reached: the week doesn't count towards the streak.",
+          "current": "This week is still in progress. It joins your consistency score once it ends.",
+          "paused": "This week is paused: it's skipped for both streak and consistency.",
+          "weight": "Weight in your consistency score: {pct}%",
+          "notCounted": "Not one of the 4 weeks in your current consistency score.",
+          "future": "This week hasn't started yet."
+        },
+        "streak": {
+          "title": "Streak",
+          "best": "best {n}",
+          "weeks": "weeks in a row",
+          "week": "week in a row",
+          "body": "A week counts when you reach your weekly goal. A paused week doesn't break the streak.",
+          "empty": "Your first workout starts your streak."
+        },
+        "built": {
+          "title": "How {score} was built",
+          "titleEmpty": "Consistency",
+          "range": "{from} – {to}",
+          "weight": "weight {pct}%",
+          "body": "Week weights: 40%, 30%, 20% and 10%, newest first. Paused weeks are skipped. We count quality workouts and rest days next to a done workout, divided by planned days.",
+          "empty": "Your score appears after your first full week with a plan.",
+          "rowAria": "Week {range}: {score} out of 100, weight {pct}%"
+        },
+        "pause": {
+          "title": "Sick or on holiday?",
+          "body": "Pause your streak for up to 4 weeks. Consistency skips these weeks too.",
+          "cta": "Pause",
+          "sheetTitle": "Pause streak",
+          "sheetBody": "The pause starts this Monday ({date}).",
+          "weeks": "{n} weeks",
+          "week": "1 week",
+          "until": "until {date}",
+          "confirm": "Pause for {n} weeks",
+          "confirmOne": "Pause for 1 week",
+          "cancel": "Cancel",
+          "active": "Paused until {date}",
+          "activeBody": "Your streak is safe. Come back whenever you're ready.",
+          "upcoming": "Pause from {from} to {to}",
+          "remove": "Remove pause",
+          "removeTitle": "Remove pause?",
+          "removeBody": "The weeks from {from} to {to} will count again for your streak and consistency.",
+          "removeConfirm": "Remove",
+          "added": "Streak paused until {date}",
+          "removed": "Pause removed"
+        }
+      },
       "bodyWeight": "Body weight",
       "weightNeedMore": "Log your weight at least twice to see a trend.",
       "insightsLockedTitle": "Advanced training insights",
       "insightsLockedBody": "Strength progression per exercise and muscle-group balance, built from your own history.",
       "strength": "Strength progression",
       "muscles": "Muscle balance",
-      "premiumActive": "Premium (demo) active",
+      "premiumActive": "Premium active",
       "historyEmpty": "No workouts yet",
       "historyEmptyBody": "Your completed sessions will appear here.",
       "adaptedCount": "{n} adjustments",
@@ -86,9 +209,103 @@
       "removeBody": "This photo will be deleted from this device.",
       "removeConfirm": "Remove",
       "photosLockedTitle": "Unlimited photo check-ins",
-      "photosLockedBody": "Free includes {n} photos. Premium keeps your whole journey."
+      "photosLockedBody": "Free includes {n} photos. Premium keeps your whole journey.",
+      "consistencyDelta": "{sign}{n} vs last week",
+      "weekdays": {
+        "0": "Monday",
+        "1": "Tuesday",
+        "2": "Wednesday",
+        "3": "Thursday",
+        "4": "Friday",
+        "5": "Saturday",
+        "6": "Sunday"
+      },
+      "insights": {
+        "title": "What's working",
+        "next": "Next: {text}",
+        "weekday_misses": {
+          "title": "{weekday} sessions slip most often",
+          "next": "Move that session to a day that suits you better?"
+        },
+        "strength_gain": {
+          "title": "{exercise}: {from} → {to} in {weeks} wk",
+          "next": "Try adding one more set."
+        },
+        "too_hard": {
+          "title": "Your last sessions felt hard",
+          "next": "We'll make the next one lighter."
+        },
+        "consistency_up": {
+          "title": "Consistency up {delta} points",
+          "next": "Keep this rhythm — it works."
+        }
+      },
+      "reports": {
+        "title": "Weekly reports",
+        "week": "Week of {date}",
+        "open": "Open report"
+      },
+      "report": {
+        "title": "Weekly report",
+        "range": "{from} – {to}",
+        "notFound": "Report not found",
+        "notFoundBody": "That week isn't available yet or doesn't exist.",
+        "back": "Back to progress",
+        "workouts": "Workouts",
+        "minutes": "Minutes",
+        "adherence": "Plan completed",
+        "vsPrev": "{diff} vs prior week",
+        "noPrev": "no prior week",
+        "same": "=",
+        "empty": "A quiet week. Nothing to log here, and that's fine. Your next plan is below.",
+        "records": "Records this week",
+        "noRecords": "No new records this week.",
+        "recordValue": "{value} {unit}",
+        "unit": {
+          "kg": "kg",
+          "reps": "reps",
+          "s": "s"
+        },
+        "next": "Next week's plan",
+        "nextEmpty": "No plan for next week yet.",
+        "workoutDay": "Workout",
+        "restDay": "Rest"
+      },
+      "exercise": {
+        "title": "Your progress",
+        "empty": "Log this exercise twice to see your trend.",
+        "best": "Best: {value} {unit}",
+        "records": "Recent records",
+        "chart": "{name} trend"
+      },
+      "levels": {
+        "1": "Starter",
+        "2": "Steady",
+        "3": "Committed",
+        "4": "Determined",
+        "5": "Strong",
+        "6": "Unstoppable",
+        "7": "Athlete",
+        "8": "Elite",
+        "9": "Champion",
+        "10": "Legend"
+      },
+      "advice": {
+        "start": "Start with one short planned session. Your progress picks up from there.",
+        "goal-remaining": "{n} more quality sessions to reach this week's goal. You still have time.",
+        "near-record": "You are close to your best on {exercise}. Another go could reach {target}.",
+        "plateau": "{exercise} has held steady for a while. Try a small change, like one more rep or a slower tempo."
+      },
+      "improvements": {
+        "record": "{exercise}: {before} to {now}, up {delta}",
+        "consistency": "Consistency up {delta} points, from {before} to {now}",
+        "streak": "Streak grew from {before} to {now} weeks"
+      }
     },
     "awards": {
+      "sharePreview": "Preview to share",
+      "copySummary": "Copy summary",
+      "copyManually": "The text is selected. Copy it using your device’s menu.",
       "level": "Level",
       "overall": "Overall",
       "workouts": "Workouts",
@@ -97,7 +314,7 @@
       "collection": "Collection",
       "collected": "{n} of {total} collected",
       "aheadOf": "Ahead of {percent} of users",
-      "demoRarity": "Demo rarity: {pct}% unlocked",
+      "demoRarity": "{pct}% of users unlock this",
       "tier": {
         "common": "Common",
         "rare": "Rare",

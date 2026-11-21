@@ -1,4 +1,5 @@
 import type { ISODate } from "./dates";
+import type { ArchiveItem, ProgressEvent } from "../progress/types";
 import type { Units } from "./units";
 
 export type Goal = "lose-fat" | "build-muscle" | "get-stronger" | "stay-fit" | "endurance";
@@ -238,4 +239,19 @@ export interface FitState {
 	partners: Record<string, "invited" | "accepted">;
 	hasDemoHistory: boolean;
 	celebrate: string[];
+	/** Streak pauses (illness, holiday): whole weeks from a Monday, at most 4 weeks each, never overlapping. */
+	pauses: Pause[];
+	/** Anonymous id used to sync progress with the backend. */
+	progressToken: string;
+	/** Planned workouts per week the user commits to (2..5). */
+	weeklyGoal: number;
+	progressEvents: ProgressEvent[];
+	/** Mondays (ISO dates) whose weekly report is already archived. */
+	archivedWeeks: string[];
+	archiveQueue: ArchiveItem[];
+}
+
+export interface Pause {
+	from: ISODate;
+	to: ISODate;
 }

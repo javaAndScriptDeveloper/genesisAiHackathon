@@ -1,9 +1,14 @@
 import Fastify, { type FastifyInstance } from "fastify";
 import type { Knex } from "knex";
 import { listTrainers } from "./trainers.js";
+import { progressRoutes } from "./progress/routes.js";
 
 export function buildApp(db: Knex): FastifyInstance {
-  const app = Fastify({ logger: true });
+  const app = Fastify({
+    logger: true,
+    // Strict body validation: reject unknown properties and wrong types instead of stripping/coercing them.
+    ajv: { customOptions: { removeAdditional: false, coerceTypes: false, useDefaults: false } },
+  });
 
   app.get("/api/health", async (_req, reply) => {
     try {
@@ -29,6 +34,8 @@ export function buildApp(db: Knex): FastifyInstance {
       return reply.code(503).send({ error: "trainers unavailable" });
     }
   });
+
+  app.register(progressRoutes(db));
 
   return app;
 }

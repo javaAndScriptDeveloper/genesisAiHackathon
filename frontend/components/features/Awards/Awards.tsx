@@ -1,9 +1,9 @@
 "use client";
 
 import { Calendar03Icon, Clock01Icon, Dumbbell01Icon, FireIcon, Idea01Icon, Medal01Icon, Share08Icon, StarIcon, Target02Icon, CrownIcon } from "@hugeicons/core-free-icons";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { AchievementBadge } from "@/components/features/AchievementBadge/AchievementBadge";
-import { Button, EmptyState, Icon, ProgressBar, ProgressRing, Sheet, SportIcon, KIND_ICON, useToast } from "@/components/ui";
+import { Button, EmptyState, Icon, ProgressBar, ProgressRing, Sheet, SportIcon, KIND_ICON, Textarea, useToast } from "@/components/ui";
 import { awardInfo, tierOf, type Tier } from "@/lib/fit/awardsInfo";
 import { formatDay } from "@/lib/fit/dates";
 import { getExercise } from "@/lib/fit/exercises";
@@ -24,11 +24,26 @@ export function Awards() {
 	const { state } = useFit();
 	const stats = useFitStats();
 	const [openId, setOpenId] = useState<string | null>(null);
+	const [shareOpen, setShareOpen] = useState(false);
+	const [copyStatus, setCopyStatus] = useState<"copied" | "manual" | null>(null);
+	const sharePreview = useRef<HTMLTextAreaElement>(null);
 	const unlockedCount = ACHIEVEMENTS.filter((a) => state.unlocked[a.id]).length;
 	const rank = Math.min(Math.max(stats.level.level, 1), LEVEL_RANKS);
 	const minutes = Math.round(state.history.reduce((n, l) => n + l.durationSec, 0) / 60);
 	const volume = state.history.reduce((n, l) => n + l.volumeKg, 0);
 	const current = ACHIEVEMENTS.find((a) => a.id === openId);
+	const shareSummary = t("fit.progress.shareAwards", { level: stats.level.level, xp: stats.xp, badges: unlockedCount });
+
+	async function copySummary() {
+		try {
+			await navigator.clipboard.writeText(shareSummary);
+			setCopyStatus("copied");
+		} catch {
+			sharePreview.current?.focus();
+			sharePreview.current?.select();
+			setCopyStatus("manual");
+		}
+	}
 
 	const share = async (text: string) => {
 		const r = await shareText(t("fit.progress.shareTitle"), text);
@@ -149,9 +164,22 @@ export function Awards() {
 				</ul>
 			)}
 
-			<Button variant="secondary" onClick={() => share(t("fit.progress.shareAwards", { level: stats.level.level, xp: stats.xp, badges: unlockedCount }))}>
+			<Button variant="secondary" iconLeft={Share08Icon} onClick={() => { setCopyStatus(null); setShareOpen(true); }}>
 				{t("fit.progress.shareAchievements")}
 			</Button>
+			<Sheet
+				open={shareOpen}
+				onClose={() => setShareOpen(false)}
+				title={t("fit.progress.shareAchievements")}
+				closeLabel={t("fit.awards.close")}
+				footer={<Button onClick={copySummary}>{t("fit.awards.copySummary")}</Button>}
+			>
+				<div className={styles.sharePreview}>
+					<AchievementBadge icon="medal" size="lg" />
+					<Textarea ref={sharePreview} readOnly rows={2} label={t("fit.awards.sharePreview")} value={shareSummary} />
+					{copyStatus && <p role="status">{t(copyStatus === "copied" ? "fit.common.copied" : "fit.awards.copyManually")}</p>}
+				</div>
+			</Sheet>
 
 			<Sheet
 				open={!!current}

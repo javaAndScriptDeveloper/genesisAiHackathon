@@ -1,8 +1,39 @@
 {
   "fit": {
-    "nav": { "label": "Main navigation", "today": "Today", "training": "Training", "progress": "Progress", "coach": "Coach", "profile": "Profile" },
-    "common": { "back": "Back", "share": "Share", "copied": "Copied to clipboard", "shareFailed": "Sharing isn't available here", "save": "Save", "cancel": "Cancel", "done": "Done", "continue": "Continue", "next": "Next", "start": "Start", "minShort": "min", "kg": "kg", "reps": "reps", "sets": "sets", "premium": "Premium", "demo": "Demo" },
-    "shell": { "resume": "Workout in progress" },
-    "celebration": { "title": "Achievement unlocked", "titleMany": "{n} achievements unlocked", "total": "+{n} XP", "nice": "Nice!", "shareText": "I just unlocked \"{title}\" in Personal Coach: {description}" }
+    "nav": {
+      "label": "Main navigation",
+      "today": "Today",
+      "training": "Training",
+      "progress": "Progress",
+      "coach": "Coach",
+      "profile": "Profile"
+    },
+    "common": {
+      "back": "Back",
+      "share": "Share",
+      "copied": "Copied to clipboard",
+      "shareFailed": "Sharing isn't available here",
+      "save": "Save",
+      "cancel": "Cancel",
+      "done": "Done",
+      "continue": "Continue",
+      "next": "Next",
+      "start": "Start",
+      "minShort": "min",
+      "kg": "kg",
+      "reps": "reps",
+      "sets": "sets",
+      "premium": "Premium"
+    },
+    "shell": {
+      "resume": "Workout in progress"
+    },
+    "celebration": {
+      "title": "Achievement unlocked",
+      "titleMany": "{n} achievements unlocked",
+      "total": "+{n} XP",
+      "nice": "Nice!",
+      "shareText": "I just unlocked \"{title}\" in Personal Coach: {description}"
+    }
   }
 }

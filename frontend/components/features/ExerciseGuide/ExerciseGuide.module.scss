@@ -172,16 +172,16 @@
 	border-color: var(--color-warningSoft);
 }
 
-// Round info button that sits on the video scrim.
-.trigger {
+// Subtle help button in the workout video header.
+.trigger.trigger {
 	flex: none;
-	background: rgba(255, 255, 255, 0.18);
-	backdrop-filter: blur(0.8rem);
-	border-color: transparent;
-	color: #fff;
+	background: rgba(255, 255, 255, 0.06);
+	border: 0.1rem solid rgba(255, 255, 255, 0.24);
+	color: rgba(255, 255, 255, 0.84);
 	border-radius: 50%;
 
 	&:hover:not(:disabled) {
-		background: rgba(255, 255, 255, 0.28);
+		background: rgba(255, 255, 255, 0.14);
+		color: #fff;
 	}
 }

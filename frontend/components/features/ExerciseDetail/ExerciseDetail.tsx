@@ -1,6 +1,7 @@
 "use client";
 
 import { ExerciseGuide } from "@/components/features/ExerciseGuide/ExerciseGuide";
+import { ExerciseProgress } from "@/components/features/ExerciseProgress/ExerciseProgress";
 import { ExerciseVideo } from "@/components/features/ExerciseVideo/ExerciseVideo";
 import { ScreenHeader } from "@/components/features/ScreenHeader/ScreenHeader";
 import { Badge, Button, EmptyState } from "@/components/ui";
@@ -26,6 +27,7 @@ export function ExerciseDetail({ id }: { id: string }) {
 				</div>
 				<p className={styles.summary}>{exercise.summary}</p>
 				<ExerciseGuide exercise={exercise} />
+				<ExerciseProgress exerciseId={exercise.id} />
 			</div>
 		</div>
 	);

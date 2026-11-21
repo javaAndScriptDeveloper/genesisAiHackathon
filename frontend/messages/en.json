@@ -44,8 +44,9 @@
       "subtitle": "Revenue, costs and acquisition per paying subscriber.",
       "scenario": "Scenario",
       "scenarios": {
+        "pilot": "Base launch pilot",
         "conservative": "Conservative",
-        "base": "Base case",
+        "base": "Market benchmark",
         "optimistic": "Optimistic"
       },
       "metrics": {
@@ -81,10 +82,10 @@
       "breakEvenDetail": "Adjust organic acquisition and monthly overhead.",
       "organic": "Organic share of installs",
       "fixed": "Fixed costs per month",
-      "organicError": "Enter 0–100%. Using 50% for now.",
-      "fixedError": "Enter 0–1 billion USD. Using $5,000 for now.",
+      "organicError": "Enter 0–100%. Using the scenario default of {value}.",
+      "fixedError": "Enter 0–1 billion USD. Using the scenario default of {value}.",
       "subscribers": "Active subscribers to cover overhead",
-      "organicThreshold": "Minimum organic share to cover CAC",
+      "organicThreshold": "Minimum organic share for lifetime payback",
       "method": "Assumptions and formulas",
       "inputs": {
         "monthlyPrice": "Monthly plan price",
@@ -102,20 +103,22 @@
         "payback": "Payback is the first month cumulative contribution covers blended CAC. The model recognizes annual revenue over each 12-month term and includes one possible renewal.",
         "fixed": "Operating break-even = fixed costs ÷ monthly contribution per active subscriber, rounded up. Acquisition spend is tracked separately in CAC.",
         "limits": "The model excludes free-tier usage, voice, taxes, refunds and wearable integration costs. The AI estimate uses planned token volumes and rates from the report.",
-        "source": "Source — Fitness Companion Market Evidence & Unit Economics Report, section 4. Values are recalculated from its input assumptions."
-      }
+        "source": "Prices, conversion, paid acquisition and renewal assumptions come from section 4 of the Fitness Companion Market Evidence & Unit Economics Report.",
+        "pilot": "The pilot uses a 90% organic target and a $50 monthly budget assumption. Include ongoing labor, content and other recurring costs in your actual budget."
+      },
+      "pilotPlan": "Launch target: {organic} organic acquisition and a {budget} monthly operating budget."
     },
     "build": {
-      "title": "MVP build payback",
-      "subtitle": "Hackathon build from 10:30 to 17:50. The hourly rate is an estimate you can change.",
+      "title": "First-year MVP break-even",
+      "subtitle": "Build labor from 10:30 to 17:50 plus 12 months of fixed costs.",
       "elapsed": "Elapsed build time",
       "duration": "{hours} h {minutes} min",
       "hourly": "Combined team rate per hour",
       "hourlyError": "Enter 0–1 million USD. Using $50 for now.",
       "cost": "One-time labor cost",
-      "payers": "New payers to recover labor in 12 months",
-      "recoverable": "{value} per payer in first-year contribution after blended CAC, before monthly overhead.",
-      "unrecoverable": "First-year contribution after blended CAC is {value} per payer. This acquisition mix leaves no surplus for the build."
+      "payers": "New paying subscribers to break even",
+      "recoverable": "{value} first-year contribution per payer after blended CAC. Total to cover: {budget} for build labor and 12 months of overhead.",
+      "unrecoverable": "{value} first-year contribution per payer after blended CAC. Covering the {budget} first-year budget requires a positive contribution."
     },
     "activity": {
       "title": "Product activity",
@@ -160,13 +163,13 @@
         "achievement_unlocked": "Achievement unlocked",
         "notification_opened": "Notification opened",
         "subscription_viewed": "Subscription viewed",
-        "subscription_started": "Demo trial started"
+        "subscription_started": "Trial started"
       },
       "coverage": "What the dashboard measures",
       "notes": {
         "retention": "Counts start when this dashboard’s event storage is enabled. The browser retains up to 4,000 recent events and shows up to 90 calendar days.",
         "workouts": "Logged workouts include partial sessions. The 80% metric uses the planned set count after workout adjustments and excludes extra sessions, safety stops and seeded history.",
-        "subscription": "Trials in the app are demos. Prices, acquisition costs and AI expenses above are planning estimates.",
+        "subscription": "Trials in the app are simulated. Prices, acquisition costs and AI expenses above are planning estimates.",
         "cohorts": "The product goal is three planned workouts in the first 14 days. Cohort activation and retention require shared user IDs and server-side event collection."
       }
     }
@@ -193,7 +196,6 @@
     },
     "health": {
       "title": "Live health",
-      "demo": "Demo mode",
       "bpm": "bpm",
       "zone": "Zone {n} · {label}",
       "connecting": "Connecting…",
@@ -202,7 +204,7 @@
       "working": "Working",
       "activity": "Activity",
       "recoveryDrop": "{n} bpm below peak",
-      "demoNote": "Simulated values for demonstration, not real measurements.",
+      "demoNote": "Simulated values, not real measurements.",
       "linkedDemo": "{name} is linked, but live data needs the native app. Values shown are simulated."
     },
     "opt": {
@@ -329,11 +331,11 @@
       "daysNote": "We spread sessions out so there is always recovery between them.",
       "limitNote": "Anything else we should know? (optional)",
       "heartNote": "We'll avoid max-effort and heavy straining exercises. Please check with your doctor before starting a new training program.",
-      "wearableNote": "Connections run in Demo Mode in the browser. You can manage them anytime under Devices.",
+      "wearableNote": "Connections are simulated in the browser. You can manage them anytime under Devices.",
       "summaryFor": "{name}'s plan",
       "firstWeek": "First week",
       "noPreview": "Adjust your answers to see a preview.",
-      "demoHistory": "Include 5 weeks of demo history",
+      "demoHistory": "Include 5 weeks of sample history",
       "demoHistoryNote": "Fills Progress with sample past workouts so you can explore everything. Remove it anytime in Settings.",
       "editNote": "Upcoming planned workouts will be rebuilt. Past sessions are kept.",
       "finish": "Start training",
@@ -399,6 +401,9 @@
       "tipDefault": "Small, steady sessions beat rare heroic ones. Aim for your next planned day."
     },
     "progress": {
+      "push": {
+        "weekly": "Week done: {done} of {goal} · streak {streak} weeks"
+      },
       "calories": "Calories",
       "goal": "Goal",
       "goalWeight": "Goal weight",
@@ -414,7 +419,7 @@
       "history": "History",
       "awards": "Awards",
       "checkins": "Check-ins",
-      "demoNote": "Includes 5 weeks of demo history. Remove it anytime in Settings.",
+      "demoNote": "Includes 5 weeks of sample history. Remove it anytime in Settings.",
       "period": "Period",
       "thisWeek": "This week",
       "last4": "Last 4 weeks",
@@ -438,14 +443,134 @@
       "shareAchievements": "Share my achievements",
       "weeklyVolume": "Weekly volume",
       "noData": "Not enough data yet.",
-      "calendar": "Training calendar",
+      "calendar": {
+        "title": "Training calendar",
+        "open": "Open calendar",
+        "openAria": "Training calendar, open the full calendar",
+        "screenTitle": "Calendar",
+        "screenSubtitle": "Your plan, workouts and streak",
+        "prevMonth": "Previous month",
+        "nextMonth": "Next month",
+        "today": "Today",
+        "weekCol": "Wk",
+        "weekColAria": "Week",
+        "swipeHint": "Swipe or use the arrows to change month",
+        "state": {
+          "training-done": "workout done",
+          "rest-credited": "rest day credited",
+          "rest": "rest day",
+          "missed": "missed workout",
+          "paused": "paused",
+          "planned": "workout planned",
+          "today": "today",
+          "none": "nothing planned"
+        },
+        "legend": {
+          "training-done": "Workout",
+          "rest-credited": "Rest credited",
+          "missed": "Missed",
+          "paused": "Pause",
+          "planned": "Planned",
+          "today": "Today"
+        },
+        "dayAria": "{date}: {state}",
+        "todaySuffix": "today",
+        "weekMark": {
+          "credited": "credited",
+          "paused": "paused",
+          "current": "current week",
+          "none": "not credited",
+          "future": "upcoming"
+        },
+        "weekAria": "Week of {date}: {status}. Show how it counted",
+        "legendNote": "The last column is the week: credited towards the streak, paused, or the current week.",
+        "day": {
+          "workoutPlanned": "Workout planned",
+          "restPlanned": "Rest day",
+          "nothingPlanned": "Nothing planned this day.",
+          "minutes": "{n} min",
+          "sets": "{done} of {planned} sets",
+          "setsShort": "{n} sets",
+          "quality": "Counts as a quality workout",
+          "notQuality": "Under 70% of planned sets, so it doesn't count towards consistency",
+          "extra": "Extra session outside the plan",
+          "missed": "This planned workout wasn't done. One missed day is fine; the next one is what counts.",
+          "upcoming": "Planned for this day.",
+          "paused": "This day is in a pause. It doesn't affect your streak or consistency.",
+          "restCredited": "Rest credited",
+          "restNotCredited": "Rest not credited",
+          "reason": {
+            "nearest-done": "Your nearest workout ({date}) was done, so this rest day counts.",
+            "nearest-not-done": "Your nearest workout ({date}) wasn't done, so this rest day doesn't count.",
+            "nearest-upcoming": "It will count once your nearest workout ({date}) is done.",
+            "no-training": "No workouts were planned this week.",
+            "future": "Rest days count when the nearest workout is done."
+          }
+        },
+        "week": {
+          "title": "Week of {date}",
+          "score": "Week score",
+          "noScore": "No plan this week",
+          "formula": "({quality} quality workouts + {rest} credited rest days) ÷ {planned} planned days",
+          "quality": "Quality workouts",
+          "restCredited": "Credited rest days",
+          "planned": "Planned days",
+          "goal": "Weekly goal: {n} quality workouts",
+          "credited": "Goal reached: the week counts towards your streak.",
+          "notCredited": "Goal not reached: the week doesn't count towards the streak.",
+          "current": "This week is still in progress. It joins your consistency score once it ends.",
+          "paused": "This week is paused: it's skipped for both streak and consistency.",
+          "weight": "Weight in your consistency score: {pct}%",
+          "notCounted": "Not one of the 4 weeks in your current consistency score.",
+          "future": "This week hasn't started yet."
+        },
+        "streak": {
+          "title": "Streak",
+          "best": "best {n}",
+          "weeks": "weeks in a row",
+          "week": "week in a row",
+          "body": "A week counts when you reach your weekly goal. A paused week doesn't break the streak.",
+          "empty": "Your first workout starts your streak."
+        },
+        "built": {
+          "title": "How {score} was built",
+          "titleEmpty": "Consistency",
+          "range": "{from} – {to}",
+          "weight": "weight {pct}%",
+          "body": "Week weights: 40%, 30%, 20% and 10%, newest first. Paused weeks are skipped. We count quality workouts and rest days next to a done workout, divided by planned days.",
+          "empty": "Your score appears after your first full week with a plan.",
+          "rowAria": "Week {range}: {score} out of 100, weight {pct}%"
+        },
+        "pause": {
+          "title": "Sick or on holiday?",
+          "body": "Pause your streak for up to 4 weeks. Consistency skips these weeks too.",
+          "cta": "Pause",
+          "sheetTitle": "Pause streak",
+          "sheetBody": "The pause starts this Monday ({date}).",
+          "weeks": "{n} weeks",
+          "week": "1 week",
+          "until": "until {date}",
+          "confirm": "Pause for {n} weeks",
+          "confirmOne": "Pause for 1 week",
+          "cancel": "Cancel",
+          "active": "Paused until {date}",
+          "activeBody": "Your streak is safe. Come back whenever you're ready.",
+          "upcoming": "Pause from {from} to {to}",
+          "remove": "Remove pause",
+          "removeTitle": "Remove pause?",
+          "removeBody": "The weeks from {from} to {to} will count again for your streak and consistency.",
+          "removeConfirm": "Remove",
+          "added": "Streak paused until {date}",
+          "removed": "Pause removed"
+        }
+      },
       "bodyWeight": "Body weight",
       "weightNeedMore": "Log your weight at least twice to see a trend.",
       "insightsLockedTitle": "Advanced training insights",
       "insightsLockedBody": "Strength progression per exercise and muscle-group balance, built from your own history.",
       "strength": "Strength progression",
       "muscles": "Muscle balance",
-      "premiumActive": "Premium (demo) active",
+      "premiumActive": "Premium active",
       "historyEmpty": "No workouts yet",
       "historyEmptyBody": "Your completed sessions will appear here.",
       "adaptedCount": "{n} adjustments",
@@ -471,9 +596,103 @@
       "removeBody": "This photo will be deleted from this device.",
       "removeConfirm": "Remove",
       "photosLockedTitle": "Unlimited photo check-ins",
-      "photosLockedBody": "Free includes {n} photos. Premium keeps your whole journey."
+      "photosLockedBody": "Free includes {n} photos. Premium keeps your whole journey.",
+      "consistencyDelta": "{sign}{n} vs last week",
+      "weekdays": {
+        "0": "Monday",
+        "1": "Tuesday",
+        "2": "Wednesday",
+        "3": "Thursday",
+        "4": "Friday",
+        "5": "Saturday",
+        "6": "Sunday"
+      },
+      "insights": {
+        "title": "What's working",
+        "next": "Next: {text}",
+        "weekday_misses": {
+          "title": "{weekday} sessions slip most often",
+          "next": "Move that session to a day that suits you better?"
+        },
+        "strength_gain": {
+          "title": "{exercise}: {from} → {to} in {weeks} wk",
+          "next": "Try adding one more set."
+        },
+        "too_hard": {
+          "title": "Your last sessions felt hard",
+          "next": "We'll make the next one lighter."
+        },
+        "consistency_up": {
+          "title": "Consistency up {delta} points",
+          "next": "Keep this rhythm — it works."
+        }
+      },
+      "reports": {
+        "title": "Weekly reports",
+        "week": "Week of {date}",
+        "open": "Open report"
+      },
+      "report": {
+        "title": "Weekly report",
+        "range": "{from} – {to}",
+        "notFound": "Report not found",
+        "notFoundBody": "That week isn't available yet or doesn't exist.",
+        "back": "Back to progress",
+        "workouts": "Workouts",
+        "minutes": "Minutes",
+        "adherence": "Plan completed",
+        "vsPrev": "{diff} vs prior week",
+        "noPrev": "no prior week",
+        "same": "=",
+        "empty": "A quiet week. Nothing to log here, and that's fine. Your next plan is below.",
+        "records": "Records this week",
+        "noRecords": "No new records this week.",
+        "recordValue": "{value} {unit}",
+        "unit": {
+          "kg": "kg",
+          "reps": "reps",
+          "s": "s"
+        },
+        "next": "Next week's plan",
+        "nextEmpty": "No plan for next week yet.",
+        "workoutDay": "Workout",
+        "restDay": "Rest"
+      },
+      "exercise": {
+        "title": "Your progress",
+        "empty": "Log this exercise twice to see your trend.",
+        "best": "Best: {value} {unit}",
+        "records": "Recent records",
+        "chart": "{name} trend"
+      },
+      "levels": {
+        "1": "Starter",
+        "2": "Steady",
+        "3": "Committed",
+        "4": "Determined",
+        "5": "Strong",
+        "6": "Unstoppable",
+        "7": "Athlete",
+        "8": "Elite",
+        "9": "Champion",
+        "10": "Legend"
+      },
+      "advice": {
+        "start": "Start with one short planned session. Your progress picks up from there.",
+        "goal-remaining": "{n} more quality sessions to reach this week's goal. You still have time.",
+        "near-record": "You are close to your best on {exercise}. Another go could reach {target}.",
+        "plateau": "{exercise} has held steady for a while. Try a small change, like one more rep or a slower tempo."
+      },
+      "improvements": {
+        "record": "{exercise}: {before} to {now}, up {delta}",
+        "consistency": "Consistency up {delta} points, from {before} to {now}",
+        "streak": "Streak grew from {before} to {now} weeks"
+      }
     },
     "awards": {
+      "sharePreview": "Preview to share",
+      "copySummary": "Copy summary",
+      "copyManually": "The text is selected. Copy it using your device’s menu.",
       "level": "Level",
       "overall": "Overall",
       "workouts": "Workouts",
@@ -482,7 +701,7 @@
       "collection": "Collection",
       "collected": "{n} of {total} collected",
       "aheadOf": "Ahead of {percent} of users",
-      "demoRarity": "Demo rarity: {pct}% unlocked",
+      "demoRarity": "{pct}% of users unlock this",
       "tier": {
         "common": "Common",
         "rare": "Rare",
@@ -717,18 +936,18 @@
       "reminderTimeHint": "When your daily workout nudge arrives on training days.",
       "setTime": "Set time",
       "push": "Browser notifications",
-      "pushNote": "Shows system notifications while this app is open in a browser. Real push needs a server and isn't set up in this demo.",
+      "pushNote": "Shows system notifications while this app is open in a browser. Real push needs a server and isn't set up yet.",
       "pushUnsupported": "This browser doesn't support notifications",
       "pushDenied": "Notification permission was not granted",
       "pushOn": "Browser notifications on",
       "pushOff": "Browser notifications off",
       "data": "Your data",
       "dataNote": "Everything is stored on this device only.",
-      "removeDemo": "Remove demo history",
-      "removeDemoTitle": "Remove demo history?",
+      "removeDemo": "Remove sample history",
+      "removeDemoTitle": "Remove sample history?",
       "removeDemoBody": "Sample past workouts are deleted. Workouts you completed yourself stay.",
       "removeDemoConfirm": "Remove",
-      "demoRemoved": "Demo history removed",
+      "demoRemoved": "Sample history removed",
       "reset": "Reset everything",
       "resetTitle": "Reset everything?",
       "resetBody": "This deletes your profile, plan, history and settings from this device. You'll start onboarding again.",
@@ -736,9 +955,9 @@
     },
     "subscription": {
       "title": "Subscription",
-      "demoNotice": "Demo only. No payment is taken and nothing is billed. This screen shows how Premium would work.",
-      "active": "Premium active (demo)",
-      "trialUntil": "Demo trial until {day}",
+      "demoNotice": "No payment is taken and nothing is billed. This screen shows how Premium would work.",
+      "active": "Premium active",
+      "trialUntil": "Trial until {day}",
       "premiumOn": "Premium is on.",
       "freeTitle": "Free",
       "freeNote": "Everything you need to train safely and consistently.",
@@ -773,21 +992,21 @@
           "body": "Schedule sessions with a Gym Bro."
         }
       },
-      "start": "Start 7-day free trial (demo)",
-      "started": "Demo trial started. No payment taken.",
-      "end": "End demo Premium",
+      "start": "Start 7-day free trial",
+      "started": "Trial started. No payment taken.",
+      "end": "End Premium",
       "ended": "Back on Free",
       "priceNote": "In a real release billing would happen through the App Store or Google Play.",
       "safetyPromise": "Training and safety features never sit behind a paywall."
     },
     "devices": {
       "title": "Connected devices",
-      "honest": "Apple Health and Garmin need a native app or provider sign-in, which a web demo can't do. Linking here turns on clearly labelled Demo Mode with simulated values.",
-      "linkedDemo": "Linked · Demo Mode",
+      "honest": "Apple Health and Garmin need a native app or provider sign-in, which a web app can't do. Linking here turns on simulated values.",
+      "linkedDemo": "Linked",
       "notLinked": "Not linked",
-      "connect": "Link (demo)",
+      "connect": "Link",
       "disconnect": "Unlink",
-      "connected": "{name} linked in Demo Mode",
+      "connected": "{name} linked",
       "disconnected": "{name} unlinked",
       "noneTitle": "No device linked",
       "noneBody": "Link one to preview the live heart-rate panel you'll see during workouts.",
@@ -837,7 +1056,7 @@
     },
     "partners": {
       "title": "Gym Bro",
-      "demoNote": "Demo: these are sample profiles. Real matching needs accounts and a server.",
+      "demoNote": "These are sample profiles. Real matching needs accounts and a server.",
       "level": "Level {n}",
       "status": {
         "invited": "Invited",
@@ -968,8 +1187,7 @@
       "kg": "kg",
       "reps": "reps",
       "sets": "sets",
-      "premium": "Premium",
-      "demo": "Demo"
+      "premium": "Premium"
     },
     "shell": {
       "resume": "Workout in progress"
@@ -1046,7 +1264,11 @@
       "challengeDone": "Complete",
       "water": "Water",
       "waterAdded": "Added 250 ml",
-      "nutritionLink": "Nutrition and water plan"
+      "nutritionLink": "Nutrition and water plan",
+      "waterRemove": "Remove {ml} ml",
+      "waterLeft": "{ml} ml to go",
+      "waterDone": "Goal reached. Nice work!",
+      "waterLimit": "Daily limit reached ({max} ml). More at once isn't safe."
     },
     "muscle": {
       "all": "All",
@@ -1189,13 +1411,6 @@
       "decrease": "Decrease",
       "increase": "Increase",
       "completeSet": "Complete set",
-      "voiceStart": "Dictate reps and weight",
-      "voiceStop": "Stop listening",
-      "voiceHint": "Tap the mic and say, for example, \"10 reps at 20 kilos\".",
-      "voiceUnsupported": "Voice input isn't supported in this browser. Use the steppers.",
-      "voiceHeard": "Heard {reps} reps at {weight} kg. Tap Complete set to log.",
-      "voiceUnclear": "Couldn't read a number from \"{text}\".",
-      "voiceError": "Voice input failed. Try again or use the steppers.",
       "prev": "Back",
       "all": "All",
       "nextEx": "Next",
@@ -1279,7 +1494,7 @@
       "partialLead": "You stopped early and that's fine. What you did still counts.",
       "emptyTitle": "No sets logged",
       "emptyBody": "Nothing to save this time. Come back whenever you're ready.",
-      "avgHr": "Average heart rate {n} bpm (simulated, demo mode).",
+      "avgHr": "Average heart rate {n} bpm (simulated).",
       "prs": "New personal records",
       "adapted": "Adjustments made",
       "adaptNote": "Your next sessions take your feedback into account.",

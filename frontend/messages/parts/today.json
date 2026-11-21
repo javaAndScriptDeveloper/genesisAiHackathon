@@ -1,24 +1,79 @@
 {
   "fit": {
-    "week": { "label": "This week", "state": { "rest": "recovery day", "planned": "planned", "done": "completed", "partial": "partly done", "skipped": "skipped", "missed": "missed" } },
-    "status": { "planned": "Planned", "completed": "Done", "partial": "Partial", "skipped": "Skipped" },
+    "week": {
+      "label": "This week",
+      "state": {
+        "rest": "recovery day",
+        "planned": "planned",
+        "done": "completed",
+        "partial": "partly done",
+        "skipped": "skipped",
+        "missed": "missed"
+      }
+    },
+    "status": {
+      "planned": "Planned",
+      "completed": "Done",
+      "partial": "Partial",
+      "skipped": "Skipped"
+    },
     "today": {
-      "greeting": { "morning": "Good morning, {name} 👋", "afternoon": "Good afternoon, {name} 👋", "evening": "Good evening, {name} 👋" },
+      "greeting": {
+        "morning": "Good morning, {name} 👋",
+        "afternoon": "Good afternoon, {name} 👋",
+        "evening": "Good evening, {name} 👋"
+      },
       "notifications": "Notifications, {n} unread",
       "profile": "Profile and settings",
-      "empty": { "title": "No workouts planned", "body": "Update your training days and we'll build your week.", "cta": "Edit preferences" },
-      "inProgress": "In progress", "resume": "Resume workout",
-      "todaysWorkout": "Today's workout", "start": "Start workout", "preview": "Preview",
-      "doneEyebrow": "Today", "doneTitle": "Workout complete", "doneBody": "Nice work. Rest, hydrate and let your body adapt.", "seeProgress": "See your progress",
-      "recoveryEyebrow": "Recovery day", "recoveryTitle": "Rest is part of the plan", "recoveryBody": "No session today. Light movement is fine, and it won't touch your streak.", "mobility": "Do a light mobility session", "startEarly": "Start next workout early", "nextUp": "Next: {title}, {day}",
-      "missedTitle": "Missed workout on {day}", "missedBody": "No pressure. Move {title} to another day or skip it. Your plan adapts either way.", "missedCta": "Reschedule or skip",
-      "comebackTitle": "Welcome back", "comebackBody": "It's been {days} days. Ease back in with a lighter session and rebuild momentum.", "comebackCta": "Start a lighter session", "comebackToast": "Next workout lightened for your comeback",
-      "weekGoal": "Weekly goal", "sessions": "sessions", "noPlanThisWeek": "Nothing planned this week.", "goalDone": "All planned sessions done. Enjoy the rest.", "goalLeft": "{n} more to hit your goal.",
-      "streak": "Streak", "streakHint": "planned sessions in a row", "level": "Level", "xpProgress": "XP to next level",
-      "challenge": "Weekly challenge", "challengeDone": "Complete",
-      "water": "Water", "waterAdded": "Added 250 ml",
-      "nutritionLink": "Nutrition and water plan"
+      "empty": {
+        "title": "No workouts planned",
+        "body": "Update your training days and we'll build your week.",
+        "cta": "Edit preferences"
+      },
+      "inProgress": "In progress",
+      "resume": "Resume workout",
+      "todaysWorkout": "Today's workout",
+      "start": "Start workout",
+      "preview": "Preview",
+      "doneEyebrow": "Today",
+      "doneTitle": "Workout complete",
+      "doneBody": "Nice work. Rest, hydrate and let your body adapt.",
+      "seeProgress": "See your progress",
+      "recoveryEyebrow": "Recovery day",
+      "recoveryTitle": "Rest is part of the plan",
+      "recoveryBody": "No session today. Light movement is fine, and it won't touch your streak.",
+      "mobility": "Do a light mobility session",
+      "startEarly": "Start next workout early",
+      "nextUp": "Next: {title}, {day}",
+      "missedTitle": "Missed workout on {day}",
+      "missedBody": "No pressure. Move {title} to another day or skip it. Your plan adapts either way.",
+      "missedCta": "Reschedule or skip",
+      "comebackTitle": "Welcome back",
+      "comebackBody": "It's been {days} days. Ease back in with a lighter session and rebuild momentum.",
+      "comebackCta": "Start a lighter session",
+      "comebackToast": "Next workout lightened for your comeback",
+      "weekGoal": "Weekly goal",
+      "sessions": "sessions",
+      "noPlanThisWeek": "Nothing planned this week.",
+      "goalDone": "All planned sessions done. Enjoy the rest.",
+      "goalLeft": "{n} more to hit your goal.",
+      "streak": "Streak",
+      "streakHint": "planned sessions in a row",
+      "level": "Level",
+      "xpProgress": "XP to next level",
+      "challenge": "Weekly challenge",
+      "challengeDone": "Complete",
+      "water": "Water",
+      "waterAdded": "Added 250 ml",
+      "nutritionLink": "Nutrition and water plan",
+      "waterRemove": "Remove {ml} ml",
+      "waterLeft": "{ml} ml to go",
+      "waterDone": "Goal reached. Nice work!",
+      "waterLimit": "Daily limit reached ({max} ml). More at once isn't safe."
     },
-    "session": { "level": "Level {n}", "exercises": "{n} exercises" }
+    "session": {
+      "level": "Level {n}",
+      "exercises": "{n} exercises"
+    }
   }
 }

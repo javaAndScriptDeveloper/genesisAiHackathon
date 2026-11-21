@@ -5,6 +5,7 @@ Mobile-first coaching app that lives in the route group `app/(app)/`. Desktop re
 ## Layers
 - `lib/fit/` is the domain, free of React: `types`, `exercises` (library + equipment/limitation filtering), `videos` (exercise → YouTube id map), `plan` (weekly plan generator), `adapt` (pure session adjustments), `stats`, `gamification`, `coach` (deterministic intent → actions), `notifications`, `health` (provider interface + Demo provider), `analytics` (typed `track`), `seed` (demo history), `speech`, `share`.
 - `lib/fit/store/`: one reducer (`reducer.ts`), `FitProvider` (localStorage persistence under `fit.state.v1`, hydration-safe via `ready`), `observe.ts` (turns state transitions into analytics events), `hooks.ts` (`useFitStats`, `useStartWorkout`).
+- `lib/progress/` holds pure progress analytics: insights ("what's working / next"), the weekly report, per-exercise strength series and records. `historyFromFit` (`lib/progress/fromFit.ts`) adapts `FitState` into its input. Streak, consistency score, XP and achievements stay in `lib/fit`; the insights consistency hint uses the app's consistency delta (`appInsights`) so numbers never contradict. `lib/api/mock/progressDb.ts` is a deterministic test fixture.
 - `components/features/*`: screens and widgets. Screens read state with `useFit()` and dispatch typed actions. Nothing computes numbers on its own: Today, Progress and Coach all use `useFitStats()` / lib functions.
 
 ## Rules specific to this app
@@ -18,7 +19,7 @@ Mobile-first coaching app that lives in the route group `app/(app)/`. Desktop re
 ## Mock vs real
 Everything is frontend state + localStorage today. Needs a backend (Next.js route handlers or the platform-backend service) when productionised: accounts/sync, real push notifications, Apple Health / Garmin OAuth or a native bridge, payments, partner matching, optional LLM coach (`/api/ai` exists and can replace `coachReply`, keep the action types).
 
-`/analytics` lives outside the phone shell. The dashboard reads event names, timestamps and workout-completion flags persisted by `track` under `fit.analytics.v1.*`. It starts collecting on installation and clears the event log on profile reset. The economics calculator uses the scenario inputs from the market report. Billing, provider usage and cross-device cohorts require server-side sources.
+`/analytics` lives outside the phone shell. The dashboard reads event names, timestamps and workout-completion flags persisted by `track` under `fit.analytics.v1.*`. It starts collecting on installation and clears the event log on profile reset. The economics calculator uses monetization and paid acquisition inputs from the market report. The default launch pilot targets 90% organic acquisition and budgets $50 per month in overhead. The market benchmark preset uses the report’s acquisition mix and illustrative overhead. Billing, provider usage and cross-device cohorts require server-side sources.
 
 ## Videos
 `lib/fit/videos.ts` maps exercise id → video id from the Leap Fitness channel (embedded with youtube-nocookie). Exercise details autoplay muted with the native control bar hidden. Unmapped exercises show a labeled related clip. Override at deploy time with `NEXT_PUBLIC_EXERCISE_VIDEO_MAP='{"goblet-squat":"<11-char id>"}'`.

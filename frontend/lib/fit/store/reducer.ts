@@ -1,11 +1,13 @@
-import { toISO, type ISODate } from "../dates";
+import { daysBetween, toISO, type ISODate } from "../dates";
+import { MAX_PAUSE_DAYS } from "../../progress/consistency";
 import type { Units } from "../units";
 import { findExercise, getExercise } from "../exercises";
 import { applyAdapt, replaceBlock, replaceUnavailable } from "../adapt";
 import { evaluateAchievements, achievementById, totalXp } from "../gamification";
 import { deriveNotifications } from "../notifications";
 import { buildAdHocWorkout, estimateMinutes, generatePlan, nextUpcoming } from "../plan";
-import { emptyState, seedHistory } from "../seed";
+import { defaultWeeklyGoal, emptyState, newProgressToken, seedHistory, WATER_MAX_ML } from "../seed";
+import type { ArchiveItem, ProgressEvent } from "../../progress/types";
 import { applyProgression, detectPrs, mean, sessionXp, volumeOf, weekStats } from "../stats";
 import type {
 	ActiveSession,
@@ -82,7 +84,17 @@ export type Action =
 	| { type: "partner"; id: string; status: "invited" | "accepted" | null }
 	| { type: "joint-workout"; workoutId: string; partnerId: string | null }
 	| { type: "dismiss-celebration" }
-	| { type: "clear-demo-history"; today: ISODate };
+	| { type: "clear-demo-history"; today: ISODate }
+	| { type: "add-pause"; from: ISODate; to: ISODate }
+	| { type: "remove-pause"; from: ISODate }
+	| { type: "set-weekly-goal"; goal: number }
+	| { type: "record-events"; events: ProgressEvent[] }
+	| { type: "mark-seen"; kinds?: ProgressEvent["kind"][]; ids?: string[]; now: string }
+	| { type: "archive-queued"; items: ArchiveItem[] }
+	| { type: "archive-sent"; ids: string[]; weeks: string[] };
+
+/** The queue never holds more than this many items; overflow drops the oldest "change" items, never "weekly". */
+export const ARCHIVE_QUEUE_CAP = 50;
 
 const uid = (p: string) => `${p}${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
 
@@ -217,11 +229,22 @@ function finishSession(state: FitState, today: ISODate, now: string): FitState {
 export function reducer(state: FitState, action: Action): FitState {
 	switch (action.type) {
 		case "hydrate":
-			return action.state;
+			// Older saved state has no pauses yet.
+			// Older saved state also lacks the progress fields.
+			return {
+				...emptyState(),
+				...action.state,
+				pauses: action.state.pauses ?? [],
+				progressToken: action.state.progressToken ?? newProgressToken(),
+				weeklyGoal: action.state.weeklyGoal ?? defaultWeeklyGoal(action.state.profile ?? null),
+				progressEvents: action.state.progressEvents ?? [],
+				archivedWeeks: action.state.archivedWeeks ?? [],
+				archiveQueue: action.state.archiveQueue ?? [],
+			};
 		case "reset":
 			return emptyState();
 		case "complete-onboarding": {
-			const base: FitState = { ...emptyState(), units: action.units, trainerId: action.trainerId ?? null, profile: action.profile, notificationSettings: state.notificationSettings, bodyWeights: [{ date: action.today, kg: action.profile.weightKg }] };
+			const base: FitState = { ...emptyState(), units: action.units, trainerId: action.trainerId ?? null, profile: action.profile, notificationSettings: state.notificationSettings, bodyWeights: [{ date: action.today, kg: action.profile.weightKg }], weeklyGoal: defaultWeeklyGoal(action.profile) };
 			const devices = { apple: action.profile.wearable === "apple", garmin: action.profile.wearable === "garmin" };
 			if (action.demoHistory) {
 				const seeded = seedHistory(action.profile, action.today);
@@ -417,7 +440,7 @@ export function reducer(state: FitState, action: Action): FitState {
 			return { ...state, notificationSettings: action.settings };
 		case "water": {
 			const current = state.water[action.date] ?? 0;
-			const next = { ...state, water: { ...state.water, [action.date]: Math.max(0, current + action.delta) } };
+			const next = { ...state, water: { ...state.water, [action.date]: Math.max(0, Math.min(Math.max(current, WATER_MAX_ML), current + action.delta)) } };
 			return unlockNew(next, action.date, new Date().toISOString());
 		}
 		case "water-goal":
@@ -459,6 +482,55 @@ export function reducer(state: FitState, action: Action): FitState {
 			const planned = state.planned.filter((w) => w.date >= action.today || (w.logId && keepIds.has(w.logId)));
 			const unlocked = Object.fromEntries(Object.entries(state.unlocked).filter(([id]) => keepLogs.length > 0 && id !== "none"));
 			return { ...state, history: keepLogs, planned, hasDemoHistory: false, unlocked: keepLogs.length ? unlocked : {}, bodyWeights: state.bodyWeights.slice(-1), water: {} };
+		}
+		case "add-pause": {
+			const pauses = state.pauses ?? [];
+			const len = daysBetween(action.from, action.to);
+			// 1 day … 4 weeks (to − from ≤ 27), never overlapping an existing pause.
+			if (len < 0 || len > MAX_PAUSE_DAYS) return state;
+			if (pauses.some((p) => p.from <= action.to && p.to >= action.from)) return state;
+			return { ...state, pauses: [...pauses, { from: action.from, to: action.to }].sort((a, b) => a.from.localeCompare(b.from)) };
+		}
+		case "set-weekly-goal":
+			return { ...state, weeklyGoal: Math.min(5, Math.max(2, Math.round(action.goal))) };
+		case "record-events": {
+			const have = new Set(state.progressEvents.map((e) => e.id));
+			const fresh: ProgressEvent[] = [];
+			for (const e of action.events) {
+				if (have.has(e.id)) continue;
+				have.add(e.id);
+				fresh.push(e);
+			}
+			return fresh.length === 0 ? state : { ...state, progressEvents: [...state.progressEvents, ...fresh] };
+		}
+		case "mark-seen": {
+			const match = (e: ProgressEvent) => (action.kinds?.includes(e.kind) ?? false) || (action.ids?.includes(e.id) ?? false);
+			if (!state.progressEvents.some((e) => e.seenAt === null && match(e))) return state;
+			return { ...state, progressEvents: state.progressEvents.map((e) => (e.seenAt === null && match(e) ? { ...e, seenAt: action.now } : e)) };
+		}
+		case "archive-queued": {
+			let queue = [...state.archiveQueue, ...action.items];
+			let over = queue.length - ARCHIVE_QUEUE_CAP;
+			if (over > 0) {
+				// Drop the oldest "change" items first (queue order is oldest first); weekly reports are never dropped.
+				queue = queue.filter((it) => {
+					if (over > 0 && it.period === "change") {
+						over -= 1;
+						return false;
+					}
+					return true;
+				});
+			}
+			return { ...state, archiveQueue: queue };
+		}
+		case "archive-sent": {
+			const sent = new Set(action.ids);
+			return { ...state, archiveQueue: state.archiveQueue.filter((it) => !sent.has(it.id)), archivedWeeks: [...new Set([...state.archivedWeeks, ...action.weeks])] };
+		}
+		case "remove-pause": {
+			const pauses = state.pauses ?? [];
+			if (!pauses.some((p) => p.from === action.from)) return state;
+			return { ...state, pauses: pauses.filter((p) => p.from !== action.from) };
 		}
 	}
 }

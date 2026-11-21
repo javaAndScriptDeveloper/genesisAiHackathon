@@ -172,22 +172,32 @@
 	font-size: 1.2rem;
 }
 
-.waterText {
-	display: grid;
-	grid-template-columns: auto 1fr;
-	column-gap: var(--space-3);
-	align-items: center;
-
-	svg {
-		grid-row: span 2;
-		color: var(--color-accent);
-	}
-}
-
 .water {
 	display: flex;
+	flex-direction: column;
+	gap: var(--space-3);
+}
+
+.waterTop {
+	display: flex;
 	align-items: center;
-	justify-content: space-between;
+	gap: var(--space-3);
+}
+
+.waterIcon {
+	display: grid;
+	flex: none;
+	place-items: center;
+	width: 4.4rem;
+	height: 4.4rem;
+	background: var(--color-accentSoft);
+	color: var(--color-accent);
+	border-radius: 50%;
+}
+
+.waterText {
+	flex: 1;
+	min-width: 0;
 
 	h3 {
 		font-size: 1.5rem;
@@ -196,6 +206,37 @@
 	p {
 		color: var(--color-textSubtle);
 		font-size: 1.3rem;
+		font-variant-numeric: tabular-nums;
+	}
+
+	strong {
+		color: var(--color-text);
+		font-size: 1.6rem;
+	}
+}
+
+.waterActions {
+	display: flex;
+	align-items: center;
+	gap: var(--space-2);
+}
+
+.waterStatus {
+	display: flex;
+	align-items: center;
+	gap: 0.6rem;
+	margin: 0;
+	color: var(--color-textSubtle);
+	font-size: 1.3rem;
+
+	&[data-state="done"] {
+		color: var(--color-success);
+		font-weight: 600;
+	}
+
+	&[data-state="limit"] {
+		color: var(--color-warningText);
+		font-weight: 600;
 	}
 }
 

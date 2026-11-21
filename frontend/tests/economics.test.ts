@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildMinutes, estimateBuildPayback, modelEconomics } from "@/lib/insights/economics";
+import { buildMinutes, defaultScenario, estimateBuildPayback, modelEconomics, scenarios } from "@/lib/insights/economics";
 
 describe("subscription economics", () => {
 	it("derives the base case from the report inputs", () => {
@@ -42,6 +42,17 @@ describe("hackathon build payback", () => {
 		const build = estimateBuildPayback(50, base.firstYearContribution, base.blendedCac);
 		expect(build.contributionAfterCac).toBeLessThan(0);
 		expect(build.payers).toBeNull();
-		expect(estimateBuildPayback(0, base.firstYearContribution, base.blendedCac).payers).toBe(0);
+		expect(estimateBuildPayback(0, base.firstYearContribution, base.blendedCac).payers).toBeNull();
 	});
+});
+
+it("recovers build labor and a year of overhead from 35 new payers in the launch plan", () => {
+	const pilot = scenarios[defaultScenario];
+	const model = modelEconomics(defaultScenario, pilot.organicPercent / 100, pilot.fixedCosts);
+	const build = estimateBuildPayback(50, model.firstYearContribution, model.blendedCac, pilot.fixedCosts);
+	expect(model.ratio).toBeCloseTo(3.85);
+	expect(model.paybackMonths).toBe(3);
+	expect(model.breakEven).toBe(11);
+	expect(build.firstYearCost).toBeCloseTo(966.67);
+	expect(build.payers).toBe(35);
 });
