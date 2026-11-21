@@ -17,6 +17,9 @@
 }
 
 .subtitle {
+	display: flex;
+	align-items: center;
+	gap: 0.6rem;
 	margin-top: 0.2rem;
 	color: var(--color-textSubtle);
 	font-size: 1.4rem;

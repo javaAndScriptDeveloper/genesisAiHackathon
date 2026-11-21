@@ -1,7 +1,9 @@
 {
   "fit": {
     "gate": { "cta": "See Premium" },
+    "insight": { "headNone": "Your insights start with your first workout", "headDone": "Week complete. Well done.", "headSome": "On track, {left} more to go this week", "headFresh": "A fresh week, start with your next session", "tipConsistent": "Consistency is your superpower. Keep protecting your rest days.", "tipVolumeDown": "Volume dipped compared with last week. Normal after a lighter week, so build back gradually.", "tipStreak": "{n} planned sessions in a row. Rest days never break it.", "tipDefault": "Small, steady sessions beat rare heroic ones. Aim for your next planned day." },
     "progress": {
+      "calories": "Calories", "goal": "Goal", "goalWeight": "Goal weight", "goalHint": "Set a goal and it shows as a line on your chart.", "goalSaved": "Goal saved", "goalReached": "You are at your goal weight.", "toGoal": "{n} {unit} {dir}", "toLose": "to lose to reach your goal", "toGain": "to gain to reach your goal",
       "title": "Progress", "subtitle": "Your training, in numbers", "overview": "Overview", "history": "History", "awards": "Awards", "checkins": "Check-ins",
       "demoNote": "Includes 5 weeks of demo history. Remove it anytime in Settings.", "period": "Period", "thisWeek": "This week", "last4": "Last 4 weeks",
       "sessions": "Sessions", "completedVsPlanned": "done / planned", "time": "Training time", "volume": "Volume", "streakLabel": "Streak", "longest": "longest {n}",

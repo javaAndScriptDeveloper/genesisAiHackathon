@@ -1,6 +1,8 @@
+@use "partials/corners";
 @use "partials/mixins";
 
 .nav {
+	position: relative;
 	display: grid;
 	flex: none;
 	grid-template-columns: repeat(5, 1fr);
@@ -14,6 +16,8 @@
 }
 
 .tab {
+	position: relative;
+	z-index: 1;
 	display: flex;
 	flex-direction: column;
 	align-items: center;
@@ -29,4 +33,26 @@
 
 .active {
 	color: var(--color-accent);
+}
+
+// Soft outlined pill that slides to the active tab.
+.indicator {
+	position: absolute;
+	top: calc(var(--space-1) + 0.4rem);
+	left: 0;
+	width: calc(var(--ind-w, 0px) - 1.2rem);
+	height: 4.8rem;
+	background: var(--color-accentSoft);
+	border: 0.1rem solid rgba(229, 36, 46, 0.28);
+	transform: translateX(calc(var(--ind-x, 0px) + 0.6rem));
+	opacity: 0;
+	pointer-events: none;
+	@include corners.radius(var(--radius-card));
+
+	&[data-ready="true"] {
+		opacity: 1;
+		transition:
+			transform 0.32s cubic-bezier(0.3, 0.8, 0.2, 1),
+			width 0.32s cubic-bezier(0.3, 0.8, 0.2, 1);
+	}
 }

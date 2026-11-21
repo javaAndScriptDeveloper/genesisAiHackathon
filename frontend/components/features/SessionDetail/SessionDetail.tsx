@@ -1,18 +1,21 @@
 "use client";
 
-import { ArrowDown01Icon, ArrowUp01Icon, Calendar03Icon, Clock01Icon, Dumbbell03Icon, HeartCheckIcon, Moon01Icon, PlayIcon, Timer02Icon } from "@hugeicons/core-free-icons";
+import { ArrowDown01Icon, ArrowUp01Icon, Calendar03Icon, Clock01Icon, Dumbbell03Icon, HeartCheckIcon, Moon01Icon, PlayIcon, Tick02Icon, Timer02Icon } from "@hugeicons/core-free-icons";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { MuscleMap } from "@/components/features/MuscleMap/MuscleMap";
 import { ChoiceList } from "@/components/features/ChoiceList/ChoiceList";
 import { ScreenHeader } from "@/components/features/ScreenHeader/ScreenHeader";
-import { Badge, Button, Card, EmptyState, Sheet, useToast, type IconDefinition } from "@/components/ui";
+import { Badge, Button, Card, EmptyState, Icon, Sheet, SportIcon, useToast, type IconDefinition } from "@/components/ui";
+import { kcalFor } from "@/lib/fit/calories";
+import { musclesOf } from "@/lib/fit/muscles";
 import { addDays, formatDay, mondayOf, WEEKDAYS, weekdayIndex } from "@/lib/fit/dates";
 import { alternativesFor, getExercise } from "@/lib/fit/exercises";
 import { describeBlock } from "@/lib/fit/format";
 import { applyAdapt } from "@/lib/fit/adapt";
 import { useFit } from "@/lib/fit/store/FitProvider";
-import { useStartWorkout } from "@/lib/fit/store/hooks";
+import { useStartWorkout, useUnits } from "@/lib/fit/store/hooks";
 import type { AdaptOp, SkipReason } from "@/lib/fit/types";
 import { useT } from "@/lib/i18n/I18nProvider";
 import styles from "./SessionDetail.module.scss";
@@ -25,6 +28,7 @@ export function SessionDetail({ id }: { id: string }) {
 	const toast = useToast();
 	const { state, dispatch, today } = useFit();
 	const start = useStartWorkout();
+	const u = useUnits();
 	const [panel, setPanel] = useState<Panel>(null);
 	const workout = state.planned.find((w) => w.id === id);
 	const profile = state.profile;
@@ -41,6 +45,12 @@ export function SessionDetail({ id }: { id: string }) {
 	}
 
 	const editable = workout.status === "planned";
+	const ids = workout.exercises.map((b) => b.exerciseId);
+	const kcal = kcalFor(ids, profile.weightKg, workout.durationMin);
+	const muscles = musclesOf(workout.exercises);
+	const equipment = Array.from(new Set(ids.flatMap((id) => getExercise(id).equipment)));
+	// "Knee-friendly" etc.: only for the limitations this user reported, and only when no exercise here loads that area.
+	const friendly = profile.limitations.filter((l) => l !== "heart-bp" && !ids.some((id) => getExercise(id).stresses.includes(l)));
 	const log = workout.logId ? state.history.find((l) => l.id === workout.logId) : undefined;
 	const trainedToday = state.planned.some((w) => w.date === today && w.id !== workout.id && (w.status === "completed" || w.status === "partial"));
 	const active = !!state.active && state.active.phase !== "summary";
@@ -72,7 +82,7 @@ export function SessionDetail({ id }: { id: string }) {
 
 	return (
 		<div className={styles.root}>
-			<ScreenHeader title={workout.title} subtitle={`${formatDay(workout.date)} · ${workout.durationMin} ${t("fit.common.minShort")}`} back="/training" />
+			<ScreenHeader title={workout.title} subtitle={`${formatDay(workout.date)} · ${workout.durationMin} ${t("fit.common.minShort")} · ${kcal} kcal`} back="/training" />
 			<div className={styles.content}>
 				<div className={styles.badges}>
 					<Badge tone={workout.status === "planned" ? "accent" : workout.status === "completed" ? "success" : "neutral"}>{t(`fit.status.${workout.status}`)}</Badge>
@@ -81,6 +91,23 @@ export function SessionDetail({ id }: { id: string }) {
 					{workout.adHoc && <Badge tone="warning">{t("fit.session.extra")}</Badge>}
 					{workout.movedFrom && <Badge>{t("fit.session.moved", { day: formatDay(workout.movedFrom) })}</Badge>}
 				</div>
+
+				<Card className={styles.targets}>
+					{muscles.length > 0 && (
+						<div className={styles.targetMap}>
+							<MuscleMap muscles={muscles} variant="pair" label={t("fit.session.targets")} />
+						</div>
+					)}
+					<div className={styles.targetInfo}>
+						<h2 className={styles.h2}>{t("fit.session.targets")}</h2>
+						<p className={styles.note}>{muscles.length ? muscles.map((m) => t(`fit.muscle.${m}`)).join(" · ") : t("fit.muscle.mobility")}</p>
+						<h3 className={styles.h3}>{t("fit.session.equipmentTitle")}</h3>
+						<div className={styles.badges}>
+							{equipment.length === 0 ? <Badge>{t("fit.session.bodyweightOnly")}</Badge> : equipment.map((e) => <Badge key={e}><SportIcon name="dumbbell" size={12} />{t(`fit.opt.equipment.${e}`)}</Badge>)}
+							{friendly.map((l) => <Badge key={l} tone="success"><Icon icon={Tick02Icon} size={12} strokeWidth={3} />{t("fit.session.friendly", { part: t(`fit.opt.limitation.${l}.label`) })}</Badge>)}
+						</div>
+					</div>
+				</Card>
 
 				{trainedToday && editable && <p className={styles.warn}>{t("fit.session.restWarning")}</p>}
 				{workout.adHoc && <p className={styles.note}>{t("fit.session.extraNote")}</p>}
@@ -102,7 +129,7 @@ export function SessionDetail({ id }: { id: string }) {
 					<Card className={styles.logCard}>
 						<h2>{t("fit.session.result")}</h2>
 						<p>
-							{Math.round(log.durationSec / 60)} {t("fit.common.minShort")} · {log.volumeKg.toLocaleString("en-US")} kg · +{log.xp} XP
+							{Math.round(log.durationSec / 60)} {t("fit.common.minShort")} · {u.fmtMass(log.volumeKg)} · +{log.xp} XP
 						</p>
 						{log.prs.length > 0 && <p className={styles.pr}>{t("fit.session.prs", { list: log.prs.join(", ") })}</p>}
 					</Card>
@@ -117,7 +144,7 @@ export function SessionDetail({ id }: { id: string }) {
 								<span className={styles.num}>{i + 1}</span>
 								<div className={styles.itemBody}>
 									<Link href={`/training/exercise/${ex.id}`} className={styles.itemName}>{ex.name}</Link>
-									<span className={styles.itemMeta}>{describeBlock(b)} · {t("fit.session.rest", { s: b.restSec })}</span>
+									<span className={styles.itemMeta}>{describeBlock(b, u.units)} · {t("fit.session.rest", { s: b.restSec })}</span>
 								</div>
 								{editable && (
 									<Button size="sm" variant="ghost" onClick={() => setPanel({ replace: b.id })}>{t("fit.session.replace")}</Button>

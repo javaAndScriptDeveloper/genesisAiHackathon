@@ -1,18 +1,19 @@
 "use client";
 
-import { Add01Icon, Alert02Icon, DropletIcon, FireIcon, Medal01Icon, Target01Icon, Notification03Icon, PlayIcon, UserCircleIcon } from "@hugeicons/core-free-icons";
+import { Add01Icon, Alert02Icon, Calendar03Icon, DropletIcon, FireIcon, Medal01Icon, Target01Icon, Notification03Icon, PlayIcon, UserCircleIcon } from "@hugeicons/core-free-icons";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ScreenHeader } from "@/components/features/ScreenHeader/ScreenHeader";
 import { Stat } from "@/components/features/Stat/Stat";
 import { WeekStrip } from "@/components/features/WeekStrip/WeekStrip";
 import { WorkoutCard } from "@/components/features/WorkoutCard/WorkoutCard";
-import { Button, Card, EmptyState, Icon, IconButton, ProgressBar, ProgressRing, useToast } from "@/components/ui";
+import { AnimatedNumber, Button, Card, EmptyState, Icon, IconButton, ProgressBar, ProgressRing, useToast } from "@/components/ui";
+import { kcalFor } from "@/lib/fit/calories";
 import { daysBetween, formatDay } from "@/lib/fit/dates";
 import { motivationFor } from "@/lib/fit/gamification";
 import { unreadCount } from "@/lib/fit/notifications";
 import { useFit } from "@/lib/fit/store/FitProvider";
-import { useFitStats, useStartWorkout } from "@/lib/fit/store/hooks";
+import { useActionNavigate, useFitStats, useStartWorkout } from "@/lib/fit/store/hooks";
 import { useT } from "@/lib/i18n/I18nProvider";
 import styles from "./Today.module.scss";
 
@@ -28,6 +29,7 @@ export function Today() {
 	const { state, dispatch, today } = useFit();
 	const stats = useFitStats();
 	const start = useStartWorkout();
+	const go = useActionNavigate();
 	const profile = state.profile;
 	if (!profile) return null;
 
@@ -45,7 +47,7 @@ export function Today() {
 		<div className={styles.root}>
 			<ScreenHeader
 				title={t(`fit.today.greeting.${greetingKey()}`, { name: profile.name })}
-				subtitle={formatDay(today)}
+				subtitle={<><Icon icon={Calendar03Icon} size={14} />{formatDay(today)}</>}
 				actions={
 					<>
 						<span className={styles.bell}>
@@ -71,11 +73,11 @@ export function Today() {
 						<p className={styles.eyebrow}>{t("fit.today.todaysWorkout")}</p>
 						<h2 className={styles.heroTitle}>{todays.title}</h2>
 						<p className={styles.heroMeta}>
-							{todays.durationMin} {t("fit.common.minShort")} · {t("fit.session.exercises", { n: todays.exercises.length })} · {todays.focus}
+							{todays.durationMin} {t("fit.common.minShort")} · {kcalFor(todays.exercises.map((b) => b.exerciseId), profile.weightKg, todays.durationMin)} kcal · {t("fit.session.exercises", { n: todays.exercises.length })}
 						</p>
 						<div className={styles.heroActions}>
 							<Button size="lg" iconLeft={PlayIcon} onClick={() => start(todays.id)}>{t("fit.today.start")}</Button>
-							<Button size="lg" variant="secondary" onClick={() => router.push(`/training/session/${todays.id}`)}>{t("fit.today.preview")}</Button>
+							<Button size="lg" variant="secondary" onDark onClick={() => router.push(`/training/session/${todays.id}`)}>{t("fit.today.preview")}</Button>
 						</div>
 					</Card>
 				) : doneToday ? (
@@ -83,7 +85,7 @@ export function Today() {
 						<p className={styles.eyebrow}>{t("fit.today.doneEyebrow")}</p>
 						<h2 className={styles.heroTitle}>{t("fit.today.doneTitle")}</h2>
 						<p className={styles.heroMeta}>{t("fit.today.doneBody")}</p>
-						<Button variant="secondary" onClick={() => router.push("/progress")}>{t("fit.today.seeProgress")}</Button>
+						<Button variant="secondary" onDark onClick={() => router.push("/progress")}>{t("fit.today.seeProgress")}</Button>
 					</Card>
 				) : state.planned.length > 0 ? (
 					<Card className={styles.hero}>
@@ -92,10 +94,7 @@ export function Today() {
 						<p className={styles.heroMeta}>{t("fit.today.recoveryBody")}</p>
 						<div className={styles.heroActions}>
 							{next && <Button iconLeft={PlayIcon} onClick={() => start(next.id)}>{t("fit.today.startEarly")}</Button>}
-							<Button variant="secondary" onClick={() => {
-								dispatch({ type: "add-adhoc", kind: "mobility", today });
-								router.push(`/training/session/x-${today}-mobility`);
-							}}>{t("fit.today.mobility")}</Button>
+							<Button variant="secondary" onDark onClick={() => go(`/training/session/x-${today}-mobility`, { type: "add-adhoc", kind: "mobility", today })}>{t("fit.today.mobility")}</Button>
 						</div>
 						{next && <p className={styles.heroMeta}>{t("fit.today.nextUp", { title: next.title, day: formatDay(next.date) })}</p>}
 					</Card>
@@ -119,9 +118,8 @@ export function Today() {
 							<h3>{t("fit.today.comebackTitle")}</h3>
 							<p>{t("fit.today.comebackBody", { days: stats.sinceLast ?? 0 })}</p>
 							<Button size="sm" onClick={() => {
-								dispatch({ type: "adapt", op: { kind: "tired" }, today });
 								toast.show(t("fit.today.comebackToast"), "success");
-								router.push(`/training/session/${next.id}`);
+								go(`/training/session/${next.id}`, { type: "adapt", op: { kind: "tired" }, today });
 							}}>{t("fit.today.comebackCta")}</Button>
 						</div>
 					</Card>
@@ -129,7 +127,7 @@ export function Today() {
 
 				<section aria-label={t("fit.today.weekGoal")} className={styles.goal}>
 					<ProgressRing value={weekPct} label={t("fit.today.weekGoal")} size={92}>
-						<strong className={styles.ringNum}>{stats.week.done}/{stats.week.planned}</strong>
+						<strong className={styles.ringNum}><AnimatedNumber value={stats.week.done} />/<AnimatedNumber value={stats.week.planned} /></strong>
 						<span className={styles.ringLabel}>{t("fit.today.sessions")}</span>
 					</ProgressRing>
 					<div className={styles.goalText}>

@@ -1,26 +1,28 @@
 "use client";
 
-import { Search01Icon } from "@hugeicons/core-free-icons";
+import { Search01Icon, Tick02Icon } from "@hugeicons/core-free-icons";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { ScreenHeader } from "@/components/features/ScreenHeader/ScreenHeader";
+import { Picture } from "@/components/ui/Picture/Picture";
+import { NextWorkoutCard } from "@/components/features/NextWorkoutCard/NextWorkoutCard";
 import { WeekStrip } from "@/components/features/WeekStrip/WeekStrip";
 import { WorkoutCard } from "@/components/features/WorkoutCard/WorkoutCard";
-import { Badge, Button, Card, Checkbox, EmptyState, Icon, IconButton, Input, SegmentedControl } from "@/components/ui";
+import { Badge, Button, Card, Checkbox, EmptyState, Icon, IconButton, Input, KIND_ICON, SegmentedControl, SportIcon } from "@/components/ui";
 import { ArrowLeft01Icon, ArrowRight01Icon } from "@hugeicons/core-free-icons";
 import { addDays, mondayOf, formatMonthDay } from "@/lib/fit/dates";
-import { scrollToCenter } from "@/lib/hooks/useSlidingIndicator";
 import { EXERCISES, isUsable } from "@/lib/fit/exercises";
 import { useFit } from "@/lib/fit/store/FitProvider";
+import { nextUpcoming } from "@/lib/fit/plan";
 import { useTabMemory } from "@/lib/fit/store/useTabMemory";
 import type { Muscle } from "@/lib/fit/types";
-import { useT } from "@/lib/i18n/I18nProvider";
+import { useI18n } from "@/lib/i18n/I18nProvider";
 import styles from "./Training.module.scss";
 
 const MUSCLES: Muscle[] = ["chest", "back", "legs", "glutes", "shoulders", "arms", "core", "cardio", "mobility"];
 
 export function Training() {
-	const t = useT();
+	const { t, locale } = useI18n();
 	const { state, today } = useFit();
 	const [tab, setTab] = useTabMemory<"plan" | "library">("training.tab", "plan");
 	const [offset, setOffset] = useState(0);
@@ -28,16 +30,19 @@ export function Training() {
 	const [muscle, setMuscle] = useState<Muscle | "all">("all");
 	const [onlyMine, setOnlyMine] = useState(true);
 	const profile = state.profile;
+	const upNext = nextUpcoming(state.planned, today);
 
 	const start = addDays(mondayOf(today), offset * 7);
 	const end = addDays(start, 6);
 	const week = state.planned.filter((w) => w.date >= start && w.date <= end).sort((a, b) => a.date.localeCompare(b.date));
 
-	const library = useMemo(() => {
+	const matchingExercises = useMemo(() => {
 		if (!profile) return [];
 		const q = query.trim().toLowerCase();
-		return EXERCISES.filter((e) => (muscle === "all" || e.muscle === muscle) && (!q || e.name.toLowerCase().includes(q)) && (!onlyMine || isUsable(e, profile)));
-	}, [query, muscle, onlyMine, profile]);
+		return EXERCISES.filter((e) => (!q || e.name.toLowerCase().includes(q)) && (!onlyMine || isUsable(e, profile)));
+	}, [query, onlyMine, profile]);
+	const library = muscle === "all" ? matchingExercises : matchingExercises.filter((exercise) => exercise.muscle === muscle);
+	const countPlural = new Intl.PluralRules(locale);
 
 	if (!profile) return null;
 
@@ -57,6 +62,7 @@ export function Training() {
 
 				{tab === "plan" ? (
 					<>
+						{upNext && <NextWorkoutCard workout={upNext} />}
 						<div className={styles.weekNav}>
 							<IconButton icon={ArrowLeft01Icon} label={t("fit.training.prevWeek")} onClick={() => setOffset(offset - 1)} />
 							<strong>
@@ -68,13 +74,19 @@ export function Training() {
 						{week.length === 0 ? (
 							<EmptyState title={t("fit.training.emptyWeek")} description={t("fit.training.emptyWeekBody")} />
 						) : (
-							<ul className={styles.list}>
-								{week.map((w) => (
-									<li key={w.id}>
-										<WorkoutCard workout={w} />
-									</li>
-								))}
-							</ul>
+							<ol className={styles.timeline}>
+								{week.map((w) => {
+									const state = w.status === "completed" || w.status === "partial" ? "done" : w.status === "skipped" ? "skipped" : w.id === upNext?.id ? "current" : w.date < today ? "missed" : "future";
+									return (
+										<li key={w.id} className={styles.step} data-state={state}>
+											<span className={styles.dot} aria-hidden>
+												{state === "done" && <Icon icon={Tick02Icon} size={12} strokeWidth={3} />}
+											</span>
+											<WorkoutCard workout={w} />
+										</li>
+									);
+								})}
+							</ol>
 						)}
 						<Card className={styles.plain}>
 							<p>{t("fit.training.recoveryNote")}</p>
@@ -87,16 +99,19 @@ export function Training() {
 							<Input label={t("fit.training.search")} placeholder={t("fit.training.searchPlaceholder")} value={query} onChange={(e) => setQuery(e.target.value)} />
 							<Icon icon={Search01Icon} size={18} className={styles.searchIcon} />
 						</div>
-						<div className={styles.chips} role="group" aria-label={t("fit.training.filterMuscle")}>
-							{(["all", ...MUSCLES] as const).map((m) => (
-								<button key={m} type="button" className={styles.chip} aria-pressed={muscle === m} onClick={(e) => {
-										setMuscle(m);
-										const strip = e.currentTarget.parentElement;
-										if (strip) scrollToCenter(strip, e.currentTarget);
-									}}>
-									{t(`fit.muscle.${m}`)}
-								</button>
-							))}
+						<div className={styles.muscleCards} role="group" aria-label={t("fit.training.filterMuscle")}>
+							{(["all", ...MUSCLES] as const).map((category) => {
+								const count = category === "all" ? matchingExercises.length : matchingExercises.filter((exercise) => exercise.muscle === category).length;
+								return (
+									<button key={category} type="button" className={styles.muscleCard} aria-pressed={muscle === category} onClick={() => setMuscle(category)}>
+										<Picture name={`training-${category}`} alt="" width={384} height={384} sizes="144px" className={styles.cover} />
+										<span className={styles.cardLabel}>
+											<strong>{t(`fit.muscle.${category}`)}</strong>
+											<span>{t(`fit.training.exerciseCount.${countPlural.select(count)}`, { count })}</span>
+										</span>
+									</button>
+								);
+							})}
 						</div>
 						<Checkbox label={t("fit.training.onlyMine")} checked={onlyMine} onChange={(e) => setOnlyMine(e.target.checked)} />
 						{library.length === 0 ? (
@@ -106,6 +121,9 @@ export function Training() {
 								{library.map((e) => (
 									<li key={e.id}>
 										<Link href={`/training/exercise/${e.id}`} transitionTypes={["nav-forward"]} className={styles.exercise}>
+											<span className={styles.exIcon}>
+												<SportIcon name={KIND_ICON[e.kind]} size={20} />
+											</span>
 											<span className={styles.exName}>{e.name}</span>
 											<span className={styles.exMeta}>
 												<Badge>{t(`fit.muscle.${e.muscle}`)}</Badge>

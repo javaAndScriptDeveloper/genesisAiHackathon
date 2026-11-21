@@ -1,0 +1,85 @@
+@use "partials/corners";
+
+.card {
+	display: flex;
+	flex-direction: column;
+	gap: var(--space-2);
+	min-width: 0;
+}
+
+.title {
+	display: flex;
+	align-items: center;
+	gap: 0.4rem;
+	color: var(--color-textSubtle);
+	font-size: 1.2rem;
+	font-weight: 600;
+}
+
+.total {
+	display: flex;
+	align-items: baseline;
+	gap: 0.4rem;
+	font-size: 2.6rem;
+	font-weight: 700;
+	font-variant-numeric: tabular-nums;
+	line-height: 1.1;
+
+	small {
+		color: var(--color-textSubtle);
+		font-size: 1.3rem;
+		font-weight: 600;
+	}
+}
+
+.bars {
+	display: grid;
+	grid-template-columns: repeat(7, 1fr);
+	gap: 0.4rem;
+	margin-top: var(--space-1);
+}
+
+.col {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 0.4rem;
+}
+
+.track {
+	display: flex;
+	align-items: flex-end;
+	width: 100%;
+	height: 6.4rem;
+	background: var(--color-surfaceMuted);
+	@include corners.radius(0.6rem);
+	overflow: hidden;
+}
+
+.fill {
+	width: 100%;
+	transition: height var(--transition-base);
+	@include corners.radius(0.6rem);
+}
+
+.accent {
+	background: var(--color-accent);
+}
+
+.neutral {
+	background: var(--color-text);
+}
+
+.day {
+	color: var(--color-textSubtle);
+	font-size: 1.1rem;
+	font-weight: 600;
+}
+
+.today {
+	color: var(--color-text);
+	font-weight: 800;
+	text-decoration: underline;
+	text-decoration-color: var(--color-accent);
+	text-underline-offset: 0.3rem;
+}

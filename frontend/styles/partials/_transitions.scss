@@ -1,9 +1,8 @@
-// Page transitions (React <ViewTransition> + View Transitions API). Only the page content is named, so the phone
-// frame, status bar and bottom navigation stay still while the content moves.
+// Page transitions (React <ViewTransition> + View Transitions API). Only the screen's content area is animated, so the
+// phone frame, status bar and bottom navigation stay still while the content changes.
 :root {
-	--vt-exit: 140ms;
-	--vt-enter: 240ms;
-	--vt-move: 360ms;
+	--vt-time: 260ms;
+	--vt-ease: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 // Clicks during a transition must reach the live page.
@@ -11,67 +10,98 @@
 	pointer-events: none;
 }
 
-// Clip the moving page to its own box so it never slides over the device bezel.
+// Old and new content crossfade on top of each other (plus-lighter keeps the combined opacity at 100%, so the page
+// never dips toward the background colour mid-transition) and the group is clipped to the content area.
 ::view-transition-group(.page-forward),
 ::view-transition-group(.page-back),
-::view-transition-group(.page-fade) {
+::view-transition-group(.page-fade),
+::view-transition-image-pair(.page-forward),
+::view-transition-image-pair(.page-back),
+::view-transition-image-pair(.page-fade) {
 	overflow: clip;
 }
 
+::view-transition-image-pair(.page-forward),
+::view-transition-image-pair(.page-back),
+::view-transition-image-pair(.page-fade) {
+	isolation: isolate;
+}
+
+::view-transition-old(.page-forward),
+::view-transition-new(.page-forward),
+::view-transition-old(.page-back),
+::view-transition-new(.page-back),
+::view-transition-old(.page-fade),
+::view-transition-new(.page-fade) {
+	mix-blend-mode: plus-lighter;
+}
+
 ::view-transition-old(.page-forward) {
-	--vt-shift: -28px;
+	--out-x: -14px;
 	animation:
-		var(--vt-exit) ease-in both vt-fade reverse,
-		var(--vt-move) cubic-bezier(0.3, 0.8, 0.2, 1) both vt-slide reverse;
+		var(--vt-time) var(--vt-ease) both vt-out,
+		var(--vt-time) var(--vt-ease) both vt-move-out;
 }
 
 ::view-transition-new(.page-forward) {
-	--vt-shift: 28px;
+	--in-x: 14px;
 	animation:
-		var(--vt-enter) ease-out var(--vt-exit) both vt-fade,
-		var(--vt-move) cubic-bezier(0.3, 0.8, 0.2, 1) both vt-slide;
+		var(--vt-time) var(--vt-ease) both vt-in,
+		var(--vt-time) var(--vt-ease) both vt-move-in;
 }
 
 ::view-transition-old(.page-back) {
-	--vt-shift: 28px;
+	--out-x: 14px;
 	animation:
-		var(--vt-exit) ease-in both vt-fade reverse,
-		var(--vt-move) cubic-bezier(0.3, 0.8, 0.2, 1) both vt-slide reverse;
+		var(--vt-time) var(--vt-ease) both vt-out,
+		var(--vt-time) var(--vt-ease) both vt-move-out;
 }
 
 ::view-transition-new(.page-back) {
-	--vt-shift: -28px;
+	--in-x: -14px;
 	animation:
-		var(--vt-enter) ease-out var(--vt-exit) both vt-fade,
-		var(--vt-move) cubic-bezier(0.3, 0.8, 0.2, 1) both vt-slide;
+		var(--vt-time) var(--vt-ease) both vt-in,
+		var(--vt-time) var(--vt-ease) both vt-move-in;
 }
 
-// Navigation without a direction: a soft rise-and-fade.
+// No direction (e.g. browser back, programmatic change): a plain crossfade with a tiny rise.
 ::view-transition-old(.page-fade) {
-	animation: var(--vt-exit) ease-in both vt-fade reverse;
+	animation: var(--vt-time) var(--vt-ease) both vt-out;
 }
 
 ::view-transition-new(.page-fade) {
 	animation:
-		var(--vt-enter) ease-out var(--vt-exit) both vt-fade,
-		var(--vt-move) cubic-bezier(0.3, 0.8, 0.2, 1) both vt-rise;
+		var(--vt-time) var(--vt-ease) both vt-in,
+		var(--vt-time) var(--vt-ease) both vt-rise;
 }
 
-@keyframes vt-fade {
+@keyframes vt-out {
+	to {
+		opacity: 0;
+	}
+}
+
+@keyframes vt-in {
 	from {
 		opacity: 0;
 	}
 }
 
-@keyframes vt-slide {
+@keyframes vt-move-out {
+	to {
+		translate: var(--out-x) 0;
+	}
+}
+
+@keyframes vt-move-in {
 	from {
-		translate: var(--vt-shift) 0;
+		translate: var(--in-x) 0;
 	}
 }
 
 @keyframes vt-rise {
 	from {
-		translate: 0 10px;
+		translate: 0 8px;
 	}
 }
 

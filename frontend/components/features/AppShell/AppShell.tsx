@@ -3,7 +3,7 @@
 import { PlayIcon } from "@hugeicons/core-free-icons";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useRef, type ReactNode } from "react";
+import { useEffect, useLayoutEffect, useRef, ViewTransition, type ReactNode } from "react";
 import { BottomNav } from "@/components/features/BottomNav/BottomNav";
 import { Celebration } from "@/components/features/Celebration/Celebration";
 import { PhoneFrame } from "@/components/features/PhoneFrame/PhoneFrame";
@@ -15,6 +15,7 @@ import styles from "./AppShell.module.scss";
 
 const FULL_SCREEN = ["/workout", "/onboarding", "/profile/edit"];
 const scrollMemory = new Map<string, number>();
+const PAGE_MOTION = { "nav-forward": "page-forward", "nav-back": "page-back", default: "page-fade" } as const;
 
 function Screen({ children }: { children: ReactNode }) {
 	const { state, ready } = useFit();
@@ -31,7 +32,8 @@ function Screen({ children }: { children: ReactNode }) {
 	}, [ready, state.profile, onboarding, router]);
 
 	// Each screen remembers its own scroll position, so switching tabs and coming back feels continuous.
-	useEffect(() => {
+	// Layout effect: restore before the browser paints (and before the transition snapshot), so no page jump is visible.
+	useLayoutEffect(() => {
 		const el = main.current;
 		if (!el) return;
 		el.scrollTop = scrollMemory.get(pathname) ?? 0;
@@ -41,13 +43,17 @@ function Screen({ children }: { children: ReactNode }) {
 	}, [pathname, ready]);
 
 	const active = state.active;
-	const showResume = !!active && active.phase !== "summary" && pathname !== "/workout";
+	const showResume = ready && !!active && active.phase !== "summary" && pathname !== "/workout";
 
 	return (
 		<>
-			<main ref={main} className={styles.main}>
-				{ready && (state.profile || onboarding) ? children : <LoadingScreen />}
-			</main>
+			{/* The fixed-size scroll area is what animates on navigation, so the motion stays inside the screen.
+			    Direction comes from transitionTypes on the navigating Link/router call; other changes get a soft fade. */}
+			<ViewTransition update={PAGE_MOTION} default="none">
+				<main ref={main} className={styles.main}>
+					{ready && (state.profile || onboarding) ? children : <LoadingScreen />}
+				</main>
+			</ViewTransition>
 			{showResume && active && (
 				<Link href="/workout" className={styles.resume}>
 					<Icon icon={PlayIcon} size={18} />

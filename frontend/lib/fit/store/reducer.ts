@@ -1,4 +1,5 @@
 import { toISO, type ISODate } from "../dates";
+import type { Units } from "../units";
 import { findExercise, getExercise } from "../exercises";
 import { applyAdapt, replaceBlock, replaceUnavailable } from "../adapt";
 import { evaluateAchievements, achievementById, totalXp } from "../gamification";
@@ -31,12 +32,15 @@ import type {
 export type Action =
 	| { type: "hydrate"; state: FitState }
 	| { type: "reset" }
-	| { type: "complete-onboarding"; profile: Profile; demoHistory: boolean; today: ISODate; now: string }
-	| { type: "update-profile"; profile: Profile; today: ISODate }
+	| { type: "complete-onboarding"; profile: Profile; units: Units; demoHistory: boolean; today: ISODate; now: string }
+	| { type: "update-profile"; profile: Profile; units: Units; today: ISODate }
 	| { type: "set-goal"; goal: Goal; goalText: string; today: ISODate }
 	| { type: "set-trainer"; trainerId: string }
+	| { type: "set-units"; units: Units }
+	| { type: "set-goal-weight"; kg: number | null }
 	| { type: "sync"; now: string }
 	| { type: "start-workout"; plannedId: string; now: string }
+	| { type: "restart-workout" }
 	| { type: "go-to"; index: number }
 	| { type: "log-set"; reps: number; weight?: number }
 	| { type: "start-timed" }
@@ -217,7 +221,7 @@ export function reducer(state: FitState, action: Action): FitState {
 		case "reset":
 			return emptyState();
 		case "complete-onboarding": {
-			const base: FitState = { ...emptyState(), profile: action.profile, notificationSettings: state.notificationSettings, bodyWeights: [{ date: action.today, kg: action.profile.weightKg }] };
+			const base: FitState = { ...emptyState(), units: action.units, profile: action.profile, notificationSettings: state.notificationSettings, bodyWeights: [{ date: action.today, kg: action.profile.weightKg }] };
 			const devices = { apple: action.profile.wearable === "apple", garmin: action.profile.wearable === "garmin" };
 			if (action.demoHistory) {
 				const seeded = seedHistory(action.profile, action.today);
@@ -237,10 +241,15 @@ export function reducer(state: FitState, action: Action): FitState {
 			// The preferences form does not carry the free-text goal; keep it unless the preset goal changed.
 			const prev = state.profile;
 			const profile = action.profile.goalText === undefined && prev?.goalText && prev.goal === action.profile.goal ? { ...action.profile, goalText: prev.goalText } : action.profile;
-			return rebuildUpcoming({ ...state, devices }, profile, action.today);
+			return rebuildUpcoming({ ...state, devices, units: action.units }, profile, action.today);
+		}
+		case "set-goal-weight":
+			return { ...state, goalWeightKg: action.kg };
+		case "set-units": {
+			return { ...state, units: action.units };
 		}
 		case "set-goal":
-			return state.profile ? reducer(state, { type: "update-profile", profile: { ...state.profile, goal: action.goal, goalText: action.goalText }, today: action.today }) : state;
+			return state.profile ? reducer(state, { type: "update-profile", profile: { ...state.profile, goal: action.goal, goalText: action.goalText }, units: state.units, today: action.today }) : state;
 		case "set-trainer":
 			return { ...state, trainerId: action.trainerId };
 		case "sync":
@@ -270,6 +279,11 @@ export function reducer(state: FitState, action: Action): FitState {
 			};
 			return { ...state, active };
 		}
+		case "restart-workout":
+			return withActive(state, (a) => {
+				const exercises = a.exercises.map((b) => ({ ...b, sets: b.sets.map((s) => ({ ...s, done: false, reps: undefined, weight: undefined })), skipped: false }));
+				return { ...a, exercises, index: 0, phase: "work", paused: false, safetyStop: false, elapsedSec: 0, restLeft: 0, restTotal: 0, workLeft: null, hrSamples: [], outcome: null };
+			});
 		case "go-to":
 			return withActive(state, (a) => (a.phase === "summary" ? a : { ...a, index: Math.min(Math.max(0, action.index), a.exercises.length - 1), phase: a.phase === "rest" ? a.phase : "work", workLeft: null }));
 		case "log-set":

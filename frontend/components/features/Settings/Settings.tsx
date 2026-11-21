@@ -1,12 +1,12 @@
 "use client";
 
-import { Globe02Icon, Notification03Icon, Shield01Icon } from "@hugeicons/core-free-icons";
-import { useRouter } from "next/navigation";
+import { Globe02Icon, Notification03Icon, RulerIcon, Shield01Icon } from "@hugeicons/core-free-icons";
 import { useState } from "react";
 import { ScreenHeader } from "@/components/features/ScreenHeader/ScreenHeader";
-import { Button, Card, Icon, Select, Sheet, Switch, TimePicker, useToast } from "@/components/ui";
+import { Button, Card, Icon, SegmentedControl, Select, Sheet, Switch, TimePicker, useToast } from "@/components/ui";
 import { NOTIFICATION_LABELS } from "@/lib/fit/notifications";
 import { useFit } from "@/lib/fit/store/FitProvider";
+import { useActionNavigate } from "@/lib/fit/store/hooks";
 import type { NotificationKind } from "@/lib/fit/types";
 import { LOCALES, LOCALE_LABELS, isLocale } from "@/lib/i18n/config";
 import { useI18n } from "@/lib/i18n/I18nProvider";
@@ -18,8 +18,8 @@ type Confirm = null | "demo" | "reset";
 
 export function Settings() {
 	const { t, locale, setLocale } = useI18n();
-	const router = useRouter();
 	const toast = useToast();
+	const go = useActionNavigate();
 	const { state, dispatch, today } = useFit();
 	const [confirm, setConfirm] = useState<Confirm>(null);
 	const s = state.notificationSettings;
@@ -46,6 +46,12 @@ export function Settings() {
 					<h2 className={`${kit.h2} ${kit.heading}`}><Icon icon={Globe02Icon} size={20} />{t("fit.settings.language")}</h2>
 					<Select label={t("fit.settings.languageLabel")} value={locale} options={LOCALES.map((l) => ({ value: l, label: LOCALE_LABELS[l] }))} onChange={(v) => isLocale(v) && setLocale(v)} />
 					<p className={kit.note}>{t("fit.settings.languageNote")}</p>
+				</Card>
+
+				<Card className={kit.stack}>
+					<h2 className={`${kit.h2} ${kit.heading}`}><Icon icon={RulerIcon} size={20} />{t("fit.settings.units")}</h2>
+					<SegmentedControl label={t("fit.settings.units")} value={state.units} onChange={(units) => dispatch({ type: "set-units", units })} options={[{ id: "metric", label: t("fit.onboarding.metric") }, { id: "imperial", label: t("fit.onboarding.imperial") }]} />
+					<p className={kit.note}>{t("fit.settings.unitsNote")}</p>
 				</Card>
 
 				<Card className={kit.stack}>
@@ -80,7 +86,7 @@ export function Settings() {
 			<Sheet open={confirm === "reset"} onClose={() => setConfirm(null)} title={t("fit.settings.resetTitle")} closeLabel={t("common.close")} variant="center" footer={
 				<>
 					<Button variant="secondary" onClick={() => setConfirm(null)}>{t("fit.common.cancel")}</Button>
-					<Button variant="danger" onClick={() => { dispatch({ type: "reset" }); setConfirm(null); router.replace("/onboarding"); }}>{t("fit.settings.resetConfirm")}</Button>
+					<Button variant="danger" onClick={() => { setConfirm(null); go("/onboarding", { type: "reset" }, { replace: true }); }}>{t("fit.settings.resetConfirm")}</Button>
 				</>
 			}><p>{t("fit.settings.resetBody")}</p></Sheet>
 		</div>

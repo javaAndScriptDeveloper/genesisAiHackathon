@@ -1,4 +1,5 @@
 import type { ISODate } from "./dates";
+import type { Units } from "./units";
 
 export type Goal = "lose-fat" | "build-muscle" | "get-stronger" | "stay-fit" | "endurance";
 export type Experience = "beginner" | "intermediate" | "advanced";
@@ -211,6 +212,7 @@ export type MealSlot = "breakfast" | "lunch" | "snack" | "dinner";
 
 export interface FitState {
 	version: 1;
+	units: Units;
 	profile: Profile | null;
 	/** Selected AI trainer id (from platform-backend `/api/trainers`); null means the default trainer. */
 	trainerId: string | null;
@@ -229,6 +231,7 @@ export interface FitState {
 	bloodPressure: BloodPressureEntry[];
 	photos: PhotoCheckIn[];
 	bodyWeights: { date: ISODate; kg: number }[];
+	goalWeightKg: number | null;
 	partners: Record<string, "invited" | "accepted">;
 	hasDemoHistory: boolean;
 	celebrate: string[];

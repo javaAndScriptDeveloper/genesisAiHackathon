@@ -68,8 +68,8 @@ export function Devices() {
 					<Badge tone="warning">{t("fit.devices.bpBadge")}</Badge>
 					<p className={kit.note}>{t("fit.devices.bpNote")}</p>
 					<div className={kit.cols}>
-						<Input label={t("fit.devices.systolic")} type="number" inputMode="numeric" value={sys} onChange={(e) => setSys(e.target.value)} error={sysErr} />
-						<Input label={t("fit.devices.diastolic")} type="number" inputMode="numeric" value={dia} onChange={(e) => setDia(e.target.value)} error={diaErr} />
+						<Input label={t("fit.devices.systolic")} type="number" inputMode="numeric" suffix="mmHg" value={sys} onChange={(e) => setSys(e.target.value)} error={sysErr} />
+						<Input label={t("fit.devices.diastolic")} type="number" inputMode="numeric" suffix="mmHg" value={dia} onChange={(e) => setDia(e.target.value)} error={diaErr} />
 					</div>
 					<Button disabled={!valid} onClick={() => { dispatch({ type: "add-bp", systolic: s, diastolic: d, now: new Date().toISOString() }); setSys(""); setDia(""); toast.show(t("fit.devices.bpSaved"), "success"); }}>{t("fit.common.save")}</Button>
 					{state.bloodPressure.length > 0 && (

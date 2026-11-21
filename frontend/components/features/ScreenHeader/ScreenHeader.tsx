@@ -9,7 +9,7 @@ import styles from "./ScreenHeader.module.scss";
 
 interface ScreenHeaderProps {
 	title: string;
-	subtitle?: string;
+	subtitle?: ReactNode;
 	/** Show a back button. A string overrides the destination, otherwise history back. */
 	back?: boolean | string;
 	actions?: ReactNode;

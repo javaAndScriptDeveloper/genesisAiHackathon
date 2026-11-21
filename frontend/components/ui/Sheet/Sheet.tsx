@@ -27,17 +27,25 @@ export function Sheet({ open, onClose, title, closeLabel = "Close", children, fo
 	const ref = useRef<HTMLDivElement>(null);
 	const titleId = useId();
 	const overlayRoot = useOverlayRoot();
+	const panelRef = ref;
+	const dragStart = useRef<number | null>(null);
+	// Parents usually pass a fresh inline onClose every render. Keep the latest in a ref so the effect below does not
+	// re-run (and steal focus) each time the page behind re-renders, e.g. the workout timer ticking every second.
+	const onCloseRef = useRef(onClose);
+	useEffect(() => {
+		onCloseRef.current = onClose;
+	});
 
 	useEffect(() => {
 		if (!open) return;
 		const previous = document.activeElement instanceof HTMLElement ? document.activeElement : null;
 		const panel = ref.current;
 		const focusable = () => Array.from(panel?.querySelectorAll<HTMLElement>('button:not([disabled]), [href], input:not([disabled]), textarea, select, [tabindex]:not([tabindex="-1"])') ?? []);
-		(panel?.querySelector<HTMLElement>("input, textarea") ?? panel)?.focus();
+		(panel?.querySelector<HTMLElement>("input, textarea") ?? panel)?.focus({ preventScroll: true });
 		const onKey = (event: KeyboardEvent) => {
 			if (event.key === "Escape" && !modal) {
 				event.stopPropagation();
-				onClose();
+				onCloseRef.current();
 			}
 			if (event.key === "Tab") {
 				const items = focusable();
@@ -56,15 +64,42 @@ export function Sheet({ open, onClose, title, closeLabel = "Close", children, fo
 		document.addEventListener("keydown", onKey);
 		return () => {
 			document.removeEventListener("keydown", onKey);
-			previous?.focus();
+			previous?.focus({ preventScroll: true });
 		};
-	}, [open, onClose, modal]);
+	}, [open, modal]);
 
 	if (!open) return null;
 	const node = (
 		<div className={clsx(styles.root, styles[variant])}>
 			<div className={styles.backdrop} onClick={modal ? undefined : onClose} aria-hidden />
 			<div ref={ref} role="dialog" aria-modal="true" aria-labelledby={titleId} tabIndex={-1} className={styles.panel}>
+				{variant === "bottom" && !modal && (
+					<div
+						className={styles.grab}
+						aria-hidden
+						onPointerDown={(e) => {
+							dragStart.current = e.clientY;
+							e.currentTarget.setPointerCapture(e.pointerId);
+						}}
+						onPointerMove={(e) => {
+							const panel = panelRef.current;
+							if (dragStart.current === null || !panel) return;
+							panel.style.transition = "none";
+							panel.style.transform = `translateY(${Math.max(0, e.clientY - dragStart.current)}px)`;
+						}}
+						onPointerUp={(e) => {
+							const panel = panelRef.current;
+							const start = dragStart.current;
+							dragStart.current = null;
+							if (!panel || start === null) return;
+							panel.style.transition = "";
+							if (e.clientY - start > 80) onCloseRef.current();
+							else panel.style.transform = "";
+						}}
+					>
+						<span />
+					</div>
+				)}
 				<div className={styles.header}>
 					<h3 id={titleId} className={styles.title}>
 						{title}

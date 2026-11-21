@@ -39,33 +39,6 @@
 	}
 }
 
-.segments {
-	display: flex;
-	gap: 0.4rem;
-	margin: 0;
-	padding: 0 var(--space-4) var(--space-2);
-	list-style: none;
-}
-
-.segment {
-	flex: 1;
-	height: 0.5rem;
-	background: var(--color-borderStrong);
-	border-radius: var(--radius-pill);
-
-	&[data-state="done"] {
-		background: var(--color-success);
-	}
-
-	&[data-state="current"] {
-		background: var(--color-accent);
-	}
-
-	&[data-state="skipped"] {
-		background: repeating-linear-gradient(90deg, var(--color-borderStrong) 0 0.4rem, transparent 0.4rem 0.8rem);
-	}
-}
-
 .scroll {
 	display: flex;
 	flex: 1;
@@ -81,6 +54,41 @@
 	gap: var(--space-3);
 }
 
+.stepBlock {
+	display: flex;
+	flex-direction: column;
+	gap: var(--space-2);
+}
+
+// One bar per exercise: everything already passed is filled, the current one is accent.
+.steps {
+	display: flex;
+	gap: 0.4rem;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.step {
+	flex: 1;
+	height: 0.6rem;
+	background: var(--color-borderStrong);
+	border-radius: var(--radius-pill);
+	transition: background var(--transition-base);
+
+	&[data-state="done"] {
+		background: var(--color-success);
+	}
+
+	&[data-state="current"] {
+		background: var(--color-accent);
+	}
+
+	&[data-state="skipped"] {
+		background: repeating-linear-gradient(90deg, var(--color-borderStrong) 0 0.4rem, transparent 0.4rem 0.8rem);
+	}
+}
+
 .counter {
 	color: var(--color-accentText);
 	font-size: 1.2rem;
@@ -89,16 +97,55 @@
 	text-transform: uppercase;
 }
 
+.heroInfo {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: var(--space-3);
+	color: #fff;
+}
+
+.heroText {
+	min-width: 0;
+}
+
 .exName {
-	margin: 0.2rem 0;
+	margin: 0;
+	color: #fff;
 	font-size: 2.4rem;
 	line-height: 1.2;
+	text-shadow: 0 0.1rem 0.8rem rgba(10, 10, 12, 0.4);
 }
 
 .target {
-	color: var(--color-textMuted);
-	font-size: 1.5rem;
+	margin-top: 0.4rem;
+	color: rgba(255, 255, 255, 0.82);
+	font-size: 1.4rem;
 	font-weight: 600;
+}
+
+.pulse {
+	display: inline-flex;
+	flex: none;
+	align-items: center;
+	gap: 0.5rem;
+	padding: 0.5rem 1rem;
+	background: rgba(255, 255, 255, 0.16);
+	backdrop-filter: blur(0.8rem);
+	font-size: 1.3rem;
+	font-weight: 700;
+	font-variant-numeric: tabular-nums;
+	border-radius: var(--radius-pill);
+
+	svg {
+		color: #ff7a8a;
+	}
+
+	small {
+		font-size: 1.1rem;
+		font-weight: 600;
+		opacity: 0.8;
+	}
 }
 
 .sets {
@@ -129,6 +176,8 @@
 }
 
 .setDone {
+	background: var(--color-successSoft);
+	border-color: transparent;
 	color: var(--color-textMuted);
 }
 
@@ -206,14 +255,50 @@
 	@include corners.radius(var(--radius-control));
 }
 
-.navRow {
+.controls {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: var(--space-3);
+}
+
+.timerBox {
+	display: flex;
+	flex: 1;
+	align-items: center;
+	justify-content: center;
+	gap: var(--space-3);
+	min-width: 0;
+}
+
+.clock {
+	font-size: 3.6rem;
+	font-weight: 750;
+	font-variant-numeric: tabular-nums;
+	line-height: 1;
+}
+
+.playBtn {
 	display: grid;
-	grid-template-columns: 1fr auto 1fr;
-	gap: var(--space-2);
+	flex: none;
+	place-items: center;
+	width: 5.6rem;
+	height: 5.6rem;
+	background: var(--color-accent);
+	color: #fff;
+	border-radius: 50%;
+	box-shadow: 0 0.4rem 1.2rem rgba(229, 36, 46, 0.3);
+	@include mixins.focus-ring;
 }
 
 .unwell {
+	background: var(--color-dangerSoft);
 	color: var(--color-dangerText);
+
+	&:hover:not(:disabled) {
+		background: var(--color-dangerSoft);
+		filter: brightness(0.96);
+	}
 }
 
 .overlay {
@@ -231,6 +316,10 @@
 	text-align: center;
 	animation: fade 0.2s ease-out;
 
+	> button {
+		width: 100%;
+	}
+
 	p {
 		color: rgba(255, 255, 255, 0.7);
 	}
@@ -242,55 +331,108 @@
 
 }
 
-// Buttons on the dark overlay: higher specificity than the kit's variant classes.
-.overlay .onDark {
-	background: transparent;
-	border-color: rgba(255, 255, 255, 0.3);
-	color: #fff;
+// Rest screen: saturated accent background instead of the dark overlay.
+.restScreen {
+	justify-content: flex-start;
+	gap: var(--space-5);
+	padding: var(--space-6) var(--space-4) var(--space-5);
+	overflow-y: auto;
+	background: linear-gradient(180deg, #e5242e 0%, #b4141d 100%);
 }
 
-.overlay .onDarkGhost {
-	color: rgba(255, 255, 255, 0.8);
+.restTop {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: var(--space-3);
+	width: 100%;
 }
 
 .restLabel {
 	font-size: 1.4rem;
 	font-weight: 700;
-	letter-spacing: 0.1em;
+	letter-spacing: 0.12em;
 	text-transform: uppercase;
+	color: rgba(255, 255, 255, 0.85) !important;
 }
 
 .restTime {
-	color: #fff;
-	font-size: 5.2rem;
-	font-weight: 750;
+	color: #fff !important;
+	font-size: 8.4rem;
+	font-weight: 800;
 	font-variant-numeric: tabular-nums;
+	line-height: 1;
 }
 
-.overlay :global(svg circle:first-child) {
-	stroke: rgba(255, 255, 255, 0.15);
+.restBar {
+	width: 70%;
+	height: 0.6rem;
+	overflow: hidden;
+	background: rgba(255, 255, 255, 0.28);
+	border-radius: var(--radius-pill);
+
+	span {
+		display: block;
+		height: 100%;
+		background: #fff;
+		border-radius: var(--radius-pill);
+		transition: width 1s linear;
+	}
 }
 
 .restActions {
 	display: flex;
-	gap: var(--space-2);
+	gap: var(--space-3);
+}
+
+.pillGhost,
+.pillSolid {
+	min-width: 12rem;
+	min-height: 4.8rem;
+	padding: 0 var(--space-5);
+	font-size: 1.5rem;
+	font-weight: 750;
+	border-radius: var(--radius-pill);
+	@include mixins.focus-ring;
+}
+
+.pillGhost {
+	background: rgba(255, 255, 255, 0.2);
+	color: #fff;
+}
+
+.pillSolid {
+	background: #fff;
+	color: #b4141d;
 }
 
 .nextUp {
 	display: flex;
 	flex-direction: column;
-	gap: 0.2rem;
+	gap: 0.4rem;
 	width: 100%;
 	padding: var(--space-3);
-	background: rgba(255, 255, 255, 0.08);
+	background: rgba(0, 0, 0, 0.22);
+	text-align: left;
 	font-size: 1.3rem;
-	color: rgba(255, 255, 255, 0.7);
-	@include corners.radius(var(--radius-card));
+	color: rgba(255, 255, 255, 0.85);
+	@include corners.radius(var(--radius-panel));
 
 	strong {
 		color: #fff;
-		font-size: 1.7rem;
+		font-size: 1.9rem;
 	}
+
+	> :last-child {
+		margin-top: var(--space-2);
+	}
+}
+
+.nextEyebrow {
+	font-size: 1.2rem;
+	font-weight: 700;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
 }
 
 .sheetLead {
@@ -347,6 +489,11 @@
 	display: flex;
 	flex-direction: column;
 	align-items: center;
+	gap: 0.2rem;
+
+	svg {
+		color: var(--color-accent);
+	}
 	padding: var(--space-3) var(--space-1) !important;
 
 	strong {
@@ -422,5 +569,101 @@
 @keyframes fade {
 	from {
 		opacity: 0;
+	}
+}
+
+.pauseActions {
+	display: flex;
+	flex-direction: column;
+	gap: var(--space-2);
+	width: 100%;
+	margin-top: var(--space-2);
+
+	button {
+		width: 100%;
+	}
+}
+
+// The recommended alternative to quitting: soft accent card, icon plate, one clear primary action.
+.endPrompt {
+	display: flex;
+	flex-direction: column;
+	gap: var(--space-3);
+	margin-top: var(--space-4);
+	padding: var(--space-3);
+	background: var(--color-accentSoft);
+	border: 0.1rem solid rgba(229, 36, 46, 0.25);
+	@include corners.nested(var(--radius-panel), var(--space-3));
+
+	button {
+		width: 100%;
+	}
+}
+
+.endHead {
+	display: flex;
+	align-items: flex-start;
+	gap: var(--space-3);
+
+	strong {
+		color: var(--color-text);
+		font-size: 1.6rem;
+	}
+
+	p {
+		margin: 0.2rem 0 0;
+		color: var(--color-textMuted);
+		font-size: 1.3rem;
+		line-height: 1.4;
+	}
+}
+
+.endPlate {
+	display: grid;
+	flex: none;
+	place-items: center;
+	width: 4rem;
+	height: 4rem;
+	background: #fff;
+	color: var(--color-accent);
+	@include corners.nested(var(--radius-panel), var(--space-3));
+}
+
+.quitReasons {
+	display: flex;
+	flex-direction: column;
+	gap: var(--space-3);
+}
+
+.quitDivider {
+	height: 0.1rem;
+	margin: var(--space-4) 0 var(--space-3);
+	background: var(--color-border);
+	border: 0;
+}
+
+.quitActions {
+	display: flex;
+	flex-direction: column;
+	gap: var(--space-3);
+
+	button:first-child {
+		width: 100%;
+	}
+}
+
+.feedbackLink {
+	align-self: center;
+	min-height: var(--hit-target);
+	padding: 0 var(--space-2);
+	color: var(--color-textSubtle);
+	font-size: 1.3rem;
+	font-weight: 600;
+	text-decoration: underline;
+	text-underline-offset: 0.3rem;
+	@include mixins.focus-ring;
+
+	&:hover {
+		color: var(--color-accentText);
 	}
 }

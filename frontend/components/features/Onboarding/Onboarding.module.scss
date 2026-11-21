@@ -175,3 +175,10 @@
 		transform: translateX(1.2rem);
 	}
 }
+
+.pair {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: var(--space-3);
+	align-items: end;
+}

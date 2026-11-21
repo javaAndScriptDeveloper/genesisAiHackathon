@@ -1,6 +1,7 @@
 import { addDays, formatDay, toISO, weekKey } from "./dates";
 import { weeklyChallenge } from "./gamification";
 import { computeStreak, weekStats } from "./stats";
+import { fmtMass } from "./units";
 import type { AppNotification, FitState, NotificationKind, NotificationSettings } from "./types";
 
 export const NOTIFICATION_LABELS: Record<NotificationKind, { label: string; hint: string }> = {
@@ -57,7 +58,7 @@ export function deriveNotifications(state: FitState, now: Date): AppNotification
 	if (now.getDay() === 1 || state.history.length > 0) {
 		const last = weekStats(state.planned, state.history, today, -1);
 		if (last.planned > 0) {
-			push({ id: `n-summary-${weekKey(addDays(today, -7))}`, kind: "weekly-summary", title: "Your week in review", body: `${last.done} of ${last.planned} sessions, ${last.minutes} min training, ${last.volume.toLocaleString("en-US")} kg lifted. Streak: ${computeStreak(state.planned, today).current}.`, href: "/progress" });
+			push({ id: `n-summary-${weekKey(addDays(today, -7))}`, kind: "weekly-summary", title: "Your week in review", body: `${last.done} of ${last.planned} sessions, ${last.minutes} min training, ${fmtMass(last.volume, state.units)} lifted. Streak: ${computeStreak(state.planned, today).current}.`, href: "/progress" });
 		}
 	}
 

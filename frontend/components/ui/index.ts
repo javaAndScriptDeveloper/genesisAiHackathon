@@ -1,3 +1,4 @@
+export { AnimatedNumber } from "./AnimatedNumber/AnimatedNumber";
 export { Avatar } from "./Avatar/Avatar";
 export { Badge } from "./Badge/Badge";
 export { Button } from "./Button/Button";
@@ -14,6 +15,7 @@ export { Input } from "./Input/Input";
 export { Modal } from "./Modal/Modal";
 export { Pagination } from "./Pagination/Pagination";
 export { Picture } from "./Picture/Picture";
+export { SportIcon, KIND_ICON, type SportIconName } from "./SportIcon/SportIcon";
 export { Select, type SelectOption } from "./Select/Select";
 export { Skeleton } from "./Skeleton/Skeleton";
 export { Switch } from "./Switch/Switch";

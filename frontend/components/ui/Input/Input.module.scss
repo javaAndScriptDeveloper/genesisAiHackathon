@@ -72,3 +72,22 @@
 		margin: 0;
 	}
 }
+
+.control {
+	position: relative;
+	display: flex;
+	align-items: center;
+}
+
+.withSuffix {
+	padding-right: 5rem;
+}
+
+.suffix {
+	position: absolute;
+	right: 1.4rem;
+	color: var(--color-placeholder);
+	font-size: 1.4rem;
+	font-weight: 550;
+	pointer-events: none;
+}

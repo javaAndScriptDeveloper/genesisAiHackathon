@@ -4,6 +4,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
+import { BodyStep } from "./BodyStep";
+import type { Units } from "@/lib/fit/units";
 import { z } from "zod";
 import { OptionCard } from "@/components/features/OptionCard/OptionCard";
 import { Badge, Button, Card, Input, ProgressBar, Switch, Textarea, IconButton } from "@/components/ui";
@@ -12,6 +14,7 @@ import { toISO, WEEKDAYS } from "@/lib/fit/dates";
 import { DAYS, DURATIONS, EQUIPMENT, EXPERIENCES, GENDERS, GOALS, LIMITATIONS, LOCATIONS, WEARABLES } from "@/lib/fit/options";
 import { generatePlan } from "@/lib/fit/plan";
 import { useFit } from "@/lib/fit/store/FitProvider";
+import { useActionNavigate } from "@/lib/fit/store/hooks";
 import type { Profile } from "@/lib/fit/types";
 import { useT } from "@/lib/i18n/I18nProvider";
 import styles from "./Onboarding.module.scss";
@@ -53,9 +56,11 @@ const FIELDS: Record<Step, (keyof Form)[]> = {
 export function Onboarding({ mode }: { mode: "create" | "edit" }) {
 	const t = useT();
 	const router = useRouter();
-	const { state, dispatch, today } = useFit();
+	const { state, today } = useFit();
+	const go = useActionNavigate();
 	const [step, setStep] = useState(0);
 	const [demoHistory, setDemoHistory] = useState(true);
+	const [units, setUnits] = useState<Units>(state.units);
 	const schema = useMemo(() => makeSchema(t), [t]);
 	const existing = state.profile;
 	const form = useForm<Form>({
@@ -63,7 +68,7 @@ export function Onboarding({ mode }: { mode: "create" | "edit" }) {
 		mode: "onTouched",
 		defaultValues: existing ?? { name: "", age: 30, gender: null, heightCm: 175, weightKg: 75, goal: "build-muscle", experience: "beginner", location: "home", equipment: ["dumbbells"], durationMin: 30, daysPerWeek: 3, limitations: [], limitationNote: "", wearable: "none" },
 	});
-	const { register, control, watch, trigger, getValues, formState } = form;
+	const { register, control, watch, trigger, getValues, setValue, formState } = form;
 	const current = STEPS[step] ?? "about";
 	const values = watch();
 	const last = step === STEPS.length - 1;
@@ -77,9 +82,8 @@ export function Onboarding({ mode }: { mode: "create" | "edit" }) {
 		const parsed = schema.safeParse(getValues());
 		if (!parsed.success) return;
 		const profile: Profile = parsed.data;
-		if (mode === "create") dispatch({ type: "complete-onboarding", profile, demoHistory, today, now: new Date().toISOString() });
-		else dispatch({ type: "update-profile", profile, today });
-		router.replace(mode === "create" ? "/today" : "/profile");
+		if (mode === "create") go("/today", { type: "complete-onboarding", profile, units, demoHistory, today, now: new Date().toISOString() }, { replace: true });
+		else go("/profile", { type: "update-profile", profile, units, today }, { replace: true });
 	};
 
 	const preview = useMemo(() => {
@@ -108,7 +112,7 @@ export function Onboarding({ mode }: { mode: "create" | "edit" }) {
 				{current === "about" && (
 					<div className={styles.stack}>
 						<Input label={t("fit.onboarding.name")} autoComplete="given-name" error={formState.errors.name?.message} {...register("name")} />
-						<Input label={t("fit.onboarding.age")} type="number" inputMode="numeric" error={formState.errors.age?.message} {...register("age", { valueAsNumber: true })} />
+						<Input label={t("fit.onboarding.age")} type="number" inputMode="numeric" suffix={t("fit.onboarding.years")} error={formState.errors.age?.message} {...register("age", { valueAsNumber: true })} />
 						<fieldset className={styles.group}>
 							<legend className={styles.legend}>{t("fit.onboarding.gender")}</legend>
 							<div className={styles.chips}>
@@ -125,10 +129,16 @@ export function Onboarding({ mode }: { mode: "create" | "edit" }) {
 				)}
 
 				{current === "body" && (
-					<div className={styles.stack}>
-						<Input label={t("fit.onboarding.height")} type="number" inputMode="numeric" hint="cm" error={formState.errors.heightCm?.message} {...register("heightCm", { valueAsNumber: true })} />
-						<Input label={t("fit.onboarding.weight")} type="number" inputMode="decimal" step="0.1" hint="kg" error={formState.errors.weightKg?.message} {...register("weightKg", { valueAsNumber: true })} />
-					</div>
+					<BodyStep
+						units={units}
+						onUnits={setUnits}
+						heightCm={Number.isFinite(values.heightCm) ? values.heightCm : 175}
+						weightKg={Number.isFinite(values.weightKg) ? values.weightKg : 75}
+						onHeight={(cm) => setValue("heightCm", cm, { shouldValidate: true, shouldTouch: true })}
+						onWeight={(kg) => setValue("weightKg", kg, { shouldValidate: true, shouldTouch: true })}
+						heightError={formState.errors.heightCm?.message}
+						weightError={formState.errors.weightKg?.message}
+					/>
 				)}
 
 				{current === "goal" && (

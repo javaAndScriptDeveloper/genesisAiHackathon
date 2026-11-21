@@ -33,7 +33,11 @@ export function useSlidingIndicator(activeKey: string) {
 			const box = container.current;
 			const line = indicator.current;
 			const el = items.current.get(activeKey);
-			if (!box || !line || !el) return;
+			if (!box || !line) return;
+			if (!el) {
+				delete line.dataset.ready; // nothing active here (e.g. on a profile page): hide the indicator
+				return;
+			}
 			line.style.setProperty("--ind-x", `${el.offsetLeft}px`);
 			line.style.setProperty("--ind-w", `${el.offsetWidth}px`);
 			line.dataset.ready = "true";
