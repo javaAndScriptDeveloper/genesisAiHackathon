@@ -68,10 +68,12 @@ export function FitProvider({ children }: { children: ReactNode }) {
 
 	const dispatch = useCallback<Dispatch<Action>>((a) => rawDispatch(a), []);
 	const api = useMemo(() => ({ state, dispatch, ready, today }), [state, dispatch, ready, today]);
-	return <FitContext.Provider value={api}>
+	return (
+		<FitContext.Provider value={api}>
 			<ProgressSync />
 			{children}
-		</FitContext.Provider>;
+		</FitContext.Provider>
+	);
 }
 
 export function useFit(): FitApi {

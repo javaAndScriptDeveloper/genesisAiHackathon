@@ -1,5 +1,5 @@
-import { describe, expect, it } from "vitest";
-import { fromRemote, planArchive, remoteSnapshotSchema, toRemote } from "@/lib/api/progressSync";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { archiveOutcome, canPushSync, fromRemote, planArchive, postArchive, remoteSnapshotSchema, toRemote } from "@/lib/api/progressSync";
 import { emptyState } from "@/lib/fit/seed";
 import { reducer } from "@/lib/fit/store/reducer";
 import type { FitState, PlannedWorkout, SessionLog } from "@/lib/fit/types";
@@ -183,5 +183,32 @@ describe("planArchive", () => {
 		const s = state({ hasDemoHistory: true, history: [log("d1", "2026-11-16", { demo: true })] });
 		const snap = snapOf(s);
 		expect(planArchive(s, snap, snapshotHash(snap), TODAY, { now: NOW })).toEqual([]);
+	});
+});
+
+describe("archive outcomes and sync gating", () => {
+	afterEach(() => vi.unstubAllGlobals());
+	it("maps statuses", () => {
+		expect([200, 201].map(archiveOutcome)).toEqual(["sent", "sent"]);
+		expect([408, 429, 500, 503].map(archiveOutcome)).toEqual(["retry", "retry", "retry", "retry"]);
+		expect([400, 404, 409, 413].map(archiveOutcome)).toEqual(["drop", "drop", "drop", "drop"]);
+	});
+	it("postArchive uses the mapping and retries on network errors", async () => {
+		const item: ArchiveItem = { id: "i", period: "change", weekStart: null, takenAt: "2026-11-25T10:00:00.000Z", engineVersion: "2.0.0", payload: {} as never, payloadHash: "h" };
+		vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ status: 400, ok: false }));
+		expect(await postArchive("t", item)).toBe("drop");
+		vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("offline")));
+		expect(await postArchive("t", item)).toBe("retry");
+	});
+	it("a rejected weekly recorded in archivedWeeks is not re-planned", () => {
+		const s = state({ archivedWeeks: ["2026-11-02", "2026-11-09", "2026-11-16"] });
+		const snap = progressSnapshot(historyFromFit(s, TODAY), { weeklyGoal: s.weeklyGoal, pauses: s.pauses });
+		const h = snapshotHash(snap);
+		expect(planArchive(s, snap, h, TODAY, { lastHash: h })).toEqual([]);
+	});
+	it("holds back push on an empty device until the pull succeeded", () => {
+		expect(canPushSync(0, false)).toBe(false);
+		expect(canPushSync(0, true)).toBe(true);
+		expect(canPushSync(3, false)).toBe(true);
 	});
 });

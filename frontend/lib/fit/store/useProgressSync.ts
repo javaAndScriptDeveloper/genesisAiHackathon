@@ -1,24 +1,24 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { fetchRemoteSnapshot, planArchive, postArchive, postSync, snapshotOf, toRemote } from "../../api/progressSync";
+import { canPushSync, fetchRemoteSnapshot, planArchive, postArchive, postSync, snapshotOf, toRemote } from "../../api/progressSync";
 import { snapshotHash } from "../../progress";
 import { useFit } from "./FitProvider";
 
 const DEBOUNCE_MS = 3000;
 const RETRY_MS = 60_000;
-const HASH_KEY = "fit.progress.lastArchiveHash";
+const hashKey = (token: string) => `fit.progress.lastArchiveHash.${token}`;
 
-function readHash(): string | null {
+function readHash(token: string): string | null {
 	try {
-		return window.localStorage.getItem(HASH_KEY);
+		return window.localStorage.getItem(hashKey(token));
 	} catch {
 		return null;
 	}
 }
-function writeHash(h: string): void {
+function writeHash(token: string, h: string): void {
 	try {
-		window.localStorage.setItem(HASH_KEY, h);
+		window.localStorage.setItem(hashKey(token), h);
 	} catch {
 		/* storage unavailable: worst case one extra change snapshot */
 	}
@@ -30,7 +30,7 @@ function writeHash(h: string): void {
  */
 export function useProgressSync(): void {
 	const { state, dispatch, ready, today } = useFit();
-	const [bootstrapped, setBootstrapped] = useState(false);
+	const [pulled, setPulled] = useState(false);
 	const [tick, setTick] = useState(0);
 	const lastSent = useRef<string | null>(null);
 	const lastHash = useRef<string | null>(null);
@@ -38,21 +38,25 @@ export function useProgressSync(): void {
 	const latest = useRef(state);
 	latest.current = state;
 
-	// Pull remote facts once when there is no local history.
+	// Pull remote facts while the device has no history; retried on the tick until it succeeds.
 	useEffect(() => {
-		if (!ready) return;
+		if (!ready || pulled) return;
+		if (latest.current.history.length > 0) {
+			setPulled(true);
+			return;
+		}
 		let alive = true;
-		void (async () => {
-			if (latest.current.history.length === 0) {
-				const snapshot = await fetchRemoteSnapshot(latest.current.progressToken);
-				if (alive && snapshot) dispatch({ type: "apply-remote", snapshot });
-			}
-			if (alive) setBootstrapped(true);
-		})();
+		void fetchRemoteSnapshot(latest.current.progressToken).then((snapshot) => {
+			if (!alive || !snapshot) return;
+			dispatch({ type: "apply-remote", snapshot });
+			setPulled(true);
+		});
 		return () => {
 			alive = false;
 		};
-	}, [ready, dispatch]);
+	}, [ready, pulled, tick, dispatch]);
+
+	const bootstrapped = ready && canPushSync(state.history.length, pulled);
 
 	// Retry tick for failed requests.
 	useEffect(() => {
@@ -75,12 +79,12 @@ export function useProgressSync(): void {
 			}
 			const snap = snapshotOf(s, today);
 			const hash = snapshotHash(snap);
-			lastHash.current ??= readHash();
+			lastHash.current ??= readHash(s.progressToken);
 			const items = planArchive(s, snap, hash, today, { lastHash: lastHash.current });
 			if (items.length > 0) dispatch({ type: "archive-queued", items });
 			if (items.some((i) => i.period === "change")) {
 				lastHash.current = hash;
-				writeHash(hash);
+				writeHash(s.progressToken, hash);
 			}
 		}, DEBOUNCE_MS);
 		return () => window.clearTimeout(id);
@@ -99,7 +103,8 @@ export function useProgressSync(): void {
 				const result = await postArchive(token, item);
 				if (result === "retry") break;
 				ids.push(item.id);
-				if (result === "sent" && item.period === "weekly" && item.weekStart) weeks.push(item.weekStart);
+				// A permanently rejected weekly is recorded in archivedWeeks too, so it is never re-planned.
+				if (item.period === "weekly" && item.weekStart) weeks.push(item.weekStart);
 			}
 			flushing.current = false;
 			if (ids.length > 0) dispatch({ type: "archive-sent", ids, weeks });

@@ -206,13 +206,25 @@ export async function postSync(token: string, body: RemoteSnapshot): Promise<boo
 	}
 }
 
-/** "sent": stored (201/200); "drop": the server will never accept it (4xx); "retry": try again later. */
-export async function postArchive(token: string, item: ArchiveItem): Promise<"sent" | "drop" | "retry"> {
+export type ArchiveOutcome = "sent" | "drop" | "retry";
+
+/** "sent": stored (201/200); "retry": timeout, rate limit, 5xx or anything unexpected; "drop": the server permanently rejects it (other 4xx). */
+export function archiveOutcome(status: number): ArchiveOutcome {
+	if (status === 200 || status === 201) return "sent";
+	if (status >= 400 && status < 500 && status !== 408 && status !== 429) return "drop";
+	return "retry";
+}
+
+/** Whether facts may be pushed: an empty device must first pull, or default settings would overwrite the remote ones. */
+export function canPushSync(localHistoryLength: number, pulled: boolean): boolean {
+	return localHistoryLength > 0 || pulled;
+}
+
+export async function postArchive(token: string, item: ArchiveItem): Promise<ArchiveOutcome> {
 	try {
 		const { id: _id, ...body } = item;
 		const res = await fetch("/api/progress/archive", { method: "POST", headers: { ...headers(token), "content-type": "application/json" }, body: JSON.stringify(body) });
-		if (res.ok) return "sent";
-		return res.status >= 400 && res.status < 500 && res.status !== 408 && res.status !== 429 ? "drop" : "retry";
+		return archiveOutcome(res.status);
 	} catch {
 		return "retry";
 	}
