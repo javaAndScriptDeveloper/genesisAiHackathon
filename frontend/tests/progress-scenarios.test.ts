@@ -127,3 +127,19 @@ describe("progress scenarios", () => {
 		expect(hasNaN([r.consistency, r.streak, r.badges])).toBe(false);
 	});
 });
+
+describe("S2 demo check-in photos", () => {
+	it("has exactly 2 small synthetic webp photos", () => {
+		const { photos } = scenarioState("S2", today);
+		expect(photos).toHaveLength(2);
+		for (const p of photos) {
+			const m = /^data:image\/webp;base64,(.+)$/.exec(p.dataUrl);
+			expect(m).not.toBeNull();
+			const bytes = Buffer.from(m?.[1] ?? "", "base64");
+			expect(bytes.subarray(0, 4).toString()).toBe("RIFF");
+			expect(bytes.subarray(8, 12).toString()).toBe("WEBP");
+			expect(bytes.length).toBeLessThanOrEqual(400 * 1024);
+		}
+		expect(photos.map((p) => p.date)).toEqual([...photos.map((p) => p.date)].sort());
+	});
+});
