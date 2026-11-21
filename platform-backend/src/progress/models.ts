@@ -112,3 +112,26 @@ export class ProgressCheckInModel extends Model {
   goalKg!: number | null;
   createdAt!: Date;
 }
+
+// AI photo-analysis results (text only); the compared photos are never stored.
+export class ProgressPhotoInsightModel extends Model {
+  static tableName = "user_progress_photo_insights";
+  id!: string;
+  userId!: number;
+  analyzedAt!: Date;
+  beforeDate!: string;
+  afterDate!: string;
+  beforeWeightKg!: number | null;
+  afterWeightKg!: number | null;
+  model!: string;
+  engineVersion!: string;
+  suitable!: boolean;
+  result!: PhotoInsightResult;
+  createdAt!: Date;
+}
+
+export interface PhotoInsightResult {
+  summary: string;
+  observations: { area: string; text: string }[];
+  encouragement: string;
+}

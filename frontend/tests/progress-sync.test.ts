@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { archiveOutcome, canPushSync, fromRemote, planArchive, postArchive, remoteSnapshotSchema, toRemote } from "@/lib/api/progressSync";
 import { emptyState } from "@/lib/fit/seed";
 import { reducer } from "@/lib/fit/store/reducer";
-import type { FitState, PlannedWorkout, SessionLog } from "@/lib/fit/types";
+import type { FitState, PhotoInsight, PlannedWorkout, SessionLog } from "@/lib/fit/types";
 import { progressSnapshot, snapshotHash } from "@/lib/progress";
 import { historyFromFit } from "@/lib/progress/fromFit";
 import type { ArchiveItem } from "@/lib/progress/types";
@@ -64,6 +64,29 @@ function state(over: Partial<FitState> = {}): FitState {
 		...over,
 	};
 }
+
+const insight = (id: string, analyzedAt: string): PhotoInsight => ({
+	id, analyzedAt, beforeDate: "2026-10-01", afterDate: "2026-11-12", beforeWeightKg: 72, afterWeightKg: null, model: "gemini-test", engineVersion: "photo-v1", suitable: true,
+	result: { summary: "Steadier.", observations: [{ area: "posture", text: "More level." }], encouragement: "Keep going." },
+});
+
+describe("photo insights sync", () => {
+	it("round-trips through toRemote/fromRemote, matches the schema and never contains data URLs", () => {
+		const s = state({ photoInsights: [insight("i1", "2026-11-20T10:00:00.000Z")] });
+		const r = toRemote(s, TODAY);
+		expect(r.photoInsights).toEqual(s.photoInsights);
+		expect(remoteSnapshotSchema.safeParse(r).success).toBe(true);
+		expect(JSON.stringify(r)).not.toContain("data:");
+		expect(fromRemote(r).photoInsights).toEqual(s.photoInsights);
+	});
+	it("defaults to an empty list and rejects more than 4 observations", () => {
+		expect(toRemote(state(), TODAY).photoInsights).toEqual([]);
+		expect(fromRemote({ ...toRemote(state(), TODAY), photoInsights: undefined }).photoInsights).toEqual([]);
+		const bad = toRemote(state({ photoInsights: [insight("i1", "2026-11-20T10:00:00.000Z")] }), TODAY);
+		bad.photoInsights![0]!.result.observations = Array(5).fill({ area: "a", text: "t" });
+		expect(remoteSnapshotSchema.safeParse(bad).success).toBe(false);
+	});
+});
 
 describe("toRemote", () => {
 	it("maps logs to workouts with set kinds", () => {

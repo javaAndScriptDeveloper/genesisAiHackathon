@@ -9,6 +9,11 @@ import { createDb, migrate, migrationConfig } from "../src/db.js";
 const A = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
 const B = "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb";
 
+const insight = (id: string, analyzedAt: string) => ({
+  id, analyzedAt, beforeDate: "2026-10-01", afterDate: "2026-11-20", beforeWeightKg: 85.5, afterWeightKg: null, model: "gemini-test", engineVersion: "photo-v1", suitable: true,
+  result: { summary: "Looks steadier.", observations: [{ area: "posture", text: "Shoulders are more level." }], encouragement: "Keep going." },
+});
+
 const body = () => ({
   settings: { weeklyGoal: 4, units: "imperial", heightCm: 180 },
   planDays: [{ date: "2026-11-23", type: "training", workoutRef: "w1" }, { date: "2026-11-24", type: "rest", workoutRef: null }],
@@ -27,6 +32,10 @@ const body = () => ({
     { id: "c3", kind: "photo", date: "2026-11-23", takenAt: "2026-11-23T09:30:00.000Z", weightKg: 80.5, goalKg: null },
     { id: "c1", kind: "weight", date: "2026-11-21", takenAt: "2026-11-21T08:00:00.000Z", weightKg: 81.25, goalKg: null },
     { id: "c2", kind: "goal", date: "2026-11-22", takenAt: "2026-11-22T08:00:00.000Z", weightKg: null, goalKg: 75 },
+  ],
+  photoInsights: [
+    insight("i2", "2026-11-24T10:00:00.000Z"),
+    insight("i1", "2026-11-23T10:00:00.000Z"),
   ],
 });
 
@@ -65,23 +74,23 @@ describe("progress API", () => {
   it("snapshot for unknown token is empty and creates no user", async () => {
     const res = await call("GET", "/api/progress/snapshot", A);
     expect(res.statusCode).toBe(200);
-    expect(res.json()).toEqual({ settings: { weeklyGoal: 3, units: "metric", heightCm: null }, planDays: [], workouts: [], pauses: [], weights: [], events: [], checkIns: [] });
+    expect(res.json()).toEqual({ settings: { weeklyGoal: 3, units: "metric", heightCm: null }, planDays: [], workouts: [], pauses: [], weights: [], events: [], checkIns: [], photoInsights: [] });
     expect(await count("users")).toBe(0);
   });
 
   it("sync creates exactly one guest user, is idempotent and round-trips via snapshot", async () => {
     const r1 = await call("POST", "/api/progress/sync", A, body());
     expect(r1.statusCode).toBe(200);
-    expect(r1.json()).toEqual({ ok: true, counts: { planDays: 2, workouts: 1, sets: 2, pauses: 1, weights: 1, events: 1, checkIns: 3 } });
+    expect(r1.json()).toEqual({ ok: true, counts: { planDays: 2, workouts: 1, sets: 2, pauses: 1, weights: 1, events: 1, checkIns: 3, photoInsights: 2 } });
     expect(await count("users")).toBe(1);
     const guest = await db("users").first();
     expect(guest).toMatchObject({ name: "Guest", email: `guest-${A}@guest.invalid` });
-    const before = await Promise.all(["user_progress_plan_days", "user_progress_workouts", "user_progress_sets", "user_progress_pauses", "user_progress_weights", "user_progress_events", "user_progress_checkins"].map(count));
+    const before = await Promise.all(["user_progress_plan_days", "user_progress_workouts", "user_progress_sets", "user_progress_pauses", "user_progress_weights", "user_progress_events", "user_progress_checkins", "user_progress_photo_insights"].map(count));
 
     const r2 = await call("POST", "/api/progress/sync", A, body());
     expect(r2.statusCode).toBe(200);
     expect(await count("users")).toBe(1);
-    expect(await Promise.all(["user_progress_plan_days", "user_progress_workouts", "user_progress_sets", "user_progress_pauses", "user_progress_weights", "user_progress_events", "user_progress_checkins"].map(count))).toEqual(before);
+    expect(await Promise.all(["user_progress_plan_days", "user_progress_workouts", "user_progress_sets", "user_progress_pauses", "user_progress_weights", "user_progress_events", "user_progress_checkins", "user_progress_photo_insights"].map(count))).toEqual(before);
 
     const snap = (await call("GET", "/api/progress/snapshot", A)).json();
     expect(JSON.stringify(snap)).not.toContain('"userId"');
@@ -177,6 +186,40 @@ describe("progress API", () => {
       await call("POST", "/api/progress/sync", A, { checkIns: body().checkIns });
       await db("users").delete();
       expect(await count("user_progress_checkins")).toBe(0);
+    });
+  });
+
+  describe("photo insights", () => {
+    it("round-trips ordered by analyzedAt and re-sync is idempotent", async () => {
+      await call("POST", "/api/progress/sync", A, { photoInsights: body().photoInsights });
+      await call("POST", "/api/progress/sync", A, { photoInsights: body().photoInsights });
+      expect(await count("user_progress_photo_insights")).toBe(2);
+      const snap = (await call("GET", "/api/progress/snapshot", A)).json();
+      expect(snap.photoInsights.map((p: { id: string }) => p.id)).toEqual(["i1", "i2"]);
+      expect(snap.photoInsights[0]).toEqual(insight("i1", "2026-11-23T10:00:00.000Z"));
+      expect(JSON.stringify(snap)).not.toContain("data:");
+    });
+
+    it("rejects unknown fields such as dataUrl with 400 and stores nothing", async () => {
+      const p = body().photoInsights[0];
+      expect((await call("POST", "/api/progress/sync", A, { photoInsights: [{ ...p, dataUrl: "data:image/png;base64,AAAA" }] })).statusCode).toBe(400);
+      expect((await call("POST", "/api/progress/sync", A, { photoInsights: [{ ...p, result: { ...p.result, dataUrl: "x" } }] })).statusCode).toBe(400);
+      expect((await call("POST", "/api/progress/sync", A, { photoInsights: [{ ...p, result: { ...p.result, observations: Array(5).fill({ area: "a", text: "t" }) } }] })).statusCode).toBe(400);
+      expect(await count("user_progress_photo_insights")).toBe(0);
+    });
+
+    it("a foreign id is 409 and does not take the row over", async () => {
+      await call("POST", "/api/progress/sync", A, { photoInsights: body().photoInsights });
+      const res = await call("POST", "/api/progress/sync", B, { photoInsights: [{ ...body().photoInsights[0], model: "hijack" }] });
+      expect(res.statusCode).toBe(409);
+      expect((await call("GET", "/api/progress/snapshot", B)).json().photoInsights).toEqual([]);
+      expect((await call("GET", "/api/progress/snapshot", A)).json().photoInsights[1].model).toBe("gemini-test");
+    });
+
+    it("deleting the user cascades to photo insights", async () => {
+      await call("POST", "/api/progress/sync", A, { photoInsights: body().photoInsights });
+      await db("users").delete();
+      expect(await count("user_progress_photo_insights")).toBe(0);
     });
   });
 

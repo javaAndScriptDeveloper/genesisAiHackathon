@@ -104,6 +104,40 @@ const syncSchema = {
         },
       },
     },
+    photoInsights: {
+      type: "array",
+      maxItems: 500,
+      items: {
+        type: "object",
+        additionalProperties: false,
+        required: ["id", "analyzedAt", "beforeDate", "afterDate", "model", "engineVersion", "suitable", "result"],
+        properties: {
+          id: str,
+          analyzedAt: dateTime,
+          beforeDate: date,
+          afterDate: date,
+          beforeWeightKg: nullable({ type: "number", exclusiveMinimum: 0, maximum: 999.99 }),
+          afterWeightKg: nullable({ type: "number", exclusiveMinimum: 0, maximum: 999.99 }),
+          model: str,
+          engineVersion: str,
+          suitable: { type: "boolean" },
+          result: {
+            type: "object",
+            additionalProperties: false,
+            required: ["summary", "observations", "encouragement"],
+            properties: {
+              summary: { type: "string", maxLength: 2000 },
+              observations: {
+                type: "array",
+                maxItems: 4,
+                items: { type: "object", additionalProperties: false, required: ["area", "text"], properties: { area: { type: "string", maxLength: 200 }, text: { type: "string", maxLength: 1000 } } },
+              },
+              encouragement: { type: "string", maxLength: 1000 },
+            },
+          },
+        },
+      },
+    },
   },
 } as const;
 

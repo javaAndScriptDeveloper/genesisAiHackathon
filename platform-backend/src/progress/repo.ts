@@ -1,9 +1,11 @@
 import type { Knex } from "knex";
 import type { Modifiers } from "objection";
+import type { PhotoInsightResult } from "./models.js";
 import {
   ProgressCheckInModel,
   ProgressEventModel,
   ProgressPauseModel,
+  ProgressPhotoInsightModel,
   ProgressPlanDayModel,
   ProgressSettingsModel,
   ProgressSnapshotModel,
@@ -47,6 +49,19 @@ export interface RemoteSnapshot {
   weights: { date: string; kg: number }[];
   events: { id: string; kind: "badge" | "level" | "pr" | "report"; refId: string; payload: unknown; createdAt: string; seenAt: string | null }[];
   checkIns: { id: string; kind: "weight" | "goal" | "photo"; date: string; takenAt: string; weightKg: number | null; goalKg: number | null }[];
+  photoInsights: PhotoInsightDto[];
+}
+export interface PhotoInsightDto {
+  id: string;
+  analyzedAt: string;
+  beforeDate: string;
+  afterDate: string;
+  beforeWeightKg: number | null;
+  afterWeightKg: number | null;
+  model: string;
+  engineVersion: string;
+  suitable: boolean;
+  result: PhotoInsightResult;
 }
 export type SyncBody = Partial<Omit<RemoteSnapshot, "settings">> & { settings?: Partial<RemoteSnapshot["settings"]> };
 export interface ArchiveInput {
@@ -119,9 +134,9 @@ function toWorkoutDto(w: ProgressWorkoutModel): WorkoutDto {
 const orderedSets: Modifiers = { ordered: (b) => b.orderBy("performedAt").orderBy("id") };
 
 export async function getSnapshot(db: Knex, userId: number | null): Promise<RemoteSnapshot> {
-  const snapshot: RemoteSnapshot = { settings: { weeklyGoal: 3, units: "metric", heightCm: null }, planDays: [], workouts: [], pauses: [], weights: [], events: [], checkIns: [] };
+  const snapshot: RemoteSnapshot = { settings: { weeklyGoal: 3, units: "metric", heightCm: null }, planDays: [], workouts: [], pauses: [], weights: [], events: [], checkIns: [], photoInsights: [] };
   if (userId === null) return snapshot;
-  const [settings, planDays, workouts, pauses, weights, events, checkIns] = await Promise.all([
+  const [settings, planDays, workouts, pauses, weights, events, checkIns, photoInsights] = await Promise.all([
     ProgressSettingsModel.query(db).findById(userId),
     ProgressPlanDayModel.query(db).where({ userId }).orderBy("date"),
     ProgressWorkoutModel.query(db).where({ userId }).withGraphFetched("sets(ordered)").modifiers(orderedSets).orderBy("performedOn").orderBy("id"),
@@ -129,6 +144,7 @@ export async function getSnapshot(db: Knex, userId: number | null): Promise<Remo
     db("user_progress_weights").where({ userId }).orderBy("date"),
     ProgressEventModel.query(db).where({ userId }).orderBy("createdAt").orderBy("id"),
     ProgressCheckInModel.query(db).where({ userId }).orderBy("takenAt").orderBy("id"),
+    ProgressPhotoInsightModel.query(db).where({ userId }).orderBy("analyzedAt").orderBy("id"),
   ]);
   if (settings) snapshot.settings = { weeklyGoal: settings.weeklyGoal, units: settings.units, heightCm: null };
   snapshot.planDays = planDays.map((p) => ({ date: p.date, type: p.type, workoutRef: p.workoutRef }));
@@ -137,6 +153,10 @@ export async function getSnapshot(db: Knex, userId: number | null): Promise<Remo
   snapshot.weights = weights.map((w: { date: string; kg: number }) => ({ date: w.date, kg: w.kg }));
   snapshot.events = events.map((e) => ({ id: e.id, kind: e.kind, refId: e.refId, payload: e.payload, createdAt: e.createdAt.toISOString(), seenAt: iso(e.seenAt) }));
   snapshot.checkIns = checkIns.map((c) => ({ id: c.id, kind: c.kind, date: c.date, takenAt: c.takenAt.toISOString(), weightKg: c.weightKg, goalKg: c.goalKg }));
+  snapshot.photoInsights = photoInsights.map((p) => ({
+    id: p.id, analyzedAt: p.analyzedAt.toISOString(), beforeDate: p.beforeDate, afterDate: p.afterDate, beforeWeightKg: p.beforeWeightKg, afterWeightKg: p.afterWeightKg,
+    model: p.model, engineVersion: p.engineVersion, suitable: p.suitable, result: p.result,
+  }));
   return snapshot;
 }
 
@@ -154,6 +174,7 @@ export async function syncSnapshot(db: Knex, userId: number, body: SyncBody) {
   const weights = body.weights ?? [];
   const events = body.events ?? [];
   const checkIns = body.checkIns ?? [];
+  const photoInsights = body.photoInsights ?? [];
   const sets = workouts.flatMap((w) => w.sets.map((s) => ({ ...s, workoutId: w.id })));
 
   await db.transaction(async (trx) => {
@@ -167,6 +188,7 @@ export async function syncSnapshot(db: Knex, userId: number, body: SyncBody) {
     await assertNotForeign(trx, "user_progress_pauses", userId, pauses.map((p) => p.id));
     await assertNotForeign(trx, "user_progress_events", userId, events.map((e) => e.id));
     await assertNotForeign(trx, "user_progress_checkins", userId, checkIns.map((c) => c.id));
+    await assertNotForeign(trx, "user_progress_photo_insights", userId, photoInsights.map((p) => p.id));
 
     if (body.settings && Object.keys(body.settings).length > 0) {
       const patch: Record<string, unknown> = { updatedAt: trx.fn.now() };
@@ -217,10 +239,19 @@ export async function syncSnapshot(db: Knex, userId: number, body: SyncBody) {
         .onConflict("id")
         .merge();
     }
+    if (photoInsights.length) {
+      await trx("user_progress_photo_insights")
+        .insert(photoInsights.map((p) => ({
+          id: p.id, userId, analyzedAt: p.analyzedAt, beforeDate: p.beforeDate, afterDate: p.afterDate, beforeWeightKg: p.beforeWeightKg ?? null, afterWeightKg: p.afterWeightKg ?? null,
+          model: p.model, engineVersion: p.engineVersion, suitable: p.suitable, result: JSON.stringify(p.result),
+        })))
+        .onConflict("id")
+        .merge();
+    }
   });
   return {
     ok: true as const,
-    counts: { planDays: planDays.length, workouts: workouts.length, sets: sets.length, pauses: pauses.length, weights: weights.length, events: events.length, checkIns: checkIns.length },
+    counts: { planDays: planDays.length, workouts: workouts.length, sets: sets.length, pauses: pauses.length, weights: weights.length, events: events.length, checkIns: checkIns.length, photoInsights: photoInsights.length },
   };
 }
 

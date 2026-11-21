@@ -600,6 +600,8 @@ export function reducer(state: FitState, action: Action): FitState {
 			const freshDevice = state.history.length === 0;
 			const have = new Set(state.progressEvents.map((e) => e.id));
 			const events = (r.progressEvents ?? []).filter((e) => !have.has(e.id));
+			const haveInsight = new Set(state.photoInsights.map((i) => i.id));
+			const insights = (r.photoInsights ?? []).filter((i) => !haveInsight.has(i.id));
 			return {
 				...state,
 				history: freshDevice && r.history ? r.history : state.history,
@@ -609,6 +611,7 @@ export function reducer(state: FitState, action: Action): FitState {
 				goalWeightKg: state.goalWeightKg === null && r.goalWeightKg != null ? r.goalWeightKg : state.goalWeightKg,
 				goalSetAt: state.goalWeightKg === null && r.goalWeightKg != null ? r.goalSetAt ?? null : state.goalSetAt,
 				progressEvents: events.length ? [...state.progressEvents, ...events] : state.progressEvents,
+				photoInsights: insights.length ? [...state.photoInsights, ...insights] : state.photoInsights,
 			};
 		}
 		case "remove-pause": {
