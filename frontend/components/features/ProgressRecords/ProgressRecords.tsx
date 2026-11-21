@@ -7,7 +7,7 @@ import { Button, Card, EmptyState, SegmentedControl, Select, Skeleton } from "@/
 import { useFit } from "@/lib/fit/store/FitProvider";
 import { useProgress } from "@/lib/fit/store/hooks";
 import { useT } from "@/lib/i18n/I18nProvider";
-import { plottedMetric, pickExercise, recordExercises, recordRows, type RecordsFilter } from "@/lib/progress/recordsScreen";
+import { plottedMetric, pickExercise, showsSetRecords, recordExercises, recordRows, type RecordsFilter } from "@/lib/progress/recordsScreen";
 import { ExerciseTrend } from "./ExerciseTrend";
 import { FormulaPanel } from "./FormulaPanel";
 import { RecordList } from "./RecordList";
@@ -28,7 +28,9 @@ export function ProgressRecords({ initialExercise }: { initialExercise?: string 
 
 	useEffect(() => {
 		if (!ready || fresh !== null) return;
-		setFresh(new Set(state.progressEvents.filter((e) => e.kind === "pr" && e.seenAt === null).map((e) => e.refId)));
+		const unseenPr = state.progressEvents.filter((e) => e.kind === "pr" && e.seenAt === null);
+		setFresh(new Set(unseenPr.map((e) => e.refId)));
+		if (unseenPr.length === 0) return;
 		dispatch({ type: "mark-seen", kinds: ["pr"], now: new Date().toISOString() });
 	}, [ready, fresh, state.progressEvents, dispatch]);
 
@@ -38,7 +40,6 @@ export function ProgressRecords({ initialExercise }: { initialExercise?: string 
 	const rows = useMemo(() => recordRows(history, records, filter, fresh ?? new Set()), [history, records, filter, fresh]);
 	const noData = history.sessions.every((s) => s.status !== "completed") || recordExercises(history, "all").length === 0;
 	const showFormula = exerciseId !== null && plottedMetric(history, exerciseId) === "e1rm";
-	const isWeighted = exercise?.kind === "weighted";
 
 	return (
 		<div className={styles.root}>
@@ -80,7 +81,7 @@ export function ProgressRecords({ initialExercise }: { initialExercise?: string 
 								<Select label={t(`${k}.exerciseLabel`)} options={options.map((o) => ({ value: o.id, label: o.name }))} value={exerciseId} onChange={setWanted} />
 								<ExerciseTrend key={exerciseId} history={history} exerciseId={exerciseId} today={today} name={exercise.name} />
 								{showFormula && <FormulaPanel history={history} exerciseId={exerciseId} />}
-								{isWeighted && <SetRecords history={history} exerciseId={exerciseId} />}
+								{showsSetRecords(plottedMetric(history, exerciseId)) && <SetRecords history={history} exerciseId={exerciseId} />}
 							</Card>
 						) : (
 							<p className={styles.hint}>{t(`${k}.emptyFilter`)}</p>

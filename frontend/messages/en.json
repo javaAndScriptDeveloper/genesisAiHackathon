@@ -924,8 +924,6 @@
           "time": "Longest hold"
         },
         "chartLabel": "{name}, {metric}",
-        "best": "Best so far",
-        "bestEstimate": "Best estimate",
         "sourceTitle": "Where this number comes from",
         "sourceBody": "This is an estimate, not a tested max. We use the Brzycki formula (weight × 36 ÷ (37 − reps)) on your best set of 10 reps or fewer.",
         "sourceExample": "{weight} × {reps} → ≈ {e1rm}",
@@ -937,9 +935,9 @@
         "listTitle": "Record history",
         "new": "New",
         "gain": "+{value}",
-        "gainFirst": "up from {previous}",
         "estimateNote": "estimate",
-        "allRecords": "All records for this exercise"
+        "allRecords": "All records for this exercise",
+        "approx": "≈ {value}"
       }
     },
     "awards": {

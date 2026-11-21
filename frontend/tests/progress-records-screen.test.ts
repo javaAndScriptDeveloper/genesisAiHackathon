@@ -15,6 +15,7 @@ import {
 	pointXs,
 	recordExercises,
 	recordKey,
+	showsSetRecords,
 	recordRows,
 } from "@/lib/progress/recordsScreen";
 import type { Exercise, History, SetLog, WorkoutSession } from "@/lib/progress/types";
@@ -67,6 +68,20 @@ describe("records screen helpers", () => {
 		expect(formulaParams(ex!, (kg, d) => `${kg.toFixed(d)} kg`)).toEqual({ weight: "32 kg", reps: 5, e1rm: "36.0 kg" });
 		expect(bestFormulaSet(H, "pushup")).toBeNull();
 		expect(bestFormulaSet(hist([sess("z", "2026-11-01", [wt(12, 40)])]), "goblet")).toBeNull();
+	});
+
+	it("formula params with an imperial formatter", () => {
+		const ex = bestFormulaSet(H, "goblet")!;
+		const lb = (kg: number, d: number) => `${(kg / 0.45359237).toFixed(d)} lb`;
+		expect(formulaParams(ex, lb)).toEqual({ weight: "71 lb", reps: 5, e1rm: "79.4 lb" });
+	});
+
+	it("set records are shown only for loaded metrics", () => {
+		expect(showsSetRecords("e1rm")).toBe(true);
+		expect(showsSetRecords("weight")).toBe(true);
+		expect(showsSetRecords("reps")).toBe(false);
+		expect(showsSetRecords("time")).toBe(false);
+		expect(showsSetRecords(null)).toBe(false);
 	});
 
 	it("plottedMetric: e1rm, weight fallback, reps", () => {

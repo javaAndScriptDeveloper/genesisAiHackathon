@@ -26,7 +26,7 @@ export function ExerciseTrend({ history, exerciseId, today, name }: { history: H
 			unit={unit}
 			label={t("fit.progress.recordsScreen.chartLabel", { name, metric: t(`fit.progress.recordsScreen.metric.${metric}`) })}
 			today={today}
-			valuePrefix={metric === "e1rm" ? "≈ " : ""}
+			estimate={metric === "e1rm"}
 			isLocked={(p) => isLockedPeriod(p, premium)}
 			lockedContent={<PremiumGate title={t("fit.progress.chart.lockedTitle")} body={t("fit.progress.chart.lockedBody")} source="records" >{null}</PremiumGate>}
 		/>

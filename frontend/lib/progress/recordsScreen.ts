@@ -160,3 +160,6 @@ export function periodChange(points: SeriesPoint[]): number {
 	const last = points[points.length - 1];
 	return first && last && points.length > 1 ? Math.round((last.value - first.value) * 10) / 10 : 0;
 }
+
+/** Set records (5/8/10 reps at a weight) only make sense for loaded exercises. */
+export const showsSetRecords = (metric: RecordMetric | null): boolean => metric === "e1rm" || metric === "weight";

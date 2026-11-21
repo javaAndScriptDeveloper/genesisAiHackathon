@@ -2,15 +2,15 @@
 
 import { Badge } from "@/components/ui";
 import { formatClock } from "@/lib/fit/dates";
-import { useUnits } from "@/lib/fit/store/hooks";
 import { useI18n } from "@/lib/i18n/I18nProvider";
 import type { RecordMetric } from "@/lib/progress/records";
 import type { RecordRow } from "@/lib/progress/recordsScreen";
+import { useMassFormat } from "./useMassFormat";
 import styles from "./ProgressRecords.module.scss";
 
 export function RecordList({ rows }: { rows: RecordRow[] }) {
 	const { t, locale } = useI18n();
-	const units = useUnits();
+	const fmt = useMassFormat();
 	const k = "fit.progress.recordsScreen";
 	const nf = new Intl.NumberFormat(locale, { maximumFractionDigits: 1 });
 	const date = (iso: string) => {
@@ -20,9 +20,9 @@ export function RecordList({ rows }: { rows: RecordRow[] }) {
 	const value = (metric: RecordMetric, v: number): string => {
 		switch (metric) {
 			case "e1rm":
-				return `≈ ${units.fmtMass(v, 1)}`;
+				return t(`${k}.approx`, { value: fmt.mass(v, 1) });
 			case "weight":
-				return units.fmtLoad(v);
+				return fmt.load(v);
 			case "reps":
 				return `${nf.format(v)} ${t("fit.progress.report.unit.reps")}`;
 			case "time":
@@ -32,9 +32,9 @@ export function RecordList({ rows }: { rows: RecordRow[] }) {
 	const gain = (metric: RecordMetric, g: number): string => {
 		switch (metric) {
 			case "e1rm":
-				return t(`${k}.gain`, { value: units.fmtMass(g, 1) });
+				return t(`${k}.gain`, { value: fmt.mass(g, 1) });
 			case "weight":
-				return t(`${k}.gain`, { value: units.fmtLoad(g) });
+				return t(`${k}.gain`, { value: fmt.load(g) });
 			case "reps":
 				return t(`${k}.gain`, { value: nf.format(g) });
 			case "time":

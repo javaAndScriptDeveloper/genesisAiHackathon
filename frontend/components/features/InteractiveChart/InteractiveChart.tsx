@@ -32,15 +32,15 @@ export interface InteractiveChartProps {
 	lockedContent?: ReactNode;
 	/** Formats a value for the readout; defaults to the locale number with at most one decimal. */
 	format?: (value: number) => string;
-	/** Prefix for estimated values, e.g. "≈ ". */
-	valuePrefix?: string;
+	/** Shows values as estimates ("≈ 36 kg"). */
+	estimate?: boolean;
 	/** Hide the "Expand" button (used inside the expanded sheet itself). */
 	hideExpand?: boolean;
 	className?: string;
 }
 
 export function InteractiveChart(props: InteractiveChartProps) {
-	const { points, unit, label, today, periods = ALL_PERIODS, defaultPeriod = "3m", isLocked, onLocked, lockedContent, format, valuePrefix = "", hideExpand = false, className } = props;
+	const { points, unit, label, today, periods = ALL_PERIODS, defaultPeriod = "3m", isLocked, onLocked, lockedContent, format, estimate = false, hideExpand = false, className } = props;
 	const { t, locale } = useI18n();
 	const [period, setPeriod] = useState<ChartPeriod>(periods.includes(defaultPeriod) ? defaultPeriod : (periods[0] ?? "3m"));
 	const [pickedDate, setPickedDate] = useState<IsoDate | null>(null);
@@ -56,6 +56,7 @@ export function InteractiveChart(props: InteractiveChartProps) {
 		return new Intl.DateTimeFormat(locale, { month: "short", day: "numeric", ...(sameYear ? {} : { year: "numeric" }) }).format(new Date(y, m - 1, day));
 	};
 
+	const approx = (v: string) => (estimate ? t("fit.progress.recordsScreen.approx", { value: v }) : v);
 	const locked = isLocked?.(period) ?? false;
 	const visible = useMemo(() => pointsInPeriod(points, today, PERIOD_DAYS[period]), [points, today, period]);
 	const wide = expanded && visible.length * PX_PER_POINT > BASE_W;
@@ -101,7 +102,7 @@ export function InteractiveChart(props: InteractiveChartProps) {
 	};
 
 	const change = periodChange(visible);
-	const desc = `${label}. ${visible.map((p) => `${fmtDate(p.date)}: ${valuePrefix}${fmt(p.value)} ${unit}`).join("; ")}`;
+	const desc = `${label}. ${visible.map((p) => `${fmtDate(p.date)}: ${approx(fmt(p.value))} ${unit}`).join("; ")}`;
 	const first = visible[0];
 	const last = visible[lastIndex];
 	const values = visible.map((p) => p.value);
@@ -129,10 +130,7 @@ export function InteractiveChart(props: InteractiveChartProps) {
 				<>
 					<div className={styles.readout} aria-live="polite">
 						<div className={styles.value}>
-							<strong>
-								{valuePrefix}
-								{current ? fmt(current.value) : ""}
-							</strong>
+							<strong>{current ? approx(fmt(current.value)) : ""}</strong>
 							<span className={styles.unit}>{unit}</span>
 							<span className={styles.date}>{current ? fmtDate(current.date) : ""}</span>
 						</div>
@@ -171,11 +169,9 @@ export function InteractiveChart(props: InteractiveChartProps) {
 								</text>
 							)}
 							{values.length > 1 && (
-								<>
-									<text x={box.padX} y={9} textAnchor="start" className={styles.axis}>
-										{fmt(Math.max(...values))}
-									</text>
-								</>
+								<text x={box.padX} y={9} textAnchor="start" className={styles.axis}>
+									{fmt(Math.max(...values))}
+								</text>
 							)}
 						</svg>
 					</div>
@@ -198,7 +194,7 @@ export function InteractiveChart(props: InteractiveChartProps) {
 			{body}
 			{!hideExpand && (
 				<Sheet open={expanded} onClose={() => setExpanded(false)} title={label} closeLabel={t("common.close")} variant="full">
-					<InteractiveChart {...props} hideExpand className={styles.expandedBody} defaultPeriod={period} />
+					<InteractiveChart {...props} hideExpand defaultPeriod={period} />
 				</Sheet>
 			)}
 		</>
