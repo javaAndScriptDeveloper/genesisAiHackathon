@@ -75,10 +75,10 @@ export function WeeklyReport({ week }: { week: string }) {
 					<h3 className={styles.h3}>{t("fit.progress.report.next")}</h3>
 					{planned === 0 ? <p className={styles.p}>{t("fit.progress.report.nextEmpty")}</p> : (
 						<ul className={styles.days}>
-							{nextWeek.days.map((d) => (
+							{nextWeek.days.map((d, i) => (
 								<li key={d.date} className={styles.day} data-type={d.type} data-none={d.status === "none" || undefined}>
-									<span>{t(`fit.progress.weekdays.${nextWeek.days.indexOf(d)}`).slice(0, 3)}</span>
-									<strong>{d.status === "none" ? "" : d.type === "workout" ? t("fit.progress.report.workoutDay") : t("fit.progress.report.restDay")}</strong>
+									<span>{t(`fit.progress.weekdays.${i}`).slice(0, 3)}</span>
+									<strong aria-label={d.status === "none" ? undefined : d.type === "workout" ? t("fit.progress.report.workoutDay") : t("fit.progress.report.restDay")}>{d.status === "none" ? "" : d.type === "workout" ? "●" : "○"}</strong>
 								</li>
 							))}
 						</ul>

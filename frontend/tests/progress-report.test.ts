@@ -30,5 +30,8 @@ describe("weeklyReport", () => {
 		expect(r.nextWeek.weekStart).toBe("2026-11-16");
 		expect(r.nextWeek.days).toHaveLength(7);
 	});
+	it("never reports consistency_up", () => {
+		for (const w of ["2026-11-02", "2026-11-09"]) expect(weeklyReport(h, w).insight?.id).not.toBe("consistency_up");
+	});
 	it("insight is null or has an id", () => expect(r.insight === null || typeof r.insight.id === "string").toBe(true));
 });

@@ -28,7 +28,8 @@ export function weeklyReport(h: History, week: IsoDate): WeeklyReport {
 		summary: periodSummary(h, week, end),
 		previous: periodSummary(h, prev, addDays(prev, 6)),
 		records: personalRecords(h).filter((r) => r.date >= week && r.date <= end),
-		insight: insights({ ...h, today: end }, 1)[0] ?? null,
+		// consistency_up uses a different metric than the app's consistency ring, so it is left out of reports.
+		insight: insights({ ...h, today: end }, 4).find((i) => i.id !== "consistency_up") ?? null,
 		nextWeek: weeklyGoal(h, addDays(week, 7)),
 	};
 }
