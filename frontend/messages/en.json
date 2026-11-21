@@ -35,6 +35,9 @@
     "unreachable": "The backend is unavailable or returned an unexpected response."
   },
   "fit": {
+    "ai": {
+      "fallbackSummary": "{name} here. I built this week from your goal, schedule and equipment. Tell me what you'd like to change and I'll rebuild it."
+    },
     "coach": {
       "title": "Personal Coach",
       "subtitle": "Ask, adjust, stay on track",
