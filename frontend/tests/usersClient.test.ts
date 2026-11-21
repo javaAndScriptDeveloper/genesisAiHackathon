@@ -9,7 +9,7 @@ afterEach(() => vi.unstubAllGlobals());
 
 describe("userPayload", () => {
 	it("maps the onboarding profile to the API body", () => {
-		expect(userPayload(profile, "hanna")).toEqual({ name: "Kate", gender: "female", weightKg: 62.5, heightCm: 170, level: "beginner", trainerId: "hanna" });
+		expect(userPayload(profile, "hanna")).toEqual({ name: "Kate", gender: "female", weightKg: 62.5, heightCm: 170, level: "beginner", daysPerWeek: 3, durationMin: 30, trainerId: "hanna" });
 	});
 	it("omits gender and trainer when not chosen", () => {
 		const body = userPayload({ ...profile, gender: null }, null);

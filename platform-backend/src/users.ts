@@ -16,6 +16,8 @@ const bodySchema = {
     heightCm: { type: "number", exclusiveMinimum: 0, maximum: 300 },
     level: { enum: ["beginner", "intermediate", "advanced"] },
     trainerId: { type: "string", minLength: 1, maxLength: 64 },
+    daysPerWeek: { type: "integer", minimum: 1, maximum: 7 },
+    durationMin: { type: "integer", minimum: 1, maximum: 600 },
   },
 } as const;
 
@@ -26,6 +28,8 @@ interface UserBody {
   heightCm?: number;
   level?: string;
   trainerId?: string;
+  daysPerWeek?: number;
+  durationMin?: number;
 }
 
 // The browser has no login yet, so a user is the device's progress token: the same guest user that progress sync
@@ -53,10 +57,12 @@ export function usersRoutes(db: Knex) {
           height: b.heightCm ?? null,
           level: b.level ?? null,
           trainerId: trainerRowId,
+          daysPerWeek: b.daysPerWeek ?? null,
+          durationMin: b.durationMin ?? null,
           updatedAt: db.fn.now(),
         });
         return reply.code(existed ? 200 : 201).send({
-          user: { name: b.name, gender: b.gender ?? null, weightKg: b.weightKg ?? null, heightCm: b.heightCm ?? null, level: b.level ?? null, trainerId: b.trainerId ?? null },
+          user: { name: b.name, gender: b.gender ?? null, weightKg: b.weightKg ?? null, heightCm: b.heightCm ?? null, level: b.level ?? null, trainerId: b.trainerId ?? null, daysPerWeek: b.daysPerWeek ?? null, durationMin: b.durationMin ?? null },
         });
       } catch (err) {
         app.log.error(err, "saving user failed");

@@ -9,6 +9,8 @@ export function userPayload(profile: Profile, trainerId: string | null) {
 		weightKg: profile.weightKg,
 		heightCm: profile.heightCm,
 		level: profile.experience,
+		daysPerWeek: profile.daysPerWeek,
+		durationMin: profile.durationMin,
 		...(trainerId ? { trainerId } : {}),
 	};
 }

@@ -9,7 +9,7 @@ import { seedTrainers } from "../src/trainers.js";
 const A = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
 const B = "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb";
 
-const profile = () => ({ name: "Kate", gender: "female", weightKg: 62.5, heightCm: 170, level: "beginner", trainerId: "hanna" });
+const profile = () => ({ name: "Kate", gender: "female", weightKg: 62.5, heightCm: 170, level: "beginner", trainerId: "hanna", daysPerWeek: 3, durationMin: 30 });
 
 describe("users API", () => {
   let container: StartedPostgreSqlContainer;
@@ -43,9 +43,10 @@ describe("users API", () => {
   it("creates the user from the onboarding profile and links the trainer by slug", async () => {
     const res = await call(A, profile());
     expect(res.statusCode).toBe(201);
-    expect(res.json()).toEqual({ user: { name: "Kate", gender: "female", weightKg: 62.5, heightCm: 170, level: "beginner", trainerId: "hanna" } });
+    expect(res.json()).toEqual({ user: { name: "Kate", gender: "female", weightKg: 62.5, heightCm: 170, level: "beginner", trainerId: "hanna", daysPerWeek: 3, durationMin: 30 } });
     const row = await db("users").join("trainers", "trainers.id", "users.trainer_id").first("users.name", "users.weight", "users.height", "trainers.slug");
     expect(row).toMatchObject({ name: "Kate", weight: 62.5, height: 170, slug: "hanna" });
+    expect(await db("users").first("days_per_week", "duration_min")).toEqual({ daysPerWeek: 3, durationMin: 30 });
   });
 
   it("is idempotent per token: a second call updates the same user", async () => {
@@ -73,11 +74,11 @@ describe("users API", () => {
   it("accepts a profile without optional fields and ignores no trainer", async () => {
     const res = await call(A, { name: "Kate" });
     expect(res.statusCode).toBe(201);
-    expect(res.json().user).toEqual({ name: "Kate", gender: null, weightKg: null, heightCm: null, level: null, trainerId: null });
+    expect(res.json().user).toEqual({ name: "Kate", gender: null, weightKg: null, heightCm: null, level: null, trainerId: null, daysPerWeek: null, durationMin: null });
   });
 
   it("rejects bad input with 400 and creates nothing", async () => {
-    for (const bad of [{}, { name: "" }, { name: "x", weightKg: -1 }, { name: "x", extra: 1 }, { name: "x", level: "god" }]) {
+    for (const bad of [{}, { name: "" }, { name: "x", weightKg: -1 }, { name: "x", extra: 1 }, { name: "x", level: "god" }, { name: "x", daysPerWeek: 8 }, { name: "x", durationMin: 0 }]) {
       expect((await call(A, bad)).statusCode).toBe(400);
     }
     expect(await count("users")).toBe(0);
