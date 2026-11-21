@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowRight01Icon, CreditCardIcon, CrownIcon, Dumbbell03Icon, Edit02Icon, Notification03Icon, Restaurant01Icon, Settings02Icon, SmartWatch01Icon, UserGroupIcon } from "@hugeicons/core-free-icons";
+import { ArrowRight01Icon, CrownIcon, Dumbbell03Icon, Edit02Icon, Notification03Icon, Restaurant01Icon, Settings02Icon, SmartWatch01Icon, Target02Icon, UserGroupIcon } from "@hugeicons/core-free-icons";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ScreenHeader } from "@/components/features/ScreenHeader/ScreenHeader";
@@ -18,7 +18,6 @@ import styles from "./Profile.module.scss";
 const LINKS: { href: string; key: string; icon: IconDefinition }[] = [
 	{ href: "/profile/edit", key: "preferences", icon: Edit02Icon },
 	{ href: "/notifications", key: "notifications", icon: Notification03Icon },
-	{ href: "/subscription", key: "subscription", icon: CreditCardIcon },
 	{ href: "/devices", key: "devices", icon: SmartWatch01Icon },
 	{ href: "/nutrition", key: "nutrition", icon: Restaurant01Icon },
 	{ href: "/partners", key: "partners", icon: UserGroupIcon },
@@ -33,6 +32,7 @@ export function Profile() {
 	const stats = useFitStats();
 	const u = useUnits();
 	const p = state.profile;
+	const premium = state.subscription.tier === "premium";
 	if (!p) return null;
 	return (
 		<div className={kit.page}>
@@ -45,7 +45,7 @@ export function Profile() {
 							<h2 className={kit.h2}>{p.name}</h2>
 							<p className={kit.note}>{t("fit.profile.levelLine", { level: stats.level.level, xp: stats.xp })}</p>
 						</div>
-						<Badge tone={state.subscription.tier === "premium" ? "accent" : "neutral"}>{state.subscription.tier === "premium" ? t("fit.common.premium") : t("fit.profile.free")}</Badge>
+						<Badge tone={premium ? "accent" : "neutral"}>{premium ? t("fit.common.premium") : t("fit.profile.free")}</Badge>
 					</div>
 					<div className={kit.chips}>
 						<Badge tone="accent">
@@ -60,23 +60,34 @@ export function Profile() {
 							{p.durationMin} {t("fit.common.minShort")}
 						</Badge>
 					</div>
-					{p.goalText && <p className={`${kit.note} ${styles.goalText}`}>“{p.goalText}”</p>}
 					<p className={kit.note}>{fmtHeight(p.heightCm, u.units)} · {u.fmtMass(p.weightKg, 1)} · BMI {bmi(p)}</p>
 				</Card>
-				{state.subscription.tier !== "premium" && (
-					<Button iconLeft={CrownIcon} onClick={() => router.push("/subscription", { transitionTypes: ["nav-forward"] })}>
-						{t("fit.profile.goPremium")}
-					</Button>
-				)}
-				<Link href="/settings" transitionTypes={["nav-forward"]} className={kit.row}>
-					<Avatar name={trainer?.name ?? t("fit.profile.yourTrainer")} src={trainer?.pathToImage} size={44} />
-					<span className={kit.rowText}>
-						<strong>{t("fit.profile.yourTrainer")}{trainer ? `: ${trainer.name}` : ""}</strong>
-						<span>{trainer ? trainer.tov.split(". ")[0] : t("fit.profile.trainerHint")}</span>
-					</span>
-					<Icon icon={ArrowRight01Icon} size={16} />
-				</Link>
+				<Button iconLeft={CrownIcon} variant={premium ? "secondary" : "primary"} onClick={() => router.push("/subscription", { transitionTypes: ["nav-forward"] })}>
+					{premium ? t("fit.profile.managePremium") : t("fit.profile.goPremium")}
+				</Button>
 				<ul className={kit.list}>
+					<li>
+						<Link href="/profile/goal" transitionTypes={["nav-forward"]} className={kit.row}>
+							<span className={kit.plate}>
+								<Icon icon={Target02Icon} size={20} />
+							</span>
+							<span className={kit.rowText}>
+								<strong>{t("fit.profile.goalRow")}</strong>
+								<span className={styles.goalText}>{p.goalText ?? t(`fit.opt.goal.${p.goal}.label`)}</span>
+							</span>
+							<Icon icon={ArrowRight01Icon} size={16} />
+						</Link>
+					</li>
+					<li>
+						<Link href="/profile/trainer" transitionTypes={["nav-forward"]} className={kit.row}>
+							<Avatar name={trainer?.name ?? t("fit.profile.trainerRow")} src={trainer?.pathToImage} size={44} />
+							<span className={kit.rowText}>
+								<strong>{t("fit.profile.trainerRow")}{trainer ? `: ${trainer.name}` : ""}</strong>
+								<span>{trainer ? trainer.tov.split(". ")[0] : t("fit.profile.trainerHint")}</span>
+							</span>
+							<Icon icon={ArrowRight01Icon} size={16} />
+						</Link>
+					</li>
 					{LINKS.map((l) => (
 						<li key={l.href}>
 							<Link href={l.href} transitionTypes={["nav-forward"]} className={kit.row}>

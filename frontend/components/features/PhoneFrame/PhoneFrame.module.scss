@@ -20,6 +20,25 @@
 	}
 }
 
+.analyticsLink {
+	display: none;
+	position: absolute;
+	inset-block-start: var(--space-5);
+	inset-inline-end: var(--space-5);
+	min-height: var(--hit-target);
+	align-items: center;
+	gap: var(--space-2);
+	padding-inline: var(--space-3);
+	color: var(--color-onPrimary);
+	font-size: 1.35rem;
+	font-weight: 650;
+	@include corners.radius(var(--radius-control));
+	@include mixins.focus-ring;
+
+	&:hover { background: var(--color-primaryHover); }
+	@include mixins.respond(lg) { display: inline-flex; }
+}
+
 // Fitness app theme: Training UI design system (training-ui/), dark. Scoped to the device so /ui-kit keeps the base kit look.
 .device {
 	--card-padding: var(--space-4);

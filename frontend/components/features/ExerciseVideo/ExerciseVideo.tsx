@@ -12,7 +12,8 @@ interface ExerciseVideoProps {
 	exercise: Exercise;
 	compact?: boolean;
 	autoPlay?: boolean;
-	/** Content laid over the top of the video (title, metrics). Switches to the taller hero frame and drops the caption links. */
+	fullWidth?: boolean;
+	/** Content laid over the top of the video (title, metrics). Switches to the taller workout frame. */
 	overlay?: ReactNode;
 }
 
@@ -20,15 +21,16 @@ export function ExerciseVideo(props: ExerciseVideoProps) {
 	return <ExercisePlayer key={props.exercise.id} {...props} />;
 }
 
-function ExercisePlayer({ exercise, compact = false, autoPlay = false, overlay }: ExerciseVideoProps) {
+function ExercisePlayer({ exercise, compact = false, autoPlay = false, fullWidth = false, overlay }: ExerciseVideoProps) {
 	const t = useT();
 	const video = videoFor(exercise);
 	const [playing, setPlaying] = useState(false);
 	const player = useRef<HTMLIFrameElement>(null);
 	const [paused, setPaused] = useState(false);
 	const hero = !!overlay;
+	const playerOrigin = new URL(video.embedUrl).origin;
 	// Hero mode hides YouTube's own chrome (title, controls) and drives the player through its postMessage API: only play/pause is exposed.
-	const command = (func: string) => player.current?.contentWindow?.postMessage(JSON.stringify({ event: "command", func, args: "" }), "*");
+	const command = (func: string) => player.current?.contentWindow?.postMessage(JSON.stringify({ event: "command", func, args: [] }), playerOrigin);
 	const toggle = () => {
 		command(paused ? "playVideo" : "pauseVideo");
 		setPaused(!paused);
@@ -37,7 +39,7 @@ function ExercisePlayer({ exercise, compact = false, autoPlay = false, overlay }
 	useEffect(() => {
 		if (!hero) return;
 		const onMessage = (event: MessageEvent) => {
-			if (event.source !== player.current?.contentWindow || typeof event.data !== "string") return;
+			if (event.origin !== playerOrigin || event.source !== player.current?.contentWindow || typeof event.data !== "string") return;
 			try {
 				const data: unknown = JSON.parse(event.data);
 				if (typeof data === "object" && data !== null && "event" in data && "info" in data && data.event === "onStateChange" && data.info === 0) command("playVideo");
@@ -48,22 +50,20 @@ function ExercisePlayer({ exercise, compact = false, autoPlay = false, overlay }
 		window.addEventListener("message", onMessage);
 		return () => window.removeEventListener("message", onMessage);
 	});
-	const heroParams = hero ? `&controls=0&modestbranding=1&disablekb=1&fs=0&iv_load_policy=3&enablejsapi=1` : "";
+	const heroParams = hero ? "&enablejsapi=1" : "";
 	const title = video.relatedTitle ?? t("fit.video.title", { name: exercise.name });
 
 	return (
-		<figure className={styles.figure}>
-			{!overlay && video.relatedTitle && <figcaption className={styles.related}>{t("fit.video.related", { name: video.relatedTitle })}</figcaption>}
-			<div className={styles.frame} data-compact={compact || undefined} data-hero={overlay ? true : undefined}>
+		<figure className={styles.figure} data-full-width={fullWidth || undefined}>
+			<div className={styles.frame} data-compact={compact || undefined} data-hero={hero || undefined}>
 				{autoPlay || playing ? (
 					<iframe
 						ref={player}
-						onLoad={() => player.current?.contentWindow?.postMessage(JSON.stringify({ event: "listening", id: 1, channel: "widget" }), "*")}
+						onLoad={hero ? () => player.current?.contentWindow?.postMessage(JSON.stringify({ event: "listening", id: 1, channel: "widget" }), playerOrigin) : undefined}
 						className={styles.iframe}
-						src={`${video.embedUrl}&autoplay=1${autoPlay ? "&mute=1" : ""}${heroParams}`}
+						src={`${video.embedUrl}&autoplay=1&controls=0&fs=0&iv_load_policy=3${autoPlay ? "&mute=1" : ""}${heroParams}`}
 						title={title}
-						allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
-						allowFullScreen
+						allow="autoplay; encrypted-media"
 						referrerPolicy="strict-origin-when-cross-origin"
 					/>
 				) : (
@@ -80,16 +80,7 @@ function ExercisePlayer({ exercise, compact = false, autoPlay = false, overlay }
 					</button>
 				)}
 			</div>
-			{!overlay && <div className={styles.caption}>
-				<a href={video.watchUrl} target="_blank" rel="noopener noreferrer" className={styles.link}>
-					{t("fit.video.openYoutube")}
-				</a>
-				{video.relatedTitle && (
-					<a href={video.searchUrl} target="_blank" rel="noopener noreferrer" className={styles.link}>
-						{t("fit.video.searchExact")}
-					</a>
-				)}
-			</div>}
+			{!hero && video.relatedTitle && <figcaption className={styles.related}>{t("fit.video.related", { name: video.relatedTitle })}</figcaption>}
 		</figure>
 	);
 }

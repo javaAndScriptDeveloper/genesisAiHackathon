@@ -18,11 +18,13 @@ Mobile-first coaching app that lives in the route group `app/(app)/`. Desktop re
 ## Mock vs real
 Everything is frontend state + localStorage today. Needs a backend (Next.js route handlers or the platform-backend service) when productionised: accounts/sync, real push notifications, Apple Health / Garmin OAuth or a native bridge, payments, partner matching, optional LLM coach (`/api/ai` exists and can replace `coachReply`, keep the action types).
 
+`/analytics` lives outside the phone shell. The dashboard reads event names, timestamps and workout-completion flags persisted by `track` under `fit.analytics.v1.*`. It starts collecting on installation and clears the event log on profile reset. The economics calculator uses the scenario inputs from the market report. Billing, provider usage and cross-device cohorts require server-side sources.
+
 ## Videos
-`lib/fit/videos.ts` maps exercise id → video id from the Leap Fitness channel (embedded with youtube-nocookie, loaded on tap, never downloaded). Unmapped exercises show a channel-search link. Override at deploy time with `NEXT_PUBLIC_EXERCISE_VIDEO_MAP='{"goblet-squat":"<11-char id>"}'`.
+`lib/fit/videos.ts` maps exercise id → video id from the Leap Fitness channel (embedded with youtube-nocookie). Exercise details autoplay muted with the native control bar hidden. Unmapped exercises show a labeled related clip. Override at deploy time with `NEXT_PUBLIC_EXERCISE_VIDEO_MAP='{"goblet-squat":"<11-char id>"}'`.
 
 ## Page transitions
-`app/(app)/template.tsx` wraps each page in React `<ViewTransition>`. Direction comes from `transitionTypes` (`nav-forward` / `nav-back`) on `Link` and `router.push`: bottom-nav tabs pick it from tab order, drill-down links use forward, header back uses back; everything else gets a soft fade. Styles live in `styles/partials/_transitions.scss` (only page content is animated, reduced motion disables it).
+The app shell wraps the scrollable page in React `<ViewTransition>`. Direction comes from `transitionTypes` on links and router calls. Exercise detail links opt out of the page transition and leave scroll restoration to the shell. The library preserves filters and the horizontal category rail in memory so the shell restores the prior vertical position against the same list. Motion styles live in `styles/partials/_transitions.scss` and honor reduced motion.
 
 ## Units (kg / lb)
 All data is stored metric (kg, cm). `state.units` (`metric` | `imperial`, default metric, chosen in onboarding and Settings) only changes display and input. Never write "kg" in a component: use `useUnits()` (`fmtLoad`, `fmtMass`, `mass`, `toKg`, `unit`) or `lib/fit/units.ts`. Animated numbers use `AnimatedNumber` (`@number-flow/react`).

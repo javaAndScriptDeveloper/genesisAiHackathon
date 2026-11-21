@@ -1,8 +1,8 @@
 "use client";
 
-import { FireIcon, Search01Icon, Tick02Icon } from "@hugeicons/core-free-icons";
+import { Search01Icon, Tick02Icon } from "@hugeicons/core-free-icons";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useLayoutEffect, useMemo, useRef, useState } from "react";
 import { ScreenHeader } from "@/components/features/ScreenHeader/ScreenHeader";
 import { Picture } from "@/components/ui/Picture/Picture";
 import { NextWorkoutCard } from "@/components/features/NextWorkoutCard/NextWorkoutCard";
@@ -21,14 +21,33 @@ import styles from "./Training.module.scss";
 
 const MUSCLES: Muscle[] = ["chest", "back", "legs", "glutes", "shoulders", "arms", "core", "cardio", "mobility"];
 
+interface LibraryFilters {
+	query: string;
+	muscle: Muscle | "all";
+	onlyMine: boolean;
+}
+
+// Keep the filtered list the same height when the shell restores its scroll position on return.
+let libraryFilters: LibraryFilters = { query: "", muscle: "all", onlyMine: true };
+let categoryScroll = 0;
+
 export function Training() {
 	const { t, locale } = useI18n();
 	const { state, today } = useFit();
 	const [tab, setTab] = useTabMemory<"plan" | "library">("training.tab", "plan");
 	const [offset, setOffset] = useState(0);
-	const [query, setQuery] = useState("");
-	const [muscle, setMuscle] = useState<Muscle | "all">("all");
-	const [onlyMine, setOnlyMine] = useState(true);
+	const [filters, setFilters] = useState(() => libraryFilters);
+	const { query, muscle, onlyMine } = filters;
+	const categories = useRef<HTMLDivElement>(null);
+
+	useLayoutEffect(() => {
+		if (categories.current) categories.current.scrollLeft = categoryScroll;
+	}, [tab]);
+
+	function updateFilters(changes: Partial<LibraryFilters>) {
+		libraryFilters = { ...filters, ...changes };
+		setFilters(libraryFilters);
+	}
 	const profile = state.profile;
 	const upNext = nextUpcoming(state.planned, today);
 
@@ -101,46 +120,52 @@ export function Training() {
 				) : (
 					<>
 						<div className={styles.search}>
-							<Input label={t("fit.training.search")} placeholder={t("fit.training.searchPlaceholder")} value={query} onChange={(e) => setQuery(e.target.value)} />
+							<Input label={t("fit.training.search")} placeholder={t("fit.training.searchPlaceholder")} value={query} onChange={(e) => updateFilters({ query: e.target.value })} />
 							<Icon icon={Search01Icon} size={18} className={styles.searchIcon} />
 						</div>
-						<div className={styles.muscleCards} role="group" aria-label={t("fit.training.filterMuscle")}>
-							{(["all", ...MUSCLES] as const).map((category) => {
-								const exercises = category === "all" ? matchingExercises : matchingExercises.filter((exercise) => exercise.muscle === category);
-								const count = exercises.length;
-								const hasHard = exercises.some((exercise) => exercise.level === 3);
-								const hasMedium = exercises.some((exercise) => exercise.level === 2);
-								return (
-									<button key={category} type="button" className={styles.muscleCard} aria-pressed={muscle === category} onClick={() => setMuscle(category)}>
-										<Picture name={`training-${category}`} alt="" width={384} height={384} sizes="172px" className={styles.cover} />
-										<span className={styles.cardBadges}>
-											{hasMedium && <span className={styles.medium}>{t("fit.training.medium")}</span>}
-											{hasHard && <span className={styles.pro} aria-label={t("fit.training.proLevel")}><Icon icon={FireIcon} size={12} />{t("fit.training.pro")}</span>}
-										</span>
-										<span className={styles.cardLabel}>
-											<strong>{t(`fit.muscle.${category}`)}</strong>
-											<span>{t(`fit.training.exerciseCount.${countPlural.select(count)}`, { count })}</span>
-										</span>
-									</button>
-								);
-							})}
+						<div className={styles.libraryFilters}>
+							<div ref={categories} className={styles.muscleCards} role="group" aria-label={t("fit.training.filterMuscle")} onScroll={(event) => { categoryScroll = event.currentTarget.scrollLeft; }}>
+								{(["all", ...MUSCLES] as const).map((category) => {
+									const exercises = category === "all" ? matchingExercises : matchingExercises.filter((exercise) => exercise.muscle === category);
+									const count = exercises.length;
+									const hasHard = exercises.some((exercise) => exercise.level === 3);
+									const hasMedium = exercises.some((exercise) => exercise.level === 2);
+									return (
+										<button key={category} type="button" className={styles.muscleCard} aria-pressed={muscle === category} onClick={() => updateFilters({ muscle: category })}>
+											<Picture name={`training-${category}`} alt="" width={384} height={384} sizes="172px" className={styles.cover} />
+											<span className={styles.cardBadges}>
+												{hasMedium && <span className={styles.medium}>{t("fit.training.medium")}</span>}
+												{hasHard && <span className={styles.pro} aria-label={t("fit.training.proLevel")}><span className={styles.fireEmoji} aria-hidden>🔥</span>{t("fit.training.pro")}</span>}
+											</span>
+											<span className={styles.cardLabel}>
+												<strong>{t(`fit.muscle.${category}`)}</strong>
+												<span>{t(`fit.training.exerciseCount.${countPlural.select(count)}`, { count })}</span>
+											</span>
+										</button>
+									);
+								})}
+							</div>
+							<Checkbox compact className={styles.onlyMine} label={t("fit.training.onlyMine")} title={t("fit.training.onlyMineHint")} checked={onlyMine} onChange={(e) => updateFilters({ onlyMine: e.target.checked })} />
 						</div>
-						<Checkbox compact className={styles.onlyMine} label={t("fit.training.onlyMine")} title={t("fit.training.onlyMineHint")} checked={onlyMine} onChange={(e) => setOnlyMine(e.target.checked)} />
 						{library.length === 0 ? (
-							<EmptyState title={t("fit.training.noResults")} description={t("fit.training.noResultsBody")} action={<Button variant="secondary" onClick={() => { setQuery(""); setMuscle("all"); setOnlyMine(false); }}>{t("fit.training.clearFilters")}</Button>} />
+							<EmptyState title={t("fit.training.noResults")} description={t("fit.training.noResultsBody")} action={<Button variant="secondary" onClick={() => updateFilters({ query: "", muscle: "all", onlyMine: false })}>{t("fit.training.clearFilters")}</Button>} />
 						) : (
 							<ul className={styles.list}>
 								{library.map((e) => (
 									<li key={e.id}>
-										<Link href={`/training/exercise/${e.id}`} transitionTypes={["nav-forward"]} className={styles.exercise}>
+										<Link href={`/training/exercise/${e.id}`} scroll={false} transitionTypes={["nav-exercise"]} className={styles.exercise}>
 											<span className={styles.exIcon}>
 												<SportIcon name={KIND_ICON[e.kind]} size={20} />
 											</span>
-											<span className={styles.exName}>{e.name}</span>
-											<span className={styles.exMeta}>
-												<Badge>{t(`fit.muscle.${e.muscle}`)}</Badge>
-												<Badge tone={e.level === 1 ? "success" : e.level === 2 ? "warning" : "danger"}>{t(`fit.level.${e.level}`)}</Badge>
+											<span className={styles.exText}>
+												<strong className={styles.exName}>{e.name}</strong>
+												<span className={styles.exSummary}>{e.summary}</span>
+												<span className={styles.exMeta}>
+													<Badge>{t(`fit.muscle.${e.muscle}`)}</Badge>
+													<Badge tone={e.level === 1 ? "success" : e.level === 2 ? "warning" : "danger"}>{t(`fit.level.${e.level}`)}</Badge>
+												</span>
 											</span>
+											<Icon icon={ArrowRight01Icon} size={18} className={styles.exArrow} />
 										</Link>
 									</li>
 								))}

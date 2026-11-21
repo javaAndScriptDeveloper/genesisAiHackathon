@@ -35,15 +35,16 @@ export function GoalCard() {
 			const data: unknown = await response.json().catch(() => null);
 			if (!response.ok || typeof data !== "object" || data === null || !("text" in data) || typeof data.text !== "string" || data.text === "") throw new Error("stt");
 			const heard = data.text;
-			setText((prev) => (prev.trim() ? `${prev.trim()} ${heard}` : heard).slice(0, 500));
+			// A new recording replaces the goal instead of piling onto the previous one.
+			setText(heard.slice(0, 500));
 		} catch {
-			toast.show(t("fit.settings.micFailed"), "danger");
+			toast.show(t("fit.profile.micFailed"), "danger");
 		} finally {
 			setTranscribing(false);
 		}
 	};
 
-	const micMessage = recorder.status === "unsupported" ? t("fit.settings.micUnsupported") : recorder.status === "denied" ? t("fit.settings.micDenied") : null;
+	const micMessage = recorder.status === "unsupported" ? t("fit.profile.micUnsupported") : recorder.status === "denied" ? t("fit.profile.micDenied") : null;
 
 	const save = async () => {
 		const wording = text.trim();
@@ -52,20 +53,20 @@ export function GoalCard() {
 		const match = await matchGoal(wording);
 		dispatch({ type: "set-goal", goal: match.status === "matched" ? match.goal : profile.goal, goalText: wording, today });
 		setSaving(false);
-		if (match.status === "matched") toast.show(t("fit.settings.goalSaved"), "success");
-		else toast.show(t(match.status === "none" ? "fit.settings.goalKept" : "fit.settings.goalUnavailable"), "danger");
+		if (match.status === "matched") toast.show(t("fit.profile.goalSaved"), "success");
+		else toast.show(t(match.status === "none" ? "fit.profile.goalKept" : "fit.profile.goalUnavailable"), "danger");
 	};
 
 	return (
 		<Card className={kit.stack}>
-			<h2 className={`${kit.h2} ${kit.heading}`}><Icon icon={Target02Icon} size={20} />{t("fit.settings.goalTitle")}</h2>
-			<Textarea label={t("fit.settings.goalLabel")} hint={t("fit.settings.goalHint")} rows={3} maxLength={500} value={text} onChange={(e) => setText(e.target.value)} />
+			<h2 className={`${kit.h2} ${kit.heading}`}><Icon icon={Target02Icon} size={20} />{t("fit.profile.goalTitle")}</h2>
+			<Textarea label={t("fit.profile.goalLabel")} hint={t("fit.profile.goalHint")} rows={3} maxLength={500} value={text} onChange={(e) => setText(e.target.value)} />
 			<div className={kit.stack}>
-				<IconButton variant="secondary" icon={recorder.status === "recording" ? StopIcon : Mic01Icon} label={recorder.status === "recording" ? t("fit.settings.micStop") : t("fit.settings.micStart")} aria-pressed={recorder.status === "recording"} disabled={transcribing} onClick={toggleMic} />
-				{transcribing && <p className={kit.note}>{t("fit.settings.micTranscribing")}</p>}
+				<IconButton variant="secondary" icon={recorder.status === "recording" ? StopIcon : Mic01Icon} label={recorder.status === "recording" ? t("fit.profile.micStop") : t("fit.profile.micStart")} aria-pressed={recorder.status === "recording"} disabled={transcribing} onClick={toggleMic} />
+				{transcribing && <p className={kit.note}>{t("fit.profile.micTranscribing")}</p>}
 				{micMessage && <p className={kit.note} role="alert">{micMessage}</p>}
 			</div>
-			<Button loading={saving} disabled={text.trim() === ""} onClick={save}>{t("fit.settings.goalSave")}</Button>
+			<Button loading={saving} disabled={text.trim() === ""} onClick={save}>{t("fit.profile.goalSave")}</Button>
 		</Card>
 	);
 }

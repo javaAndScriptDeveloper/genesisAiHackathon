@@ -1,7 +1,7 @@
 "use client";
 
 import { CrownIcon, Tick02Icon } from "@hugeicons/core-free-icons";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { Notice } from "@/components/features/Notice/Notice";
 import { ScreenHeader } from "@/components/features/ScreenHeader/ScreenHeader";
 import { Badge, Button, Card, Icon, useToast } from "@/components/ui";
@@ -20,7 +20,10 @@ export function Subscription({ source }: { source: string }) {
 	const toast = useToast();
 	const { state, dispatch } = useFit();
 	const premium = state.subscription.tier === "premium";
+	const viewedSource = useRef<string | null>(null);
 	useEffect(() => {
+		if (viewedSource.current === source) return;
+		viewedSource.current = source;
 		track("subscription_viewed", { source });
 	}, [source]);
 

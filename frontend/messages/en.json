@@ -34,6 +34,143 @@
     "time": "Time",
     "unreachable": "The backend is unavailable or returned an unexpected response."
   },
+  "analytics": {
+    "title": "Analytics",
+    "brand": "Personal Coach",
+    "openApp": "Open app",
+    "economics": "Unit economics",
+    "model": {
+      "badge": "Planning model · USD",
+      "subtitle": "Revenue, costs and acquisition per paying subscriber.",
+      "scenario": "Scenario",
+      "scenarios": {
+        "conservative": "Conservative",
+        "base": "Base case",
+        "optimistic": "Optimistic"
+      },
+      "metrics": {
+        "ltv": "Contribution LTV",
+        "cac": "Blended CAC",
+        "ratio": "LTV / CAC",
+        "payback": "CAC payback"
+      },
+      "ltvDetail": "Lifetime contribution per subscriber",
+      "cacDetail": "{value} from paid channels alone",
+      "ratioDetail": "1× covers acquisition costs",
+      "paybackDetail": "From recognized contribution",
+      "noPayback": "Not reached",
+      "months": "{value} mo.",
+      "multiple": "{value}×",
+      "chartTitle": "Acquisition payback",
+      "chartDetail": "Cumulative contribution per new subscriber over 24 months",
+      "cumulative": "Cumulative contribution",
+      "axis": "${value}",
+      "chartMonth": "Month {month}",
+      "costPerMonth": "Per month",
+      "costShare": "Share of gross revenue",
+      "costTitle": "Monthly cost breakdown",
+      "costDetail": "Per paid subscriber-month, weighted by plan mix",
+      "gross": "Gross revenue per month",
+      "costs": {
+        "fees": "Store fees",
+        "ai": "AI inference",
+        "infra": "Infrastructure & analytics",
+        "contribution": "Contribution margin"
+      },
+      "breakEven": "Break-even",
+      "breakEvenDetail": "Adjust organic acquisition and monthly overhead.",
+      "organic": "Organic share of installs",
+      "fixed": "Fixed costs per month",
+      "organicError": "Enter 0–100%. Using 50% for now.",
+      "fixedError": "Enter 0–1 billion USD. Using $5,000 for now.",
+      "subscribers": "Active subscribers to cover overhead",
+      "organicThreshold": "Minimum organic share to cover CAC",
+      "method": "Assumptions and formulas",
+      "inputs": {
+        "monthlyPrice": "Monthly plan price",
+        "annualPrice": "Annual plan price",
+        "annualShare": "Annual share of subscribers",
+        "annualRenewal": "First annual renewal rate",
+        "monthlyLifetime": "Paid months on monthly plan",
+        "cpi": "Paid cost per install",
+        "conversion": "Install-to-paid conversion",
+        "storeFee": "Store commission"
+      },
+      "notes": {
+        "ltv": "Contribution LTV = net subscription revenue minus AI and variable infrastructure costs, weighted across monthly and annual plans.",
+        "cac": "Paid CAC = cost per install ÷ install-to-paid conversion. Blended CAC assumes the same conversion for organic installs and zero incremental organic spend.",
+        "payback": "Payback is the first month cumulative contribution covers blended CAC. The model recognizes annual revenue over each 12-month term and includes one possible renewal.",
+        "fixed": "Operating break-even = fixed costs ÷ monthly contribution per active subscriber, rounded up. Acquisition spend is tracked separately in CAC.",
+        "limits": "The model excludes free-tier usage, voice, taxes, refunds and wearable integration costs. The AI estimate uses planned token volumes and rates from the report.",
+        "source": "Source — Fitness Companion Market Evidence & Unit Economics Report, section 4. Values are recalculated from its input assumptions."
+      }
+    },
+    "build": {
+      "title": "MVP build payback",
+      "subtitle": "Hackathon build from 10:30 to 17:50. The hourly rate is an estimate you can change.",
+      "elapsed": "Elapsed build time",
+      "duration": "{hours} h {minutes} min",
+      "hourly": "Combined team rate per hour",
+      "hourlyError": "Enter 0–1 million USD. Using $50 for now.",
+      "cost": "One-time labor cost",
+      "payers": "New payers to recover labor in 12 months",
+      "recoverable": "{value} per payer in first-year contribution after blended CAC, before monthly overhead.",
+      "unrecoverable": "First-year contribution after blended CAC is {value} per payer. This acquisition mix leaves no surplus for the build."
+    },
+    "activity": {
+      "title": "Product activity",
+      "badge": "This browser",
+      "subtitle": "Recorded app events on this browser and device.",
+      "period": "Activity period",
+      "periods": {
+        "week": "7 days",
+        "month": "30 days",
+        "quarter": "90 days"
+      },
+      "metrics": {
+        "onboarding": "Onboarding",
+        "starts": "Workout starts",
+        "completed": "Completed workouts",
+        "quality": "Planned workouts ≥80%"
+      },
+      "details": {
+        "onboarding": "Completed onboarding flows",
+        "starts": "Plan and extra sessions",
+        "completed": "Sessions marked complete",
+        "quality": "At least 80% of planned sets"
+      },
+      "chartTitle": "Event volume",
+      "chartDetail": "All tracked product events",
+      "total": "{count} recorded events",
+      "eventCount": "Recorded events",
+      "empty": "No events in this period",
+      "emptyDetail": "Finish onboarding, start a workout or use the coach to populate this view.",
+      "unavailable": "Browser storage is unavailable",
+      "unavailableDetail": "Allow site storage to record and view activity here.",
+      "eventsTitle": "Events by type",
+      "eventsDetail": "Counts for the selected period",
+      "events": {
+        "onboarding_completed": "Onboarding completed",
+        "workout_started": "Workout started",
+        "workout_paused": "Workout paused",
+        "workout_completed": "Workout logged",
+        "workout_abandoned": "Workout ended early",
+        "workout_adapted": "Workout adapted",
+        "coach_used": "Coach message sent",
+        "achievement_unlocked": "Achievement unlocked",
+        "notification_opened": "Notification opened",
+        "subscription_viewed": "Subscription viewed",
+        "subscription_started": "Demo trial started"
+      },
+      "coverage": "What the dashboard measures",
+      "notes": {
+        "retention": "Counts start when this dashboard’s event storage is enabled. The browser retains up to 4,000 recent events and shows up to 90 calendar days.",
+        "workouts": "Logged workouts include partial sessions. The 80% metric uses the planned set count after workout adjustments and excludes extra sessions, safety stops and seeded history.",
+        "subscription": "Trials in the app are demos. Prices, acquisition costs and AI expenses above are planning estimates.",
+        "cohorts": "The product goal is three planned workouts in the first 14 days. Cohort activation and retention require shared user IDs and server-side event collection."
+      }
+    }
+  },
   "fit": {
     "coach": {
       "title": "Personal Coach",
@@ -517,6 +654,26 @@
     },
     "profile": {
       "title": "Profile",
+      "goalTitle": "Your goal",
+      "goalLabel": "Describe your goal",
+      "goalHint": "For example: run a half marathon by June.",
+      "goalSave": "Save goal",
+      "micStart": "Speak your goal",
+      "micStop": "Stop recording",
+      "micTranscribing": "Listening to what you said…",
+      "micFailed": "Couldn't turn your voice into text. You can type your goal instead.",
+      "micDenied": "Microphone access was blocked. Allow it in your browser, or type your goal.",
+      "micUnsupported": "Voice input isn't supported in this browser. Type your goal instead.",
+      "goalSaved": "Goal updated and plan refreshed",
+      "goalUnavailable": "Saved your wording, but goal matching is unavailable right now, so your plan is unchanged.",
+      "goalKept": "Saved your wording, but it didn't match a preset, so your plan is unchanged.",
+      "trainerTitle": "Your trainer",
+      "trainerNote": "Pick who coaches you.",
+      "trainerLoadFailed": "Couldn't load trainers. Try again later.",
+      "trainerSet": "Trainer set to {name}",
+      "managePremium": "Manage Premium",
+      "goalRow": "Goal",
+      "trainerRow": "Trainer",
       "openSettings": "Open settings",
       "goPremium": "Go Premium",
       "yourTrainer": "Your trainer",
@@ -532,14 +689,6 @@
         "notifications": {
           "label": "Notifications",
           "hint": "Your reminders and messages."
-        },
-        "settings": {
-          "label": "Settings",
-          "hint": "Language, reminder times, data."
-        },
-        "subscription": {
-          "label": "Subscription",
-          "hint": "Free and Premium."
         },
         "devices": {
           "label": "Connected devices",
@@ -559,23 +708,6 @@
       "title": "Settings",
       "units": "Units",
       "unitsNote": "Changes how weights and height are shown. Your data is stored once and converted on the fly.",
-      "goalTitle": "Your goal",
-      "goalLabel": "Describe your goal",
-      "goalHint": "For example: run a half marathon by June.",
-      "goalSave": "Save goal",
-      "micStart": "Speak your goal",
-      "micStop": "Stop recording",
-      "micTranscribing": "Listening to what you said…",
-      "micFailed": "Couldn't turn your voice into text. You can type your goal instead.",
-      "micDenied": "Microphone access was blocked. Allow it in your browser, or type your goal.",
-      "micUnsupported": "Voice input isn't supported in this browser. Type your goal instead.",
-      "goalSaved": "Goal updated and plan refreshed",
-      "goalUnavailable": "Saved your wording, but goal matching is unavailable right now, so your plan is unchanged.",
-      "goalKept": "Saved your wording, but it didn't match a preset, so your plan is unchanged.",
-      "trainerTitle": "Your trainer",
-      "trainerNote": "Pick who coaches you.",
-      "trainerLoadFailed": "Couldn't load trainers. Try again later.",
-      "trainerSet": "Trainer set to {name}",
       "language": "Language",
       "languageLabel": "Show the app in",
       "languageNote": "More languages are on the way. Anything not translated yet appears in English.",
@@ -938,8 +1070,6 @@
       "play": "Play {name}",
       "playLabel": "Play video",
       "related": "Related clip · {name}",
-      "searchExact": "Find this exercise",
-      "openYoutube": "Open on YouTube",
       "pause": "Pause video",
       "resume": "Play video"
     },
