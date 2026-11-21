@@ -510,7 +510,7 @@
     },
     "progress": {
       "push": {
-        "weekly": "Week done: {done} of {goal} workouts. Week streak: {streak}."
+        "weekly": "Week done: {done} of {goal} · streak {streak} weeks"
       },
       "calories": "Calories",
       "goal": "Goal",
@@ -527,7 +527,7 @@
       "history": "History",
       "awards": "Awards",
       "checkins": "Check-ins",
-      "demoNote": "Includes 5 weeks of sample history. Remove it anytime in Settings.",
+      "demoNote": "Includes 5 weeks of demo history. Remove it anytime in Settings.",
       "period": "Period",
       "thisWeek": "This week",
       "last4": "Last 4 weeks",
@@ -680,7 +680,7 @@
       "insightsLockedBody": "Strength progression per exercise and muscle-group balance, built from your own history.",
       "strength": "Strength progression",
       "muscles": "Muscle balance",
-      "premiumActive": "Premium active",
+      "premiumActive": "Premium (demo) active",
       "historyEmpty": "No workouts yet",
       "historyEmptyBody": "Your completed sessions will appear here.",
       "adaptedCount": "{n} adjustments",
@@ -694,7 +694,7 @@
       "logWeight": "Log your weight",
       "weightSaved": "Weight saved",
       "photos": "Photo check-ins",
-      "photosNote": "Photos stay in this browser. If you ask for an AI analysis, the two photos you choose are sent once and are not saved on our servers.",
+      "photosNote": "Photos are stored only in this browser and never uploaded.",
       "addPhoto": "Add photo",
       "photoAdded": "Photo added",
       "photoError": "Couldn't read that photo",
@@ -748,8 +748,6 @@
         "notFound": "Report not found",
         "notFoundBody": "That week isn't available yet or doesn't exist.",
         "back": "Back to progress",
-        "noData": "Nothing to report yet",
-        "noDataBody": "Log your first workout and this week's report will show up here.",
         "workouts": "Workouts",
         "minutes": "Minutes",
         "adherence": "Plan completed",
@@ -769,6 +767,8 @@
         "nextEmpty": "No plan for next week yet.",
         "workoutDay": "Workout",
         "restDay": "Rest",
+        "noData": "Nothing to report yet",
+        "noDataBody": "Log your first workout and this week's report will show up here.",
         "push": "Notification preview",
         "creditedTitle": "Week counted toward your streak",
         "notCreditedTitle": "Week not counted this time",
@@ -827,14 +827,14 @@
       "advice": {
         "start": "Start with one short planned session. Your progress picks up from there.",
         "goal-remaining": "{n} more quality sessions to reach this week's goal. You still have time.",
-        "goal-remaining-one": "1 more quality session to reach this week's goal. You still have time.",
         "near-record": "You are close to your best on {exercise}. Another go could reach {target}.",
-        "plateau": "{exercise} has held steady for a while. Try a small change, like one more rep or a slower tempo."
+        "plateau": "{exercise} has held steady for a while. Try a small change, like one more rep or a slower tempo.",
+        "goal-remaining-one": "1 more quality session to reach this week's goal. You still have time."
       },
       "improvements": {
         "record": "{exercise}: {before} to {now}, up {delta}",
         "consistency": "Consistency up {delta} points, from {before} to {now}",
-        "streak": "Week streak grew from {before} to {now}"
+        "streak": "Streak grew from {before} to {now} weeks"
       },
       "badge": {
         "first-workout": {
@@ -890,6 +890,102 @@
         "badgeTitle": "Unlocked: {title}",
         "levelTitle": "Level {level} reached",
         "levelBody": "Your training keeps adding up. See your progress."
+      },
+      "main": {
+        "report": {
+          "title": "Your weekly report is ready",
+          "open": "Open"
+        },
+        "goal": {
+          "title": "Weekly goal",
+          "count": "{done} of {goal}",
+          "unit": "quality workouts",
+          "left": "{n} more workouts to reach your goal this week.",
+          "leftOne": "One more workout and this week counts towards your streak.",
+          "reached": "Goal reached. This week counts towards your streak.",
+          "paused": "This week is paused. Train if you feel like it, no pressure.",
+          "start": "Start workout",
+          "stripAria": "This week, {summary}. Open the calendar",
+          "day": "{day}: {state}",
+          "state": {
+            "done": "done",
+            "rest": "rest day",
+            "today": "today",
+            "upcoming": "workout ahead",
+            "missed": "not done"
+          },
+          "ofGoal": "of {goal}",
+          "counts": "Every quality workout this week still counts. Monday starts a fresh week."
+        },
+        "consistency": {
+          "title": "Consistency",
+          "of": "/100",
+          "note": "4 weeks, recent ones weigh more",
+          "barsAria": "Week scores, oldest to newest: {list}"
+        },
+        "streak": {
+          "title": "Streak",
+          "weeks": "weeks",
+          "week": "week",
+          "best": "Best {n}",
+          "zero": "Reach your weekly goal to start one."
+        },
+        "first": {
+          "title": "Your first workout starts your progress",
+          "body": "Consistency and streak show up once you start training."
+        },
+        "level": {
+          "title": "Level {level} · {name}",
+          "xp": "{into} / {span} XP",
+          "toNext": "{n} XP to level {next}",
+          "empty": "Every quality workout earns XP.",
+          "new": "New level"
+        },
+        "achievements": {
+          "next": "Next achievements",
+          "recent": "Recently earned",
+          "more": "{n} more"
+        },
+        "improved": {
+          "title": "What improved"
+        },
+        "next": {
+          "title": "What next",
+          "start": "Start workout",
+          "calendar": "Open calendar"
+        },
+        "records": {
+          "title": "New records",
+          "new": "New",
+          "estimate": "≈ {value}",
+          "up": "up {delta}",
+          "e1rm": "estimated 1RM",
+          "weight": "best weight",
+          "reps": "best reps",
+          "time": "best time"
+        },
+        "nav": {
+          "title": "More",
+          "calendar": "Calendar",
+          "calendarHint": "Plan, streak and pauses",
+          "weight": "Body weight",
+          "weightHint": "Weigh-ins and trend",
+          "report": "Weekly report",
+          "reportHint": "Week of {date}",
+          "reportNone": "Your first report arrives on Monday",
+          "achievements": "Achievements",
+          "achievementsHint": "{n} of {total} earned",
+          "history": "History",
+          "historyHint": "Every finished workout",
+          "checkins": "Check-ins",
+          "checkinsHint": "Photos and weight log",
+          "new": "New",
+          "newCount": "+{n}"
+        }
+      },
+      "unit": {
+        "reps": "reps",
+        "s": "s"
       },
       "chart": {
         "periodLabel": "Chart period",
@@ -994,9 +1090,6 @@
       }
     },
     "awards": {
-      "sharePreview": "Preview to share",
-      "copySummary": "Copy summary",
-      "copyManually": "The text is selected. Copy it using your device’s menu.",
       "level": "Level",
       "overall": "Overall",
       "workouts": "Workouts",
@@ -1005,7 +1098,7 @@
       "collection": "Collection",
       "collected": "{n} of {total} collected",
       "aheadOf": "Ahead of {percent} of users",
-      "demoRarity": "{pct}% of users unlock this",
+      "demoRarity": "Demo rarity: {pct}% unlocked",
       "tier": {
         "common": "Common",
         "rare": "Rare",
@@ -1033,7 +1126,10 @@
       "badges": "Badges",
       "earned": "Earned",
       "progress": "Progress",
-      "progressOf": "{n} of {total}"
+      "progressOf": "{n} of {total}",
+      "sharePreview": "Preview to share",
+      "copySummary": "Copy summary",
+      "copyManually": "The text is selected. Copy it using your device’s menu."
     },
     "history": {
       "totals": "Totals",

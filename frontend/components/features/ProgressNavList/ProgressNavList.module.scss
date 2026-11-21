@@ -1,0 +1,83 @@
+@use "partials/corners";
+@use "partials/mixins";
+
+.root {
+	display: flex;
+	flex-direction: column;
+	gap: var(--space-3);
+
+	.title {
+		margin: 0;
+		font-size: 1.8rem;
+		font-weight: 700;
+	}
+
+	.list {
+		margin: 0;
+		padding: 0;
+		background: var(--color-surface);
+		border: 0.1rem solid var(--color-border);
+		box-shadow: var(--shadow-card);
+		list-style: none;
+		overflow: hidden;
+		@include corners.radius(var(--radius-card));
+
+		li + li {
+			border-top: 0.1rem solid var(--color-border);
+		}
+	}
+
+	.row {
+		display: flex;
+		align-items: center;
+		gap: var(--space-3);
+		min-height: 6rem;
+		padding: var(--space-3) var(--space-4);
+		color: inherit;
+		text-decoration: none;
+		@include mixins.focus-ring;
+
+		&:is(a):hover {
+			background: var(--color-surfaceHover);
+		}
+
+		&[data-disabled] {
+			color: var(--color-textMuted);
+		}
+	}
+
+	.icon {
+		display: flex;
+		flex-shrink: 0;
+		align-items: center;
+		justify-content: center;
+		width: 3.6rem;
+		height: 3.6rem;
+		background: var(--color-accentSoft);
+		color: var(--color-accentText);
+		@include corners.radius(var(--radius-control));
+	}
+
+	.text {
+		display: flex;
+		flex: 1;
+		flex-direction: column;
+		min-width: 0;
+	}
+
+	.name {
+		font-size: 1.5rem;
+		font-weight: 600;
+	}
+
+	.hint {
+		color: var(--color-textMuted);
+		font-size: 1.3rem;
+		@include mixins.truncate;
+	}
+
+	.chevron {
+		flex-shrink: 0;
+		color: var(--color-textSubtle);
+	}
+}
