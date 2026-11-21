@@ -1,5 +1,6 @@
 import type { CoachRequest } from "./aiApi";
 import type { ProfileChanges } from "./aiPlan";
+import { isSafetyConcern } from "./coach";
 import { findExercise } from "./exercises";
 import type { ISODate } from "./dates";
 import type { CoachAction, CoachMessage, PlannedWorkout, Profile } from "./types";
@@ -47,9 +48,16 @@ export function planSummaryText(planned: PlannedWorkout[], today: ISODate): stri
 		.slice(0, 4000);
 }
 
-/** The last 12 messages for the AI, ending with the user's turn. */
+/**
+ * The last 12 messages for the AI, ending with the user's turn. Symptom messages and safety replies never reach
+ * the AI; when the last message is not an allowed user message, the result is empty and the caller answers locally.
+ */
 export function chatHistory(messages: CoachMessage[]): CoachRequest["messages"] {
-	return messages.slice(-12).map((m) => ({ from: m.from, text: m.text.slice(0, 600) }));
+	const allowed = (m: CoachMessage) => !m.safety && !(m.from === "user" && isSafetyConcern(m.text));
+	const last = messages[messages.length - 1];
+	if (!last || last.from !== "user" || !allowed(last)) return [];
+	const safe = messages.filter(allowed);
+	return safe.slice(-12).map((m) => ({ from: m.from, text: m.text.slice(0, 600) }));
 }
 
 /** The profile after a regex-coach action that changes settings, or null when the action does not. */

@@ -16,9 +16,12 @@ export async function POST(request: Request) {
 		return NextResponse.json(response);
 	}
 
+	// Earlier symptom messages (and the safety replies quoting them) stay out of the AI's context too.
+	const history = messages.filter((m) => !isSafetyConcern(m.text));
+
 	try {
 		const [stats, trainer] = await Promise.all([userId === null ? Promise.resolve([]) : getSnapshots(userId, 7), getTrainerTov(trainerSlug)]);
-		const ai = await coachChat(trainer, { profile, stats, wishes, planSummary, messages });
+		const ai = await coachChat(trainer, { profile, stats, wishes, planSummary, messages: history });
 		const response: CoachResponse = { reply: ai.reply, rebuild: ai.rebuild, safety: false };
 		return NextResponse.json(response);
 	} catch (error) {

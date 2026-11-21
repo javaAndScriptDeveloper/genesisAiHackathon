@@ -240,6 +240,14 @@ describe("AI plan state", () => {
 		expect(history[0]?.text).toHaveLength(600);
 	});
 
+	it("chat history for the AI leaves out symptom messages and safety replies", () => {
+		const msg = (from: "user" | "coach", text: string, safety?: boolean) => ({ id: text, from, text, at: now, safety });
+		const history = chatHistory([msg("user", "I have chest pain"), msg("coach", "Please stop", true), msg("user", "fewer leg days")]);
+		expect(history).toEqual([{ from: "user", text: "fewer leg days" }]);
+		expect(chatHistory([msg("user", "more cardio"), msg("user", "I feel dizzy")])).toEqual([]);
+		expect(chatHistory([msg("user", "more cardio"), msg("coach", "Sure")])).toEqual([]);
+	});
+
 	it("old saved state without new fields loads with defaults", () => {
 		const old = { version: 1, units: "metric", profile: null, trainerId: null, planned: [], history: [], active: null, notifications: [], water: {}, subscription: { tier: "free", trialEndsAt: null }, coach: [] };
 		vi.stubGlobal("window", { localStorage: { getItem: () => JSON.stringify(old), setItem: () => undefined } });

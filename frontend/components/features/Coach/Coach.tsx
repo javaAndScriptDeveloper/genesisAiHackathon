@@ -94,14 +94,19 @@ export function Coach() {
 	};
 
 	const ask = async (value: string, history: CoachMessage[]) => {
+		const messages = chatHistory(history);
+		if (messages.length === 0) {
+			localReply(value);
+			return;
+		}
 		try {
 			const res = await aiClient.requestCoach({
 				userId: state.backend?.userId ?? null,
 				profile,
 				trainerSlug: activeTrainerId(state),
-				wishes: state.planWishes.slice(-10),
+				wishes: state.planWishes.slice(-10).map((w) => w.slice(0, 200)),
 				planSummary: planSummaryText(state.planned, today),
-				messages: chatHistory(history),
+				messages,
 			});
 			if (res.safety && active) dispatch({ type: "safety-stop" });
 			post({ text: res.reply, safety: res.safety || undefined, rebuild: res.rebuild ?? undefined });

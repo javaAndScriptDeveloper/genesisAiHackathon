@@ -195,6 +195,26 @@ describe("POST /api/coach", () => {
 		expect(coachChat).not.toHaveBeenCalled();
 	});
 
+	it("drops earlier symptom messages and safety replies before calling Gemini", async () => {
+		vi.mocked(coachChat).mockResolvedValue({ reply: "Sure", rebuild: null });
+		const messages = [
+			{ from: "user", text: "I have chest pain" },
+			{ from: "coach", text: safetyReplyText() },
+			{ from: "user", text: "feeling dizzy again" },
+			{ from: "coach", text: "Glad you are better" },
+			{ from: "user", text: "fewer leg days" },
+		];
+		const { status, json } = await run({ ...cbase, messages });
+		expect(status).toBe(200);
+		expect(json.safety).toBe(false);
+		const sent = vi.mocked(coachChat).mock.calls[0]?.[1].messages ?? [];
+		expect(sent).toEqual([
+			{ from: "coach", text: "Glad you are better" },
+			{ from: "user", text: "fewer leg days" },
+		]);
+		expect(JSON.stringify(sent)).not.toMatch(/chest|dizz/i);
+	});
+
 	it("passes the AI reply and rebuild through", async () => {
 		const rebuild = { wishes: ["shorter"], profileChanges: { durationMin: 20 }, summary: "Shorter plan" };
 		vi.mocked(coachChat).mockResolvedValue({ reply: "Sure thing", rebuild });
