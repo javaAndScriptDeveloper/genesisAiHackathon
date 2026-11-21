@@ -13,6 +13,7 @@ import { ArrowLeft02Icon } from "@hugeicons/core-free-icons";
 import { WEEKDAYS } from "@/lib/fit/dates";
 import { DAYS, DURATIONS, EQUIPMENT, EXPERIENCES, GENDERS, GOALS, LIMITATIONS, LOCATIONS, WEARABLES } from "@/lib/fit/options";
 import { generatePlan } from "@/lib/fit/plan";
+import { createUser } from "@/lib/api/users";
 import { useFit } from "@/lib/fit/store/FitProvider";
 import { useActionNavigate } from "@/lib/fit/store/hooks";
 import type { Profile } from "@/lib/fit/types";
@@ -82,6 +83,8 @@ export function Onboarding({ mode }: { mode: "create" | "edit" }) {
 		const parsed = schema.safeParse(getValues());
 		if (!parsed.success) return;
 		const profile: Profile = parsed.data;
+		// Fire and forget: the app works offline, the server copy is created when reachable.
+		if (mode === "create") void createUser(profile, state.trainerId, state.progressToken);
 		if (mode === "create") go("/today", { type: "complete-onboarding", profile, units, demoHistory, today, now: new Date().toISOString() }, { replace: true });
 		else go("/profile", { type: "update-profile", profile, units, today }, { replace: true });
 	};
