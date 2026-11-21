@@ -67,10 +67,10 @@ export function Profile() {
 					</Button>
 				)}
 				<Link href="/settings" transitionTypes={["nav-forward"]} className={kit.row}>
-					<Avatar name={trainer?.name ?? t("fit.profile.yourTrainer")} src={trainer?.iconPath} size={44} />
+					<Avatar name={trainer?.name ?? t("fit.profile.yourTrainer")} src={trainer?.pathToImage} size={44} />
 					<span className={kit.rowText}>
 						<strong>{t("fit.profile.yourTrainer")}{trainer ? `: ${trainer.name}` : ""}</strong>
-						<span>{trainer ? trainer.description.split(". ")[0] : t("fit.profile.trainerHint")}</span>
+						<span>{trainer ? trainer.tov.split(". ")[0] : t("fit.profile.trainerHint")}</span>
 					</span>
 					<Icon icon={ArrowRight01Icon} size={16} />
 				</Link>

@@ -2,7 +2,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { PostgreSqlContainer, StartedPostgreSqlContainer } from "@testcontainers/postgresql";
 import type { Knex } from "knex";
 import { buildApp } from "../src/app.js";
-import { createDb, migrate } from "../src/db.js";
+import { createDb, migrate, migrationConfig } from "../src/db.js";
 import { seedTrainers } from "../src/trainers.js";
 
 describe("GET /api/trainers", () => {
@@ -27,9 +27,24 @@ describe("GET /api/trainers", () => {
     const { trainers } = res.json();
     expect(trainers.map((t: { name: string }) => t.name)).toEqual(["Mike", "John", "Hanna", "Caroline", "Alex"]);
     for (const t of trainers) {
-      expect(t.description.length).toBeGreaterThan(0);
-      expect(t.iconPath).toMatch(/^\/trainers\/[a-z]+\.svg$/);
+      expect(t.tov.length).toBeGreaterThan(0);
+      expect(t.pathToImage).toMatch(/^\/trainers\/[a-z]+\.svg$/);
     }
+  });
+
+  it("has the columns id, name, path_to_image, tov and sort_order", async () => {
+    const { rows } = await db.raw("select column_name from information_schema.columns where table_name = 'trainers' order by column_name");
+    expect(rows.map((r: { column_name: string }) => r.column_name)).toEqual(["id", "name", "path_to_image", "sort_order", "tov"]);
+  });
+
+  it("the rename migration keeps rows written under the old column names", async () => {
+    await db.migrate.rollback(migrationConfig, true);
+    await db.migrate.up(migrationConfig);
+    await db.raw("insert into trainers (id, name, icon_path, description, sort_order) values ('legacy', 'Legacy', '/trainers/legacy.svg', 'old tone', 9)");
+    await migrate(db);
+    const row = await db("trainers").where({ id: "legacy" }).first();
+    expect(row).toMatchObject({ name: "Legacy", pathToImage: "/trainers/legacy.svg", tov: "old tone" });
+    await db("trainers").where({ id: "legacy" }).delete();
   });
 
   it("migrate and seed are idempotent", async () => {

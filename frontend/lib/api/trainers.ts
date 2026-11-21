@@ -5,7 +5,7 @@ import { ApiError } from "./types";
 // Trainers live in platform-backend (Postgres). The browser reaches them through the `/api/*` fallback
 // rewrite, so this uses the real path rather than the mock API base. Avatars are dummy SVGs in public/trainers
 // (deliberate exception to the WebP rule), so render them with `unoptimized`.
-export const trainerSchema = z.object({ id: z.string(), name: z.string(), iconPath: z.string(), description: z.string() });
+export const trainerSchema = z.object({ id: z.string(), name: z.string(), pathToImage: z.string(), tov: z.string() });
 export type Trainer = z.infer<typeof trainerSchema>;
 
 const responseSchema = z.object({ trainers: z.array(trainerSchema) });

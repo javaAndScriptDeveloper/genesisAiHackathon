@@ -24,7 +24,7 @@ describe("apiFetch", () => {
 });
 
 describe("fetchTrainers", () => {
-	const trainer = { id: "mike", name: "Mike", iconPath: "/trainers/mike.svg", description: "Blunt." };
+	const trainer = { id: "mike", name: "Mike", pathToImage: "/trainers/mike.svg", tov: "Blunt." };
 	it("parses the backend payload", async () => {
 		stub({ trainers: [trainer] });
 		await expect(fetchTrainers()).resolves.toEqual([trainer]);

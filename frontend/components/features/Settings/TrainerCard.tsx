@@ -25,8 +25,8 @@ export function TrainerCard() {
 			{isError && <p className={kit.note}>{t("fit.settings.trainerLoadFailed")}</p>}
 			{trainers?.map((tr) => (
 				<div key={tr.id} className={styles.item}>
-					<Avatar name={tr.name} src={tr.iconPath} size={48} />
-					<OptionCard type="radio" name="trainer" label={tr.name} hint={tr.description} checked={tr.id === selected} onChange={() => { dispatch({ type: "set-trainer", trainerId: tr.id }); toast.show(t("fit.settings.trainerSet", { name: tr.name }), "success"); }} />
+					<Avatar name={tr.name} src={tr.pathToImage} size={48} />
+					<OptionCard type="radio" name="trainer" label={tr.name} hint={tr.tov} checked={tr.id === selected} onChange={() => { dispatch({ type: "set-trainer", trainerId: tr.id }); toast.show(t("fit.settings.trainerSet", { name: tr.name }), "success"); }} />
 				</div>
 			))}
 		</Card>

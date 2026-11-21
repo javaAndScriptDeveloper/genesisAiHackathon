@@ -7,9 +7,11 @@ export function createDb(connectionString: string): Knex {
 }
 
 // Works from dist/ (compiled .js) in Docker and from src/ (.ts) under Vitest.
+export const migrationConfig: Knex.MigratorConfig = {
+  directory: path.join(import.meta.dirname, "migrations"),
+  loadExtensions: [".js", ".ts"],
+};
+
 export async function migrate(db: Knex): Promise<void> {
-  await db.migrate.latest({
-    directory: path.join(import.meta.dirname, "migrations"),
-    loadExtensions: [".js", ".ts"],
-  });
+  await db.migrate.latest(migrationConfig);
 }
