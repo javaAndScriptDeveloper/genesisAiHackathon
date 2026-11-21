@@ -77,6 +77,7 @@ describe("DB schema migrations", () => {
       height: { type: "numeric", nullable: true },
       trainer_id: { type: "bigint", nullable: true },
       level: { type: "character varying", nullable: true },
+      onboarding: { type: "jsonb", nullable: true },
       ...ts,
     });
     expect(await columns("user_devices")).toMatchObject({

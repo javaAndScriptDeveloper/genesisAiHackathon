@@ -1,6 +1,7 @@
 import Fastify, { type FastifyInstance } from "fastify";
 import type { Knex } from "knex";
 import { listTrainers } from "./trainers.js";
+import { registerUserRoutes } from "./users.js";
 
 export function buildApp(db: Knex): FastifyInstance {
   const app = Fastify({ logger: true });
@@ -29,6 +30,8 @@ export function buildApp(db: Knex): FastifyInstance {
       return reply.code(503).send({ error: "trainers unavailable" });
     }
   });
+
+  registerUserRoutes(app, db);
 
   return app;
 }
