@@ -11,8 +11,7 @@
         "preferences": { "label": "Training preferences", "hint": "Goal, schedule, equipment and limitations." },
         "notifications": { "label": "Notifications", "hint": "Your reminders and messages." },
         "devices": { "label": "Connected devices", "hint": "Apple Health, Garmin, blood pressure log." },
-        "nutrition": { "label": "Nutrition and water", "hint": "Daily targets and hydration." },
-        "partners": { "label": "Gym Bro", "hint": "Find a workout partner." }
+        "nutrition": { "label": "Nutrition and water", "hint": "Daily targets and hydration." }
       }
     },
     "settings": {
@@ -56,8 +55,6 @@
       "waterTitle": "Water", "goalHit": "Daily goal reached. Nice.", "waterLeft": "{n} ml to go.", "goal": "Daily goal"
     },
     "partners": {
-      "title": "Gym Bro", "demoNote": "Demo: these are sample profiles. Real matching needs accounts and a server.", "level": "Level {n}", "status": { "invited": "Invited", "accepted": "Partner" },
-      "invite": "Invite to train", "invited": "Invite sent to {name}", "accepted": "{name} accepted", "remove": "Remove partner",
       "schedule": "Train together: {title}, {day}", "scheduled": "Joint workout with {name} on {day}", "unscheduled": "Joint workout cancelled", "cancelJoint": "Cancel joint workout", "jointNote": "You're training with {name}. It shows on this workout.",
       "lockedTitle": "Joint workouts", "lockedBody": "Scheduling sessions with a partner is part of Premium."
     }

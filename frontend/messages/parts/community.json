@@ -1,0 +1,12 @@
+{
+  "fit": {
+    "community": {
+      "title": "Community", "demoNote": "Demo: these are sample people and the replies are scripted. Real buddies need accounts and a server.",
+      "connectedTitle": "Connected", "awaitingTitle": "Awaiting approval", "findTitle": "Find gym buddies",
+      "connect": "Connect", "cancelRequest": "Cancel request", "awaiting": "Awaiting approval", "connected": "Connected",
+      "requestSent": "Request sent to {name}", "approved": "{name} approved your request",
+      "level": "Level {n}", "lastWorkout": "Last workout: {title}, {when}",
+      "when": { "today": "today", "yesterday": "yesterday", "daysAgo": "{n} days ago" }
+    }
+  }
+}

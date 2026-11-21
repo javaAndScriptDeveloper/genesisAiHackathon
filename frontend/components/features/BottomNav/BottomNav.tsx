@@ -1,7 +1,7 @@
 "use client";
 
 import clsx from "clsx";
-import { ChartUpIcon, Dumbbell03Icon, Home03Icon, UserIcon } from "@hugeicons/core-free-icons";
+import { ChartUpIcon, Dumbbell03Icon, Home03Icon, UserGroupIcon, UserIcon } from "@hugeicons/core-free-icons";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Icon, type IconDefinition } from "@/components/ui";
@@ -13,6 +13,7 @@ const TABS: { href: string; key: string; icon: IconDefinition }[] = [
 	{ href: "/today", key: "today", icon: Home03Icon },
 	{ href: "/training", key: "training", icon: Dumbbell03Icon },
 	{ href: "/progress", key: "progress", icon: ChartUpIcon },
+	{ href: "/community", key: "community", icon: UserGroupIcon },
 	{ href: "/profile", key: "profile", icon: UserIcon },
 ];
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowRight01Icon, CrownIcon, Dumbbell03Icon, Edit02Icon, Notification03Icon, Restaurant01Icon, Settings02Icon, SmartWatch01Icon, Target02Icon, UserGroupIcon } from "@hugeicons/core-free-icons";
+import { ArrowRight01Icon, CrownIcon, Dumbbell03Icon, Edit02Icon, Notification03Icon, Restaurant01Icon, Settings02Icon, SmartWatch01Icon, Target02Icon } from "@hugeicons/core-free-icons";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ScreenHeader } from "@/components/features/ScreenHeader/ScreenHeader";
@@ -20,7 +20,6 @@ const LINKS: { href: string; key: string; icon: IconDefinition }[] = [
 	{ href: "/notifications", key: "notifications", icon: Notification03Icon },
 	{ href: "/devices", key: "devices", icon: SmartWatch01Icon },
 	{ href: "/nutrition", key: "nutrition", icon: Restaurant01Icon },
-	{ href: "/partners", key: "partners", icon: UserGroupIcon },
 ];
 
 export function Profile() {
