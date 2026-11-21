@@ -28,3 +28,13 @@
 
 ## Task P3: Перевірка
 - [ ] `bun run test`, `bun run typecheck`; ручний прогін з реальним `GEMINI_API_KEY` локально, якщо він є в `.env.local` (без ключа — перевірити 503-шлях); оновити `frontend/docs/agent/ai-utils.md` рядком про route.
+
+## Task P0: Тестові фото (синтетичні)
+**Files:** Create `frontend/assets-src/demo-checkins/{before,after}.svg` (джерело), `frontend/public/demo/checkins/{before,after}.webp` (+ @2x) через `bun run images` або Playwright-рендер; Modify `frontend/lib/fit/scenarios.ts` (S2: два `photos` з `dataUrl` цих зображень у base64, дати на початку й наприкінці 12 тижнів, `weightKg` з історії ваги; позначка demo).
+- Зображення — явно намальовані манекени/силуети (не фото людей): «до» — трохи сутула постава, м'якший контур; «після» — рівна постава, чіткіший контур. Нейтральний фон, без облич, без оголеності, без брендів. 480×640, кожне ≤ 120 КБ.
+- Тест: S2 має рівно 2 фото, їх `dataUrl` декодуються в image/webp ≤ 400 КБ.
+- Commit `chore(demo): synthetic check-in photos for AI analysis testing`.
+
+## Task P4: Зберігання результатів аналізу
+**Files:** Create `platform-backend/src/migrations/20261124_04_create_user_progress_photo_insights.ts` (`id` text PK з клієнта, `user_id` → users on delete cascade, `analyzed_at` timestamptz, `before_date` date, `after_date` date, `before_weight_kg` numeric(5,2) null, `after_weight_kg` numeric(5,2) null, `model` text, `engine_version` text, `suitable` boolean, `result` jsonb (summary, observations, encouragement), `created_at`; index (`user_id`, `analyzed_at`); **жодних колонок для зображень**); Modify `src/progress/models.ts`, `repo.ts`, `routes.ts` (масив `photoInsights` у sync body/snapshot, upsert by id, cross-user 409, `additionalProperties:false` → поле `dataUrl` = 400); frontend: `FitState.photoInsights` у `toRemote`/`fromRemote` + zod; Test `test/progress-api.test.ts`, `frontend/tests/progress-sync.test.ts`.
+- Commit `feat(progress): store AI photo insights`.
