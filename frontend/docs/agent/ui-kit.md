@@ -17,6 +17,10 @@ Living showcase: `/ui-kit` (and `/`). Every new or changed component must appear
 | Table | `columns`, `rows`, `getRowKey`, `loading` (skeleton rows), empty state |
 | Tabs, Pagination | accessible; pagination collapses with ellipsis |
 | Carousel | Swiper wrapper with nav, pagination, keyboard, optional autoplay |
+| Sheet | In-frame bottom/center overlay (no native dialog); `modal` blocks dismissal |
+| SegmentedControl | Controlled tabs; selection lives with the caller |
+| ProgressBar, ProgressRing | 0–100 `value`, `label` required |
+| Stepper | Large +/- numeric control for sets and onboarding |
 | Badge, Avatar, Card, Container, Skeleton, EmptyState, Icon, Picture | basics |
 
 ## Adding a component

@@ -1,0 +1,32 @@
+@use "partials/mixins";
+
+.nav {
+	display: grid;
+	flex: none;
+	grid-template-columns: repeat(4, 1fr);
+	padding: var(--space-1) var(--space-2) 2.4rem;
+	background: var(--color-surface);
+	border-top: 0.1rem solid var(--color-border);
+
+	@include mixins.below(sm) {
+		padding-bottom: max(1rem, env(safe-area-inset-bottom));
+	}
+}
+
+.tab {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 0.3rem;
+	min-height: 5.6rem;
+	color: var(--color-textSubtle);
+	font-size: 1.1rem;
+	font-weight: 600;
+	transition: color var(--transition-fast);
+	@include mixins.focus-ring;
+}
+
+.active {
+	color: var(--color-accent);
+}

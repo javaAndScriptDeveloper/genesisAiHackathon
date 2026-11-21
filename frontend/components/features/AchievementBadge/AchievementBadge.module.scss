@@ -1,0 +1,27 @@
+@use "partials/corners";
+
+.badge {
+	display: grid;
+	flex: none;
+	place-items: center;
+	background: var(--color-accent);
+	color: var(--color-onAccent);
+	box-shadow: inset 0 0 0 0.3rem rgba(255, 255, 255, 0.25);
+	border-radius: 50%;
+}
+
+.md {
+	width: 5.2rem;
+	height: 5.2rem;
+}
+
+.lg {
+	width: 9.6rem;
+	height: 9.6rem;
+}
+
+.locked {
+	background: var(--color-surfaceMuted);
+	color: var(--color-placeholder);
+	box-shadow: none;
+}

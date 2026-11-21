@@ -1,0 +1,67 @@
+{
+  "fit": {
+    "notifications": {
+      "title": "Notifications", "settings": "Notification settings", "empty": "You're all caught up", "emptyBody": "Reminders, achievements and weekly summaries will show up here.", "markAll": "Mark all as read",
+      "now": "Just now", "minAgo": "{n} min ago", "hourAgo": "{n} h ago", "dayAgo": "{n} d ago",
+      "kind": { "workout": "Workout", "missed": "Missed", "achievement": "Achievement", "weekly-goal": "Weekly goal", "recovery": "Recovery", "coach": "Coach", "weekly-summary": "Summary" }
+    },
+    "profile": {
+      "title": "Profile", "levelLine": "Level {level} · {xp} XP", "free": "Free", "perWeek": "days/week",
+      "links": {
+        "preferences": { "label": "Training preferences", "hint": "Goal, schedule, equipment and limitations." },
+        "notifications": { "label": "Notifications", "hint": "Your reminders and messages." },
+        "settings": { "label": "Settings", "hint": "Language, reminder times, data." },
+        "subscription": { "label": "Subscription", "hint": "Free and Premium." },
+        "devices": { "label": "Connected devices", "hint": "Apple Health, Garmin, blood pressure log." },
+        "nutrition": { "label": "Nutrition and water", "hint": "Daily targets and hydration." },
+        "partners": { "label": "Gym Bro", "hint": "Find a workout partner." }
+      }
+    },
+    "settings": {
+      "title": "Settings", "language": "Language", "languageNote": "More languages are on the way. Anything not translated yet appears in English.",
+      "reminders": "Reminders", "remindersNote": "Fewer, kinder notifications. You choose which ones you want.", "reminderTime": "Workout reminder time",
+      "push": "Browser notifications", "pushNote": "Shows system notifications while this app is open in a browser. Real push needs a server and isn't set up in this demo.",
+      "pushUnsupported": "This browser doesn't support notifications", "pushDenied": "Notification permission was not granted", "pushOn": "Browser notifications on", "pushOff": "Browser notifications off",
+      "data": "Your data", "dataNote": "Everything is stored on this device only.",
+      "removeDemo": "Remove demo history", "removeDemoTitle": "Remove demo history?", "removeDemoBody": "Sample past workouts are deleted. Workouts you completed yourself stay.", "removeDemoConfirm": "Remove", "demoRemoved": "Demo history removed",
+      "reset": "Reset everything", "resetTitle": "Reset everything?", "resetBody": "This deletes your profile, plan, history and settings from this device. You'll start onboarding again.", "resetConfirm": "Reset"
+    },
+    "subscription": {
+      "title": "Subscription", "demoNotice": "Demo only. No payment is taken and nothing is billed. This screen shows how Premium would work.",
+      "active": "Premium active (demo)", "trialUntil": "Demo trial until {day}", "premiumOn": "Premium is on.",
+      "freeTitle": "Free", "freeNote": "Everything you need to train safely and consistently.",
+      "free": { "plan": "Personalized weekly plan", "workouts": "Guided workouts with adjustments", "library": "Exercise library with videos", "coach": "Personal Coach chat", "progress": "Progress, streaks and achievements", "safety": "All safety guidance, always" },
+      "premiumTitle": "Premium",
+      "premium": {
+        "adaptive": { "title": "Rebuild my plan with the coach", "body": "Re-plan upcoming weeks from your history and feedback." },
+        "insights": { "title": "Advanced training insights", "body": "Strength trends per exercise and muscle balance." },
+        "rebuild": { "title": "Extended personalization", "body": "Finer control as your goals and schedule change." },
+        "photos": { "title": "Unlimited photo check-ins", "body": "Keep every check-in in one timeline." },
+        "partners": { "title": "Joint workouts with a partner", "body": "Schedule sessions with a Gym Bro." }
+      },
+      "start": "Start 7-day free trial (demo)", "started": "Demo trial started. No payment taken.", "end": "End demo Premium", "ended": "Back on Free",
+      "priceNote": "In a real release billing would happen through the App Store or Google Play.", "safetyPromise": "Training and safety features never sit behind a paywall."
+    },
+    "devices": {
+      "title": "Connected devices", "honest": "Apple Health and Garmin need a native app or provider sign-in, which a web demo can't do. Linking here turns on clearly labelled Demo Mode with simulated values.",
+      "linkedDemo": "Linked · Demo Mode", "notLinked": "Not linked", "connect": "Link (demo)", "disconnect": "Unlink", "connected": "{name} linked in Demo Mode", "disconnected": "{name} unlinked",
+      "noneTitle": "No device linked", "noneBody": "Link one to preview the live heart-rate panel you'll see during workouts.",
+      "bpTitle": "Blood pressure log", "bpBadge": "Manually entered", "bpNote": "Entered by you, kept separate from sensor data and never estimated from heart rate. Not a medical record.",
+      "systolic": "Systolic", "diastolic": "Diastolic", "bpSysError": "Enter 70 to 250", "bpDiaError": "Enter 40 to 150", "bpSaved": "Reading saved", "manual": "manual entry", "remove": "Remove"
+    },
+    "nutrition": {
+      "title": "Nutrition and water", "disclaimer": "General estimates for planning, not medical or dietitian advice.", "calories": "Calories", "protein": "Protein", "carbs": "Carbs", "fat": "Fat",
+      "mealsTitle": "Today's meals", "mealsDone": "{n} of {total} meals logged today.",
+      "goalTip": { "lose-fat": "A modest deficit with plenty of protein keeps muscle while fat comes off.", "build-muscle": "A small surplus and protein at every meal support muscle growth.", "get-stronger": "Eat enough to fuel heavy sets and recover well.", "stay-fit": "Balanced meals and steady energy beat strict rules.", "endurance": "Carbs fuel long sessions. Don't skimp on them." },
+      "slot": { "breakfast": "Breakfast", "lunch": "Lunch", "snack": "Snack", "dinner": "Dinner" },
+      "idea": { "breakfast": "oats, yogurt and berries", "lunch": "chicken or tofu bowl with rice and vegetables", "snack": "fruit and a handful of nuts", "dinner": "fish or beans, potatoes and a big salad" },
+      "waterTitle": "Water", "goalHit": "Daily goal reached. Nice.", "waterLeft": "{n} ml to go.", "goal": "Daily goal"
+    },
+    "partners": {
+      "title": "Gym Bro", "demoNote": "Demo: these are sample profiles. Real matching needs accounts and a server.", "level": "Level {n}", "status": { "invited": "Invited", "accepted": "Partner" },
+      "invite": "Invite to train", "invited": "Invite sent to {name}", "accepted": "{name} accepted", "remove": "Remove partner",
+      "schedule": "Train together: {title}, {day}", "scheduled": "Joint workout with {name} on {day}", "unscheduled": "Joint workout cancelled", "cancelJoint": "Cancel joint workout", "jointNote": "You're training with {name}. It shows on this workout.",
+      "lockedTitle": "Joint workouts", "lockedBody": "Scheduling sessions with a partner is part of Premium."
+    }
+  }
+}

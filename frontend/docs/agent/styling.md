@@ -17,3 +17,5 @@
 - Focus: buttons/links use `mixins.focus-ring`; text inputs change border-color only (no outline/box-shadow).
 - Respect `prefers-reduced-motion` (reset handles global animation; avoid long motion).
 - Admin-style semantics: near-black for primary actions, green success, red destructive, amber warning; blue/indigo is accent only.
+
+- The fitness app overrides accent/primary to red inside `PhoneFrame.module.scss` (`.device` scope). The rest of the kit and `/ui-kit` keep the indigo/near-black look.

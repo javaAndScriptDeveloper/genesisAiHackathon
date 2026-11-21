@@ -1,0 +1,893 @@
+{
+  "uiKit": {
+    "title": "UI Kit",
+    "lead": "All shared building blocks of the project in one place: typography, colors, components.",
+    "typography": "Typography",
+    "colors": "Colors",
+    "buttons": "Buttons",
+    "forms": "Fields and selection",
+    "overlays": "Dialogs and notifications",
+    "data": "Data: table and pagination",
+    "navigation": "Tabs and carousel",
+    "feedback": "Badges, skeletons, empty state",
+    "icons": "Icons (Hugeicons)",
+    "mobileControls": "Mobile app controls"
+  },
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "loading": "Loading…",
+    "close": "Close"
+  },
+  "backendStatus": {
+    "title": "Backend status",
+    "lead": "Checks the frontend's connection to platform-backend after every deploy.",
+    "health": "Health",
+    "ping": "Ping",
+    "ok": "Working",
+    "down": "Unavailable",
+    "database": "Database",
+    "connected": "Connected",
+    "disconnected": "Disconnected",
+    "message": "Message",
+    "time": "Time",
+    "unreachable": "The backend is unavailable or returned an unexpected response."
+  },
+  "fit": {
+    "coach": {
+      "title": "Personal Coach",
+      "subtitle": "Ask, adjust, stay on track",
+      "greeting": "Hi {name}! I know your plan, your history and how this week is going. Tell me what's up and I'll adjust your training.",
+      "suggestions": "Suggested questions",
+      "placeholder": "Message your coach",
+      "send": "Send message",
+      "typing": "Coach is typing",
+      "voice": "Dictate a message",
+      "voiceUnsupported": "Voice input isn't supported in this browser. Type instead.",
+      "voiceError": "Voice input failed. Try again or type.",
+      "applied": "Applied",
+      "backToWorkout": "Back to my workout (paused)",
+      "doneRecovery": "Done. Today is a recovery day and your streak is safe. Come back refreshed.",
+      "doneEquipment": "Done. I removed that equipment from your profile and swapped {n} exercises in your next workout. Later sessions are updated too.",
+      "doneLimitation": "Done. I'll avoid those movements in upcoming sessions and swapped what I could.",
+      "doneRebuild": "Done. Your upcoming weeks are rebuilt from your latest preferences and history."
+    },
+    "health": {
+      "title": "Live health",
+      "demo": "Demo mode",
+      "bpm": "bpm",
+      "zone": "Zone {n} · {label}",
+      "connecting": "Connecting…",
+      "duration": "Duration",
+      "resting": "Resting",
+      "working": "Working",
+      "activity": "Activity",
+      "recoveryDrop": "{n} bpm below peak",
+      "demoNote": "Simulated values for demonstration, not real measurements.",
+      "linkedDemo": "{name} is linked, but live data needs the native app. Values shown are simulated."
+    },
+    "opt": {
+      "gender": {
+        "female": "Female",
+        "male": "Male",
+        "non-binary": "Non-binary",
+        "private": "Prefer not to say"
+      },
+      "goal": {
+        "lose-fat": {
+          "label": "Lose fat",
+          "hint": "Higher reps, shorter rests and cardio finishers."
+        },
+        "build-muscle": {
+          "label": "Build muscle",
+          "hint": "Moderate reps and steady progressive load."
+        },
+        "get-stronger": {
+          "label": "Get stronger",
+          "hint": "Heavier sets with longer rests."
+        },
+        "stay-fit": {
+          "label": "Stay fit & healthy",
+          "hint": "Balanced training that fits your life."
+        },
+        "endurance": {
+          "label": "Build endurance",
+          "hint": "Higher reps, short rests and conditioning."
+        }
+      },
+      "experience": {
+        "beginner": {
+          "label": "Beginner",
+          "hint": "New to training or coming back after a long break."
+        },
+        "intermediate": {
+          "label": "Intermediate",
+          "hint": "Training regularly for a year or more."
+        },
+        "advanced": {
+          "label": "Advanced",
+          "hint": "Several years of consistent, structured training."
+        }
+      },
+      "location": {
+        "home": {
+          "label": "At home",
+          "hint": "Pick the equipment you own."
+        },
+        "gym": {
+          "label": "At the gym",
+          "hint": "Full access to machines and free weights."
+        },
+        "hybrid": {
+          "label": "Both",
+          "hint": "Home gear plus a gym on some days."
+        }
+      },
+      "equipment": {
+        "dumbbells": "Dumbbells",
+        "bench": "Bench",
+        "barbell": "Barbell",
+        "machines": "Gym machines",
+        "bands": "Resistance bands",
+        "jump-rope": "Jump rope"
+      },
+      "limitation": {
+        "knees": {
+          "label": "Knees",
+          "hint": "Avoid deep or high-impact knee loading."
+        },
+        "lower-back": {
+          "label": "Lower back",
+          "hint": "Avoid heavy hinging and spinal loading."
+        },
+        "shoulders": {
+          "label": "Shoulders",
+          "hint": "Avoid heavy overhead and wide pressing."
+        },
+        "wrists": {
+          "label": "Wrists",
+          "hint": "Avoid weight-bearing on the hands."
+        },
+        "heart-bp": {
+          "label": "Heart or blood pressure",
+          "hint": "Avoid max-effort and heavy straining work."
+        }
+      },
+      "wearable": {
+        "none": {
+          "label": "No device",
+          "hint": "You can connect one later."
+        },
+        "apple": {
+          "label": "Apple Watch / Health",
+          "hint": "Heart rate and recovery from Apple Health."
+        },
+        "garmin": {
+          "label": "Garmin",
+          "hint": "Heart rate and activity from Garmin Connect."
+        }
+      }
+    },
+    "onboarding": {
+      "eyebrow": "Your plan",
+      "editEyebrow": "Preferences",
+      "progress": "Setup progress",
+      "name": "What should we call you?",
+      "age": "Age",
+      "gender": "Gender (optional)",
+      "height": "Height",
+      "weight": "Weight",
+      "equipment": "Equipment you have",
+      "equipmentNote": "Leave everything unchecked for bodyweight-only training.",
+      "duration": "Workout length",
+      "days": "Training days per week",
+      "daysOption": "{n} days",
+      "daysNote": "We spread sessions out so there is always recovery between them.",
+      "limitNote": "Anything else we should know? (optional)",
+      "heartNote": "We'll avoid max-effort and heavy straining exercises. Please check with your doctor before starting a new training program.",
+      "wearableNote": "Connections run in Demo Mode in the browser. You can manage them anytime under Devices.",
+      "summaryFor": "{name}'s plan",
+      "firstWeek": "First week",
+      "noPreview": "Adjust your answers to see a preview.",
+      "demoHistory": "Include 5 weeks of demo history",
+      "demoHistoryNote": "Fills Progress with sample past workouts so you can explore everything. Remove it anytime in Settings.",
+      "editNote": "Upcoming planned workouts will be rebuilt. Past sessions are kept.",
+      "finish": "Start training",
+      "save": "Save and update plan",
+      "errors": {
+        "name": "Enter a name",
+        "nameLong": "Keep it under 30 characters",
+        "number": "Enter a number",
+        "age": "Age must be 14 to 90",
+        "height": "Height must be 120 to 230 cm",
+        "weight": "Weight must be 30 to 250 kg"
+      },
+      "steps": {
+        "about": {
+          "title": "Let's get to know you",
+          "lead": "A few quick questions so your plan fits you."
+        },
+        "body": {
+          "title": "Your body stats",
+          "lead": "Used to pick sensible starting loads. Stays on your device."
+        },
+        "goal": {
+          "title": "What's your main goal?",
+          "lead": "This shapes sets, reps, rests and exercise choice."
+        },
+        "experience": {
+          "title": "Your training experience",
+          "lead": "We start where you are and progress from there."
+        },
+        "where": {
+          "title": "Where do you train?",
+          "lead": "Only exercises you can actually do end up in your plan."
+        },
+        "schedule": {
+          "title": "Your schedule",
+          "lead": "Be realistic. Consistency beats ambition."
+        },
+        "limits": {
+          "title": "Limitations",
+          "lead": "Select anything that needs care. We'll steer around it."
+        },
+        "wearable": {
+          "title": "Connect a wearable",
+          "lead": "Optional. Live heart rate makes workouts smarter."
+        },
+        "summary": {
+          "title": "Your personalized plan",
+          "lead": "Here's how your first week looks. You can change anything later."
+        }
+      }
+    },
+    "gate": {
+      "cta": "See Premium"
+    },
+    "progress": {
+      "title": "Progress",
+      "subtitle": "Your training, in numbers",
+      "overview": "Overview",
+      "history": "History",
+      "awards": "Awards",
+      "checkins": "Check-ins",
+      "demoNote": "Includes 5 weeks of demo history. Remove it anytime in Settings.",
+      "period": "Period",
+      "thisWeek": "This week",
+      "last4": "Last 4 weeks",
+      "sessions": "Sessions",
+      "completedVsPlanned": "done / planned",
+      "time": "Training time",
+      "volume": "Volume",
+      "streakLabel": "Streak",
+      "longest": "longest {n}",
+      "consistency": "Consistency",
+      "consistencyBody": "Planned sessions completed over the last 4 weeks. Recovery skips don't count against you.",
+      "insight": "Training insight",
+      "summaryNone": "Finish your first workout and your personal summary shows up here.",
+      "summary": "You've done {done} of {planned} planned sessions this week with {score}% consistency over four weeks. Your training volume is {trend} compared with last week.",
+      "trendUp": "up or steady",
+      "trendDown": "lower",
+      "shareTitle": "My progress",
+      "shareText": "This week: {done}/{planned} sessions, {streak}-session streak, level {level} in Personal Coach.",
+      "shareAwards": "Level {level}, {xp} XP and {badges} badges in Personal Coach.",
+      "shared": "Shared",
+      "shareAchievements": "Share my achievements",
+      "weeklyVolume": "Weekly volume",
+      "noData": "Not enough data yet.",
+      "calendar": "Training calendar",
+      "bodyWeight": "Body weight",
+      "weightNeedMore": "Log your weight at least twice to see a trend.",
+      "insightsLockedTitle": "Advanced training insights",
+      "insightsLockedBody": "Strength progression per exercise and muscle-group balance, built from your own history.",
+      "strength": "Strength progression",
+      "muscles": "Muscle balance",
+      "premiumActive": "Premium (demo) active",
+      "historyEmpty": "No workouts yet",
+      "historyEmptyBody": "Your completed sessions will appear here.",
+      "adaptedCount": "{n} adjustments",
+      "level": "Level",
+      "toNext": "{n} XP to next level",
+      "badges": "Achievements ({n}/{total})",
+      "unlockedOn": "Unlocked {day}",
+      "records": "Personal records",
+      "recordsEmpty": "No records yet",
+      "recordsEmptyBody": "Beat your best weight or reps and it lands here.",
+      "logWeight": "Log your weight",
+      "weightSaved": "Weight saved",
+      "photos": "Photo check-ins",
+      "photosNote": "Photos are stored only in this browser and never uploaded.",
+      "addPhoto": "Add photo",
+      "photoAdded": "Photo added",
+      "photoError": "Couldn't read that photo",
+      "photosEmpty": "No photos yet",
+      "photosEmptyBody": "Add one every few weeks to see change you can't feel day to day.",
+      "photoAlt": "Check-in photo from {day}",
+      "removePhoto": "Remove",
+      "removeTitle": "Remove photo?",
+      "removeBody": "This photo will be deleted from this device.",
+      "removeConfirm": "Remove",
+      "photosLockedTitle": "Unlimited photo check-ins",
+      "photosLockedBody": "Free includes {n} photos. Premium keeps your whole journey."
+    },
+    "notifications": {
+      "title": "Notifications",
+      "settings": "Notification settings",
+      "empty": "You're all caught up",
+      "emptyBody": "Reminders, achievements and weekly summaries will show up here.",
+      "markAll": "Mark all as read",
+      "now": "Just now",
+      "minAgo": "{n} min ago",
+      "hourAgo": "{n} h ago",
+      "dayAgo": "{n} d ago",
+      "kind": {
+        "workout": "Workout",
+        "missed": "Missed",
+        "achievement": "Achievement",
+        "weekly-goal": "Weekly goal",
+        "recovery": "Recovery",
+        "coach": "Coach",
+        "weekly-summary": "Summary"
+      }
+    },
+    "profile": {
+      "title": "Profile",
+      "levelLine": "Level {level} · {xp} XP",
+      "free": "Free",
+      "perWeek": "days/week",
+      "links": {
+        "preferences": {
+          "label": "Training preferences",
+          "hint": "Goal, schedule, equipment and limitations."
+        },
+        "notifications": {
+          "label": "Notifications",
+          "hint": "Your reminders and messages."
+        },
+        "settings": {
+          "label": "Settings",
+          "hint": "Language, reminder times, data."
+        },
+        "subscription": {
+          "label": "Subscription",
+          "hint": "Free and Premium."
+        },
+        "devices": {
+          "label": "Connected devices",
+          "hint": "Apple Health, Garmin, blood pressure log."
+        },
+        "nutrition": {
+          "label": "Nutrition and water",
+          "hint": "Daily targets and hydration."
+        },
+        "partners": {
+          "label": "Gym Bro",
+          "hint": "Find a workout partner."
+        }
+      }
+    },
+    "settings": {
+      "title": "Settings",
+      "language": "Language",
+      "languageNote": "More languages are on the way. Anything not translated yet appears in English.",
+      "reminders": "Reminders",
+      "remindersNote": "Fewer, kinder notifications. You choose which ones you want.",
+      "reminderTime": "Workout reminder time",
+      "push": "Browser notifications",
+      "pushNote": "Shows system notifications while this app is open in a browser. Real push needs a server and isn't set up in this demo.",
+      "pushUnsupported": "This browser doesn't support notifications",
+      "pushDenied": "Notification permission was not granted",
+      "pushOn": "Browser notifications on",
+      "pushOff": "Browser notifications off",
+      "data": "Your data",
+      "dataNote": "Everything is stored on this device only.",
+      "removeDemo": "Remove demo history",
+      "removeDemoTitle": "Remove demo history?",
+      "removeDemoBody": "Sample past workouts are deleted. Workouts you completed yourself stay.",
+      "removeDemoConfirm": "Remove",
+      "demoRemoved": "Demo history removed",
+      "reset": "Reset everything",
+      "resetTitle": "Reset everything?",
+      "resetBody": "This deletes your profile, plan, history and settings from this device. You'll start onboarding again.",
+      "resetConfirm": "Reset"
+    },
+    "subscription": {
+      "title": "Subscription",
+      "demoNotice": "Demo only. No payment is taken and nothing is billed. This screen shows how Premium would work.",
+      "active": "Premium active (demo)",
+      "trialUntil": "Demo trial until {day}",
+      "premiumOn": "Premium is on.",
+      "freeTitle": "Free",
+      "freeNote": "Everything you need to train safely and consistently.",
+      "free": {
+        "plan": "Personalized weekly plan",
+        "workouts": "Guided workouts with adjustments",
+        "library": "Exercise library with videos",
+        "coach": "Personal Coach chat",
+        "progress": "Progress, streaks and achievements",
+        "safety": "All safety guidance, always"
+      },
+      "premiumTitle": "Premium",
+      "premium": {
+        "adaptive": {
+          "title": "Rebuild my plan with the coach",
+          "body": "Re-plan upcoming weeks from your history and feedback."
+        },
+        "insights": {
+          "title": "Advanced training insights",
+          "body": "Strength trends per exercise and muscle balance."
+        },
+        "rebuild": {
+          "title": "Extended personalization",
+          "body": "Finer control as your goals and schedule change."
+        },
+        "photos": {
+          "title": "Unlimited photo check-ins",
+          "body": "Keep every check-in in one timeline."
+        },
+        "partners": {
+          "title": "Joint workouts with a partner",
+          "body": "Schedule sessions with a Gym Bro."
+        }
+      },
+      "start": "Start 7-day free trial (demo)",
+      "started": "Demo trial started. No payment taken.",
+      "end": "End demo Premium",
+      "ended": "Back on Free",
+      "priceNote": "In a real release billing would happen through the App Store or Google Play.",
+      "safetyPromise": "Training and safety features never sit behind a paywall."
+    },
+    "devices": {
+      "title": "Connected devices",
+      "honest": "Apple Health and Garmin need a native app or provider sign-in, which a web demo can't do. Linking here turns on clearly labelled Demo Mode with simulated values.",
+      "linkedDemo": "Linked · Demo Mode",
+      "notLinked": "Not linked",
+      "connect": "Link (demo)",
+      "disconnect": "Unlink",
+      "connected": "{name} linked in Demo Mode",
+      "disconnected": "{name} unlinked",
+      "noneTitle": "No device linked",
+      "noneBody": "Link one to preview the live heart-rate panel you'll see during workouts.",
+      "bpTitle": "Blood pressure log",
+      "bpBadge": "Manually entered",
+      "bpNote": "Entered by you, kept separate from sensor data and never estimated from heart rate. Not a medical record.",
+      "systolic": "Systolic",
+      "diastolic": "Diastolic",
+      "bpSysError": "Enter 70 to 250",
+      "bpDiaError": "Enter 40 to 150",
+      "bpSaved": "Reading saved",
+      "manual": "manual entry",
+      "remove": "Remove"
+    },
+    "nutrition": {
+      "title": "Nutrition and water",
+      "disclaimer": "General estimates for planning, not medical or dietitian advice.",
+      "calories": "Calories",
+      "protein": "Protein",
+      "carbs": "Carbs",
+      "fat": "Fat",
+      "mealsTitle": "Today's meals",
+      "mealsDone": "{n} of {total} meals logged today.",
+      "goalTip": {
+        "lose-fat": "A modest deficit with plenty of protein keeps muscle while fat comes off.",
+        "build-muscle": "A small surplus and protein at every meal support muscle growth.",
+        "get-stronger": "Eat enough to fuel heavy sets and recover well.",
+        "stay-fit": "Balanced meals and steady energy beat strict rules.",
+        "endurance": "Carbs fuel long sessions. Don't skimp on them."
+      },
+      "slot": {
+        "breakfast": "Breakfast",
+        "lunch": "Lunch",
+        "snack": "Snack",
+        "dinner": "Dinner"
+      },
+      "idea": {
+        "breakfast": "oats, yogurt and berries",
+        "lunch": "chicken or tofu bowl with rice and vegetables",
+        "snack": "fruit and a handful of nuts",
+        "dinner": "fish or beans, potatoes and a big salad"
+      },
+      "waterTitle": "Water",
+      "goalHit": "Daily goal reached. Nice.",
+      "waterLeft": "{n} ml to go.",
+      "goal": "Daily goal"
+    },
+    "partners": {
+      "title": "Gym Bro",
+      "demoNote": "Demo: these are sample profiles. Real matching needs accounts and a server.",
+      "level": "Level {n}",
+      "status": {
+        "invited": "Invited",
+        "accepted": "Partner"
+      },
+      "invite": "Invite to train",
+      "invited": "Invite sent to {name}",
+      "accepted": "{name} accepted",
+      "remove": "Remove partner",
+      "schedule": "Train together: {title}, {day}",
+      "scheduled": "Joint workout with {name} on {day}",
+      "unscheduled": "Joint workout cancelled",
+      "cancelJoint": "Cancel joint workout",
+      "jointNote": "You're training with {name}. It shows on this workout.",
+      "lockedTitle": "Joint workouts",
+      "lockedBody": "Scheduling sessions with a partner is part of Premium."
+    },
+    "adapt": {
+      "easier": {
+        "label": "Make it easier",
+        "hint": "About 10% lighter, or an easier variation."
+      },
+      "harder": {
+        "label": "Make it a bit harder",
+        "hint": "Small step up on load or reps."
+      },
+      "more-rest": {
+        "label": "More rest between sets",
+        "hint": "Adds 30 seconds to every rest."
+      },
+      "min20": {
+        "label": "I only have 20 minutes",
+        "hint": "Keeps the main work, trims the extras."
+      },
+      "min30": {
+        "label": "I only have 30 minutes",
+        "hint": "Trims accessory work to fit."
+      },
+      "tired": {
+        "label": "I'm feeling tired",
+        "hint": "Fewer sets, lighter loads, longer rests."
+      }
+    },
+    "session": {
+      "title": "Workout",
+      "notFound": "Workout not found",
+      "notFoundBody": "It may have been replaced when your plan was updated.",
+      "toTraining": "Back to training",
+      "extra": "Extra session",
+      "extraNote": "Extra sessions earn reduced XP and don't count toward your streak. Rest days are what make training work.",
+      "moved": "Moved from {day}",
+      "restWarning": "You already trained today. A second hard session is rarely better than rest. Consider keeping this for another day.",
+      "skipped": {
+        "recovery": "Skipped for recovery. This keeps your streak safe.",
+        "unwell": "Skipped while unwell. Your streak is safe. Come back when you feel ready.",
+        "busy": "Skipped because of a busy day."
+      },
+      "start": "Start workout",
+      "alreadyActive": "Another workout is in progress. Finish or end it first.",
+      "adjust": "Adjust",
+      "move": "Move",
+      "skip": "Skip",
+      "result": "Result",
+      "prs": "Personal records: {list}",
+      "exerciseList": "Exercises",
+      "rest": "{s}s rest",
+      "replace": "Replace",
+      "adjustTitle": "Adjust this workout",
+      "adjustLead": "Changes apply to this planned session. You can still adjust during the workout.",
+      "moveTitle": "Move workout",
+      "moveLead": "Pick a day. Days that already have a workout are unavailable.",
+      "currentDay": "Current day",
+      "dayTaken": "Already has {title}",
+      "dayFree": "Free day",
+      "skipTitle": "Skip this workout",
+      "skipLead": "Tell us why so your plan and streak stay fair.",
+      "reason": {
+        "recovery": {
+          "label": "I need recovery",
+          "hint": "Sore or tired. Counts as neutral for your streak."
+        },
+        "unwell": {
+          "label": "I'm unwell or hurt",
+          "hint": "Take care of yourself. Streak is safe."
+        },
+        "busy": {
+          "label": "Too busy",
+          "hint": "Ends the current streak, but you can restart anytime."
+        }
+      },
+      "skipToast": {
+        "recovery": "Recovery day taken. Streak is safe.",
+        "unwell": "Take care. Streak is safe.",
+        "busy": "Workout skipped"
+      },
+      "replaceTitle": "Replace exercise",
+      "replaceLead": "Swap {name} for something that fits your equipment and limits.",
+      "noAlternatives": "No alternatives",
+      "noAlternativesBody": "Nothing else fits your equipment and limitations for this muscle group.",
+      "replaced": "Replaced with {name}",
+      "level": "Level {n}",
+      "exercises": "{n} exercises"
+    },
+    "nav": {
+      "label": "Main navigation",
+      "today": "Today",
+      "training": "Training",
+      "progress": "Progress",
+      "coach": "Coach"
+    },
+    "common": {
+      "back": "Back",
+      "share": "Share",
+      "copied": "Copied to clipboard",
+      "shareFailed": "Sharing isn't available here",
+      "save": "Save",
+      "cancel": "Cancel",
+      "done": "Done",
+      "continue": "Continue",
+      "next": "Next",
+      "start": "Start",
+      "minShort": "min",
+      "kg": "kg",
+      "reps": "reps",
+      "sets": "sets",
+      "premium": "Premium",
+      "demo": "Demo"
+    },
+    "shell": {
+      "resume": "Workout in progress"
+    },
+    "celebration": {
+      "title": "Achievement unlocked",
+      "titleMany": "{n} achievements unlocked",
+      "total": "+{n} XP",
+      "nice": "Nice!",
+      "shareText": "I just unlocked \"{title}\" in Personal Coach: {description}"
+    },
+    "week": {
+      "label": "This week",
+      "state": {
+        "rest": "recovery day",
+        "planned": "planned",
+        "done": "completed",
+        "partial": "partly done",
+        "skipped": "skipped",
+        "missed": "missed"
+      }
+    },
+    "status": {
+      "planned": "Planned",
+      "completed": "Done",
+      "partial": "Partial",
+      "skipped": "Skipped"
+    },
+    "today": {
+      "greeting": {
+        "morning": "Good morning, {name}",
+        "afternoon": "Good afternoon, {name}",
+        "evening": "Good evening, {name}"
+      },
+      "notifications": "Notifications, {n} unread",
+      "profile": "Profile and settings",
+      "empty": {
+        "title": "No workouts planned",
+        "body": "Update your training days and we'll build your week.",
+        "cta": "Edit preferences"
+      },
+      "inProgress": "In progress",
+      "resume": "Resume workout",
+      "todaysWorkout": "Today's workout",
+      "start": "Start workout",
+      "preview": "Preview",
+      "doneEyebrow": "Today",
+      "doneTitle": "Workout complete",
+      "doneBody": "Nice work. Rest, hydrate and let your body adapt.",
+      "seeProgress": "See your progress",
+      "recoveryEyebrow": "Recovery day",
+      "recoveryTitle": "Rest is part of the plan",
+      "recoveryBody": "No session today. Light movement is fine, and it won't touch your streak.",
+      "mobility": "Do a light mobility session",
+      "startEarly": "Start next workout early",
+      "nextUp": "Next: {title}, {day}",
+      "missedTitle": "Missed workout on {day}",
+      "missedBody": "No pressure. Move {title} to another day or skip it. Your plan adapts either way.",
+      "missedCta": "Reschedule or skip",
+      "comebackTitle": "Welcome back",
+      "comebackBody": "It's been {days} days. Ease back in with a lighter session and rebuild momentum.",
+      "comebackCta": "Start a lighter session",
+      "comebackToast": "Next workout lightened for your comeback",
+      "weekGoal": "Weekly goal",
+      "sessions": "sessions",
+      "noPlanThisWeek": "Nothing planned this week.",
+      "goalDone": "All planned sessions done. Enjoy the rest.",
+      "goalLeft": "{n} more to hit your goal.",
+      "streak": "Streak",
+      "streakHint": "planned sessions in a row",
+      "level": "Level",
+      "xpProgress": "XP to next level",
+      "challenge": "Weekly challenge",
+      "challengeDone": "Complete",
+      "water": "Water",
+      "waterAdded": "Added 250 ml",
+      "nutritionLink": "Nutrition and water plan"
+    },
+    "muscle": {
+      "all": "All",
+      "chest": "Chest",
+      "back": "Back",
+      "legs": "Legs",
+      "glutes": "Glutes",
+      "shoulders": "Shoulders",
+      "arms": "Arms",
+      "core": "Core",
+      "cardio": "Cardio",
+      "mobility": "Mobility"
+    },
+    "level": {
+      "1": "Easy",
+      "2": "Moderate",
+      "3": "Hard"
+    },
+    "video": {
+      "none": "No demo video mapped yet for this exercise.",
+      "search": "Search the Leap Fitness channel",
+      "title": "{name} demonstration",
+      "play": "Play demonstration of {name}",
+      "playLabel": "Play demo",
+      "credit": "Video: Leap Fitness on YouTube.",
+      "openYoutube": "Open on YouTube"
+    },
+    "guide": {
+      "steps": "How to do it",
+      "tips": "Technique tips",
+      "breathing": "Breathing",
+      "mistakes": "Common mistakes"
+    },
+    "exercise": {
+      "title": "Exercise",
+      "notFound": "Exercise not found",
+      "backToLibrary": "Back to library",
+      "noEquipment": "No equipment"
+    },
+    "training": {
+      "title": "Training",
+      "subtitle": "Your plan and exercise library",
+      "plan": "Plan",
+      "library": "Library",
+      "prevWeek": "Previous week",
+      "nextWeek": "Next week",
+      "thisWeek": "This week",
+      "emptyWeek": "Nothing planned",
+      "emptyWeekBody": "This week is all recovery. Use it well.",
+      "recoveryNote": "Training days are spaced so there is recovery between sessions. Days without a workout are recovery days.",
+      "editPlan": "Edit training days and preferences",
+      "search": "Search exercises",
+      "searchPlaceholder": "Squat, row, plank…",
+      "filterMuscle": "Filter by muscle",
+      "onlyMine": "Only exercises that fit my equipment and limits",
+      "noResults": "No exercises found",
+      "noResultsBody": "Try another search or show everything.",
+      "clearFilters": "Show all exercises"
+    },
+    "safety": {
+      "title": "Stop and rest",
+      "rested": "I've rested and I feel normal again",
+      "resume": "Resume workout"
+    },
+    "workout": {
+      "noneTitle": "No workout in progress",
+      "noneBody": "Start one from your plan.",
+      "toTraining": "Go to training",
+      "end": "End workout",
+      "pause": "Pause workout",
+      "resume": "Resume",
+      "paused": "Workout paused",
+      "pausedBody": "Take your time. The timer is stopped.",
+      "left": "~{n} min left",
+      "progress": "{done} of {total} exercises done",
+      "exerciseOf": "Exercise {n} of {total}",
+      "target": "{sets} sets × {reps}",
+      "sets": "Sets",
+      "logged": "Logged",
+      "current": "Now",
+      "skippedNote": "You skipped this exercise.",
+      "blockDone": "All sets done. Move to the next exercise.",
+      "skippedLabel": "Skipped",
+      "skippedToast": "Exercise skipped",
+      "startTimer": "Start {s}s timer",
+      "finishSet": "Finish set",
+      "repsLabel": "Repetitions",
+      "weightLabel": "Weight",
+      "decrease": "Decrease",
+      "increase": "Increase",
+      "completeSet": "Complete set",
+      "voiceStart": "Dictate reps and weight",
+      "voiceStop": "Stop listening",
+      "voiceHint": "Tap the mic and say, for example, \"10 reps at 20 kilos\".",
+      "voiceUnsupported": "Voice input isn't supported in this browser. Use the steppers.",
+      "voiceHeard": "Heard {reps} reps at {weight} kg. Tap Complete set to log.",
+      "voiceUnclear": "Couldn't read a number from \"{text}\".",
+      "voiceError": "Voice input failed. Try again or use the steppers.",
+      "prev": "Back",
+      "all": "All",
+      "nextEx": "Next",
+      "adjust": "Adjust this workout",
+      "rest": "Rest",
+      "addRest": "+30 s",
+      "skipRest": "Skip rest",
+      "upNext": "Up next",
+      "setOf": "Set {n} of {total}",
+      "tooHardRest": "This is too hard or I need changes",
+      "unwell": "I feel unwell",
+      "unwellHint": "Chest pain, dizziness or severe discomfort: stop and get safety guidance.",
+      "adjustTitle": "Adjust workout",
+      "adjustLead": "Completed sets are always kept. Changes apply to what's left.",
+      "actions": {
+        "too-hard": {
+          "label": "This is too hard",
+          "hint": "Lighter loads, softer reps and a bit more rest."
+        },
+        "easier": {
+          "label": "Make it easier",
+          "hint": "About 10% lighter or an easier variation."
+        },
+        "more-rest": {
+          "label": "I need more rest",
+          "hint": "Adds 30 seconds between sets."
+        },
+        "replace": {
+          "label": "Replace this exercise",
+          "hint": "Swap it for one that fits your equipment."
+        },
+        "min20": {
+          "label": "I only have 20 minutes",
+          "hint": "Keeps the essentials and trims the rest."
+        },
+        "tired": {
+          "label": "I'm feeling tired",
+          "hint": "Fewer sets, lighter loads, longer rests."
+        },
+        "skip": {
+          "label": "Skip this exercise",
+          "hint": "Move on without logging it."
+        },
+        "pause": {
+          "label": "Pause workout",
+          "hint": "Stops the timers until you resume."
+        },
+        "end": {
+          "label": "End workout",
+          "hint": "Save what you've done and finish."
+        }
+      },
+      "replaceTitle": "Replace exercise",
+      "replaceLead": "Pick a replacement for {name}.",
+      "overviewTitle": "All exercises",
+      "setsDone": "{done}/{total} sets",
+      "endTitle": "End workout?",
+      "endBody": "Your {n} completed sets will be saved as a partial workout.",
+      "endEmpty": "You haven't logged any sets. Leave without saving?",
+      "keepGoing": "Keep going",
+      "endSave": "End and save",
+      "endLeave": "Leave workout"
+    },
+    "summary": {
+      "title": "Workout complete",
+      "partialTitle": "Good effort",
+      "complete": "Completed",
+      "partial": "Partial",
+      "lead": "{title} is done. Here's how it went.",
+      "partialLead": "You stopped early and that's fine. What you did still counts.",
+      "emptyTitle": "No sets logged",
+      "emptyBody": "Nothing to save this time. Come back whenever you're ready.",
+      "avgHr": "Average heart rate {n} bpm (simulated, demo mode).",
+      "prs": "New personal records",
+      "adapted": "Adjustments made",
+      "adaptNote": "Your next sessions take your feedback into account.",
+      "exercises": "Exercises",
+      "feelTitle": "How did it feel?",
+      "feelNote": "Your answer tunes the loads in your next sessions.",
+      "feel": {
+        "easy": "Too easy",
+        "right": "Just right",
+        "hard": "Too hard"
+      },
+      "save": "Save and view progress",
+      "saveHome": "Save and go home",
+      "discard": "Discard workout",
+      "discardTitle": "Discard workout?",
+      "discardBody": "This session will not be saved and won't count toward progress.",
+      "discardConfirm": "Discard"
+    }
+  }
+}

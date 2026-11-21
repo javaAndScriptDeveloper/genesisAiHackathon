@@ -1,0 +1,37 @@
+{
+  "uiKit": {
+    "title": "UI Kit",
+    "lead": "All shared building blocks of the project in one place: typography, colors, components.",
+    "typography": "Typography",
+    "colors": "Colors",
+    "buttons": "Buttons",
+    "forms": "Fields and selection",
+    "overlays": "Dialogs and notifications",
+    "data": "Data: table and pagination",
+    "navigation": "Tabs and carousel",
+    "feedback": "Badges, skeletons, empty state",
+    "icons": "Icons (Hugeicons)",
+    "mobileControls": "Mobile app controls"
+  },
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "loading": "Loading…",
+    "close": "Close"
+  },
+  "backendStatus": {
+    "title": "Backend status",
+    "lead": "Checks the frontend's connection to platform-backend after every deploy.",
+    "health": "Health",
+    "ping": "Ping",
+    "ok": "Working",
+    "down": "Unavailable",
+    "database": "Database",
+    "connected": "Connected",
+    "disconnected": "Disconnected",
+    "message": "Message",
+    "time": "Time",
+    "unreachable": "The backend is unavailable or returned an unexpected response."
+  }
+}

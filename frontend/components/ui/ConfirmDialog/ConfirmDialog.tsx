@@ -16,7 +16,7 @@ interface ConfirmDialogProps {
 }
 
 // Required for every destructive action. No fields, so the dialog container keeps focus.
-export function ConfirmDialog({ open, title, description, confirmLabel, cancelLabel = "Скасувати", tone = "default", loading, onConfirm, onCancel }: ConfirmDialogProps) {
+export function ConfirmDialog({ open, title, description, confirmLabel, cancelLabel = "Cancel", tone = "default", loading, onConfirm, onCancel }: ConfirmDialogProps) {
 	return (
 		<Modal
 			open={open}

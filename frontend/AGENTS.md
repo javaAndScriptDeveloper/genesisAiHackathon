@@ -25,6 +25,7 @@ Frontend starter for a hackathon. Brief and backend are not final, so keep every
 | Claude and Gemini server utilities | [docs/agent/ai-utils.md](docs/agent/ai-utils.md) |
 | Images: WebP, @2x, `next/image` | [docs/agent/images.md](docs/agent/images.md) |
 | UX, accessibility and product rules | [docs/agent/ux-rules.md](docs/agent/ux-rules.md) |
+| Fitness app: domain, state, mock vs real | [docs/agent/fitness-app.md](docs/agent/fitness-app.md) |
 | Libraries installed and why | [docs/agent/libraries.md](docs/agent/libraries.md) |
 | Hackathon day workflow and checklist | [docs/agent/hackathon-workflow.md](docs/agent/hackathon-workflow.md) |
 
@@ -44,7 +45,7 @@ Design history: `docs/superpowers/specs/` and `docs/superpowers/plans/`.
 - **Fonts:** Inter body, Unbounded for h1 (heavy), Montserrat/Poppins opt-in. Loaded via `next/font` in `lib/fonts.ts`.
 - **Icons:** Hugeicons only, via `components/ui/Icon`, individual named imports. Never emoji or text glyphs as icons.
 - **Images:** WebP, @2x when possible, always through `next/image` (`Picture`). Convert with `bun run images`.
-- **Copy:** user-facing text in `messages/uk.json`, read with `t("key")`. Ukrainian only, no language switcher.
+- **Copy / i18n:** the app is multilingual, English is the default and source language. All user-facing text lives in `messages/<locale>.json` (`en`, `uk`; add a locale in `lib/i18n/config.ts`), read with `useT()` in client components or `t(key, params, locale)` elsewhere; `{name}` interpolation, missing keys fall back to English. Never hardcode UI strings in components. Domain content that is data (exercise library in `lib/fit/exercises.ts`, coach replies in `lib/fit/coach.ts`) is English-only for now and is the next thing to move into message files.
 - **Theme:** one light theme, no theme switcher.
 - **Forms:** react-hook-form + zod; no browser-native validation; show errors in the kit's own UI.
 - **Loading/empty/error:** every data view has a skeleton, an empty state and an error state. Data that can take a while to load or switch (pagination, tabs, filters, search, refetch) MUST show skeletons during the switch, not stale/blank content; skeleton keeps the same layout (columns, row count, heights) so nothing jumps.

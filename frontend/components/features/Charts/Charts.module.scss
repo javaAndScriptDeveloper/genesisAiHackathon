@@ -1,0 +1,39 @@
+.figure {
+	margin: 0;
+}
+
+.svg {
+	display: block;
+	width: 100%;
+	height: auto;
+	overflow: visible;
+}
+
+.bar {
+	fill: var(--color-borderStrong);
+}
+
+.barNow {
+	fill: var(--color-accent);
+}
+
+.axis {
+	fill: var(--color-textSubtle);
+	font-size: 10px;
+}
+
+.val {
+	fill: var(--color-textMuted);
+	font-size: 10px;
+	font-weight: 600;
+}
+
+.line {
+	stroke: var(--color-accent);
+}
+
+.dot {
+	fill: var(--color-surface);
+	stroke: var(--color-accent);
+	stroke-width: 2.5;
+}

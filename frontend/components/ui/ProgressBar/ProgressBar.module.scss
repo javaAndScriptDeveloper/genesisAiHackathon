@@ -1,0 +1,25 @@
+.track {
+	height: 0.8rem;
+	overflow: hidden;
+	background: var(--color-surfaceMuted);
+	border-radius: var(--radius-pill);
+}
+
+.fill {
+	display: block;
+	height: 100%;
+	border-radius: var(--radius-pill);
+	transition: width var(--transition-base);
+}
+
+.accent {
+	background: var(--color-accent);
+}
+
+.success {
+	background: var(--color-success);
+}
+
+.neutral {
+	background: var(--color-text);
+}

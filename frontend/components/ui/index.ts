@@ -22,3 +22,8 @@ export { Tabs, type TabItem } from "./Tabs/Tabs";
 export { Textarea } from "./Textarea/Textarea";
 export { ToastProvider, useToast } from "./Toast/Toast";
 export { Tooltip } from "./Tooltip/Tooltip";
+export { ProgressBar } from "./ProgressBar/ProgressBar";
+export { ProgressRing } from "./ProgressRing/ProgressRing";
+export { SegmentedControl, type Segment } from "./SegmentedControl/SegmentedControl";
+export { Sheet } from "./Sheet/Sheet";
+export { Stepper } from "./Stepper/Stepper";

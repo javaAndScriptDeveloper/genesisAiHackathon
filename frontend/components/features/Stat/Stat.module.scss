@@ -1,0 +1,33 @@
+@use "partials/corners";
+
+.stat {
+	display: flex;
+	flex-direction: column;
+	gap: 0.2rem;
+	min-width: 0;
+	padding: var(--space-3);
+	background: var(--color-surface);
+	border: 0.1rem solid var(--color-border);
+	@include corners.radius(var(--radius-card));
+}
+
+.label {
+	display: flex;
+	align-items: center;
+	gap: 0.4rem;
+	color: var(--color-textSubtle);
+	font-size: 1.2rem;
+	font-weight: 600;
+}
+
+.value {
+	font-size: 2.4rem;
+	font-weight: 700;
+	font-variant-numeric: tabular-nums;
+	line-height: 1.2;
+}
+
+.hint {
+	color: var(--color-textSubtle);
+	font-size: 1.2rem;
+}

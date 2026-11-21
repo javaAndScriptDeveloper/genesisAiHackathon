@@ -1,0 +1,194 @@
+@use "partials/corners";
+@use "partials/mixins";
+
+.root {
+	padding-bottom: var(--space-5);
+}
+
+.content {
+	display: flex;
+	flex-direction: column;
+	gap: var(--space-4);
+	padding: 0 var(--space-4);
+}
+
+.bell {
+	position: relative;
+	display: inline-flex;
+}
+
+.badge {
+	position: absolute;
+	top: 0.4rem;
+	right: 0.2rem;
+	display: grid;
+	place-items: center;
+	min-width: 1.8rem;
+	height: 1.8rem;
+	padding: 0 0.4rem;
+	background: var(--color-accent);
+	color: #fff;
+	font-size: 1.1rem;
+	font-weight: 700;
+	border-radius: var(--radius-pill);
+	pointer-events: none;
+}
+
+.hero {
+	display: flex;
+	flex-direction: column;
+	gap: var(--space-2);
+	padding: var(--space-5);
+	background: #131316;
+	border-color: #131316;
+	color: #fff;
+
+	p {
+		color: rgba(255, 255, 255, 0.72);
+	}
+}
+
+.eyebrow {
+	font-size: 1.2rem;
+	font-weight: 700;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: var(--color-accentText);
+}
+
+.hero .eyebrow {
+	color: #ff8c93;
+}
+
+.heroTitle {
+	font-family: var(--font-display);
+	font-size: 2.6rem;
+	line-height: 1.15;
+}
+
+.heroMeta {
+	font-size: 1.4rem;
+}
+
+.heroActions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--space-2);
+	margin-top: var(--space-2);
+
+	> :first-child {
+		flex: 1;
+	}
+}
+
+.hero :global(button[class*="secondary"]) {
+	background: transparent;
+	color: #fff;
+	border-color: rgba(255, 255, 255, 0.3);
+}
+
+.notice {
+	display: flex;
+	gap: var(--space-3);
+	background: var(--color-warningSoft);
+	border-color: #fde68a;
+	color: var(--color-warningText);
+
+	h3 {
+		font-size: 1.5rem;
+	}
+
+	p {
+		margin: 0.2rem 0 var(--space-2);
+		color: var(--color-textMuted);
+		font-size: 1.3rem;
+		line-height: 1.45;
+	}
+}
+
+.goal {
+	display: flex;
+	align-items: center;
+	gap: var(--space-4);
+}
+
+.goalText {
+	h2 {
+		font-size: 1.8rem;
+	}
+
+	p {
+		margin-top: 0.2rem;
+		color: var(--color-textMuted);
+		font-size: 1.4rem;
+	}
+}
+
+.ringNum {
+	font-size: 2rem;
+}
+
+.ringLabel {
+	color: var(--color-textSubtle);
+	font-size: 1.1rem;
+}
+
+.stats {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: var(--space-3);
+}
+
+.challenge {
+	display: flex;
+	flex-direction: column;
+	gap: var(--space-2);
+
+	h3 {
+		font-size: 1.6rem;
+	}
+
+	p {
+		color: var(--color-textMuted);
+		font-size: 1.3rem;
+	}
+}
+
+.challengeMeta {
+	color: var(--color-textSubtle);
+	font-size: 1.2rem;
+}
+
+.water {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+
+	h3 {
+		font-size: 1.5rem;
+	}
+
+	p {
+		color: var(--color-textSubtle);
+		font-size: 1.3rem;
+	}
+}
+
+.quote {
+	padding: 0 var(--space-2);
+	color: var(--color-textMuted);
+	font-size: 1.4rem;
+	font-style: italic;
+	line-height: 1.5;
+	text-align: center;
+}
+
+.link {
+	min-height: var(--hit-target);
+	display: grid;
+	place-items: center;
+	color: var(--color-accentText);
+	font-size: 1.4rem;
+	font-weight: 600;
+	@include mixins.focus-ring;
+}

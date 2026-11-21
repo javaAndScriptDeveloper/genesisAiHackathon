@@ -9,6 +9,8 @@ interface ModalProps {
 	open: boolean;
 	onClose: () => void;
 	title: string;
+	/** Accessible label of the close button (pass translated copy). */
+	closeLabel?: string;
 	children: ReactNode;
 	footer?: ReactNode;
 }
@@ -17,7 +19,7 @@ const EDITABLE = 'input:not([type="hidden"]):not([readonly]):not([disabled]), te
 
 // Native <dialog>: focus trap, Escape and inert background come from the platform.
 // If the content has an editable field it is focused on open; otherwise the dialog itself keeps focus.
-export function Modal({ open, onClose, title, children, footer }: ModalProps) {
+export function Modal({ open, onClose, title, closeLabel = "Close", children, footer }: ModalProps) {
 	const ref = useRef<HTMLDialogElement>(null);
 
 	useEffect(() => {
@@ -39,7 +41,7 @@ export function Modal({ open, onClose, title, children, footer }: ModalProps) {
 		>
 			<div className={styles.header}>
 				<h3 className={styles.title}>{title}</h3>
-				<IconButton icon={Cancel01Icon} label="Закрити" onClick={onClose} />
+				<IconButton icon={Cancel01Icon} label={closeLabel} onClick={onClose} />
 			</div>
 			<div className={styles.body}>{children}</div>
 			{footer && <div className={styles.footer}>{footer}</div>}

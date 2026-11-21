@@ -1,0 +1,23 @@
+.root {
+	position: relative;
+	flex: none;
+}
+
+.track {
+	stroke: var(--color-surfaceMuted);
+}
+
+.bar {
+	stroke: var(--color-accent);
+	transition: stroke-dashoffset 0.6s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.content {
+	position: absolute;
+	inset: 0;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	text-align: center;
+}

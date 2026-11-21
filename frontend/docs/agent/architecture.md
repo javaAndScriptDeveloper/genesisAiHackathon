@@ -18,7 +18,9 @@ lib/
   validation/              shared zod form schemas
   hooks/                   tiny shared hooks
   fonts.ts, messages.ts
-messages/uk.json           all user-facing copy
+messages/*.json           all user-facing copy (en default, uk; parts/ are merged into en.json)
+app/(app)/                 fitness app routes inside the phone shell, see docs/agent/fitness-app.md
+lib/fit/, lib/i18n/        fitness domain + store, locale provider
 styles/                    globals.scss + partials (tokens, reset, typography, corners, mixins, scrollbar)
 scripts/convert-images.mjs image pipeline
 tests/                     vitest tests for lib/

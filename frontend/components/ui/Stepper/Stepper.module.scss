@@ -1,0 +1,50 @@
+@use "partials/corners";
+@use "partials/mixins";
+
+.root {
+	display: flex;
+	align-items: center;
+	gap: var(--space-2);
+}
+
+.button {
+	display: grid;
+	place-items: center;
+	width: 4.8rem;
+	height: 4.8rem;
+	flex: none;
+	background: var(--color-surfaceMuted);
+	color: var(--color-text);
+	transition: background-color var(--transition-fast), transform var(--transition-fast);
+	@include corners.radius(var(--radius-control));
+	@include mixins.focus-ring;
+
+	&:active:not(:disabled) {
+		transform: scale(0.96);
+		background: var(--color-surfaceHover);
+	}
+
+	&:disabled {
+		opacity: 0.4;
+	}
+}
+
+.value {
+	display: flex;
+	flex: 1;
+	align-items: baseline;
+	justify-content: center;
+	gap: 0.4rem;
+	min-width: 6rem;
+}
+
+.number {
+	font-size: 2.8rem;
+	font-weight: 700;
+	font-variant-numeric: tabular-nums;
+}
+
+.unit {
+	color: var(--color-textSubtle);
+	font-size: 1.4rem;
+}

@@ -1,0 +1,63 @@
+@use "partials/corners";
+@use "partials/mixins";
+
+.card {
+	display: flex;
+	gap: var(--space-3);
+	padding: var(--space-3);
+	background: var(--color-surface);
+	border: 0.1rem solid var(--color-border);
+	box-shadow: var(--shadow-card);
+	@include corners.radius(var(--radius-card));
+	@include mixins.focus-ring;
+}
+
+.icon {
+	display: grid;
+	flex: none;
+	place-items: center;
+	width: 4.8rem;
+	height: 4.8rem;
+	background: var(--color-accentSoft);
+	color: var(--color-accent);
+	@include corners.nested(var(--radius-card), 0.4rem);
+}
+
+.body {
+	display: flex;
+	flex: 1;
+	flex-direction: column;
+	gap: 0.4rem;
+	min-width: 0;
+}
+
+.row {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--space-2);
+}
+
+.title {
+	font-size: 1.6rem;
+}
+
+.meta {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--space-2);
+	color: var(--color-textSubtle);
+	font-size: 1.3rem;
+}
+
+.metaItem {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.3rem;
+}
+
+.names {
+	color: var(--color-textMuted);
+	font-size: 1.3rem;
+	@include mixins.truncate;
+}

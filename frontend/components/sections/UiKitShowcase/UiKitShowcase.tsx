@@ -32,7 +32,12 @@ import {
 	Modal,
 	Pagination,
 	Select,
+	ProgressBar,
+	ProgressRing,
+	SegmentedControl,
+	Sheet,
 	Skeleton,
+	Stepper,
 	Switch,
 	Table,
 	Tabs,
@@ -184,7 +189,7 @@ export function UiKitShowcase() {
 					onCancel={() => setConfirm(false)}
 					onConfirm={() => {
 						setConfirm(false);
-						toast.show("Видалено", "success");
+						toast.show("Видалено", "danger");
 					}}
 				/>
 			</Section>
@@ -238,6 +243,10 @@ export function UiKitShowcase() {
 				</div>
 			</Section>
 
+			<Section id="mobile" title={t("uiKit.mobileControls")}>
+				<MobileControlsDemo />
+			</Section>
+
 			<Section id="icons" title={t("uiKit.icons")}>
 				<div className={styles.row}>
 					{ICON_SAMPLES.map(([name, icon]) => (
@@ -249,5 +258,26 @@ export function UiKitShowcase() {
 				</div>
 			</Section>
 		</Container>
+	);
+}
+
+// Controls built for the mobile fitness app. Sheet is positioned against its nearest positioned ancestor (not the viewport).
+function MobileControlsDemo() {
+	const [seg, setSeg] = useState<"plan" | "library">("plan");
+	const [reps, setReps] = useState(10);
+	const [open, setOpen] = useState(false);
+	return (
+		<div className={styles.stack} style={{ position: "relative", minHeight: "26rem" }}>
+			<SegmentedControl label="Demo tabs" value={seg} onChange={setSeg} options={[{ id: "plan", label: "Plan" }, { id: "library", label: "Library" }]} />
+			<Stepper label="Repetitions" value={reps} onChange={setReps} min={1} max={50} unit="reps" />
+			<ProgressBar value={reps * 2} label="Demo progress" />
+			<ProgressRing value={reps * 2} label="Demo ring" size={72}>
+				<strong>{reps}</strong>
+			</ProgressRing>
+			<Button variant="secondary" onClick={() => setOpen(true)}>Open sheet</Button>
+			<Sheet open={open} onClose={() => setOpen(false)} title="Bottom sheet" footer={<Button onClick={() => setOpen(false)}>Done</Button>}>
+				In-frame overlay used instead of a native dialog inside the phone shell.
+			</Sheet>
+		</div>
 	);
 }

@@ -1,0 +1,76 @@
+{
+  "fit": {
+    "opt": {
+      "gender": { "female": "Female", "male": "Male", "non-binary": "Non-binary", "private": "Prefer not to say" },
+      "goal": {
+        "lose-fat": { "label": "Lose fat", "hint": "Higher reps, shorter rests and cardio finishers." },
+        "build-muscle": { "label": "Build muscle", "hint": "Moderate reps and steady progressive load." },
+        "get-stronger": { "label": "Get stronger", "hint": "Heavier sets with longer rests." },
+        "stay-fit": { "label": "Stay fit & healthy", "hint": "Balanced training that fits your life." },
+        "endurance": { "label": "Build endurance", "hint": "Higher reps, short rests and conditioning." }
+      },
+      "experience": {
+        "beginner": { "label": "Beginner", "hint": "New to training or coming back after a long break." },
+        "intermediate": { "label": "Intermediate", "hint": "Training regularly for a year or more." },
+        "advanced": { "label": "Advanced", "hint": "Several years of consistent, structured training." }
+      },
+      "location": {
+        "home": { "label": "At home", "hint": "Pick the equipment you own." },
+        "gym": { "label": "At the gym", "hint": "Full access to machines and free weights." },
+        "hybrid": { "label": "Both", "hint": "Home gear plus a gym on some days." }
+      },
+      "equipment": { "dumbbells": "Dumbbells", "bench": "Bench", "barbell": "Barbell", "machines": "Gym machines", "bands": "Resistance bands", "jump-rope": "Jump rope" },
+      "limitation": {
+        "knees": { "label": "Knees", "hint": "Avoid deep or high-impact knee loading." },
+        "lower-back": { "label": "Lower back", "hint": "Avoid heavy hinging and spinal loading." },
+        "shoulders": { "label": "Shoulders", "hint": "Avoid heavy overhead and wide pressing." },
+        "wrists": { "label": "Wrists", "hint": "Avoid weight-bearing on the hands." },
+        "heart-bp": { "label": "Heart or blood pressure", "hint": "Avoid max-effort and heavy straining work." }
+      },
+      "wearable": {
+        "none": { "label": "No device", "hint": "You can connect one later." },
+        "apple": { "label": "Apple Watch / Health", "hint": "Heart rate and recovery from Apple Health." },
+        "garmin": { "label": "Garmin", "hint": "Heart rate and activity from Garmin Connect." }
+      }
+    },
+    "onboarding": {
+      "eyebrow": "Your plan",
+      "editEyebrow": "Preferences",
+      "progress": "Setup progress",
+      "name": "What should we call you?",
+      "age": "Age",
+      "gender": "Gender (optional)",
+      "height": "Height",
+      "weight": "Weight",
+      "equipment": "Equipment you have",
+      "equipmentNote": "Leave everything unchecked for bodyweight-only training.",
+      "duration": "Workout length",
+      "days": "Training days per week",
+      "daysOption": "{n} days",
+      "daysNote": "We spread sessions out so there is always recovery between them.",
+      "limitNote": "Anything else we should know? (optional)",
+      "heartNote": "We'll avoid max-effort and heavy straining exercises. Please check with your doctor before starting a new training program.",
+      "wearableNote": "Connections run in Demo Mode in the browser. You can manage them anytime under Devices.",
+      "summaryFor": "{name}'s plan",
+      "firstWeek": "First week",
+      "noPreview": "Adjust your answers to see a preview.",
+      "demoHistory": "Include 5 weeks of demo history",
+      "demoHistoryNote": "Fills Progress with sample past workouts so you can explore everything. Remove it anytime in Settings.",
+      "editNote": "Upcoming planned workouts will be rebuilt. Past sessions are kept.",
+      "finish": "Start training",
+      "save": "Save and update plan",
+      "errors": { "name": "Enter a name", "nameLong": "Keep it under 30 characters", "number": "Enter a number", "age": "Age must be 14 to 90", "height": "Height must be 120 to 230 cm", "weight": "Weight must be 30 to 250 kg" },
+      "steps": {
+        "about": { "title": "Let's get to know you", "lead": "A few quick questions so your plan fits you." },
+        "body": { "title": "Your body stats", "lead": "Used to pick sensible starting loads. Stays on your device." },
+        "goal": { "title": "What's your main goal?", "lead": "This shapes sets, reps, rests and exercise choice." },
+        "experience": { "title": "Your training experience", "lead": "We start where you are and progress from there." },
+        "where": { "title": "Where do you train?", "lead": "Only exercises you can actually do end up in your plan." },
+        "schedule": { "title": "Your schedule", "lead": "Be realistic. Consistency beats ambition." },
+        "limits": { "title": "Limitations", "lead": "Select anything that needs care. We'll steer around it." },
+        "wearable": { "title": "Connect a wearable", "lead": "Optional. Live heart rate makes workouts smarter." },
+        "summary": { "title": "Your personalized plan", "lead": "Here's how your first week looks. You can change anything later." }
+      }
+    }
+  }
+}

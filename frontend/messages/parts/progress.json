@@ -1,0 +1,22 @@
+{
+  "fit": {
+    "gate": { "cta": "See Premium" },
+    "progress": {
+      "title": "Progress", "subtitle": "Your training, in numbers", "overview": "Overview", "history": "History", "awards": "Awards", "checkins": "Check-ins",
+      "demoNote": "Includes 5 weeks of demo history. Remove it anytime in Settings.", "period": "Period", "thisWeek": "This week", "last4": "Last 4 weeks",
+      "sessions": "Sessions", "completedVsPlanned": "done / planned", "time": "Training time", "volume": "Volume", "streakLabel": "Streak", "longest": "longest {n}",
+      "consistency": "Consistency", "consistencyBody": "Planned sessions completed over the last 4 weeks. Recovery skips don't count against you.",
+      "insight": "Training insight", "summaryNone": "Finish your first workout and your personal summary shows up here.",
+      "summary": "You've done {done} of {planned} planned sessions this week with {score}% consistency over four weeks. Your training volume is {trend} compared with last week.",
+      "trendUp": "up or steady", "trendDown": "lower",
+      "shareTitle": "My progress", "shareText": "This week: {done}/{planned} sessions, {streak}-session streak, level {level} in Personal Coach.", "shareAwards": "Level {level}, {xp} XP and {badges} badges in Personal Coach.", "shared": "Shared", "shareAchievements": "Share my achievements",
+      "weeklyVolume": "Weekly volume", "noData": "Not enough data yet.", "calendar": "Training calendar", "bodyWeight": "Body weight", "weightNeedMore": "Log your weight at least twice to see a trend.",
+      "insightsLockedTitle": "Advanced training insights", "insightsLockedBody": "Strength progression per exercise and muscle-group balance, built from your own history.", "strength": "Strength progression", "muscles": "Muscle balance", "premiumActive": "Premium (demo) active",
+      "historyEmpty": "No workouts yet", "historyEmptyBody": "Your completed sessions will appear here.", "adaptedCount": "{n} adjustments",
+      "level": "Level", "toNext": "{n} XP to next level", "badges": "Achievements ({n}/{total})", "unlockedOn": "Unlocked {day}", "records": "Personal records", "recordsEmpty": "No records yet", "recordsEmptyBody": "Beat your best weight or reps and it lands here.",
+      "logWeight": "Log your weight", "weightSaved": "Weight saved", "photos": "Photo check-ins", "photosNote": "Photos are stored only in this browser and never uploaded.", "addPhoto": "Add photo", "photoAdded": "Photo added", "photoError": "Couldn't read that photo", "photosEmpty": "No photos yet", "photosEmptyBody": "Add one every few weeks to see change you can't feel day to day.",
+      "photoAlt": "Check-in photo from {day}", "removePhoto": "Remove", "removeTitle": "Remove photo?", "removeBody": "This photo will be deleted from this device.", "removeConfirm": "Remove",
+      "photosLockedTitle": "Unlimited photo check-ins", "photosLockedBody": "Free includes {n} photos. Premium keeps your whole journey."
+    }
+  }
+}

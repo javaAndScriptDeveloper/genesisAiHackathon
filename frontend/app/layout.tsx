@@ -4,13 +4,13 @@ import { Providers } from "@/lib/query/Providers";
 import "@/styles/globals.scss";
 
 export const metadata: Metadata = {
-	title: "AI Hackathon Genesis",
-	description: "Frontend starter",
+	title: "Personal Coach",
+	description: "Personalized fitness coaching: your plan, guided workouts and progress.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
 	return (
-		<html lang="uk" className={fontVariables}>
+		<html lang="en" className={fontVariables}>
 			<body>
 				<Providers>{children}</Providers>
 			</body>

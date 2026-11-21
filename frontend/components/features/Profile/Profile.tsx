@@ -1,0 +1,64 @@
+"use client";
+
+import { ArrowRight01Icon, CreditCardIcon, Dumbbell03Icon, Edit02Icon, Notification03Icon, Restaurant01Icon, Settings02Icon, SmartWatch01Icon, UserGroupIcon } from "@hugeicons/core-free-icons";
+import Link from "next/link";
+import { ScreenHeader } from "@/components/features/ScreenHeader/ScreenHeader";
+import { Avatar, Badge, Card, Icon, type IconDefinition } from "@/components/ui";
+import { bmi } from "@/lib/fit/stats";
+import { useFit } from "@/lib/fit/store/FitProvider";
+import { useFitStats } from "@/lib/fit/store/hooks";
+import { useT } from "@/lib/i18n/I18nProvider";
+import kit from "../ScreenKit/ScreenKit.module.scss";
+
+const LINKS: { href: string; key: string; icon: IconDefinition }[] = [
+	{ href: "/profile/edit", key: "preferences", icon: Edit02Icon },
+	{ href: "/notifications", key: "notifications", icon: Notification03Icon },
+	{ href: "/settings", key: "settings", icon: Settings02Icon },
+	{ href: "/subscription", key: "subscription", icon: CreditCardIcon },
+	{ href: "/devices", key: "devices", icon: SmartWatch01Icon },
+	{ href: "/nutrition", key: "nutrition", icon: Restaurant01Icon },
+	{ href: "/partners", key: "partners", icon: UserGroupIcon },
+];
+
+export function Profile() {
+	const t = useT();
+	const { state } = useFit();
+	const stats = useFitStats();
+	const p = state.profile;
+	if (!p) return null;
+	return (
+		<div className={kit.page}>
+			<ScreenHeader title={t("fit.profile.title")} back="/today" />
+			<div className={kit.content}>
+				<Card className={kit.stack}>
+					<div style={{ display: "flex", alignItems: "center", gap: "1.6rem" }}>
+						<Avatar name={p.name} />
+						<div>
+							<h2 className={kit.h2}>{p.name}</h2>
+							<p className={kit.note}>{t("fit.profile.levelLine", { level: stats.level.level, xp: stats.xp })}</p>
+						</div>
+						<Badge tone={state.subscription.tier === "premium" ? "accent" : "neutral"}>{state.subscription.tier === "premium" ? t("fit.common.premium") : t("fit.profile.free")}</Badge>
+					</div>
+					<p className={kit.note}>
+						<Icon icon={Dumbbell03Icon} size={14} /> {t(`fit.opt.goal.${p.goal}.label`)} · {t(`fit.opt.experience.${p.experience}.label`)} · {p.daysPerWeek} {t("fit.profile.perWeek")} · {p.durationMin} {t("fit.common.minShort")}
+					</p>
+					<p className={kit.note}>{p.heightCm} cm · {p.weightKg} kg · BMI {bmi(p)}</p>
+				</Card>
+				<ul className={kit.list}>
+					{LINKS.map((l) => (
+						<li key={l.href}>
+							<Link href={l.href} className={kit.row}>
+								<Icon icon={l.icon} size={22} />
+								<span className={kit.rowText}>
+									<strong>{t(`fit.profile.links.${l.key}.label`)}</strong>
+									<span>{t(`fit.profile.links.${l.key}.hint`)}</span>
+								</span>
+								<Icon icon={ArrowRight01Icon} size={18} />
+							</Link>
+						</li>
+					))}
+				</ul>
+			</div>
+		</div>
+	);
+}

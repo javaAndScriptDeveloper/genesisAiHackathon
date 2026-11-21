@@ -1,0 +1,17 @@
+{
+  "fit": {
+    "muscle": { "all": "All", "chest": "Chest", "back": "Back", "legs": "Legs", "glutes": "Glutes", "shoulders": "Shoulders", "arms": "Arms", "core": "Core", "cardio": "Cardio", "mobility": "Mobility" },
+    "level": { "1": "Easy", "2": "Moderate", "3": "Hard" },
+    "video": { "none": "No demo video mapped yet for this exercise.", "search": "Search the Leap Fitness channel", "title": "{name} demonstration", "play": "Play demonstration of {name}", "playLabel": "Play demo", "credit": "Video: Leap Fitness on YouTube.", "openYoutube": "Open on YouTube" },
+    "guide": { "steps": "How to do it", "tips": "Technique tips", "breathing": "Breathing", "mistakes": "Common mistakes" },
+    "exercise": { "title": "Exercise", "notFound": "Exercise not found", "backToLibrary": "Back to library", "noEquipment": "No equipment" },
+    "training": {
+      "title": "Training", "subtitle": "Your plan and exercise library", "plan": "Plan", "library": "Library",
+      "prevWeek": "Previous week", "nextWeek": "Next week", "thisWeek": "This week",
+      "emptyWeek": "Nothing planned", "emptyWeekBody": "This week is all recovery. Use it well.",
+      "recoveryNote": "Training days are spaced so there is recovery between sessions. Days without a workout are recovery days.", "editPlan": "Edit training days and preferences",
+      "search": "Search exercises", "searchPlaceholder": "Squat, row, plank…", "filterMuscle": "Filter by muscle", "onlyMine": "Only exercises that fit my equipment and limits",
+      "noResults": "No exercises found", "noResultsBody": "Try another search or show everything.", "clearFilters": "Show all exercises"
+    }
+  }
+}

@@ -1,6 +1,6 @@
-import { UiKitShowcase } from "@/components/sections/UiKitShowcase/UiKitShowcase";
+import { redirect } from "next/navigation";
 
-// Placeholder home: shows the whole UI kit until the real product screens exist. Also available at /ui-kit.
+// The shell sends first-time users to onboarding. The UI kit stays available at /ui-kit.
 export default function HomePage() {
-	return <UiKitShowcase />;
+	redirect("/today");
 }

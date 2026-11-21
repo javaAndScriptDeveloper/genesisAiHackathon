@@ -1,0 +1,102 @@
+@use "partials/corners";
+@use "partials/mixins";
+
+// Shared layout bits for secondary screens (notifications, profile, settings, devices…).
+.page {
+	padding-bottom: var(--space-6);
+}
+
+.content {
+	display: flex;
+	flex-direction: column;
+	gap: var(--space-4);
+	padding: 0 var(--space-4);
+}
+
+.stack {
+	display: flex;
+	flex-direction: column;
+	gap: var(--space-3);
+}
+
+.h2 {
+	font-size: 1.7rem;
+}
+
+.h3 {
+	font-size: 1.5rem;
+}
+
+.p {
+	color: var(--color-textMuted);
+	font-size: 1.4rem;
+	line-height: 1.5;
+}
+
+.note {
+	color: var(--color-textSubtle);
+	font-size: 1.3rem;
+	line-height: 1.45;
+}
+
+.list {
+	display: flex;
+	flex-direction: column;
+	gap: var(--space-2);
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.row {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--space-3);
+	width: 100%;
+	min-height: 6rem;
+	padding: var(--space-3) var(--space-4);
+	background: var(--color-surface);
+	border: 0.1rem solid var(--color-border);
+	text-align: left;
+	@include corners.radius(var(--radius-card));
+	@include mixins.focus-ring;
+}
+
+.rowText {
+	display: flex;
+	flex: 1;
+	flex-direction: column;
+	gap: 0.2rem;
+	min-width: 0;
+
+	strong {
+		font-size: 1.5rem;
+	}
+
+	span {
+		color: var(--color-textSubtle);
+		font-size: 1.3rem;
+		line-height: 1.4;
+	}
+}
+
+.unread {
+	border-color: var(--color-accent);
+	background: var(--color-accentSoft);
+}
+
+.warn {
+	padding: var(--space-3);
+	background: var(--color-warningSoft);
+	color: var(--color-warningText);
+	font-size: 1.3rem;
+	line-height: 1.45;
+	@include corners.radius(var(--radius-control));
+}
+
+.cols {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: var(--space-3);
+}
