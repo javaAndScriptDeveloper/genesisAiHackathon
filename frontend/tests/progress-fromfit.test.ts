@@ -123,3 +123,14 @@ describe("historyFromFit", () => {
 		expect(insights(h)).toEqual([]);
 	});
 });
+
+describe("appInsights", () => {
+	it("consistency hint follows the app delta, never contradicts the badge", async () => {
+		const { appInsights } = await import("@/lib/progress/fromFit");
+		const { demoHistory } = await import("@/lib/api/mock/progressDb");
+		const h = demoHistory();
+		expect(appInsights(h, -1).some((i) => i.id === "consistency_up")).toBe(false);
+		expect(appInsights({ ...h, sessions: [] }, 3)).toContainEqual({ id: "consistency_up", vars: { delta: 3 } });
+		expect(appInsights(h, 5)).toHaveLength(2);
+	});
+});

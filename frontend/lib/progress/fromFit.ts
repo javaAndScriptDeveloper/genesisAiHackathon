@@ -1,6 +1,7 @@
 import { findExercise } from "../fit/exercises";
 import type { FitState, Perceived, PlannedWorkout } from "../fit/types";
 import { addDays, eachDay, weekStart } from "./dates";
+import { insights, type Insight } from "./insights";
 import type { Exercise, History, IsoDate, PlannedDay, Rpe, SetLog, WorkoutSession } from "./types";
 
 const RPE: Record<Perceived, Rpe> = { easy: "easy", right: "ok", hard: "hard" };
@@ -91,4 +92,14 @@ export function reportWeeksOf(history: History): IsoDate[] {
 		if (monday < current) weeks.add(monday);
 	}
 	return [...weeks].sort().reverse().slice(0, 8);
+}
+
+/**
+ * Insights for the app screen. The "consistency up" hint uses the same delta as the consistency badge
+ * (the app's own score), so the two can never contradict each other.
+ */
+export function appInsights(h: History, consistencyDelta: number | null, limit = 2): Insight[] {
+	const list = insights(h, 4).filter((i) => i.id !== "consistency_up");
+	if (consistencyDelta !== null && consistencyDelta > 0) list.push({ id: "consistency_up", vars: { delta: consistencyDelta } });
+	return list.slice(0, limit);
 }
