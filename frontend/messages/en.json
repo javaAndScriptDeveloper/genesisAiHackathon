@@ -532,6 +532,13 @@
         "nextEmpty": "No plan for next week yet.",
         "workoutDay": "Workout",
         "restDay": "Rest"
+      },
+      "exercise": {
+        "title": "Your progress",
+        "empty": "Log this exercise twice to see your trend.",
+        "best": "Best: {value} {unit}",
+        "records": "Recent records",
+        "chart": "{name} trend"
       }
     },
     "awards": {
