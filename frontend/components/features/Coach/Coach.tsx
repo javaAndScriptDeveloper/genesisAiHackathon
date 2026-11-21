@@ -208,7 +208,7 @@ export function Coach() {
 				{state.coach.map((m) => (
 					<div key={m.id} className={clsx(styles.bubble, m.from === "user" ? styles.user : styles.coach, m.safety && styles.safety)}>
 						<p className={styles.text}>{m.text}</p>
-							{m.rebuild && <RebuildCard rebuild={m.rebuild} profile={profile} applied={m.appliedAction === "rebuild"} busy={recreating || busy} onRecreate={() => void recreate(m)} />}
+						{m.rebuild && <RebuildCard rebuild={m.rebuild} profile={profile} applied={m.appliedAction === "rebuild"} busy={recreating || busy} onRecreate={() => void recreate(m)} />}
 						{m.actions && m.actions.length > 0 && (
 							<div className={styles.actions}>
 								{m.actions.map((a) => {

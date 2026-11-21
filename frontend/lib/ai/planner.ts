@@ -21,7 +21,14 @@ export async function askJson<T>(schema: z.ZodType<T>, o: { system: string; prom
 			ai.models.generateContent({
 				model: model(),
 				contents: o.prompt,
-				config: { systemInstruction: o.system, responseMimeType: "application/json", responseJsonSchema: z.toJSONSchema(schema), abortSignal: AbortSignal.timeout(ms) },
+				config: {
+					systemInstruction: o.system,
+					responseMimeType: "application/json",
+					responseJsonSchema: z.toJSONSchema(schema),
+					// No thinking: keeps gemini-2.5-flash calls well under the timeout.
+					thinkingConfig: { thinkingBudget: 0 },
+					abortSignal: AbortSignal.timeout(ms),
+				},
 			}),
 			timeout,
 		]);
