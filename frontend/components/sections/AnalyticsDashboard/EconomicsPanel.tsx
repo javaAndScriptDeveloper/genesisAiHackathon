@@ -7,6 +7,7 @@ import { useState } from "react";
 import { Badge, Card, Icon, Input, Select } from "@/components/ui";
 import { useI18n } from "@/lib/i18n/I18nProvider";
 import { assumptions, buildMinutes, estimateBuildPayback, modelEconomics, scenarios, type Scenario } from "@/lib/insights/economics";
+import { ChartSeries, DashboardChart } from "./DashboardChart";
 import styles from "./AnalyticsDashboard.module.scss";
 
 const scenarioOptions: Scenario[] = ["conservative", "base", "optimistic"];
@@ -110,25 +111,22 @@ export function EconomicsPanel() {
 						<span><i className={styles.barKey} />{t("analytics.model.cumulative")}</span>
 						<span><i className={styles.lineKey} />{t("analytics.model.metrics.cac")}</span>
 					</div>
-					<div className={styles.chart}>
-						<div className={styles.axis} aria-hidden>
-							{ticks.map((value) => <span key={value}>{t("analytics.model.axis", { value: whole(value) })}</span>)}
-						</div>
-						<div className={styles.plot}>
-							<div className={styles.gridlines} aria-hidden>{ticks.map((value) => <i key={value} />)}</div>
-							<div className={styles.threshold} style={{ bottom: `${100 * model.blendedCac / ceiling}%` }} aria-hidden />
-							<ul className={styles.bars} aria-label={t("analytics.model.cumulative")}>
-								{model.monthlyContribution.map(({ month, contribution }) => (
-									<li key={month}>
-										<span className={styles.chartBar} style={{ height: `${100 * contribution / ceiling}%` }} title={t("analytics.model.chartValue", { month, value: money(contribution) })}>
-											<span className={styles.srOnly}>{t("analytics.model.chartValue", { month, value: money(contribution) })}</span>
-										</span>
-										{(month === 1 || month % 4 === 0) && <span className={styles.tickLabel} aria-hidden>{month}</span>}
-									</li>
-								))}
-							</ul>
-						</div>
-					</div>
+					<DashboardChart
+						label={t("analytics.model.chartTitle")}
+						max={ceiling}
+						threshold={model.blendedCac}
+						ticks={ticks.map((value) => ({ value, label: t("analytics.model.axis", { value: whole(value) }) }))}
+						points={model.monthlyContribution.map(({ month, contribution }) => ({
+							id: String(month),
+							label: t("analytics.model.chartMonth", { month }),
+							value: contribution,
+							tick: month === 1 || month % 4 === 0 ? month : undefined,
+							values: [
+								{ label: t("analytics.model.cumulative"), amount: money(contribution) },
+								{ label: t("analytics.model.metrics.cac"), amount: money(model.blendedCac) },
+							],
+						}))}
+					/>
 				</Card>
 
 				<Card className={styles.panel}>
@@ -143,9 +141,20 @@ export function EconomicsPanel() {
 						<span>{t("analytics.model.gross")}</span>
 						<strong>{money(model.grossPerMonth)}</strong>
 					</div>
-					<div className={styles.costStack} aria-hidden>
-						{costs.map(({ id, value }) => <span key={id} data-cost={id} style={{ width: `${100 * value / model.grossPerMonth}%` }} />)}
-					</div>
+					<ChartSeries
+						stacked
+						label={t("analytics.model.costTitle")}
+						max={model.grossPerMonth}
+						points={costs.map(({ id, value }) => ({
+							id,
+							label: t(`analytics.model.costs.${id}`),
+							value,
+							values: [
+								{ label: t("analytics.model.costPerMonth"), amount: money(value) },
+								{ label: t("analytics.model.costShare"), amount: percent(value / model.grossPerMonth) },
+							],
+						}))}
+					/>
 					<dl className={styles.costRows}>
 						{costs.map(({ id, value }) => (
 							<div key={id} data-cost={id}>
