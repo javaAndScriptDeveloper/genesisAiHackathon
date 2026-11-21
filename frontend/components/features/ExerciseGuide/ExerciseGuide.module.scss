@@ -115,3 +115,100 @@
 	color: var(--color-accent);
 	@include corners.nested(var(--radius-card), 0.6rem);
 }
+
+// Sheet content.
+.sheetIntro {
+	display: flex;
+	align-items: center;
+	gap: var(--space-3);
+	margin: var(--space-3) 0;
+	padding: var(--space-3);
+	background: var(--color-accentSoft);
+	color: var(--color-accentText);
+	@include corners.radius(var(--radius-card));
+
+	strong {
+		font-size: 1.6rem;
+	}
+
+	p {
+		margin: 0.2rem 0 0;
+		color: var(--color-textMuted);
+		font-size: 1.3rem;
+		line-height: 1.4;
+	}
+
+	&[data-section="mistakes"] {
+		background: var(--color-warningSoft);
+		color: var(--color-warning);
+	}
+
+	&[data-section="breathing"] {
+		background: var(--color-successSoft);
+		color: var(--color-success);
+	}
+}
+
+.introIcon {
+	display: grid;
+	flex: none;
+	place-items: center;
+	width: 4rem;
+	height: 4rem;
+	background: var(--color-surface);
+	border-radius: 50%;
+}
+
+.cards {
+	display: flex;
+	flex-direction: column;
+	gap: var(--space-2);
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.card {
+	display: flex;
+	align-items: flex-start;
+	gap: var(--space-3);
+	padding: var(--space-3);
+	background: var(--color-surface);
+	border: 0.1rem solid var(--color-border);
+	color: var(--color-text);
+	font-size: 1.5rem;
+	line-height: 1.45;
+	@include corners.radius(var(--radius-card));
+}
+
+.cardMark {
+	display: grid;
+	flex: none;
+	place-items: center;
+	width: 2.8rem;
+	height: 2.8rem;
+	background: var(--color-accent);
+	color: #fff;
+	font-size: 1.3rem;
+	font-weight: 700;
+	border-radius: 50%;
+
+	[data-section="tips"] & {
+		background: var(--color-accentSoft);
+		color: var(--color-accent);
+	}
+
+	[data-section="breathing"] & {
+		background: var(--color-successSoft);
+		color: var(--color-success);
+	}
+
+	[data-section="mistakes"] & {
+		background: var(--color-warningSoft);
+		color: var(--color-warning);
+	}
+}
+
+[data-section="mistakes"] > .card {
+	border-color: var(--color-warningSoft);
+}

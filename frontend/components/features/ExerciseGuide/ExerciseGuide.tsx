@@ -48,7 +48,16 @@ export function ExerciseGuide({ exercise, variant = "inline", defaultOpen = "ste
 				</div>
 				<Sheet open={open !== null} onClose={() => setOpen(null)} title={exercise.name} closeLabel={t("common.close")}>
 					<SegmentedControl label={t("fit.guide.title")} value={section} onChange={setSection} options={IDS.map((id) => ({ id, label: t(`fit.guide.short.${id}`) }))} />
-					<GuideList id={section} lines={bodies[section]} />
+					<div className={styles.sheetIntro} data-section={section}>
+						<span className={styles.introIcon}>
+							<Icon icon={ICONS[section]} size={22} />
+						</span>
+						<div>
+							<strong>{t(`fit.guide.${section}`)}</strong>
+							<p>{t(`fit.guide.lead.${section}`)}</p>
+						</div>
+					</div>
+					<GuideCards id={section} lines={bodies[section]} />
 				</Sheet>
 			</>
 		);
@@ -80,5 +89,21 @@ function GuideList({ id, lines }: { id: SectionId; lines: string[] }) {
 				<li key={line}>{line}</li>
 			))}
 		</Tag>
+	);
+}
+
+// Sheet version: one card per line. Steps are numbered, tips and breathing get an icon, mistakes a warning tint.
+function GuideCards({ id, lines }: { id: SectionId; lines: string[] }) {
+	return (
+		<ol className={styles.cards} data-section={id}>
+			{lines.map((line, i) => (
+				<li key={line} className={styles.card}>
+					<span className={styles.cardMark} aria-hidden>
+						{id === "steps" ? i + 1 : <Icon icon={ICONS[id]} size={16} />}
+					</span>
+					<span>{line}</span>
+				</li>
+			))}
+		</ol>
 	);
 }

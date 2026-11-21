@@ -1,7 +1,7 @@
 "use client";
 
 import { PlayCircleIcon } from "@hugeicons/core-free-icons";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { Icon, Picture } from "@/components/ui";
 import { videoFor } from "@/lib/fit/videos";
 import type { Exercise } from "@/lib/fit/types";
@@ -12,13 +12,15 @@ interface ExerciseVideoProps {
 	exercise: Exercise;
 	compact?: boolean;
 	autoPlay?: boolean;
+	/** Content laid over the top of the video (title, metrics). Switches to the taller hero frame and drops the caption links. */
+	overlay?: ReactNode;
 }
 
 export function ExerciseVideo(props: ExerciseVideoProps) {
 	return <ExercisePlayer key={props.exercise.id} {...props} />;
 }
 
-function ExercisePlayer({ exercise, compact = false, autoPlay = false }: ExerciseVideoProps) {
+function ExercisePlayer({ exercise, compact = false, autoPlay = false, overlay }: ExerciseVideoProps) {
 	const t = useT();
 	const video = videoFor(exercise);
 	const [playing, setPlaying] = useState(false);
@@ -27,7 +29,7 @@ function ExercisePlayer({ exercise, compact = false, autoPlay = false }: Exercis
 	return (
 		<figure className={styles.figure}>
 			{video.relatedTitle && <figcaption className={styles.related}>{t("fit.video.related", { name: video.relatedTitle })}</figcaption>}
-			<div className={styles.frame} data-compact={compact || undefined}>
+			<div className={styles.frame} data-compact={compact || undefined} data-hero={overlay ? true : undefined}>
 				{autoPlay || playing ? (
 					<iframe
 						className={styles.iframe}
@@ -44,8 +46,9 @@ function ExercisePlayer({ exercise, compact = false, autoPlay = false }: Exercis
 						<span>{t("fit.video.playLabel")}</span>
 					</button>
 				)}
+				{overlay && <div className={styles.overlay}>{overlay}</div>}
 			</div>
-			<div className={styles.caption}>
+			{!overlay && <div className={styles.caption}>
 				<a href={video.watchUrl} target="_blank" rel="noopener noreferrer" className={styles.link}>
 					{t("fit.video.openYoutube")}
 				</a>
@@ -54,7 +57,7 @@ function ExercisePlayer({ exercise, compact = false, autoPlay = false }: Exercis
 						{t("fit.video.searchExact")}
 					</a>
 				)}
-			</div>
+			</div>}
 		</figure>
 	);
 }

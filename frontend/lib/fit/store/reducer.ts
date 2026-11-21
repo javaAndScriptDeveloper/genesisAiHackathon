@@ -37,6 +37,7 @@ export type Action =
 	| { type: "set-goal-weight"; kg: number | null }
 	| { type: "sync"; now: string }
 	| { type: "start-workout"; plannedId: string; now: string }
+	| { type: "restart-workout" }
 	| { type: "go-to"; index: number }
 	| { type: "log-set"; reps: number; weight?: number }
 	| { type: "start-timed" }
@@ -268,6 +269,11 @@ export function reducer(state: FitState, action: Action): FitState {
 			};
 			return { ...state, active };
 		}
+		case "restart-workout":
+			return withActive(state, (a) => {
+				const exercises = a.exercises.map((b) => ({ ...b, sets: b.sets.map((s) => ({ ...s, done: false, reps: undefined, weight: undefined })), skipped: false }));
+				return { ...a, exercises, index: 0, phase: "work", paused: false, safetyStop: false, elapsedSec: 0, restLeft: 0, restTotal: 0, workLeft: null, hrSamples: [], outcome: null };
+			});
 		case "go-to":
 			return withActive(state, (a) => (a.phase === "summary" ? a : { ...a, index: Math.min(Math.max(0, action.index), a.exercises.length - 1), phase: a.phase === "rest" ? a.phase : "work", workLeft: null }));
 		case "log-set":

@@ -1,6 +1,7 @@
 "use client";
 
-import { Alert02Icon, ArrowDown01Icon, ArrowReloadHorizontalIcon, Clock01Icon, Dumbbell03Icon, Moon01Icon, PauseIcon, SkipForwardIcon, StopIcon, Timer02Icon, Tick02Icon } from "@hugeicons/core-free-icons";
+import { Alert02Icon, ArrowReloadHorizontalIcon, Clock01Icon, Dumbbell03Icon, HelpCircleIcon, Leaf01Icon, Logout01Icon, Moon01Icon, PauseIcon, SkipForwardIcon, StopIcon, Timer02Icon, Tick02Icon } from "@hugeicons/core-free-icons";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { ChoiceList, type Choice } from "@/components/features/ChoiceList/ChoiceList";
 import { Button, Checkbox, EmptyState, Icon, Sheet, type IconDefinition } from "@/components/ui";
@@ -14,7 +15,7 @@ import type { AdaptOp } from "@/lib/fit/types";
 import { useT } from "@/lib/i18n/I18nProvider";
 import styles from "./Workout.module.scss";
 
-export type SheetName = null | "adjust" | "replace" | "overview" | "end" | "safety";
+export type SheetName = null | "adjust" | "replace" | "overview" | "end" | "safety" | "quit";
 
 interface Props {
 	sheet: SheetName;
@@ -51,7 +52,7 @@ export function WorkoutSheets({ sheet, setSheet, toastShow }: Props) {
 
 	const ACTIONS: { key: string; icon: IconDefinition; op?: AdaptOp; onClick?: () => void }[] = [
 		{ key: "too-hard", icon: Alert02Icon, op: { kind: "too-hard" } },
-		{ key: "easier", icon: ArrowDown01Icon, op: { kind: "easier" } },
+		{ key: "easier", icon: Leaf01Icon, op: { kind: "easier" } },
 		{ key: "more-rest", icon: Clock01Icon, op: { kind: "more-rest" } },
 		{ key: "replace", icon: ArrowReloadHorizontalIcon, onClick: () => setSheet("replace") },
 		{ key: "min20", icon: Timer02Icon, op: { kind: "shorten", minutes: 20 } },
@@ -132,6 +133,24 @@ export function WorkoutSheets({ sheet, setSheet, toastShow }: Props) {
 				/>
 			</Sheet>
 
+			<Sheet open={sheet === "quit"} onClose={() => { dispatch({ type: "resume" }); setSheet(null); }} title={t("fit.workout.quitTitle")} closeLabel={t("common.close")}>
+				<div className={styles.quitReasons}>
+					<p className={styles.sheetLead}>{t("fit.workout.quitLead")}</p>
+					<ChoiceList
+						items={[
+							{ key: "unwell", icon: Alert02Icon, tone: "danger", title: t("fit.workout.reasonUnwell"), onClick: () => setSheet("safety") },
+							{ key: "hard", icon: Leaf01Icon, title: t("fit.workout.reasonHard"), hint: t("fit.workout.reasonHardHint"), onClick: () => { dispatch({ type: "resume" }); run({ kind: "too-hard" }); } },
+							{ key: "unsure", icon: HelpCircleIcon, title: t("fit.workout.reasonUnsure"), hint: t("fit.workout.reasonUnsureHint"), onClick: () => { dispatch({ type: "resume" }); setSheet("replace"); } },
+						]}
+					/>
+				</div>
+				<hr className={styles.quitDivider} />
+				<div className={styles.quitActions}>
+					<Button variant="danger" iconLeft={Logout01Icon} onClick={() => setSheet("end")}>{t("fit.workout.quit")}</Button>
+					<Link href="/coach" className={styles.feedbackLink}>{t("fit.workout.feedback")}</Link>
+				</div>
+			</Sheet>
+
 			<Sheet open={sheet === "end"} onClose={() => setSheet(null)} title={t("fit.workout.endTitle")} closeLabel={t("common.close")} variant="center" footer={
 				<>
 					<Button variant="secondary" onClick={() => setSheet(null)}>{t("fit.workout.keepGoing")}</Button>
@@ -158,7 +177,7 @@ export function WorkoutSheets({ sheet, setSheet, toastShow }: Props) {
 							<p>{t("fit.workout.tooHardHint")}</p>
 						</div>
 					</div>
-					<Button iconLeft={ArrowDown01Icon} onClick={() => run({ kind: "too-hard" })}>{t("fit.workout.regenEasier")}</Button>
+					<Button iconLeft={Leaf01Icon} onClick={() => run({ kind: "too-hard" })}>{t("fit.workout.regenEasier")}</Button>
 				</div>
 			</Sheet>
 

@@ -17,6 +17,21 @@
 	&[data-compact] {
 		aspect-ratio: 2 / 1;
 	}
+
+	&[data-hero] {
+		aspect-ratio: 4 / 3.4;
+		min-height: 26rem;
+	}
+}
+
+// Dark scrim at the top of the hero video carrying the exercise title and info. Clicks pass through to the player.
+.overlay {
+	position: absolute;
+	inset: 0 0 auto;
+	z-index: 2;
+	padding: var(--space-4) var(--space-4) 6rem;
+	background: linear-gradient(180deg, rgba(10, 10, 12, 0.82) 0%, rgba(10, 10, 12, 0.5) 55%, transparent 100%);
+	pointer-events: none;
 }
 
 .iframe {

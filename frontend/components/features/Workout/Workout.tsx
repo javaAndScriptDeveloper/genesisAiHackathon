@@ -1,15 +1,13 @@
 "use client";
 
-import { Alert02Icon, ArrowDown01Icon, Cancel01Icon, MusicNote01Icon, PauseIcon, PlayIcon, Timer02Icon } from "@hugeicons/core-free-icons";
+import { Cancel01Icon, Logout01Icon, MusicNote01Icon, PauseIcon, PlayIcon, Refresh01Icon } from "@hugeicons/core-free-icons";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { Button, EmptyState, IconButton, Icon, useToast } from "@/components/ui";
 import { WorkoutMusic } from "@/components/features/WorkoutMusic/WorkoutMusic";
 import { WorkoutHealthPanel } from "@/components/features/WorkoutHealthPanel/WorkoutHealthPanel";
 import { useWorkoutHealth } from "@/components/features/WorkoutHealthPanel/useWorkoutHealth";
-import { applyAdapt } from "@/lib/fit/adapt";
 import { formatClock } from "@/lib/fit/dates";
-import type { AdaptOp } from "@/lib/fit/types";
 import { getExercise } from "@/lib/fit/exercises";
 import { estimateMinutes } from "@/lib/fit/plan";
 import { useFit } from "@/lib/fit/store/FitProvider";
@@ -24,7 +22,7 @@ export function Workout() {
 	const t = useT();
 	const router = useRouter();
 	const toast = useToast();
-	const { state, dispatch, today } = useFit();
+	const { state, dispatch } = useFit();
 	const [sheet, setSheet] = useState<SheetName>(null);
 	const [musicOpen, setMusicOpen] = useState(false);
 	const a = state.active;
@@ -53,21 +51,12 @@ export function Workout() {
 
 	if (a.phase === "summary") return <WorkoutSummary />;
 
-	// On pause the most likely reason to stop is that it feels too hard: offer to regenerate the rest right here.
-	const regenerate = (op: AdaptOp) => {
-		const res = applyAdapt(a.exercises, op, { profile, startIndex: a.index });
-		dispatch({ type: "adapt", op, today });
-		dispatch({ type: "resume" });
-		toast.show(res.message, res.changed ? "success" : "info");
-	};
-
 	const linked = state.devices.apple ? "Apple Health" : state.devices.garmin ? "Garmin" : undefined;
-	const doneBlocks = a.exercises.filter((b) => !b.skipped && b.sets.every((s) => s.done)).length;
 
 	return (
 		<div className={styles.root}>
 			<header className={styles.top}>
-				<IconButton icon={Cancel01Icon} label={t("fit.workout.end")} onClick={() => setSheet("end")} />
+				<IconButton icon={Cancel01Icon} label={t("fit.workout.quit")} onClick={() => { dispatch({ type: "pause" }); setSheet("quit"); }} />
 				<div className={styles.topTitle}>
 					<strong>{a.title}</strong>
 					<span>
@@ -77,19 +66,10 @@ export function Workout() {
 				<IconButton icon={MusicNote01Icon} label={t("fit.music.title")} onClick={() => setMusicOpen(true)} />
 				<IconButton icon={PauseIcon} label={t("fit.workout.pause")} onClick={() => dispatch({ type: "pause" })} />
 			</header>
-			<ol className={styles.segments} aria-label={t("fit.workout.progress", { done: doneBlocks, total: a.exercises.length })}>
-				{a.exercises.map((b, i) => {
-					const finished = !b.skipped && b.sets.every((s) => s.done);
-					return <li key={b.id} className={styles.segment} data-state={b.skipped ? "skipped" : finished ? "done" : i === a.index ? "current" : "todo"} />;
-				})}
-			</ol>
 
 			<div className={styles.scroll}>
-				<WorkoutStage onAdjust={() => setSheet("adjust")} onOverview={() => setSheet("overview")} />
+				<WorkoutStage onAdjust={() => setSheet("adjust")} onOverview={() => setSheet("overview")} onUnwell={() => setSheet("safety")} bpm={health.sample?.hr ?? null} />
 				<WorkoutHealthPanel sample={health.sample} zone={health.zone} alert={health.alert} elapsedSec={a.elapsedSec} resting={a.phase === "rest"} recoveryDrop={health.recoveryDrop} linkedTo={linked} />
-				<Button variant="ghost" onClick={() => setSheet("safety")} className={styles.unwell}>
-					{t("fit.workout.unwell")}
-				</Button>
 			</div>
 
 			{a.phase === "rest" && !a.paused && <RestView onAdjust={() => setSheet("adjust")} onMusic={() => setMusicOpen(true)} />}
@@ -99,17 +79,11 @@ export function Workout() {
 					<Icon icon={PauseIcon} size={40} />
 					<h2>{t("fit.workout.paused")}</h2>
 					<p>{t("fit.workout.pausedBody")}</p>
-					<div className={styles.pausePrompt}>
-						<p className={styles.pausePromptTitle}>
-							<Icon icon={Alert02Icon} size={16} />
-							{t("fit.workout.tooHardPrompt")}
-						</p>
-						<Button variant="secondary" onDark iconLeft={ArrowDown01Icon} onClick={() => regenerate({ kind: "too-hard" })}>{t("fit.workout.regenEasier")}</Button>
-						<Button variant="secondary" onDark iconLeft={Timer02Icon} onClick={() => regenerate({ kind: "shorten", minutes: 15 })}>{t("fit.workout.regenShort")}</Button>
+					<div className={styles.pauseActions}>
+						<Button size="lg" iconLeft={PlayIcon} onClick={() => dispatch({ type: "resume" })}>{t("fit.workout.resume")}</Button>
+						<Button variant="secondary" onDark iconLeft={Refresh01Icon} onClick={() => dispatch({ type: "restart-workout" })}>{t("fit.workout.restart")}</Button>
+						<Button variant="ghost" onDark iconLeft={Logout01Icon} onClick={() => setSheet("quit")}>{t("fit.workout.quit")}</Button>
 					</div>
-					<Button size="lg" iconLeft={PlayIcon} onClick={() => dispatch({ type: "resume" })}>{t("fit.workout.resume")}</Button>
-					<Button variant="secondary" onDark iconLeft={MusicNote01Icon} onClick={() => setMusicOpen(true)}>{t("fit.music.title")}</Button>
-					<Button variant="secondary" onDark onClick={() => setSheet("end")}>{t("fit.workout.end")}</Button>
 				</div>
 			)}
 

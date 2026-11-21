@@ -779,7 +779,10 @@
         "steady": "Steady Beat",
         "drive": "Intervals",
         "cooldown": "Cool Down"
-      }
+      },
+      "playingNext": "Playing, then the next track",
+      "seek": "Seek",
+      "repeat": "Repeat track"
     },
     "guide": {
       "title": "Exercise guide",
@@ -792,7 +795,13 @@
       "steps": "How to do it",
       "tips": "Technique tips",
       "breathing": "Breathing",
-      "mistakes": "Common mistakes"
+      "mistakes": "Common mistakes",
+      "lead": {
+        "steps": "Follow the sequence. Slow and controlled beats fast and sloppy.",
+        "tips": "Small details that make the movement safer and more effective.",
+        "breathing": "Steady breath keeps you calm and the movement smooth.",
+        "mistakes": "Watch for these. Fixing one usually fixes the rest."
+      }
     },
     "exercise": {
       "title": "Exercise",
@@ -930,7 +939,17 @@
       "endEmpty": "You haven't logged any sets. Leave without saving?",
       "keepGoing": "Keep going",
       "endSave": "End and save",
-      "endLeave": "Leave workout"
+      "endLeave": "Leave workout",
+      "restart": "Restart",
+      "quit": "Quit",
+      "quitTitle": "Why are you leaving?",
+      "quitLead": "Pick the closest reason. We'll help you with it before you quit.",
+      "reasonUnwell": "I don't feel well right now",
+      "reasonHard": "It's too hard",
+      "reasonHardHint": "Make the rest of the workout easier and carry on.",
+      "reasonUnsure": "I don't know how to do this",
+      "reasonUnsureHint": "Swap this exercise for another one.",
+      "feedback": "Tell us what went wrong"
     },
     "summary": {
       "setsLine": "{sets} sets across {exercises} exercises.",
