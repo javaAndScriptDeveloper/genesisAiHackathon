@@ -1,0 +1,36 @@
+.player {
+	display: grid;
+	gap: var(--space-3);
+}
+
+.nowPlaying {
+	display: grid;
+	justify-items: center;
+	gap: var(--space-1);
+	padding-block: var(--space-3);
+	font-size: 1.6rem;
+
+	span {
+		color: var(--color-textMuted);
+		font-size: 1.3rem;
+	}
+}
+
+.controls,
+.tracks {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	gap: var(--space-2);
+}
+
+.volume {
+	display: grid;
+	gap: var(--space-1);
+	font-size: 1.3rem;
+
+	input {
+		min-height: var(--hit-target);
+		accent-color: var(--color-accent);
+	}
+}

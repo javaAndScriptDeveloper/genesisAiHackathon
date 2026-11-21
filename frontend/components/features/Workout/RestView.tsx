@@ -1,7 +1,8 @@
 "use client";
 
+import { MusicNote01Icon } from "@hugeicons/core-free-icons";
 import { ExerciseVideo } from "@/components/features/ExerciseVideo/ExerciseVideo";
-import { Button } from "@/components/ui";
+import { Button, IconButton } from "@/components/ui";
 import { formatClock } from "@/lib/fit/dates";
 import { getExercise } from "@/lib/fit/exercises";
 import { useFit } from "@/lib/fit/store/FitProvider";
@@ -10,7 +11,7 @@ import { useT } from "@/lib/i18n/I18nProvider";
 import styles from "./Workout.module.scss";
 
 // Rest is its own full-colour moment: giant countdown, two pill actions, then a preview (with video) of what comes next.
-export function RestView({ onAdjust }: { onAdjust: () => void }) {
+export function RestView({ onAdjust, onMusic }: { onAdjust: () => void; onMusic: () => void }) {
 	const t = useT();
 	const { state, dispatch } = useFit();
 	const u = useUnits();
@@ -29,6 +30,7 @@ export function RestView({ onAdjust }: { onAdjust: () => void }) {
 	return (
 		<div className={`${styles.overlay} ${styles.restScreen}`} role="dialog" aria-modal="true" aria-label={t("fit.workout.rest")}>
 			<div className={styles.restTop}>
+				<IconButton icon={MusicNote01Icon} label={t("fit.music.title")} onClick={onMusic} variant="secondary" />
 				<p className={styles.restLabel}>{t("fit.workout.rest")}</p>
 				<p className={styles.restTime} aria-live="off">{formatClock(a.restLeft)}</p>
 				<span className={styles.restBar} role="progressbar" aria-label={t("fit.workout.rest")} aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(pct)}>

@@ -2,7 +2,12 @@
   "fit": {
     "muscle": { "all": "All", "chest": "Chest", "back": "Back", "legs": "Legs", "glutes": "Glutes", "shoulders": "Shoulders", "arms": "Arms", "core": "Core", "cardio": "Cardio", "mobility": "Mobility" },
     "level": { "1": "Easy", "2": "Moderate", "3": "Hard" },
-    "video": { "none": "No demo video mapped yet for this exercise.", "search": "Search the Leap Fitness channel", "title": "{name} demonstration", "play": "Play demonstration of {name}", "playLabel": "Play demo", "credit": "Video: Leap Fitness on YouTube.", "openYoutube": "Open on YouTube" },
+    "video": { "title": "{name} demonstration", "play": "Play {name}", "playLabel": "Play video", "related": "Related clip · {name}", "searchExact": "Find this exercise", "openYoutube": "Open on YouTube" },
+    "music": {
+      "title": "Workout music", "close": "Close music player", "choose": "Choose a track", "playing": "Playing on repeat", "paused": "Paused",
+      "play": "Play music", "pause": "Pause music", "previous": "Previous track", "next": "Next track", "mute": "Mute music", "unmute": "Unmute music", "volume": "Volume", "off": "Turn off music", "error": "Couldn’t play the track. Try again.",
+      "tracks": { "steady": "Steady Beat", "drive": "Intervals", "cooldown": "Cool Down" }
+    },
     "guide": { "title": "Exercise guide", "short": { "steps": "How to", "tips": "Tips", "breathing": "Breathing", "mistakes": "Mistakes" }, "steps": "How to do it", "tips": "Technique tips", "breathing": "Breathing", "mistakes": "Common mistakes" },
     "exercise": { "title": "Exercise", "notFound": "Exercise not found", "backToLibrary": "Back to library", "noEquipment": "No equipment" },
     "training": {
@@ -11,6 +16,7 @@
       "prevWeek": "Previous week", "nextWeek": "Next week", "thisWeek": "This week",
       "emptyWeek": "Nothing planned", "emptyWeekBody": "This week is all recovery. Use it well.",
       "recoveryNote": "Training days are spaced so there is recovery between sessions. Days without a workout are recovery days.", "editPlan": "Edit training days and preferences",
+      "exerciseCount": { "one": "{count} exercise", "other": "{count} exercises" },
       "search": "Search exercises", "searchPlaceholder": "Squat, row, plank…", "filterMuscle": "Filter by muscle", "onlyMine": "Only exercises that fit my equipment and limits",
       "noResults": "No exercises found", "noResultsBody": "Try another search or show everything.", "clearFilters": "Show all exercises"
     }

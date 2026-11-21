@@ -58,50 +58,6 @@
 	pointer-events: none;
 }
 
-.chips {
-	position: relative;
-	display: flex;
-	gap: var(--space-2);
-	margin: 0 calc(var(--space-4) * -1);
-	padding: 0 var(--space-4);
-	overflow-x: auto;
-	scrollbar-width: none;
-}
-
-.chip {
-	flex: none;
-	min-height: 3.6rem;
-	padding: 0 var(--space-3);
-	background: var(--color-surface);
-	border: 0.1rem solid var(--color-border);
-	font-size: 1.3rem;
-	font-weight: 600;
-	text-transform: capitalize;
-	border-radius: var(--radius-pill);
-	@include mixins.focus-ring;
-
-	&[aria-pressed="true"] {
-		background: var(--color-accent);
-		border-color: var(--color-accent);
-		color: #fff;
-	}
-}
-
-.toggle {
-	display: flex;
-	align-items: center;
-	gap: var(--space-2);
-	min-height: var(--hit-target);
-	color: var(--color-textMuted);
-	font-size: 1.4rem;
-
-	input {
-		width: 2rem;
-		height: 2rem;
-		accent-color: var(--color-accent);
-	}
-}
-
 .exercise {
 	display: flex;
 	align-items: center;
@@ -190,26 +146,56 @@
 	}
 }
 
-// Muscle picker for the library: round body diagrams, like a body-part menu.
-.muscleGrid {
+.muscleCards {
 	display: grid;
-	grid-template-columns: repeat(4, 1fr);
-	gap: var(--space-3) var(--space-2);
+	grid-auto-flow: column;
+	grid-auto-columns: clamp(11.2rem, 35%, 14.4rem);
+	gap: var(--space-2);
+	margin-inline: calc(var(--space-4) * -1);
+	padding: var(--space-1) var(--space-4);
+	overflow-x: auto;
+	scroll-snap-type: x proximity;
+	scroll-padding-inline: var(--space-4);
 }
 
-.muscleTile {
+.muscleCard {
 	display: flex;
 	flex-direction: column;
-	align-items: center;
-	gap: 0.6rem;
-	color: var(--color-textMuted);
-	font-size: 1.2rem;
-	font-weight: 600;
+	background: var(--color-surface);
+	border: 0.1rem solid var(--color-borderStrong);
+	overflow: hidden;
+	text-align: start;
+	scroll-snap-align: start;
+	@include corners.radius(var(--radius-card));
 	@include mixins.focus-ring;
 
+	&:hover {
+		border-color: var(--color-accent);
+	}
+
 	&[aria-pressed="true"] {
-		color: var(--color-text);
-		font-weight: 700;
+		background: var(--color-accentSoft);
+		border-color: var(--color-accent);
+		color: var(--color-accentText);
+		box-shadow: 0 0 0 0.1rem var(--color-accent);
+	}
+}
+
+.cover {
+	display: block;
+	width: 100%;
+	height: auto;
+}
+
+.cardLabel {
+	display: grid;
+	gap: var(--space-1);
+	padding: var(--space-2);
+	font-size: 1.4rem;
+
+	span {
+		color: var(--color-textMuted);
+		font-size: 1.2rem;
 	}
 }
 

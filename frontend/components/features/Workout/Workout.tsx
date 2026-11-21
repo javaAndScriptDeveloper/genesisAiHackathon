@@ -1,9 +1,10 @@
 "use client";
 
-import { Alert02Icon, ArrowDown01Icon, Cancel01Icon, PauseIcon, PlayIcon, Timer02Icon } from "@hugeicons/core-free-icons";
+import { Alert02Icon, ArrowDown01Icon, Cancel01Icon, MusicNote01Icon, PauseIcon, PlayIcon, Timer02Icon } from "@hugeicons/core-free-icons";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { Button, EmptyState, IconButton, Icon, useToast } from "@/components/ui";
+import { WorkoutMusic } from "@/components/features/WorkoutMusic/WorkoutMusic";
 import { WorkoutHealthPanel } from "@/components/features/WorkoutHealthPanel/WorkoutHealthPanel";
 import { useWorkoutHealth } from "@/components/features/WorkoutHealthPanel/useWorkoutHealth";
 import { applyAdapt } from "@/lib/fit/adapt";
@@ -25,6 +26,7 @@ export function Workout() {
 	const toast = useToast();
 	const { state, dispatch, today } = useFit();
 	const [sheet, setSheet] = useState<SheetName>(null);
+	const [musicOpen, setMusicOpen] = useState(false);
 	const a = state.active;
 	const profile = state.profile;
 	const live = !!a && a.phase !== "summary";
@@ -72,6 +74,7 @@ export function Workout() {
 						{formatClock(a.elapsedSec)} · {t("fit.workout.left", { n: minutesLeft })}
 					</span>
 				</div>
+				<IconButton icon={MusicNote01Icon} label={t("fit.music.title")} onClick={() => setMusicOpen(true)} />
 				<IconButton icon={PauseIcon} label={t("fit.workout.pause")} onClick={() => dispatch({ type: "pause" })} />
 			</header>
 			<ol className={styles.segments} aria-label={t("fit.workout.progress", { done: doneBlocks, total: a.exercises.length })}>
@@ -89,7 +92,7 @@ export function Workout() {
 				</Button>
 			</div>
 
-			{a.phase === "rest" && !a.paused && <RestView onAdjust={() => setSheet("adjust")} />}
+			{a.phase === "rest" && !a.paused && <RestView onAdjust={() => setSheet("adjust")} onMusic={() => setMusicOpen(true)} />}
 
 			{a.paused && !a.safetyStop && (
 				<div className={styles.overlay} role="dialog" aria-modal="true" aria-label={t("fit.workout.paused")}>
@@ -105,10 +108,12 @@ export function Workout() {
 						<Button variant="secondary" onDark iconLeft={Timer02Icon} onClick={() => regenerate({ kind: "shorten", minutes: 15 })}>{t("fit.workout.regenShort")}</Button>
 					</div>
 					<Button size="lg" iconLeft={PlayIcon} onClick={() => dispatch({ type: "resume" })}>{t("fit.workout.resume")}</Button>
+					<Button variant="secondary" onDark iconLeft={MusicNote01Icon} onClick={() => setMusicOpen(true)}>{t("fit.music.title")}</Button>
 					<Button variant="secondary" onDark onClick={() => setSheet("end")}>{t("fit.workout.end")}</Button>
 				</div>
 			)}
 
+			<WorkoutMusic open={musicOpen} onClose={() => setMusicOpen(false)} />
 			<WorkoutSheets sheet={sheet} setSheet={setSheet} toastShow={toast.show} />
 		</div>
 	);

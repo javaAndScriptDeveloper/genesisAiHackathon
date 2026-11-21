@@ -41,7 +41,7 @@ export function WorkoutStage({ onAdjust, onOverview }: { onAdjust: () => void; o
 				</p>
 			</div>
 
-			<ExerciseVideo exercise={exercise} compact />
+			{a.phase === "work" && !a.paused && <ExerciseVideo exercise={exercise} compact autoPlay />}
 			<ExerciseGuide exercise={exercise} variant="sheet" />
 
 			<ol className={styles.sets} aria-label={t("fit.workout.sets")}>
