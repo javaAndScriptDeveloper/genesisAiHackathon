@@ -33,6 +33,11 @@ export function emptyState(): FitState {
 		partners: {},
 		hasDemoHistory: false,
 		celebrate: [],
+		backend: null,
+		planWishes: [],
+		planSource: "rules",
+		planSummary: null,
+		daily: null,
 	};
 }
 

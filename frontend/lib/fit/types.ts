@@ -1,4 +1,6 @@
+import type { CoachAiReply } from "./aiPlan";
 import type { ISODate } from "./dates";
+import type { DailyStats, DailyStatus } from "./dailyStats";
 import type { Units } from "./units";
 
 export type Goal = "lose-fat" | "build-muscle" | "get-stronger" | "stay-fit" | "endurance";
@@ -165,6 +167,8 @@ export interface CoachMessage {
 	/** Set once the user taps one of the actions, so it cannot be applied twice. */
 	appliedAction?: string;
 	safety?: boolean;
+	/** Plan rebuild the AI coach proposed alongside its reply. */
+	rebuild?: NonNullable<CoachAiReply["rebuild"]>;
 }
 
 export type AdaptOp =
@@ -210,6 +214,16 @@ export interface PhotoCheckIn {
 
 export type MealSlot = "breakfast" | "lunch" | "snack" | "dinner";
 
+export interface DailyCheck {
+	date: ISODate;
+	status: DailyStatus;
+	note: string;
+	stats: DailyStats | null;
+	sessionId: string | null;
+	original: PlannedWorkout | null;
+	undone: boolean;
+}
+
 export interface FitState {
 	version: 1;
 	units: Units;
@@ -238,4 +252,12 @@ export interface FitState {
 	partners: Record<string, "invited" | "accepted">;
 	hasDemoHistory: boolean;
 	celebrate: string[];
+	/** Ids issued by platform-backend for this browser; null until registered. */
+	backend: { userId: number; deviceId: number } | null;
+	/** The user's own plan wishes, passed to the AI planner. */
+	planWishes: string[];
+	planSource: "ai" | "fallback" | "rules";
+	planSummary: string | null;
+	/** Today's readiness check, null until it has run. */
+	daily: DailyCheck | null;
 }
