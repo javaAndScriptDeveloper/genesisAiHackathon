@@ -1,7 +1,7 @@
 "use client";
 
 import { Avatar, Badge, Card } from "@/components/ui";
-import { useTrainers } from "@/lib/api/trainers";
+import { trainerById, useTrainers } from "@/lib/api/trainers";
 import { activeTrainerId } from "@/lib/fit/options";
 import { useFit } from "@/lib/fit/store/FitProvider";
 import { useT } from "@/lib/i18n/I18nProvider";
@@ -13,7 +13,7 @@ export function PlanSummaryCard() {
 	const { state } = useFit();
 	const { data: trainers } = useTrainers();
 	if (!state.planSummary) return null;
-	const trainer = trainers?.find((tr) => tr.id === activeTrainerId(state));
+	const trainer = trainerById(trainers, activeTrainerId(state));
 	const name = trainer?.name ?? t("fit.ai.trainerFallback");
 
 	return (

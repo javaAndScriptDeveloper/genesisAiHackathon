@@ -18,7 +18,7 @@ export function Avatar({ name, src, size = 40, className }: AvatarProps) {
 		.toUpperCase();
 	return (
 		<span className={clsx(styles.avatar, className)} style={{ width: size, height: size, fontSize: size * 0.38 }} role="img" aria-label={name}>
-			{src ? <Image src={src} alt="" width={size} height={size} className={styles.image} /> : initials}
+			{src ? <Image src={src} alt="" width={size} height={size} className={styles.image} loading="eager" /> : initials}
 		</span>
 	);
 }

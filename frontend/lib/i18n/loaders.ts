@@ -4,7 +4,6 @@ type Dict = { [key: string]: string | Dict };
 
 // Each language is its own chunk, fetched only when someone picks it. English is bundled; Ukrainian ships with the app.
 export const LOADERS: Partial<Record<Locale, () => Promise<Dict>>> = {
-	be: () => import("@/messages/be.json").then((m) => m.default),
 	bg: () => import("@/messages/bg.json").then((m) => m.default),
 	bs: () => import("@/messages/bs.json").then((m) => m.default),
 	ca: () => import("@/messages/ca.json").then((m) => m.default),

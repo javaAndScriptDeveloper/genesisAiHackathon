@@ -1,7 +1,8 @@
 "use client";
 
-import { Avatar, Button, Card, Skeleton } from "@/components/ui";
-import { useTrainers } from "@/lib/api/trainers";
+import { Cardiogram01Icon, HeartCheckIcon, Moon02Icon, Undo02Icon } from "@hugeicons/core-free-icons";
+import { Avatar, Button, Card, Icon, ProgressRing, Skeleton } from "@/components/ui";
+import { trainerById, useTrainers } from "@/lib/api/trainers";
 import { activeTrainerId } from "@/lib/fit/options";
 import { useFit } from "@/lib/fit/store/FitProvider";
 import { useAiPlan } from "@/lib/fit/store/useAiPlan";
@@ -15,23 +16,31 @@ export function DailyCheckCard() {
 	const { busy } = useAiPlan();
 	const { data: trainers } = useTrainers();
 	const daily = state.daily;
-	const trainer = trainers?.find((tr) => tr.id === activeTrainerId(state));
+	const trainer = trainerById(trainers, activeTrainerId(state));
+
+	const header = (
+		<div className={styles.head}>
+			{trainer && <Avatar name={trainer.name} src={trainer.pathToImage} size={44} />}
+			<div className={styles.titles}>
+				<p className={styles.eyebrow}>{t("fit.ai.daily.eyebrow")}</p>
+				<h2 className={styles.title}>{trainer ? `${trainer.name} · ${t("fit.ai.daily.title")}` : t("fit.ai.daily.title")}</h2>
+			</div>
+		</div>
+	);
 
 	if (!daily) {
 		if (!busy) return null;
+		// The card frame (coach, title) is on screen straight away; only the numbers and the note wait for the server.
 		return (
 			<Card className={styles.root} aria-busy aria-label={t("fit.ai.daily.loading")}>
-				<Skeleton width="40%" height="1.4rem" />
-				<div className={styles.head}>
-					<Skeleton width="4rem" height="4rem" className={styles.round} />
-					<Skeleton width="55%" height="1.8rem" />
-				</div>
+				{header}
 				<div className={styles.stats}>
-					{[0, 1, 2, 3].map((i) => (
-						<Skeleton key={i} height="5.6rem" />
+					{[0, 1, 2].map((i) => (
+						<Skeleton key={i} height="7.2rem" />
 					))}
 				</div>
 				<Skeleton height="1.6rem" />
+				<Skeleton width="70%" height="1.6rem" />
 			</Card>
 		);
 	}
@@ -41,37 +50,44 @@ export function DailyCheckCard() {
 	const canUndo = !!daily.original && !daily.undone;
 	const items = stats
 		? [
-				{ label: t("fit.ai.daily.sleep"), value: t("fit.ai.daily.sleepValue", { h: stats.sleepHours }) },
-				{ label: t("fit.ai.daily.restingHr"), value: t("fit.ai.daily.hrValue", { bpm: stats.restingHr }) },
-				{ label: t("fit.ai.daily.hrv"), value: t("fit.ai.daily.hrvValue", { ms: stats.hrvMs }) },
-				{ label: t("fit.ai.daily.readiness"), value: t("fit.ai.daily.readinessValue", { n: stats.readiness }) },
+				{ icon: Moon02Icon, label: t("fit.ai.daily.sleep"), value: t("fit.ai.daily.sleepValue", { h: stats.sleepHours }) },
+				{ icon: HeartCheckIcon, label: t("fit.ai.daily.restingHr"), value: t("fit.ai.daily.hrValue", { bpm: stats.restingHr }) },
+				{ icon: Cardiogram01Icon, label: t("fit.ai.daily.hrv"), value: t("fit.ai.daily.hrvValue", { ms: stats.hrvMs }) },
 			]
 		: [];
 
 	return (
 		<Card className={styles.root}>
-			<p className={styles.eyebrow}>{t("fit.ai.daily.eyebrow")}</p>
-			<div className={styles.head}>
-				{trainer && <Avatar name={trainer.name} src={trainer.pathToImage} size={40} />}
-				<h2 className={styles.title}>{trainer ? `${trainer.name} · ${t("fit.ai.daily.title")}` : t("fit.ai.daily.title")}</h2>
+			<div className={styles.top}>
+				{header}
+				{stats && (
+					<ProgressRing value={stats.readiness} size={64} stroke={6} label={t("fit.ai.daily.readiness")}>
+						<span className={styles.ringNum}>{stats.readiness}</span>
+					</ProgressRing>
+				)}
 			</div>
 			{items.length > 0 && (
 				<dl className={styles.stats}>
 					{items.map((i) => (
 						<div key={i.label} className={styles.stat}>
-							<dt>{i.label}</dt>
+							<span className={styles.statIcon}>
+								<Icon icon={i.icon} size={18} />
+							</span>
 							<dd>{i.value}</dd>
+							<dt>{i.label}</dt>
 						</div>
 					))}
 				</dl>
 			)}
 			<p className={styles.note}>{daily.undone ? t("fit.ai.daily.undone") : daily.note}</p>
-			{stats && <p className={styles.caption}>{t("fit.ai.daily.simulated")}</p>}
-			{canUndo && (
-				<Button size="sm" variant="secondary" className={styles.undo} onClick={() => dispatch({ type: "undo-daily" })}>
-					{t("fit.ai.daily.undo")}
-				</Button>
-			)}
+			<div className={styles.foot}>
+				{stats && <p className={styles.caption}>{t("fit.ai.daily.simulated")}</p>}
+				{canUndo && (
+					<Button size="sm" variant="secondary" iconLeft={Undo02Icon} className={styles.undo} onClick={() => dispatch({ type: "undo-daily" })}>
+						{t("fit.ai.daily.undo")}
+					</Button>
+				)}
+			</div>
 		</Card>
 	);
 }

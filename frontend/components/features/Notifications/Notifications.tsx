@@ -4,7 +4,7 @@ import { Alert02Icon, ChartUpIcon, Chat01Icon, Dumbbell03Icon, FireIcon, Medal01
 import { useRouter } from "next/navigation";
 import { ScreenHeader } from "@/components/features/ScreenHeader/ScreenHeader";
 import { Avatar, Badge, Button, EmptyState, Icon, IconButton, type IconDefinition } from "@/components/ui";
-import { useTrainers } from "@/lib/api/trainers";
+import { trainerById, useTrainers } from "@/lib/api/trainers";
 import { activeTrainerId } from "@/lib/fit/options";
 import { track } from "@/lib/fit/analytics";
 import type { NotificationKind } from "@/lib/fit/types";
@@ -33,7 +33,7 @@ export function Notifications() {
 	const shareWith = useShare();
 	const unread = state.notifications.filter((n) => !n.read).length;
 	const { data: trainers } = useTrainers();
-	const trainer = trainers?.find((tr) => tr.id === activeTrainerId(state));
+	const trainer = trainerById(trainers, activeTrainerId(state));
 	return (
 		<div className={kit.page}>
 			<ScreenHeader title={t("fit.notifications.title")} back actions={<IconButton icon={Settings02Icon} label={t("fit.notifications.settings")} onClick={() => router.push("/settings")} />} />

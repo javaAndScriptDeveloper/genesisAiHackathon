@@ -95,3 +95,19 @@
 	gap: var(--space-1);
 	margin-top: 0.4rem;
 }
+
+// Request waiting for approval: the status tag sits in the card's top-left corner.
+.awaitingCard {
+	position: relative;
+	padding-top: 4.4rem;
+}
+
+.awaitingTag {
+	position: absolute;
+	top: 0;
+	left: 0;
+	padding: 0.5rem 1.2rem;
+	font-size: 1.2rem;
+	// Round only the corner that touches the card's own corner, so the tag follows the card's outline.
+	@include corners.radius(var(--radius-card) 0 var(--radius-control) 0);
+}

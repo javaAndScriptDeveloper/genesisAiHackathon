@@ -9,67 +9,108 @@
 	box-shadow: inset 0.3rem 0 0 var(--color-coach), var(--shadow-card);
 }
 
-.eyebrow {
-	font-size: 1.2rem;
-	font-weight: 700;
-	letter-spacing: 0.08em;
-	text-transform: uppercase;
-	color: var(--color-coach);
+.top {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--space-3);
 }
 
 .head {
 	display: flex;
+	flex: 1;
 	align-items: center;
-	gap: var(--space-2);
+	gap: var(--space-3);
+	min-width: 0;
 }
 
-.round {
-	@include corners.radius(var(--radius-pill));
+.titles {
+	min-width: 0;
+}
+
+.eyebrow {
+	color: var(--color-coach);
+	font-size: 1.1rem;
+	font-weight: 700;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
 }
 
 .title {
-	flex: 1;
-	min-width: 0;
 	font-size: 1.6rem;
 	line-height: 1.3;
 }
 
+.ringNum {
+	font-size: 1.6rem;
+	font-weight: 800;
+	font-variant-numeric: tabular-nums;
+}
+
 .stats {
 	display: grid;
-	grid-template-columns: repeat(2, 1fr);
+	grid-template-columns: repeat(3, 1fr);
 	gap: var(--space-2);
+	margin: 0;
 }
 
 .stat {
 	display: flex;
 	flex-direction: column;
+	align-items: center;
 	gap: 0.2rem;
-	padding: var(--space-2) var(--space-3);
+	padding: var(--space-3) var(--space-2);
 	background: var(--color-coachSoft);
-	@include corners.nested(var(--radius-card), var(--space-5));
+	text-align: center;
+	@include corners.nested(var(--radius-card), var(--space-4));
+
+	dd {
+		margin: 0;
+		font-size: 1.7rem;
+		font-weight: 700;
+		font-variant-numeric: tabular-nums;
+	}
 
 	dt {
 		color: var(--color-textMuted);
 		font-size: 1.2rem;
 	}
-
-	dd {
-		font-size: 1.7rem;
-		font-weight: 700;
-		font-variant-numeric: tabular-nums;
-	}
 }
 
+.statIcon {
+	display: grid;
+	place-items: center;
+	width: 3.2rem;
+	height: 3.2rem;
+	margin-bottom: 0.2rem;
+	background: var(--color-surface);
+	color: var(--color-coach);
+	border-radius: 50%;
+}
+
+// The trainer's note reads like a message bubble from them.
 .note {
+	margin: 0;
+	padding: var(--space-3);
+	background: var(--color-surfaceMuted);
 	font-size: 1.5rem;
-	line-height: 1.45;
+	line-height: 1.5;
+	@include corners.nested(var(--radius-card), var(--space-2));
+}
+
+.foot {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--space-3);
 }
 
 .caption {
+	margin: 0;
 	color: var(--color-textSubtle);
 	font-size: 1.2rem;
 }
 
 .undo {
-	align-self: flex-start;
+	flex: none;
 }

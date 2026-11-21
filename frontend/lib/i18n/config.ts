@@ -1,6 +1,6 @@
 // Locales the app can show: English (default, source) plus the languages of Europe. Russian is intentionally not offered.
 // Missing keys in a locale fall back to English, never to a blank string. Add a locale: messages/<code>.json, an entry here and in `loaders.ts`.
-export const LOCALES = ["en", "uk", "sq", "eu", "be", "bs", "bg", "ca", "hr", "cs", "da", "nl", "et", "fi", "fr", "gl", "de", "el", "hu", "is", "ga", "it", "lv", "lt", "lb", "mk", "mt", "nb", "pl", "pt", "ro", "sr", "sk", "sl", "es", "sv", "tr", "cy"] as const;
+export const LOCALES = ["en", "uk", "sq", "eu", "bs", "bg", "ca", "hr", "cs", "da", "nl", "et", "fi", "fr", "gl", "de", "el", "hu", "is", "ga", "it", "lv", "lt", "lb", "mk", "mt", "nb", "pl", "pt", "ro", "sr", "sk", "sl", "es", "sv", "tr", "cy"] as const;
 export type Locale = (typeof LOCALES)[number];
 export const DEFAULT_LOCALE: Locale = "en";
 // Each language written in itself, so people can find theirs.
@@ -9,7 +9,6 @@ export const LOCALE_LABELS: Record<Locale, string> = {
 	uk: "Українська",
 	sq: "Shqip",
 	eu: "Euskara",
-	be: "Беларуская",
 	bs: "Bosanski",
 	bg: "Български",
 	ca: "Català",
@@ -46,7 +45,7 @@ export const LOCALE_LABELS: Record<Locale, string> = {
 };
 // Flag of the country most associated with each language. Regional languages (Basque, Catalan, Galician, Welsh) use their state or nation.
 export const LOCALE_FLAGS: Record<Locale, string> = {
-	en: "🇬🇧", uk: "🇺🇦", sq: "🇦🇱", eu: "🇪🇸", be: "🇧🇾", bs: "🇧🇦", bg: "🇧🇬", ca: "🇪🇸", hr: "🇭🇷", cs: "🇨🇿", da: "🇩🇰", nl: "🇳🇱", et: "🇪🇪", fi: "🇫🇮", fr: "🇫🇷", gl: "🇪🇸", de: "🇩🇪", el: "🇬🇷", hu: "🇭🇺", is: "🇮🇸", ga: "🇮🇪", it: "🇮🇹", lv: "🇱🇻", lt: "🇱🇹", lb: "🇱🇺", mk: "🇲🇰", mt: "🇲🇹", nb: "🇳🇴", pl: "🇵🇱", pt: "🇵🇹", ro: "🇷🇴", sr: "🇷🇸", sk: "🇸🇰", sl: "🇸🇮", es: "🇪🇸", sv: "🇸🇪", tr: "🇹🇷", cy: "🏴󠁧󠁢󠁷󠁬󠁳󠁿",
+	en: "🇬🇧", uk: "🇺🇦", sq: "🇦🇱", eu: "🇪🇸", bs: "🇧🇦", bg: "🇧🇬", ca: "🇪🇸", hr: "🇭🇷", cs: "🇨🇿", da: "🇩🇰", nl: "🇳🇱", et: "🇪🇪", fi: "🇫🇮", fr: "🇫🇷", gl: "🇪🇸", de: "🇩🇪", el: "🇬🇷", hu: "🇭🇺", is: "🇮🇸", ga: "🇮🇪", it: "🇮🇹", lv: "🇱🇻", lt: "🇱🇹", lb: "🇱🇺", mk: "🇲🇰", mt: "🇲🇹", nb: "🇳🇴", pl: "🇵🇱", pt: "🇵🇹", ro: "🇷🇴", sr: "🇷🇸", sk: "🇸🇰", sl: "🇸🇮", es: "🇪🇸", sv: "🇸🇪", tr: "🇹🇷", cy: "🏴󠁧󠁢󠁷󠁬󠁳󠁿",
 };
 
 export const LOCALE_STORAGE_KEY = "app.locale";

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ScreenHeader } from "@/components/features/ScreenHeader/ScreenHeader";
 import { Avatar, Badge, Button, Card, Icon, IconButton, type IconDefinition } from "@/components/ui";
-import { useTrainers } from "@/lib/api/trainers";
+import { trainerById, useTrainers } from "@/lib/api/trainers";
 import { activeTrainerId } from "@/lib/fit/options";
 import { bmi } from "@/lib/fit/stats";
 import { useFit } from "@/lib/fit/store/FitProvider";
@@ -27,7 +27,7 @@ export function Profile() {
 	const router = useRouter();
 	const { state } = useFit();
 	const { data: trainers } = useTrainers();
-	const trainer = trainers?.find((tr) => tr.id === activeTrainerId(state));
+	const trainer = trainerById(trainers, activeTrainerId(state));
 	const stats = useFitStats();
 	const u = useUnits();
 	const p = state.profile;

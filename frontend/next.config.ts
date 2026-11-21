@@ -8,8 +8,10 @@ const nextConfig: NextConfig = {
 	// Required by frontend/Dockerfile (copies .next/standalone).
 	output: "standalone",
 	turbopack: { root: process.cwd() },
-	// Images are always served as WebP; sizes cover 1x and 2x (retina) renditions.
+	// Images are served as-is (unoptimized): they are already WebP at 1x/2x from `bun run images`, and the /_next/image optimizer
+	// route sometimes failed or answered late, which made avatars and photos vanish. Static files can't fail that way.
 	images: {
+		unoptimized: true,
 		formats: ["image/webp"],
 		deviceSizes: [360, 640, 768, 1024, 1280, 1536, 1920, 2560],
 		imageSizes: [16, 32, 48, 64, 96, 128, 256, 384, 512, 768],

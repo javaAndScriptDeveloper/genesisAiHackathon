@@ -89,7 +89,9 @@ export function Community() {
 						<ul className={kit.list}>
 							{awaiting.map((b) => (
 								<li key={b.id}>
-									<Card className={kit.stack}>
+									<Card className={`${kit.stack} ${styles.awaitingCard}`}>
+										{/* Pinned to the top-left corner so it reads as the card's status, not as part of the row. */}
+										<Badge tone="warning" className={styles.awaitingTag}>{t("fit.community.awaiting")}</Badge>
 										<div style={{ display: "flex", alignItems: "center", gap: "1.2rem" }}>
 											<Avatar name={b.name} src={buddyPortrait(b)} />
 											<span className={kit.rowText}>
@@ -97,7 +99,6 @@ export function Community() {
 												<span>{t(`fit.opt.goal.${b.goal}.label`)} · {b.days}</span>
 												<BuddyBadges buddy={b} />
 											</span>
-											<Badge tone="warning">{t("fit.community.awaiting")}</Badge>
 										</div>
 										<Button size="sm" variant="ghost" onClick={() => dispatch({ type: "partner", id: b.id, status: null })}>{t("fit.community.cancelRequest")}</Button>
 									</Card>

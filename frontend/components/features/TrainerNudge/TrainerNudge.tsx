@@ -1,7 +1,7 @@
 "use client";
 
 import { Avatar, Button, Card } from "@/components/ui";
-import { useTrainers } from "@/lib/api/trainers";
+import { trainerById, useTrainers } from "@/lib/api/trainers";
 import { activeTrainerId } from "@/lib/fit/options";
 import { useFit } from "@/lib/fit/store/FitProvider";
 import { useActionNavigate } from "@/lib/fit/store/hooks";
@@ -16,7 +16,7 @@ export function TrainerNudge() {
 	const { data: trainers } = useTrainers();
 	const note = state.notifications.find((n) => n.nudge !== undefined && !n.read);
 	if (!note) return null;
-	const trainer = trainers?.find((tr) => tr.id === activeTrainerId(state));
+	const trainer = trainerById(trainers, activeTrainerId(state));
 	const name = trainer?.name ?? "";
 	return (
 		<Card className={styles.card}>
