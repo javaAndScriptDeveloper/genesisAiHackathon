@@ -51,12 +51,25 @@ export async function dailyCheck(
 	} catch {
 		// The route copes with missing stats.
 	}
-	const todays = s.planned.find((w) => w.date === s.today && w.status === "planned" && !w.adHoc) ?? null;
-	const upcoming = s.planned.filter((w) => w.date > s.today && w.status === "planned");
+	// Re-checking a day that was already adjusted starts from the original session, so adjustments never stack.
+	const original = s.daily?.date === s.today && s.daily.original && !s.daily.undone ? s.daily.original : null;
+	const planned = original ? s.planned.map((w) => (w.id === original.id ? original : w)) : s.planned;
+	const todays = planned.find((w) => w.date === s.today && w.status === "planned" && !w.adHoc) ?? null;
+	const upcoming = planned.filter((w) => w.date > s.today && w.status === "planned");
 	try {
 		const r = await deps.requestDaily({ userId, profile: s.profile, trainerSlug: s.trainerSlug, session: todays, upcoming, wishes: s.wishes, today: s.today });
 		return { check: { date: s.today, status: r.status, note: r.note, stats: r.stats, sessionId: r.session?.id ?? todays?.id ?? null }, session: r.session };
 	} catch {
 		return null;
 	}
+}
+
+export type SimulateOutcome = "failed" | "lighter" | "recovery" | "restDay" | "unchanged";
+
+/** What the demo simulation did to today: an adjusted session, a rest-day note, or nothing. */
+export function simulateOutcome(daily: DailyCheck | null): SimulateOutcome {
+	if (!daily) return "failed";
+	if (daily.original && daily.status !== "unchanged") return daily.status;
+	if (daily.sessionId === null && daily.status !== "unchanged") return "restDay";
+	return "unchanged";
 }

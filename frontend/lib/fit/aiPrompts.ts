@@ -40,8 +40,9 @@ export function dailyPrompt(i: { profile: Profile; stats: DailyStats; status: Da
 	const plan = i.session
 		? JSON.stringify({ title: i.session.title, focus: i.session.focus, durationMin: i.session.durationMin, exercises: i.session.exercises.map((b) => ({ exerciseId: b.exerciseId, sets: b.sets.length, target: b.sets[0]?.target, restSec: b.restSec })) })
 		: "none (rest day)";
-	const rule =
-		i.status === "recovery"
+	const rule = !i.session
+		? "Today is a rest day: write one supportive line recommending rest or a gentle walk; don't propose a workout, and return an empty exercises list."
+		: i.status === "recovery"
 			? "Replace it with an active recovery session of at most 30 minutes: only mobility, cardio or core exercises, never more sets than planned."
 			: i.status === "lighter"
 				? "Make it lighter: fewer sets or easier exercises, never more sets or time than planned."

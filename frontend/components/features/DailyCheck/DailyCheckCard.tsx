@@ -31,7 +31,8 @@ export function DailyCheckCard() {
 	}
 
 	const stats = daily.stats;
-	const canUndo = daily.status !== "unchanged" && !daily.undone;
+	// Undo only when a session was really changed (a rest day has nothing to restore).
+	const canUndo = !!daily.original && !daily.undone;
 	const items = stats
 		? [
 				{ label: t("fit.ai.daily.sleep"), value: t("fit.ai.daily.sleepValue", { h: stats.sleepHours }) },

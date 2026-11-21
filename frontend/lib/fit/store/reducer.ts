@@ -198,7 +198,8 @@ function mergeUpcoming(state: FitState, incoming: PlannedWorkout[], today: ISODa
 }
 
 function rebuildUpcoming(state: FitState, profile: Profile, today: ISODate): FitState {
-	return { ...mergeUpcoming(state, generatePlan(profile, today, 4), today), profile };
+	// The new sessions have not been checked against today's readiness yet: clear the check so it runs again.
+	return { ...mergeUpcoming(state, generatePlan(profile, today, 4), today), profile, daily: null };
 }
 
 function unlockNew(state: FitState, today: ISODate, now: string): FitState {
@@ -519,7 +520,7 @@ function applyProfileChange(state: FitState, profile: Profile, today: ISODate): 
 		if (replaced.length) active = { ...active, exercises, adaptations: [...active.adaptations, `Swapped: ${replaced.join(", ")}`] };
 	}
 	planned = planned.map((w) => w);
-	return { ...state, profile, planned, active };
+	return { ...state, profile, planned, active, daily: null };
 }
 
 export { findExercise, totalXp };

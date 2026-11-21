@@ -274,6 +274,19 @@ describe("AI plan state", () => {
 		}
 	});
 
+	it("plan-replacing actions clear today's daily check so it runs again", () => {
+		const w = { ...aiSession("w1", today), title: "Recovery" };
+		const daily = { date: today, status: "recovery" as const, note: "Rest", stats: null, sessionId: "w1", original: aiSession("w1", today), undone: false };
+		const s0: FitState = { ...emptyState(), profile: { ...profile, equipment: ["dumbbells", "bench"] }, planned: [w], daily, subscription: { tier: "premium", trialEndsAt: null } };
+		expect(run(s0, { type: "update-profile", profile: { ...profile, daysPerWeek: 4 }, units: "metric", today }).daily).toBeNull();
+		expect(run(s0, { type: "set-goal", goal: "lose-fat", goalText: "", today }).daily).toBeNull();
+		const reply = { id: "r", from: "coach" as const, text: "ok", at: now };
+		const apply = (action: Extract<Action, { type: "coach-apply" }>["action"]) => run(s0, { type: "coach-apply", messageId: "m", action, today, now, reply }).daily;
+		expect(apply({ id: "a", label: "x", type: "remove-equipment", equipment: "dumbbells" })).toBeNull();
+		expect(apply({ id: "b", label: "x", type: "avoid-limitation", limitation: "knees" })).toBeNull();
+		expect(apply({ id: "c", label: "x", type: "rebuild-plan", premium: true })).toBeNull();
+	});
+
 	it("update-profile sets planSource rules and set-backend stores ids", () => {
 		const s0: FitState = { ...emptyState(), profile, planned: generatePlan(profile, today, 4), planSource: "ai" };
 		expect(run(s0, { type: "update-profile", profile: { ...profile, daysPerWeek: 4 }, units: "metric", today }).planSource).toBe("rules");

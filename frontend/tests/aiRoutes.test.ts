@@ -15,6 +15,7 @@ import { POST as COACH } from "@/app/api/coach/route";
 import { AiConfigError } from "@/lib/ai/errors";
 import { adjustSession, coachChat, generateWeek } from "@/lib/ai/planner";
 import { safetyReplyText } from "@/lib/fit/coach";
+import { t } from "@/lib/messages";
 import { getSnapshots, getTrainerTov, saveTraining } from "@/lib/api/platform";
 
 const profile: Profile = {
@@ -160,6 +161,18 @@ describe("POST /api/plan/daily", () => {
 		const { json } = await run(dbase);
 		expect(json.createdBy).toBe("fallback");
 		expect(json.note.length).toBeGreaterThan(0);
+	});
+
+	it("rest day on a poor night: recommends rest instead of saying good to go", async () => {
+		vi.mocked(getSnapshots).mockResolvedValue([stats(30)]);
+		vi.mocked(adjustSession).mockRejectedValue(new Error("boom"));
+		const { json } = await run({ ...dbase, session: null });
+		expect(json.status).toBe("recovery");
+		expect(json.session).toBeNull();
+		expect(json.note).toBe(t("fit.ai.restDayRecovery", {}, "en"));
+		expect(saveTraining).not.toHaveBeenCalled();
+		vi.mocked(getSnapshots).mockResolvedValue([stats(50)]);
+		expect((await run({ ...dbase, session: null })).json.note).toBe(t("fit.ai.restDayLighter", {}, "en"));
 	});
 
 	it("no snapshot for today: unchanged, no stats, AI not called", async () => {

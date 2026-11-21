@@ -9,6 +9,7 @@ import { Badge, Button, Card, EmptyState, Icon, Input, SegmentedControl, useToas
 import { Notice } from "@/components/features/Notice/Notice";
 import { formatDay } from "@/lib/fit/dates";
 import { PROVIDERS } from "@/lib/fit/health";
+import { simulateOutcome } from "@/lib/fit/aiFlow";
 import type { Scenario } from "@/lib/fit/dailyStats";
 import { useFit } from "@/lib/fit/store/FitProvider";
 import { useAiPlan } from "@/lib/fit/store/useAiPlan";
@@ -35,9 +36,9 @@ export function Devices() {
 		{ id: "bad-night", label: t("fit.ai.demoSim.badNight") },
 	];
 	const simulate = async () => {
-		const status = await runDaily({ scenario, force: true });
-		if (!status) toast.show(t("fit.ai.demoSim.failed"), "danger");
-		else toast.show(t(status === "unchanged" ? "fit.ai.demoSim.fine" : status === "lighter" ? "fit.ai.demoSim.lighter" : "fit.ai.demoSim.recovery"), "success");
+		const outcome = simulateOutcome(await runDaily({ scenario, force: true }));
+		if (outcome === "failed") toast.show(t("fit.ai.demoSim.failed"), "danger");
+		else toast.show(t(outcome === "unchanged" ? "fit.ai.demoSim.fine" : `fit.ai.demoSim.${outcome}`), "success");
 	};
 	const valid = sys !== "" && dia !== "" && !sysErr && !diaErr && s > d;
 

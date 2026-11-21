@@ -1,13 +1,13 @@
 import { describe, expect, it, vi } from "vitest";
 import type { AiDeps } from "@/lib/fit/aiClient";
-import { dailyCheck, ensureBackend, rebuildPlan } from "@/lib/fit/aiFlow";
+import { dailyCheck, ensureBackend, rebuildPlan, simulateOutcome } from "@/lib/fit/aiFlow";
 import type { DailyResponse, PlanResponse } from "@/lib/fit/aiApi";
 import { createGate, singleFlight } from "@/lib/fit/singleFlight";
 import { toISO } from "@/lib/fit/dates";
 import { generatePlan } from "@/lib/fit/plan";
 import { emptyState } from "@/lib/fit/seed";
 import { reducer } from "@/lib/fit/store/reducer";
-import type { DailyStats } from "@/lib/fit/dailyStats";
+import type { DailyStats, Scenario } from "@/lib/fit/dailyStats";
 import type { FitState, PlannedWorkout, Profile } from "@/lib/fit/types";
 
 const profile: Profile = {
@@ -107,6 +107,52 @@ describe("dailyCheck", () => {
 		state = reducer(state, { type: "apply-daily", ...result });
 		expect(state.planned.find((w) => w.date === today)?.title).toBe("Recovery");
 		expect(state.daily?.status).toBe("recovery");
+	});
+	it("re-checking an adjusted day sends the original session, not the adjusted one", async () => {
+		const adjusted: PlannedWorkout = { ...todays, title: "Lighter", durationMin: 20 };
+		const daily = { date: today, status: "lighter" as const, note: "", stats, sessionId: "w-today", original: todays, undone: false };
+		const deps = fakes();
+		await dailyCheck(deps, { ...s, planned: [adjusted, later, done], daily, scenario: "bad-night", force: true });
+		expect(deps.requestDaily).toHaveBeenCalledWith(expect.objectContaining({ session: todays, upcoming: [later] }));
+		const deps2 = fakes();
+		await dailyCheck(deps2, { ...s, planned: [adjusted, later, done], daily: { ...daily, undone: true }, force: true });
+		expect(deps2.requestDaily).toHaveBeenCalledWith(expect.objectContaining({ session: adjusted }));
+	});
+	it("a bad night survives the forced check after a rebuild (sync without scenario keeps the day)", async () => {
+		// A fake device that behaves like the backend: no scenario keeps the existing row for the date.
+		const nights = new Map<string, Scenario>();
+		const syncDevice = vi.fn(async (_u: number, _d: number, date: string, scenario?: Scenario) => {
+			if (scenario || !nights.has(date)) nights.set(date, scenario ?? "normal");
+			return { ...stats, scenario: nights.get(date) ?? "normal" };
+		});
+		const recovery: PlannedWorkout = { ...todays, title: "Recovery", durationMin: 15 };
+		const requestDaily = vi.fn(async (): Promise<DailyResponse> =>
+			nights.get(today) === "bad-night" ? { status: "recovery", session: recovery, note: "rest", stats, createdBy: "ai" } : { status: "unchanged", session: null, note: "ok", stats, createdBy: "ai" },
+		);
+		const deps = fakes({ syncDevice, requestDaily });
+		let state: FitState = { ...emptyState(), profile, planned: [todays, later] };
+		const first = await dailyCheck(deps, { ...s, planned: state.planned, daily: null, scenario: "bad-night", force: true });
+		if (!first) throw new Error("expected result");
+		state = reducer(state, { type: "apply-daily", ...first });
+		state = reducer(state, { type: "apply-ai-plan", planned: [todays, later], summary: "s", source: "ai", wishes: [], today });
+		const again = await dailyCheck(deps, { ...s, planned: state.planned, daily: state.daily, force: true });
+		expect(syncDevice).toHaveBeenLastCalledWith(1, 2, today, undefined);
+		if (!again) throw new Error("expected result");
+		state = reducer(state, { type: "apply-daily", ...again });
+		expect(state.daily?.status).toBe("recovery");
+		expect(state.planned.find((w) => w.date === today)?.title).toBe("Recovery");
+	});
+});
+
+describe("simulateOutcome", () => {
+	const check = { date: today, status: "lighter" as const, note: "", stats, sessionId: "w-today", original: todays, undone: false };
+	it("names what actually happened to today's session", () => {
+		expect(simulateOutcome(null)).toBe("failed");
+		expect(simulateOutcome(check)).toBe("lighter");
+		expect(simulateOutcome({ ...check, status: "recovery" })).toBe("recovery");
+		expect(simulateOutcome({ ...check, status: "recovery", sessionId: null, original: null })).toBe("restDay");
+		expect(simulateOutcome({ ...check, status: "lighter", original: null })).toBe("unchanged");
+		expect(simulateOutcome({ ...check, status: "unchanged", sessionId: null, original: null })).toBe("unchanged");
 	});
 });
 

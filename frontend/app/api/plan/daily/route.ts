@@ -25,7 +25,9 @@ export async function POST(request: Request) {
 	const status = statusForReadiness(stats.readiness);
 
 	if (status === "unchanged" || !session) {
-		let note = t("fit.ai.dailyFine", { name }, "en");
+		// A rest day on a poor night is not "good to go": the fallback recommends rest.
+		const fallbackKey = status === "unchanged" ? "fit.ai.dailyFine" : status === "lighter" ? "fit.ai.restDayLighter" : "fit.ai.restDayRecovery";
+		let note = t(fallbackKey, { name }, "en");
 		let createdBy: DailyResponse["createdBy"] = "fallback";
 		try {
 			const ai = await adjustSession(trainer, { profile, stats, status, session });

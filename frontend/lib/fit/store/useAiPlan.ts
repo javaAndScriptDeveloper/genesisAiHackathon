@@ -5,9 +5,9 @@ import { aiClient } from "../aiClient";
 import { dailyCheck, ensureBackend, rebuildPlan } from "../aiFlow";
 import { toBackendUser } from "../backendUser";
 import { createGate, singleFlight } from "../singleFlight";
-import type { DailyStatus, Scenario } from "../dailyStats";
+import type { Scenario } from "../dailyStats";
 import { activeTrainerId } from "../options";
-import type { Profile } from "../types";
+import type { DailyCheck, Profile } from "../types";
 import type { Dispatch } from "react";
 import { useFit } from "./FitProvider";
 import { reducer, type Action } from "./reducer";
@@ -60,11 +60,11 @@ export function useAiPlan() {
 		[dispatch, today],
 	);
 
-	/** Resolves with the resulting status, or null when no check ran (no profile, backend or response). */
+	/** Resolves with the resulting check, or null when no check ran (no profile, backend or response). */
 	const runDaily = useCallback(
-		(o: { scenario?: Scenario; force?: boolean } = {}): Promise<DailyStatus | null> =>
+		(o: { scenario?: Scenario; force?: boolean } = {}): Promise<DailyCheck | null> =>
 			tracked(async () => {
-				let status: DailyStatus | null = null;
+				let check: DailyCheck | null = null;
 				await dailyGate(o.force === true, async () => {
 					const profile = latest.current.profile;
 					if (!profile) return;
@@ -73,11 +73,13 @@ export function useAiPlan() {
 					const s = latest.current;
 					const result = await dailyCheck(aiClient, { backend, profile, trainerSlug: activeTrainerId(s), planned: s.planned, wishes: s.planWishes, today, daily: s.daily, scenario: o.scenario, force: o.force });
 					if (result) {
-						dispatch({ type: "apply-daily", ...result });
-						status = result.check.status;
+						const applied = { type: "apply-daily", ...result } as const;
+						// The reducer is pure, so the resulting check (with `original`) is derived here for the caller.
+						check = reducer(latest.current, applied).daily;
+						dispatch(applied);
 					}
 				});
-				return status;
+				return check;
 			}),
 		[ensure, dispatch, today],
 	);
