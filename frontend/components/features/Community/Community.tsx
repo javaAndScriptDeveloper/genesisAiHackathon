@@ -105,7 +105,7 @@ export function Community() {
 												<span>{t(`fit.opt.goal.${b.goal}.label`)} · {b.days} · {t("fit.community.level", { n: b.level })}</span>
 											</span>
 										</div>
-										<Button size="sm" onClick={() => connect(b)}>{t("fit.community.connect")}</Button>
+										<Button size="sm" variant="secondary" onClick={() => connect(b)}>{t("fit.community.connect")}</Button>
 									</Card>
 								</li>
 							))}
