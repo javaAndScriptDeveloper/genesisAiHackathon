@@ -1,0 +1,45 @@
+{
+  "fit": {
+    "community": {
+      "title": "Community",
+      "demoNote": "Demo: these are sample people and the replies are scripted. Real buddies need accounts and a server.",
+      "connectedTitle": "Connected",
+      "awaitingTitle": "Awaiting approval",
+      "findTitle": "Find gym buddies",
+      "connect": "Connect",
+      "cancelRequest": "Cancel request",
+      "awaiting": "Awaiting approval",
+      "connected": "Connected",
+      "requestSent": "Request sent to {name}",
+      "approved": "{name} approved your request",
+      "level": "Level {n}",
+      "lastWorkout": "Last workout: {title}, {when}",
+      "when": {
+        "today": "today",
+        "yesterday": "yesterday",
+        "daysAgo": "{n} days ago"
+      },
+      "resultsTab": "Results",
+      "chatTab": "Chat",
+      "notConnectedTitle": "Not connected yet",
+      "notConnectedBody": "You can see results and chat once this buddy approves your request.",
+      "backToList": "Back to Community",
+      "thisWeek": "This week",
+      "workoutsWeek": "{n} workouts",
+      "streak": "{n}-week streak",
+      "bestLift": "Best lift",
+      "prLine": "{exercise}: {weight}",
+      "lastWorkoutTitle": "Last workout",
+      "removeBuddy": "Remove buddy",
+      "removed": "{name} removed",
+      "chatEmpty": "Say hi to {name}",
+      "messagePlaceholder": "Write a message",
+      "send": "Send",
+      "sharePhoto": "Share a photo",
+      "photoFailed": "Couldn't use that file. Pick an image.",
+      "sharedPhoto": "Shared photo",
+      "typing": "{name} is typing…",
+      "photoRemoved": "Photo removed to save space"
+    }
+  }
+}

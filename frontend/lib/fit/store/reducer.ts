@@ -4,6 +4,7 @@ import type { Units } from "../units";
 import { findExercise, getExercise } from "../exercises";
 import { applyAdapt, replaceBlock, replaceUnavailable } from "../adapt";
 import { evaluateAchievements, achievementById, totalXp } from "../gamification";
+import { ACCEPT_DELAY_MS, MAX_CHAT_MESSAGES } from "../community";
 import { deriveNotifications } from "../notifications";
 import { buildAdHocWorkout, estimateMinutes, generatePlan, nextUpcoming } from "../plan";
 import { defaultWeeklyGoal, emptyState, newProgressToken, seedHistory, WATER_MAX_ML } from "../seed";
@@ -13,6 +14,7 @@ import type {
 	ActiveSession,
 	AdaptOp,
 	AppNotification,
+	ChatMessage,
 	Goal,
 	CoachAction,
 	CoachMessage,
@@ -81,7 +83,9 @@ export type Action =
 	| { type: "add-photo"; photo: PhotoCheckIn }
 	| { type: "remove-photo"; id: string }
 	| { type: "add-body-weight"; date: ISODate; kg: number; at?: string }
-	| { type: "partner"; id: string; status: "invited" | "accepted" | null }
+	| { type: "partner"; id: string; status: "invited" | "accepted" | null; now?: string }
+	| { type: "partners-sync"; now: string }
+	| { type: "chat-send"; buddyId: string; message: ChatMessage }
 	| { type: "joint-workout"; workoutId: string; partnerId: string | null }
 	| { type: "dismiss-celebration" }
 	| { type: "clear-demo-history"; today: ISODate }
@@ -468,9 +472,29 @@ export function reducer(state: FitState, action: Action): FitState {
 			return { ...state, bodyWeights: [...state.bodyWeights.filter((b) => b.date !== action.date), { date: action.date, kg: action.kg, at: action.at }].sort((a, b) => a.date.localeCompare(b.date)) };
 		case "partner": {
 			const partners = { ...state.partners };
-			if (action.status === null) delete partners[action.id];
-			else partners[action.id] = action.status;
-			return { ...state, partners };
+			const partnerInvitedAt = { ...state.partnerInvitedAt };
+			const chats = { ...state.chats };
+			if (action.status === null) {
+				delete partners[action.id];
+				delete partnerInvitedAt[action.id];
+				delete chats[action.id];
+			} else {
+				partners[action.id] = action.status;
+				if (action.status === "invited" && action.now) partnerInvitedAt[action.id] = action.now;
+			}
+			return { ...state, partners, partnerInvitedAt, chats };
+		}
+		case "partners-sync": {
+			const now = Date.parse(action.now);
+			// A missing invite time (requests saved by the old Gym Bro screen) counts as overdue.
+			const due = Object.entries(state.partners).filter(([id, status]) => status === "invited" && (state.partnerInvitedAt[id] === undefined || now - Date.parse(state.partnerInvitedAt[id]) >= ACCEPT_DELAY_MS));
+			if (due.length === 0) return state;
+			return { ...state, partners: { ...state.partners, ...Object.fromEntries(due.map(([id]) => [id, "accepted" as const])) } };
+		}
+		case "chat-send": {
+			const { message, buddyId } = action;
+			if (message.text.trim() === "" && !message.photo) return state;
+			return { ...state, chats: { ...state.chats, [buddyId]: [...(state.chats[buddyId] ?? []), message].slice(-MAX_CHAT_MESSAGES) } };
 		}
 		case "joint-workout":
 			return patchPlanned(state, action.workoutId, (w) => ({ ...w, partnerId: action.partnerId ?? undefined }));

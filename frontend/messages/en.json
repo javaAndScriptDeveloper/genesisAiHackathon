@@ -194,6 +194,47 @@
       "doneLimitation": "Done. I'll avoid those movements in upcoming sessions and swapped what I could.",
       "doneRebuild": "Done. Your upcoming weeks are rebuilt from your latest preferences and history."
     },
+    "community": {
+      "title": "Community",
+      "demoNote": "Demo: these are sample people and the replies are scripted. Real buddies need accounts and a server.",
+      "connectedTitle": "Connected",
+      "awaitingTitle": "Awaiting approval",
+      "findTitle": "Find gym buddies",
+      "connect": "Connect",
+      "cancelRequest": "Cancel request",
+      "awaiting": "Awaiting approval",
+      "connected": "Connected",
+      "requestSent": "Request sent to {name}",
+      "approved": "{name} approved your request",
+      "level": "Level {n}",
+      "lastWorkout": "Last workout: {title}, {when}",
+      "when": {
+        "today": "today",
+        "yesterday": "yesterday",
+        "daysAgo": "{n} days ago"
+      },
+      "resultsTab": "Results",
+      "chatTab": "Chat",
+      "notConnectedTitle": "Not connected yet",
+      "notConnectedBody": "You can see results and chat once this buddy approves your request.",
+      "backToList": "Back to Community",
+      "thisWeek": "This week",
+      "workoutsWeek": "{n} workouts",
+      "streak": "{n}-week streak",
+      "bestLift": "Best lift",
+      "prLine": "{exercise}: {weight}",
+      "lastWorkoutTitle": "Last workout",
+      "removeBuddy": "Remove buddy",
+      "removed": "{name} removed",
+      "chatEmpty": "Say hi to {name}",
+      "messagePlaceholder": "Write a message",
+      "send": "Send",
+      "sharePhoto": "Share a photo",
+      "photoFailed": "Couldn't use that file. Pick an image.",
+      "sharedPhoto": "Shared photo",
+      "typing": "{name} is typing…",
+      "photoRemoved": "Photo removed to save space"
+    },
     "health": {
       "title": "Live health",
       "bpm": "bpm",
@@ -916,10 +957,6 @@
         "nutrition": {
           "label": "Nutrition and water",
           "hint": "Daily targets and hydration."
-        },
-        "partners": {
-          "label": "Gym Bro",
-          "hint": "Find a workout partner."
         }
       }
     },
@@ -1055,17 +1092,6 @@
       "goal": "Daily goal"
     },
     "partners": {
-      "title": "Gym Bro",
-      "demoNote": "These are sample profiles. Real matching needs accounts and a server.",
-      "level": "Level {n}",
-      "status": {
-        "invited": "Invited",
-        "accepted": "Partner"
-      },
-      "invite": "Invite to train",
-      "invited": "Invite sent to {name}",
-      "accepted": "{name} accepted",
-      "remove": "Remove partner",
       "schedule": "Train together: {title}, {day}",
       "scheduled": "Joint workout with {name} on {day}",
       "unscheduled": "Joint workout cancelled",
@@ -1170,6 +1196,7 @@
       "training": "Training",
       "progress": "Progress",
       "coach": "Coach",
+      "community": "Community",
       "profile": "Profile"
     },
     "common": {

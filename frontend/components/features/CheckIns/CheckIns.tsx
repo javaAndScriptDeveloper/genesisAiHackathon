@@ -5,6 +5,7 @@ import { useRef, useState } from "react";
 import { PremiumGate, usePremium } from "@/components/features/PremiumGate/PremiumGate";
 import { Button, Card, EmptyState, Icon, Input, ProgressBar, Sheet, useToast } from "@/components/ui";
 import { formatDay } from "@/lib/fit/dates";
+import { resizeToDataUrl } from "@/lib/fit/image";
 import { validateBodyWeightInput } from "@/lib/fit/numberInput";
 import { useFit } from "@/lib/fit/store/FitProvider";
 import { useUnits } from "@/lib/fit/store/hooks";
@@ -12,27 +13,6 @@ import { useT } from "@/lib/i18n/I18nProvider";
 import styles from "./CheckIns.module.scss";
 
 const FREE_PHOTOS = 3;
-
-function resizeToDataUrl(file: File, max = 480): Promise<string> {
-	return new Promise((resolve, reject) => {
-		const url = URL.createObjectURL(file);
-		const img = new Image();
-		img.onload = () => {
-			const scale = Math.min(1, max / Math.max(img.width, img.height));
-			const canvas = document.createElement("canvas");
-			canvas.width = Math.round(img.width * scale);
-			canvas.height = Math.round(img.height * scale);
-			canvas.getContext("2d")?.drawImage(img, 0, 0, canvas.width, canvas.height);
-			URL.revokeObjectURL(url);
-			resolve(canvas.toDataURL("image/jpeg", 0.72));
-		};
-		img.onerror = () => {
-			URL.revokeObjectURL(url);
-			reject(new Error("image"));
-		};
-		img.src = url;
-	});
-}
 
 function formatStamp(iso: string | undefined, fallbackDay: string): string {
 	if (!iso) return formatDay(fallbackDay);

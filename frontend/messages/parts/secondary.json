@@ -66,10 +66,6 @@
         "nutrition": {
           "label": "Nutrition and water",
           "hint": "Daily targets and hydration."
-        },
-        "partners": {
-          "label": "Gym Bro",
-          "hint": "Find a workout partner."
         }
       }
     },
@@ -205,17 +201,6 @@
       "goal": "Daily goal"
     },
     "partners": {
-      "title": "Gym Bro",
-      "demoNote": "These are sample profiles. Real matching needs accounts and a server.",
-      "level": "Level {n}",
-      "status": {
-        "invited": "Invited",
-        "accepted": "Partner"
-      },
-      "invite": "Invite to train",
-      "invited": "Invite sent to {name}",
-      "accepted": "{name} accepted",
-      "remove": "Remove partner",
       "schedule": "Train together: {title}, {day}",
       "scheduled": "Joint workout with {name} on {day}",
       "unscheduled": "Joint workout cancelled",

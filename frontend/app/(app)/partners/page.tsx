@@ -1,5 +1,6 @@
-import { Partners } from "@/components/features/Partners/Partners";
+import { redirect } from "next/navigation";
 
+// The Gym Bro screen moved into the Community tab.
 export default function Page() {
-	return <Partners />;
+	redirect("/community");
 }
