@@ -617,7 +617,9 @@
       "history": "Weight history",
       "entryCount": "{n} entries",
       "historyEmpty": "No entries yet",
-      "historyEmptyBody": "Every weight you save appears here with the date and time."
+      "historyEmptyBody": "Every weight you save appears here with the date and time.",
+      "showAll": "Show all ({n})",
+      "showLess": "Show less"
     },
     "photoAi": {
       "button": "Analyze with AI",
