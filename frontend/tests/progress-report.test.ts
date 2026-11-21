@@ -80,4 +80,22 @@ describe("weeklyReportV2", () => {
 		const later = mk(["2026-10-26", MON, addDays(MON, 1), addDays(MON, 2), "2026-11-09", "2026-11-10", "2026-11-11", "2026-11-12"]);
 		expect(weeklyReportV2(later, ctx, MON)).toEqual(weeklyReportV2(base, ctx, MON));
 	});
+	it("paused middle week is skipped and an older week pulled in", () => {
+		const week = (ws: string, n: number) => Array.from({ length: n }, (_, i) => addDays(ws, i));
+		// weeks: 10-12:5, 10-19:5, 10-26:(paused, 0), 11-02(report):3 -> mean of 3,5,5 = 4.33 -> 4 (a paused 0 would give 3)
+		const h = mk([...week("2026-10-12", 5), ...week("2026-10-19", 5), ...week(MON, 3)]);
+		const c: ProgressContext = { ...ctx, pauses: [{ from: "2026-10-26", to: "2026-11-01" }] };
+		expect(weeklyReportV2(h, c, MON).recommendedGoal).toBe(4);
+	});
+	it("paused report week is not seeded", () => {
+		const week = (ws: string, n: number) => Array.from({ length: n }, (_, i) => addDays(ws, i));
+		const h = mk([...week("2026-10-19", 5), ...week("2026-10-26", 5), ...week(MON, 2)]);
+		const c: ProgressContext = { ...ctx, pauses: [{ from: MON, to: addDays(MON, 6) }] };
+		expect(weeklyReportV2(h, c, MON).recommendedGoal).toBe(5);
+	});
+	it("no non-paused weeks -> 2", () => {
+		const h = mk([MON, addDays(MON, 1)]);
+		const c: ProgressContext = { ...ctx, pauses: [{ from: MON, to: addDays(MON, 6) }] };
+		expect(weeklyReportV2(h, c, MON).recommendedGoal).toBe(2);
+	});
 });

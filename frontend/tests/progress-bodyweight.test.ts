@@ -6,18 +6,22 @@ describe("bmi", () => {
 		expect(bmi(70, 175)).toEqual({ value: 22.9, category: "normal" });
 	});
 	it("boundaries", () => {
-		expect(bmi(56.6, 175)?.category).toBe("under"); // 18.48
-		expect(bmi(56.7, 175)?.category).toBe("normal"); // 18.51
-		expect(bmi(76.5, 175)?.category).toBe("normal"); // 24.98
+		expect(bmi(56.5, 175)?.category).toBe("under"); // 18.45 -> 18.4
+		expect(bmi(56.6, 175)?.category).toBe("normal"); // 18.48 -> 18.5
+		expect(bmi(76.4, 175)?.category).toBe("normal"); // 24.95 -> 24.9
 		expect(bmi(76.6, 175)?.category).toBe("over"); // 25.01
 		expect(bmi(100, 200)?.category).toBe("over"); // 25
 		expect(bmi(120, 200)?.category).toBe("obese"); // 30
-		expect(bmi(119.9, 200)?.category).toBe("over");
+		expect(bmi(119.7, 200)?.category).toBe("over"); // 29.925 -> 29.9
 		expect(bmi(70, 175)?.category).toBe("normal");
 	});
-	it("uses unrounded value for category", () => {
-		// 24.96 rounds to 25.0 but is still normal
-		expect(bmi(76.44, 175)).toEqual({ value: 25, category: "normal" });
+	it("category follows the rounded (displayed) value", () => {
+		// 24.96 displays as 25.0, so it must be "over"
+		expect(bmi(76.44, 175)).toEqual({ value: 25, category: "over" });
+	});
+	it("exactly 18.5 is normal", () => {
+		expect(bmi(56.656, 175)).toEqual({ value: 18.5, category: "normal" }); // 18.498 -> 18.5
+		expect(bmi(18.5, 100)).toEqual({ value: 18.5, category: "normal" });
 	});
 	it("invalid input -> null", () => {
 		expect(bmi(0, 175)).toBeNull();

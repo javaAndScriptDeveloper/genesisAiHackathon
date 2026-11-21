@@ -39,6 +39,7 @@ export function bmi(kg: number, heightCm: number): { value: number; category: Bm
 	if (!(kg > 0) || !(heightCm > 0) || !Number.isFinite(kg) || !Number.isFinite(heightCm)) return null;
 	const m = heightCm / 100;
 	const raw = kg / (m * m);
-	const category: BmiCategory = raw < 18.5 ? "under" : raw < 25 ? "normal" : raw < 30 ? "over" : "obese";
-	return { value: r1(raw), category };
+	const value = r1(raw); // category from the displayed (rounded) value so they always agree
+	const category: BmiCategory = value < 18.5 ? "under" : value < 25 ? "normal" : value < 30 ? "over" : "obese";
+	return { value, category };
 }

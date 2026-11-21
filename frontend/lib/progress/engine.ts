@@ -1,6 +1,6 @@
 import { badges, type Badge } from "./badges";
 import { checkInSummary, type CheckInSummary } from "./checkins";
-import { consistencyV2, streakV2, weeklyGoal, type WeekGoalDay } from "./consistency";
+import { consistencyV2, effectiveGoal, streakV2, weeklyGoal, type WeekGoalDay } from "./consistency";
 import { addDays, weekStart } from "./dates";
 import { isQualitySession } from "./days";
 import { advice, improvements, type Advice, type Improvement } from "./improvements";
@@ -26,14 +26,13 @@ export interface ProgressSnapshot {
 export function progressSnapshot(h: History, ctx: ProgressContext): ProgressSnapshot {
 	const ws = weekStart(h.today);
 	const we = addDays(ws, 6);
-	const goal = Number.isFinite(ctx.weeklyGoal) ? ctx.weeklyGoal : 3;
 	const totalXp = xpLedger(h, ctx).reduce((a, e) => a + e.amount, 0);
 	return {
 		checkIns: checkInSummary(h),
 		consistency: consistencyV2(h, ctx),
 		streak: streakV2(h, ctx),
 		week: {
-			goal: Math.min(5, Math.max(2, goal)),
+			goal: effectiveGoal(ctx),
 			quality: h.sessions.filter((s) => s.date >= ws && s.date <= we && isQualitySession(s)).length,
 			days: weeklyGoal(h).days,
 		},

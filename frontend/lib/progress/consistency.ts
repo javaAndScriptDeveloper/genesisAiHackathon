@@ -183,8 +183,13 @@ export function consistencyV2(
 	return { score, weeks };
 }
 
+/** Weekly goal clamped to 2..5; a non-finite value falls back to 3. */
+export function effectiveGoal(ctx: ProgressContext): number {
+	return Math.min(5, Math.max(2, Number.isFinite(ctx.weeklyGoal) ? ctx.weeklyGoal : 3));
+}
+
 export function weekCredited(h: History, ctx: ProgressContext, ws: IsoDate): boolean {
-	const goal = Math.min(5, Math.max(2, ctx.weeklyGoal));
+	const goal = effectiveGoal(ctx);
 	const end = addDays(ws, 6);
 	return h.sessions.filter((s) => s.date >= ws && s.date <= end && isQualitySession(s)).length >= goal;
 }

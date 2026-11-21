@@ -52,6 +52,11 @@ describe("xpLedger", () => {
 		expect(xpLedger(h(8), ctx)).toEqual([{ date: "2026-11-16", source: "workout", amount: 80 }]);
 		expect(xpLedger(h(6), ctx)).toEqual([]);
 	});
+	it("workout XP never exceeds 100 (14 of 12 sets)", () => {
+		const h: History = { ...empty, sessions: [withSets("2026-11-16", 14, { setsPlanned: 12 })] };
+		expect(xpLedger(h, ctx)).toEqual([{ date: "2026-11-16", source: "workout", amount: 100 }]);
+		expect(xpForSession(h, ctx, "s-2026-11-16").workout).toBe(100);
+	});
 	it("one rewarded workout per day, tie -> earliest id", () => {
 		const h: History = { ...empty, sessions: [withSets("2026-11-16", 8, { id: "b" }), withSets("2026-11-16", 10, { id: "a" }), withSets("2026-11-16", 10, { id: "c" })] };
 		expect(xpLedger(h, ctx)).toEqual([{ date: "2026-11-16", source: "workout", amount: 100 }]);

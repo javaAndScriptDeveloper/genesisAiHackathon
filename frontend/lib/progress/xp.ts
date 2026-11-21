@@ -22,7 +22,7 @@ const PR_CAP = 3;
 const WEEK_XP = 50;
 const REST_XP = 5;
 
-const ratio = (s: WorkoutSession): number => s.sets.length / s.setsPlanned;
+const ratio = (s: WorkoutSession): number => Math.min(1, s.sets.length / s.setsPlanned);
 const workoutXp = (s: WorkoutSession): number => (isQualitySession(s) ? Math.round(100 * ratio(s)) : 0);
 
 function prCounts(h: History): Map<string, number> {

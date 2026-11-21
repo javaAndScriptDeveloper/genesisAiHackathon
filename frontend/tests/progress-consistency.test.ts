@@ -257,3 +257,12 @@ describe("v2 edge cases", () => {
 		expect(isPausedWeek(ctx({ pauses: [{ from: addDays(wk(1), 3), to: wk(1) }] }), wk(1))).toBe(false);
 	});
 });
+
+describe("non-finite weekly goal", () => {
+	it("weekCredited falls back to 3", () => {
+		const dates = ["2026-11-16", "2026-11-17", "2026-11-18"];
+		const h: History = { today: "2026-11-21", exercises: [], plan: [], sessions: dates.map((d) => session(d)), body: [], checkIns: [], device: null };
+		expect(weekCredited(h, { weeklyGoal: NaN, pauses: [] }, "2026-11-16")).toBe(true);
+		expect(weekCredited({ ...h, sessions: h.sessions.slice(0, 2) }, { weeklyGoal: NaN, pauses: [] }, "2026-11-16")).toBe(false);
+	});
+});

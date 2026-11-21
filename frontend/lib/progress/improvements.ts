@@ -1,8 +1,8 @@
-import { consistencyV2, isPausedWeek, streakV2 } from "./consistency";
+import { consistencyV2, effectiveGoal, isPausedWeek, streakV2 } from "./consistency";
 import { addDays, daysBetween, weekStart } from "./dates";
-import { isQualitySession } from "./days";
-import { estimate1RM, exerciseSeries, mainMetric, type RecordMetric } from "./records";
-import type { Exercise, History, ProgressContext } from "./types";
+import { isQualitySession, truncateHistory } from "./days";
+import { exerciseMetric, exerciseSeries, type RecordMetric } from "./records";
+import type { History, ProgressContext } from "./types";
 
 export type Improvement =
 	| { kind: "record"; exerciseId: string; metric: RecordMetric; now: number; before: number; delta: number }
@@ -19,14 +19,6 @@ const LOOKBACK = 28;
 const RECENT = 14;
 const MAX_IMPROVEMENTS = 2;
 
-function metricOf(h: History, ex: Exercise): RecordMetric {
-	if (ex.kind !== "weighted") return mainMetric(ex.kind);
-	const anyE1rm = h.sessions.some(
-		(s) => s.status === "completed" && s.sets.some((x) => x.exerciseId === ex.id && x.weightKg !== null && estimate1RM(x.weightKg, x.reps) !== null),
-	);
-	return anyE1rm ? "e1rm" : "weight";
-}
-
 const relative = (i: Improvement): number => i.delta / Math.max(i.before, 1);
 
 /** What improved versus 28 days ago: at most 2, positive deltas only, biggest relative gain first. */
@@ -38,10 +30,10 @@ export function improvements(h: History, ctx: ProgressContext): Improvement[] {
 		const now = series[series.length - 1];
 		const before = [...series].reverse().find((p) => p.date <= cutoff);
 		if (now && before && now.value > before.value) {
-			out.push({ kind: "record", exerciseId: ex.id, metric: metricOf(h, ex), now: now.value, before: before.value, delta: Math.round((now.value - before.value) * 10) / 10 });
+			out.push({ kind: "record", exerciseId: ex.id, metric: exerciseMetric(h, ex), now: now.value, before: before.value, delta: Math.round((now.value - before.value) * 10) / 10 });
 		}
 	}
-	const past: History = { ...h, today: cutoff };
+	const past = truncateHistory(h, cutoff);
 	const cNow = consistencyV2(h, ctx).score;
 	const cBefore = consistencyV2(past, ctx).score;
 	if (cNow !== null && cBefore !== null && cNow > cBefore) out.push({ kind: "consistency", now: cNow, before: cBefore, delta: cNow - cBefore });
@@ -58,7 +50,7 @@ export function advice(h: History, ctx: ProgressContext): Advice | null {
 
 	const ws = weekStart(h.today);
 	if (!isPausedWeek(ctx, ws)) {
-		const goal = Math.min(5, Math.max(2, ctx.weeklyGoal));
+		const goal = effectiveGoal(ctx);
 		const end = addDays(ws, 6);
 		const quality = h.sessions.filter((s) => s.date >= ws && s.date <= end && isQualitySession(s)).length;
 		const remaining = goal - quality;
@@ -68,6 +60,7 @@ export function advice(h: History, ctx: ProgressContext): Advice | null {
 
 	const windowStart = addDays(h.today, -(RECENT - 1));
 	let plateau: Advice | null = null;
+	let near: { gap: number; advice: Advice } | null = null;
 	for (const ex of h.exercises) {
 		const series = exerciseSeries(h, ex.id).filter((p) => p.date <= h.today);
 		if (series.length === 0) continue;
@@ -77,11 +70,12 @@ export function advice(h: History, ctx: ProgressContext): Advice | null {
 		const record = Math.max(...series.map((p) => p.value));
 		const recentBest = Math.max(...recent.map((p) => p.value));
 		if (recentBest < record && recentBest >= record * 0.95) {
-			return { id: "near-record", vars: { exerciseId: ex.id, exercise: ex.name, target: record } };
+			const gap = (record - recentBest) / record;
+			if (!near || gap < near.gap) near = { gap, advice: { id: "near-record", vars: { exerciseId: ex.id, exercise: ex.name, target: record } } };
 		}
 		if (!plateau && recent.length >= 4 && earlier.length > 0 && recentBest <= Math.max(...earlier.map((p) => p.value))) {
 			plateau = { id: "plateau", vars: { exerciseId: ex.id, exercise: ex.name } };
 		}
 	}
-	return plateau;
+	return near?.advice ?? plateau;
 }

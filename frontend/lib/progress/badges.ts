@@ -1,6 +1,6 @@
 import { addDays, weekStart } from "./dates";
 import { isQualitySession } from "./days";
-import { isPausedWeek, streakV2, weekCredited } from "./consistency";
+import { effectiveGoal, isPausedWeek, streakV2 } from "./consistency";
 import { personalRecords } from "./records";
 import type { History, IsoDate, ProgressContext } from "./types";
 
@@ -64,7 +64,7 @@ function streakDates(h: History, ctx: ProgressContext, maxN: number): Map<number
 	const out = new Map<number, IsoDate>();
 	const e = earliest(h);
 	if (e === null) return out;
-	const goal = Math.min(5, Math.max(2, ctx.weeklyGoal));
+	const goal = effectiveGoal(ctx);
 	let reached = 0;
 	for (let ws = weekStart(e); ws <= weekStart(h.today); ws = addDays(ws, 7)) {
 		const best = streakV2({ ...h, today: addDays(ws, 6) }, ctx).best;

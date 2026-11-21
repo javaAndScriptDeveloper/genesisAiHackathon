@@ -15,7 +15,7 @@ export function detectEvents(before: ProgressSnapshot, after: ProgressSnapshot, 
 	const had = new Set(before.badges.filter((b) => b.unlocked).map((b) => b.id));
 	for (const b of after.badges) if (b.unlocked && !had.has(b.id)) out.push(ev("badge", b.id, now));
 	if (after.level.level > before.level.level) out.push(ev("level", String(after.level.level), now));
-	const key = (r: ProgressSnapshot["records"][number]) => `${r.exerciseId}:${r.metric}:${r.date}`;
+	const key = (r: ProgressSnapshot["records"][number]) => `${r.exerciseId}:${r.metric}:${r.date}:${r.value}`;
 	const known = new Set(before.records.map(key));
 	for (const r of after.records) if (!known.has(key(r))) out.push(ev("pr", key(r), now));
 	return out;
