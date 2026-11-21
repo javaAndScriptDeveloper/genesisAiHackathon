@@ -1,3 +1,4 @@
+import type { ProgressSnapshot } from "./engine";
 export type IsoDate = string; // YYYY-MM-DD
 export type ExerciseKind = "weighted" | "bodyweight" | "timed";
 export interface Exercise {
@@ -76,6 +77,6 @@ export interface ArchiveItem {
 	weekStart: IsoDate | null;
 	takenAt: string;
 	engineVersion: string;
-	payload: unknown; // Task 7 tightens this
+	payload: ProgressSnapshot;
 	payloadHash: string;
 }

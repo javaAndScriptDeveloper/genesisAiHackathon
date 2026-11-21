@@ -11,3 +11,6 @@ export * from "./insights";
 export * from "./bodyWeight";
 export * from "./improvements";
 export * from "./checkins";
+export * from "./engine";
+export * from "./events";
+export * from "./premium";
