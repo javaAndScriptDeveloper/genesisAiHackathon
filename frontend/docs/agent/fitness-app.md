@@ -20,3 +20,6 @@ Everything is frontend state + localStorage today. Needs a backend (Next.js rout
 
 ## Videos
 `lib/fit/videos.ts` maps exercise id → video id from the Leap Fitness channel (embedded with youtube-nocookie, loaded on tap, never downloaded). Unmapped exercises show a channel-search link. Override at deploy time with `NEXT_PUBLIC_EXERCISE_VIDEO_MAP='{"goblet-squat":"<11-char id>"}'`.
+
+## Page transitions
+`app/(app)/template.tsx` wraps each page in React `<ViewTransition>`. Direction comes from `transitionTypes` (`nav-forward` / `nav-back`) on `Link` and `router.push`: bottom-nav tabs pick it from tab order, drill-down links use forward, header back uses back; everything else gets a soft fade. Styles live in `styles/partials/_transitions.scss` (only page content is animated, reduced motion disables it).

@@ -2,6 +2,7 @@
 
 import { CrownIcon, Tick02Icon } from "@hugeicons/core-free-icons";
 import { useEffect } from "react";
+import { Notice } from "@/components/features/Notice/Notice";
 import { ScreenHeader } from "@/components/features/ScreenHeader/ScreenHeader";
 import { Badge, Button, Card, Icon, useToast } from "@/components/ui";
 import { track } from "@/lib/fit/analytics";
@@ -27,7 +28,7 @@ export function Subscription({ source }: { source: string }) {
 		<div className={kit.page}>
 			<ScreenHeader title={t("fit.subscription.title")} back />
 			<div className={kit.content}>
-				<p className={kit.warn}>{t("fit.subscription.demoNotice")}</p>
+				<Notice>{t("fit.subscription.demoNotice")}</Notice>
 
 				{premium && (
 					<Card className={styles.active}>

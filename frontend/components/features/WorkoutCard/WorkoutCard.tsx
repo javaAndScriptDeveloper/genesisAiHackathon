@@ -15,7 +15,7 @@ export function WorkoutCard({ workout, showDate = true }: { workout: PlannedWork
 	const t = useT();
 	const names = workout.exercises.slice(0, 3).map((b) => getExercise(b.exerciseId).name);
 	return (
-		<Link href={`/training/session/${workout.id}`} className={styles.card}>
+		<Link href={`/training/session/${workout.id}`} transitionTypes={["nav-forward"]} className={styles.card}>
 			<span className={styles.icon}>
 				<Icon icon={Dumbbell03Icon} size={22} />
 			</span>

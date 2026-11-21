@@ -1,6 +1,6 @@
 "use client";
 
-import { Add01Icon, Alert02Icon, FireIcon, Notification03Icon, PlayIcon, UserCircleIcon } from "@hugeicons/core-free-icons";
+import { Add01Icon, Alert02Icon, DropletIcon, FireIcon, Medal01Icon, Target01Icon, Notification03Icon, PlayIcon, UserCircleIcon } from "@hugeicons/core-free-icons";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ScreenHeader } from "@/components/features/ScreenHeader/ScreenHeader";
@@ -142,12 +142,12 @@ export function Today() {
 
 				<div className={styles.stats}>
 					<Stat label={t("fit.today.streak")} value={stats.streak.current} hint={t("fit.today.streakHint")} icon={<Icon icon={FireIcon} size={14} />} />
-					<Stat label={t("fit.today.level")} value={stats.level.level} hint={`${stats.level.into}/${stats.level.span} XP`} />
+					<Stat label={t("fit.today.level")} value={stats.level.level} hint={`${stats.level.into}/${stats.level.span} XP`} icon={<Icon icon={Medal01Icon} size={14} />} />
 				</div>
 				<ProgressBar value={stats.level.pct} label={t("fit.today.xpProgress")} />
 
 				<Card className={styles.challenge}>
-					<p className={styles.eyebrow}>{t("fit.today.challenge")}</p>
+					<p className={styles.eyebrow}><Icon icon={Target01Icon} size={14} /> {t("fit.today.challenge")}</p>
 					<h3>{stats.challenge.title}</h3>
 					<p>{stats.challenge.description}</p>
 					<ProgressBar value={(stats.challenge.progress / stats.challenge.target) * 100} label={stats.challenge.title} tone={stats.challenge.complete ? "success" : "accent"} />
@@ -158,7 +158,8 @@ export function Today() {
 				</Card>
 
 				<Card className={styles.water}>
-					<div>
+					<div className={styles.waterText}>
+						<Icon icon={DropletIcon} size={22} />
 						<h3>{t("fit.today.water")}</h3>
 						<p>{water} / {state.waterGoalMl} ml</p>
 					</div>

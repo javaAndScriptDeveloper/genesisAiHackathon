@@ -1,9 +1,10 @@
 "use client";
 
-import { Add01Icon, MinusSignIcon } from "@hugeicons/core-free-icons";
+import { Add01Icon, DropletIcon, FireIcon, MinusSignIcon } from "@hugeicons/core-free-icons";
+import { Notice } from "@/components/features/Notice/Notice";
 import { ScreenHeader } from "@/components/features/ScreenHeader/ScreenHeader";
 import { Stat } from "@/components/features/Stat/Stat";
-import { Button, Card, Checkbox, ProgressRing, Stepper } from "@/components/ui";
+import { Button, Card, Checkbox, Icon, ProgressRing, Stepper } from "@/components/ui";
 import { useFit } from "@/lib/fit/store/FitProvider";
 import type { MealSlot, Profile } from "@/lib/fit/types";
 import { useT } from "@/lib/i18n/I18nProvider";
@@ -35,9 +36,9 @@ export function Nutrition() {
 		<div className={kit.page}>
 			<ScreenHeader title={t("fit.nutrition.title")} back />
 			<div className={kit.content}>
-				<p className={kit.warn}>{t("fit.nutrition.disclaimer")}</p>
+				<Notice>{t("fit.nutrition.disclaimer")}</Notice>
 				<div className={kit.cols}>
-					<Stat label={t("fit.nutrition.calories")} value={target.kcal} hint="kcal" />
+					<Stat label={t("fit.nutrition.calories")} value={target.kcal.toLocaleString("en-US")} hint="kcal" icon={<Icon icon={FireIcon} size={14} />} />
 					<Stat label={t("fit.nutrition.protein")} value={target.protein} hint="g" />
 					<Stat label={t("fit.nutrition.carbs")} value={target.carbs} hint="g" />
 					<Stat label={t("fit.nutrition.fat")} value={target.fat} hint="g" />
@@ -55,7 +56,7 @@ export function Nutrition() {
 				</Card>
 
 				<Card className={kit.stack}>
-					<h2 className={kit.h2}>{t("fit.nutrition.waterTitle")}</h2>
+					<h2 className={`${kit.h2} ${kit.heading}`}><Icon icon={DropletIcon} size={20} />{t("fit.nutrition.waterTitle")}</h2>
 					<div style={{ display: "flex", alignItems: "center", gap: "2rem" }}>
 						<ProgressRing value={(water / state.waterGoalMl) * 100} label={t("fit.nutrition.waterTitle")} size={104}>
 							<strong>{(water / 1000).toFixed(1)} L</strong>

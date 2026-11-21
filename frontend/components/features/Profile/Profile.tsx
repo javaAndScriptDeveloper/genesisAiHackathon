@@ -39,21 +39,33 @@ export function Profile() {
 						</div>
 						<Badge tone={state.subscription.tier === "premium" ? "accent" : "neutral"}>{state.subscription.tier === "premium" ? t("fit.common.premium") : t("fit.profile.free")}</Badge>
 					</div>
-					<p className={kit.note}>
-						<Icon icon={Dumbbell03Icon} size={14} /> {t(`fit.opt.goal.${p.goal}.label`)} · {t(`fit.opt.experience.${p.experience}.label`)} · {p.daysPerWeek} {t("fit.profile.perWeek")} · {p.durationMin} {t("fit.common.minShort")}
-					</p>
+					<div className={kit.chips}>
+						<Badge tone="accent">
+							<Icon icon={Dumbbell03Icon} size={12} />
+							{t(`fit.opt.goal.${p.goal}.label`)}
+						</Badge>
+						<Badge>{t(`fit.opt.experience.${p.experience}.label`)}</Badge>
+						<Badge>
+							{p.daysPerWeek} {t("fit.profile.perWeek")}
+						</Badge>
+						<Badge>
+							{p.durationMin} {t("fit.common.minShort")}
+						</Badge>
+					</div>
 					<p className={kit.note}>{p.heightCm} cm · {p.weightKg} kg · BMI {bmi(p)}</p>
 				</Card>
 				<ul className={kit.list}>
 					{LINKS.map((l) => (
 						<li key={l.href}>
-							<Link href={l.href} className={kit.row}>
-								<Icon icon={l.icon} size={22} />
+							<Link href={l.href} transitionTypes={["nav-forward"]} className={kit.row}>
+								<span className={kit.plate}>
+									<Icon icon={l.icon} size={20} />
+								</span>
 								<span className={kit.rowText}>
 									<strong>{t(`fit.profile.links.${l.key}.label`)}</strong>
 									<span>{t(`fit.profile.links.${l.key}.hint`)}</span>
 								</span>
-								<Icon icon={ArrowRight01Icon} size={18} />
+								<Icon icon={ArrowRight01Icon} size={16} />
 							</Link>
 						</li>
 					))}

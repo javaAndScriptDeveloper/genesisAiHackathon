@@ -3,6 +3,8 @@
 import clsx from "clsx";
 import { Cancel01Icon } from "@hugeicons/core-free-icons";
 import { useEffect, useId, useRef, type ReactNode } from "react";
+import { createPortal } from "react-dom";
+import { useOverlayRoot } from "./OverlayRoot";
 import { IconButton } from "../IconButton/IconButton";
 import styles from "./Sheet.module.scss";
 
@@ -24,6 +26,7 @@ interface SheetProps {
 export function Sheet({ open, onClose, title, closeLabel = "Close", children, footer, variant = "bottom", modal = false }: SheetProps) {
 	const ref = useRef<HTMLDivElement>(null);
 	const titleId = useId();
+	const overlayRoot = useOverlayRoot();
 
 	useEffect(() => {
 		if (!open) return;
@@ -58,7 +61,7 @@ export function Sheet({ open, onClose, title, closeLabel = "Close", children, fo
 	}, [open, onClose, modal]);
 
 	if (!open) return null;
-	return (
+	const node = (
 		<div className={clsx(styles.root, styles[variant])}>
 			<div className={styles.backdrop} onClick={modal ? undefined : onClose} aria-hidden />
 			<div ref={ref} role="dialog" aria-modal="true" aria-labelledby={titleId} tabIndex={-1} className={styles.panel}>
@@ -73,4 +76,5 @@ export function Sheet({ open, onClose, title, closeLabel = "Close", children, fo
 			</div>
 		</div>
 	);
+	return overlayRoot ? createPortal(node, overlayRoot) : node;
 }

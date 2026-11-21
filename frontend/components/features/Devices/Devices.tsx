@@ -1,10 +1,12 @@
 "use client";
 
+import { AppleIcon, SmartWatch01Icon } from "@hugeicons/core-free-icons";
 import { useState } from "react";
 import { ScreenHeader } from "@/components/features/ScreenHeader/ScreenHeader";
 import { WorkoutHealthPanel } from "@/components/features/WorkoutHealthPanel/WorkoutHealthPanel";
 import { useWorkoutHealth } from "@/components/features/WorkoutHealthPanel/useWorkoutHealth";
-import { Badge, Button, Card, EmptyState, Input, useToast } from "@/components/ui";
+import { Badge, Button, Card, EmptyState, Icon, Input, useToast } from "@/components/ui";
+import { Notice } from "@/components/features/Notice/Notice";
 import { formatDay } from "@/lib/fit/dates";
 import { PROVIDERS } from "@/lib/fit/health";
 import { useFit } from "@/lib/fit/store/FitProvider";
@@ -29,20 +31,27 @@ export function Devices() {
 		<div className={kit.page}>
 			<ScreenHeader title={t("fit.devices.title")} back />
 			<div className={kit.content}>
-				<p className={kit.warn}>{t("fit.devices.honest")}</p>
+				<Notice>{t("fit.devices.honest")}</Notice>
 				<ul className={kit.list}>
 					{PROVIDERS.map((p) => {
 						const linked = state.devices[p.id];
 						return (
-							<li key={p.id} className={kit.row}>
-								<span className={kit.rowText}>
-									<strong>{p.name}</strong>
-									<span>{p.description}</span>
-									<span>{linked ? t("fit.devices.linkedDemo") : t("fit.devices.notLinked")}</span>
-								</span>
-								<Button size="sm" variant={linked ? "secondary" : "primary"} onClick={() => { dispatch({ type: "device", id: p.id, connected: !linked }); toast.show(linked ? t("fit.devices.disconnected", { name: p.name }) : t("fit.devices.connected", { name: p.name }), linked ? "info" : "success"); }}>
-									{linked ? t("fit.devices.disconnect") : t("fit.devices.connect")}
-								</Button>
+							<li key={p.id} className={`${kit.row} ${kit.rowStack}`}>
+								<div className={kit.rowHead}>
+									<span className={kit.plate}>
+										<Icon icon={p.id === "apple" ? AppleIcon : SmartWatch01Icon} size={20} />
+									</span>
+									<span className={kit.rowText}>
+										<strong>{p.name}</strong>
+										<span>{p.description}</span>
+									</span>
+								</div>
+								<div className={kit.rowHead}>
+									<Badge tone={linked ? "warning" : "neutral"}>{linked ? t("fit.devices.linkedDemo") : t("fit.devices.notLinked")}</Badge>
+									<Button size="sm" variant={linked ? "secondary" : "primary"} className={kit.pushRight} onClick={() => { dispatch({ type: "device", id: p.id, connected: !linked }); toast.show(linked ? t("fit.devices.disconnected", { name: p.name }) : t("fit.devices.connected", { name: p.name }), linked ? "info" : "success"); }}>
+										{linked ? t("fit.devices.disconnect") : t("fit.devices.connect")}
+									</Button>
+								</div>
 							</li>
 						);
 					})}
@@ -51,7 +60,7 @@ export function Devices() {
 				{anyLinked ? (
 					<WorkoutHealthPanel sample={health.sample} zone={health.zone} alert={health.alert} elapsedSec={0} resting recoveryDrop={health.recoveryDrop} linkedTo={state.devices.apple ? "Apple Health" : "Garmin"} />
 				) : (
-					<EmptyState title={t("fit.devices.noneTitle")} description={t("fit.devices.noneBody")} />
+					<EmptyState icon={SmartWatch01Icon} title={t("fit.devices.noneTitle")} description={t("fit.devices.noneBody")} />
 				)}
 
 				<Card className={kit.stack}>

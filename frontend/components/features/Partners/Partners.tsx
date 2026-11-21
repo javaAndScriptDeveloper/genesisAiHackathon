@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { Notice } from "@/components/features/Notice/Notice";
 import { ScreenHeader } from "@/components/features/ScreenHeader/ScreenHeader";
 import { Avatar, Badge, Button, Card, useToast } from "@/components/ui";
 import { PremiumGate } from "@/components/features/PremiumGate/PremiumGate";
@@ -38,7 +39,7 @@ export function Partners() {
 		<div className={kit.page}>
 			<ScreenHeader title={t("fit.partners.title")} back />
 			<div className={kit.content}>
-				<p className={kit.warn}>{t("fit.partners.demoNote")}</p>
+				<Notice>{t("fit.partners.demoNote")}</Notice>
 				<ul className={kit.list}>
 					{PARTNERS.map((p) => {
 						const status = state.partners[p.id];

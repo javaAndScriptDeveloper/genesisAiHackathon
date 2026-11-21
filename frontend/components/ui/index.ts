@@ -21,6 +21,7 @@ export { Table, type Column } from "./Table/Table";
 export { Tabs, type TabItem } from "./Tabs/Tabs";
 export { Textarea } from "./Textarea/Textarea";
 export { ToastProvider, useToast } from "./Toast/Toast";
+export { TimePicker } from "./TimePicker/TimePicker";
 export { Tooltip } from "./Tooltip/Tooltip";
 export { ProgressBar } from "./ProgressBar/ProgressBar";
 export { ProgressRing } from "./ProgressRing/ProgressRing";

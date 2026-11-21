@@ -2,6 +2,7 @@
 
 import clsx from "clsx";
 import { useId, useRef, useState, type KeyboardEvent, type ReactNode } from "react";
+import { useSlidingIndicator } from "@/lib/hooks/useSlidingIndicator";
 import styles from "./Tabs.module.scss";
 
 export interface TabItem {
@@ -20,6 +21,7 @@ export function Tabs({ tabs, defaultId }: TabsProps) {
 	const base = useId();
 	const [current, setCurrent] = useState(defaultId ?? tabs[0]?.id);
 	const refs = useRef<Record<string, HTMLButtonElement | null>>({});
+	const { container, indicator, register } = useSlidingIndicator(current ?? "");
 
 	const onKeyDown = (event: KeyboardEvent, index: number) => {
 		const last = tabs.length - 1;
@@ -39,12 +41,14 @@ export function Tabs({ tabs, defaultId }: TabsProps) {
 
 	return (
 		<div>
-			<div role="tablist" className={styles.list}>
+			<div role="tablist" className={styles.list} ref={container}>
+				<span ref={indicator} className={styles.indicator} aria-hidden />
 				{tabs.map((tab, index) => (
 					<button
 						key={tab.id}
 						ref={(node) => {
 							refs.current[tab.id] = node;
+							register(tab.id)(node);
 						}}
 						type="button"
 						role="tab"

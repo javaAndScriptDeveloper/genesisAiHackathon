@@ -1,10 +1,11 @@
 "use client";
 
-import { Camera01Icon, FireIcon } from "@hugeicons/core-free-icons";
+import { ArrowDown01Icon, Calendar03Icon, Camera01Icon, Clock01Icon, Dumbbell01Icon, FireIcon } from "@hugeicons/core-free-icons";
 import { useRef, useState } from "react";
 import { AchievementBadge } from "@/components/features/AchievementBadge/AchievementBadge";
 import { BarChart, LineChart } from "@/components/features/Charts/Charts";
 import { PremiumGate, usePremium } from "@/components/features/PremiumGate/PremiumGate";
+import { Notice } from "@/components/features/Notice/Notice";
 import { ScreenHeader } from "@/components/features/ScreenHeader/ScreenHeader";
 import { Stat } from "@/components/features/Stat/Stat";
 import { Badge, Button, Card, EmptyState, Icon, Input, ProgressBar, ProgressRing, SegmentedControl, Sheet, useToast } from "@/components/ui";
@@ -114,12 +115,12 @@ function Overview() {
 
 	return (
 		<>
-			{state.hasDemoHistory && <p className={styles.demoNote}>{t("fit.progress.demoNote")}</p>}
+			{state.hasDemoHistory && <Notice tone="info">{t("fit.progress.demoNote")}</Notice>}
 			<SegmentedControl label={t("fit.progress.period")} value={period} onChange={setPeriod} options={[{ id: "week", label: t("fit.progress.thisWeek") }, { id: "month", label: t("fit.progress.last4") }]} />
 			<div className={styles.grid2}>
-				<Stat label={t("fit.progress.sessions")} value={`${view.done}/${view.planned}`} hint={t("fit.progress.completedVsPlanned")} />
-				<Stat label={t("fit.progress.time")} value={view.minutes} hint={t("fit.common.minShort")} />
-				<Stat label={t("fit.progress.volume")} value={view.volume.toLocaleString("en-US")} hint="kg" />
+				<Stat label={t("fit.progress.sessions")} value={`${view.done}/${view.planned}`} hint={t("fit.progress.completedVsPlanned")} icon={<Icon icon={Calendar03Icon} size={14} />} />
+				<Stat label={t("fit.progress.time")} value={view.minutes} hint={t("fit.common.minShort")} icon={<Icon icon={Clock01Icon} size={14} />} />
+				<Stat label={t("fit.progress.volume")} value={view.volume.toLocaleString("en-US")} hint="kg" icon={<Icon icon={Dumbbell01Icon} size={14} />} />
 				<Stat label={t("fit.progress.streakLabel")} value={stats.streak.current} hint={t("fit.progress.longest", { n: stats.streak.longest })} icon={<Icon icon={FireIcon} size={14} />} />
 			</div>
 
@@ -208,6 +209,7 @@ function History() {
 								{l.demo && <Badge>{t("fit.common.demo")}</Badge>}
 								<Badge tone={l.status === "completed" ? "success" : "warning"}>{t(`fit.status.${l.status}`)}</Badge>
 							</span>
+							<Icon icon={ArrowDown01Icon} size={18} className={styles.chevron} />
 						</summary>
 						<ul className={styles.logBody}>
 							{l.exercises.map((e) => (

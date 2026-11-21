@@ -1,11 +1,12 @@
 "use client";
 
-import { PlayIcon } from "@hugeicons/core-free-icons";
+import { ArrowDown01Icon, ArrowUp01Icon, Calendar03Icon, Clock01Icon, Dumbbell03Icon, HeartCheckIcon, Moon01Icon, PlayIcon, Timer02Icon } from "@hugeicons/core-free-icons";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { ChoiceList } from "@/components/features/ChoiceList/ChoiceList";
 import { ScreenHeader } from "@/components/features/ScreenHeader/ScreenHeader";
-import { Badge, Button, Card, EmptyState, Sheet, useToast } from "@/components/ui";
+import { Badge, Button, Card, EmptyState, Sheet, useToast, type IconDefinition } from "@/components/ui";
 import { addDays, formatDay, mondayOf, WEEKDAYS, weekdayIndex } from "@/lib/fit/dates";
 import { alternativesFor, getExercise } from "@/lib/fit/exercises";
 import { describeBlock } from "@/lib/fit/format";
@@ -54,14 +55,15 @@ export function SessionDetail({ id }: { id: string }) {
 		setPanel(null);
 	};
 
-	const ADJUSTMENTS: { key: string; op: AdaptOp }[] = [
-		{ key: "easier", op: { kind: "easier" } },
-		{ key: "harder", op: { kind: "harder" } },
-		{ key: "more-rest", op: { kind: "more-rest" } },
-		{ key: "min20", op: { kind: "shorten", minutes: 20 } },
-		{ key: "min30", op: { kind: "shorten", minutes: 30 } },
-		{ key: "tired", op: { kind: "tired" } },
+	const ADJUSTMENTS: { key: string; op: AdaptOp; icon: IconDefinition }[] = [
+		{ key: "easier", op: { kind: "easier" }, icon: ArrowDown01Icon },
+		{ key: "harder", op: { kind: "harder" }, icon: ArrowUp01Icon },
+		{ key: "more-rest", op: { kind: "more-rest" }, icon: Clock01Icon },
+		{ key: "min20", op: { kind: "shorten", minutes: 20 }, icon: Timer02Icon },
+		{ key: "min30", op: { kind: "shorten", minutes: 30 }, icon: Timer02Icon },
+		{ key: "tired", op: { kind: "tired" }, icon: Moon01Icon },
 	];
+	const REASON_ICONS: Record<SkipReason, IconDefinition> = { recovery: Moon01Icon, unwell: HeartCheckIcon, busy: Calendar03Icon };
 
 	const monday = mondayOf(workout.date);
 	const dayChoices = Array.from({ length: 14 }, (_, i) => addDays(monday, i)).filter((d) => d >= today);
@@ -128,64 +130,45 @@ export function SessionDetail({ id }: { id: string }) {
 
 			<Sheet open={panel === "adjust"} onClose={() => setPanel(null)} title={t("fit.session.adjustTitle")} closeLabel={t("common.close")}>
 				<p className={styles.sheetLead}>{t("fit.session.adjustLead")}</p>
-				<ul className={styles.choices}>
-					{ADJUSTMENTS.map((a) => (
-						<li key={a.key}>
-							<button type="button" className={styles.choice} onClick={() => adapt(a.op)}>
-								<strong>{t(`fit.adapt.${a.key}.label`)}</strong>
-								<span>{t(`fit.adapt.${a.key}.hint`)}</span>
-							</button>
-						</li>
-					))}
-				</ul>
+				<ChoiceList items={ADJUSTMENTS.map((a) => ({ key: a.key, icon: a.icon, title: t(`fit.adapt.${a.key}.label`), hint: t(`fit.adapt.${a.key}.hint`), onClick: () => adapt(a.op) }))} />
 			</Sheet>
 
 			<Sheet open={panel === "move"} onClose={() => setPanel(null)} title={t("fit.session.moveTitle")} closeLabel={t("common.close")}>
 				<p className={styles.sheetLead}>{t("fit.session.moveLead")}</p>
-				<ul className={styles.choices}>
-					{dayChoices.map((d) => {
+				<ChoiceList
+					items={dayChoices.map((d) => {
 						const clash = state.planned.find((w) => w.date === d && w.id !== workout.id && !w.adHoc);
-						return (
-							<li key={d}>
-								<button
-									type="button"
-									className={styles.choice}
-									disabled={!!clash || d === workout.date}
-									onClick={() => {
-										dispatch({ type: "move-planned", id: workout.id, date: d });
-										toast.show(t("fit.session.moved", { day: formatDay(d) }), "success");
-										setPanel(null);
-									}}
-								>
-									<strong>{WEEKDAYS[weekdayIndex(d)]}, {formatDay(d)}</strong>
-									<span>{d === workout.date ? t("fit.session.currentDay") : clash ? t("fit.session.dayTaken", { title: clash.title }) : t("fit.session.dayFree")}</span>
-								</button>
-							</li>
-						);
+						return {
+							key: d,
+							icon: Calendar03Icon,
+							title: `${WEEKDAYS[weekdayIndex(d)]}, ${formatDay(d)}`,
+							hint: d === workout.date ? t("fit.session.currentDay") : clash ? t("fit.session.dayTaken", { title: clash.title }) : t("fit.session.dayFree"),
+							disabled: !!clash || d === workout.date,
+							onClick: () => {
+								dispatch({ type: "move-planned", id: workout.id, date: d });
+								toast.show(t("fit.session.moved", { day: formatDay(d) }), "success");
+								setPanel(null);
+							},
+						};
 					})}
-				</ul>
+				/>
 			</Sheet>
 
 			<Sheet open={panel === "skip"} onClose={() => setPanel(null)} title={t("fit.session.skipTitle")} closeLabel={t("common.close")}>
 				<p className={styles.sheetLead}>{t("fit.session.skipLead")}</p>
-				<ul className={styles.choices}>
-					{(["recovery", "unwell", "busy"] as SkipReason[]).map((reason) => (
-						<li key={reason}>
-							<button
-								type="button"
-								className={styles.choice}
-								onClick={() => {
-									dispatch({ type: "skip-planned", id: workout.id, reason });
-									toast.show(t(`fit.session.skipToast.${reason}`), "info");
-									setPanel(null);
-								}}
-							>
-								<strong>{t(`fit.session.reason.${reason}.label`)}</strong>
-								<span>{t(`fit.session.reason.${reason}.hint`)}</span>
-							</button>
-						</li>
-					))}
-				</ul>
+				<ChoiceList
+					items={(["recovery", "unwell", "busy"] as SkipReason[]).map((reason) => ({
+						key: reason,
+						icon: REASON_ICONS[reason],
+						title: t(`fit.session.reason.${reason}.label`),
+						hint: t(`fit.session.reason.${reason}.hint`),
+						onClick: () => {
+							dispatch({ type: "skip-planned", id: workout.id, reason });
+							toast.show(t(`fit.session.skipToast.${reason}`), "info");
+							setPanel(null);
+						},
+					}))}
+				/>
 			</Sheet>
 
 			<Sheet open={!!replacing} onClose={() => setPanel(null)} title={t("fit.session.replaceTitle")} closeLabel={t("common.close")}>
@@ -196,24 +179,19 @@ export function SessionDetail({ id }: { id: string }) {
 							const options = alternativesFor(replacing.exerciseId, profile, workout.exercises.map((b) => b.exerciseId));
 							if (options.length === 0) return <EmptyState title={t("fit.session.noAlternatives")} description={t("fit.session.noAlternativesBody")} />;
 							return (
-								<ul className={styles.choices}>
-									{options.map((o) => (
-										<li key={o.id}>
-											<button
-												type="button"
-												className={styles.choice}
-												onClick={() => {
-													dispatch({ type: "replace-planned-exercise", id: workout.id, blockId: replacing.id, exerciseId: o.id });
-													toast.show(t("fit.session.replaced", { name: o.name }), "success");
-													setPanel(null);
-												}}
-											>
-												<strong>{o.name}</strong>
-												<span>{t(`fit.level.${o.level}`)} · {o.equipment.length ? o.equipment.map((e) => t(`fit.opt.equipment.${e}`)).join(", ") : t("fit.exercise.noEquipment")}</span>
-											</button>
-										</li>
-									))}
-								</ul>
+								<ChoiceList
+									items={options.map((o) => ({
+										key: o.id,
+										icon: Dumbbell03Icon,
+										title: o.name,
+										hint: `${t(`fit.level.${o.level}`)} · ${o.equipment.length ? o.equipment.map((e) => t(`fit.opt.equipment.${e}`)).join(", ") : t("fit.exercise.noEquipment")}`,
+										onClick: () => {
+											dispatch({ type: "replace-planned-exercise", id: workout.id, blockId: replacing.id, exerciseId: o.id });
+											toast.show(t("fit.session.replaced", { name: o.name }), "success");
+											setPanel(null);
+										},
+									}))}
+								/>
 							);
 						})()}
 					</>

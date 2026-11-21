@@ -1,0 +1,161 @@
+@use "partials/corners";
+@use "partials/mixins";
+
+.field {
+	display: flex;
+	flex-direction: column;
+	gap: 0.6rem;
+}
+
+.label {
+	font-size: 1.4rem;
+	font-weight: 600;
+}
+
+// Looks like Input: same height, border and radius, focus = border change.
+.trigger {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	min-height: var(--hit-target);
+	padding: 0 1.4rem;
+	background: var(--color-surface);
+	border: 0.1rem solid var(--color-borderStrong);
+	color: var(--color-text);
+	font-size: 1.6rem;
+	transition: border-color var(--transition-fast);
+	@include corners.radius(var(--radius-control));
+
+	&:hover {
+		border-color: var(--color-textSubtle);
+	}
+
+	&:focus-visible {
+		outline: none;
+		border-color: var(--color-fieldFocus);
+	}
+
+	svg {
+		color: var(--color-textSubtle);
+	}
+}
+
+.value {
+	font-weight: 600;
+	font-variant-numeric: tabular-nums;
+}
+
+.hint {
+	color: var(--color-textSubtle);
+	font-size: 1.3rem;
+	line-height: 1.4;
+}
+
+.body {
+	display: flex;
+	flex-direction: column;
+	gap: var(--space-4);
+}
+
+.wheels {
+	position: relative;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: var(--space-2);
+	height: 22rem;
+	mask-image: linear-gradient(to bottom, transparent, #000 30%, #000 70%, transparent);
+}
+
+// Highlight behind the selected row. Concentric with the sheet's rounded body.
+.band {
+	position: absolute;
+	inset-inline: 0;
+	top: 50%;
+	height: 4.4rem;
+	background: var(--color-surfaceMuted);
+	transform: translateY(-50%);
+	pointer-events: none;
+	@include corners.radius(var(--radius-control));
+}
+
+.colon {
+	position: relative;
+	z-index: 1;
+	font-size: 2.6rem;
+	font-weight: 700;
+}
+
+.wheel {
+	position: relative;
+	z-index: 1;
+	width: 9.6rem;
+	height: 100%;
+	padding-block: 8.8rem;
+	overflow-y: auto;
+	overscroll-behavior: contain;
+	scroll-snap-type: y mandatory;
+	scrollbar-width: none;
+	outline: none;
+	@include corners.radius(var(--radius-control));
+
+	&::-webkit-scrollbar {
+		display: none;
+	}
+
+	&:focus-visible {
+		box-shadow: 0 0 0 0.2rem var(--color-focusRing);
+	}
+}
+
+.item {
+	display: grid;
+	place-items: center;
+	height: 4.4rem;
+	color: var(--color-placeholder);
+	font-size: 2.4rem;
+	font-weight: 500;
+	font-variant-numeric: tabular-nums;
+	scroll-snap-align: center;
+	cursor: pointer;
+	user-select: none;
+	transition: color var(--transition-fast), font-weight var(--transition-fast);
+}
+
+.itemOn {
+	color: var(--color-text);
+	font-weight: 700;
+}
+
+.presets {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	gap: var(--space-2);
+}
+
+.preset {
+	min-height: 3.6rem;
+	padding: 0 var(--space-3);
+	background: var(--color-surfaceMuted);
+	color: var(--color-textMuted);
+	font-size: 1.3rem;
+	font-weight: 600;
+	font-variant-numeric: tabular-nums;
+	@include corners.radius(var(--radius-control));
+	@include mixins.focus-ring;
+}
+
+.presetOn {
+	background: var(--color-accentSoft);
+	color: var(--color-accentText);
+}
+
+.actions {
+	display: flex;
+	gap: var(--space-2);
+
+	> * {
+		flex: 1;
+	}
+}

@@ -1,7 +1,9 @@
 @use "partials/mixins";
 
 .list {
+	position: relative;
 	display: flex;
+	scrollbar-width: none;
 	gap: 0.4rem;
 	border-bottom: 0.1rem solid var(--color-border);
 	overflow-x: auto;
@@ -21,23 +23,27 @@
 	&:hover {
 		color: var(--color-text);
 	}
-
-	&::after {
-		content: "";
-		position: absolute;
-		inset: auto 1.2rem -0.1rem;
-		height: 0.2rem;
-		background: var(--color-text);
-		transform: scaleX(0);
-		transition: transform var(--transition-base);
-	}
 }
 
 .active {
 	color: var(--color-text);
+}
 
-	&::after {
-		transform: scaleX(1);
+// Magic line: slides between tabs (position set by useSlidingIndicator).
+.indicator {
+	position: absolute;
+	bottom: -0.1rem;
+	left: 0;
+	width: calc(var(--ind-w, 0px) - 2.4rem);
+	height: 0.3rem;
+	background: var(--color-accent);
+	border-radius: var(--radius-pill);
+	transform: translateX(calc(var(--ind-x, 0px) + 1.2rem));
+	opacity: 0;
+
+	&[data-ready="true"] {
+		opacity: 1;
+		transition: transform 0.32s cubic-bezier(0.3, 0.8, 0.2, 1), width 0.32s cubic-bezier(0.3, 0.8, 0.2, 1);
 	}
 }
 

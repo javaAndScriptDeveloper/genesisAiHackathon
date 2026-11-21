@@ -1,11 +1,13 @@
 "use client";
 
 import { useEffect, useState, type ReactNode } from "react";
+import { OverlayRootContext } from "@/components/ui/Sheet/OverlayRoot";
 import styles from "./PhoneFrame.module.scss";
 
 // Desktop: a centered iPhone-style device. Real phones (< 576px wide): the frame disappears and the app fills the screen.
 export function PhoneFrame({ children, hideStatusBar = false }: { children: ReactNode; hideStatusBar?: boolean }) {
 	const [clock, setClock] = useState("9:41");
+	const [screen, setScreen] = useState<HTMLDivElement | null>(null);
 	useEffect(() => {
 		const tick = () => setClock(new Date().toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: false }));
 		tick();
@@ -16,7 +18,8 @@ export function PhoneFrame({ children, hideStatusBar = false }: { children: Reac
 	return (
 		<div className={styles.stage}>
 			<div className={styles.device}>
-				<div className={styles.screen}>
+				<div className={styles.screen} ref={setScreen}>
+					<OverlayRootContext.Provider value={screen}>
 					{!hideStatusBar && (
 						<div className={styles.statusBar} aria-hidden>
 							<span className={styles.time}>{clock}</span>
@@ -28,6 +31,7 @@ export function PhoneFrame({ children, hideStatusBar = false }: { children: Reac
 						</div>
 					)}
 					{children}
+					</OverlayRootContext.Provider>
 					<span className={styles.homeBar} aria-hidden />
 				</div>
 			</div>

@@ -1,8 +1,10 @@
 "use client";
 
+import { Alert02Icon, ArrowDown01Icon, ArrowReloadHorizontalIcon, Clock01Icon, Dumbbell03Icon, Moon01Icon, PauseIcon, SkipForwardIcon, StopIcon, Timer02Icon, Tick02Icon } from "@hugeicons/core-free-icons";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Button, Checkbox, EmptyState, Sheet } from "@/components/ui";
+import { ChoiceList, type Choice } from "@/components/features/ChoiceList/ChoiceList";
+import { Button, Checkbox, EmptyState, Sheet, type IconDefinition } from "@/components/ui";
 import { applyAdapt } from "@/lib/fit/adapt";
 import { SAFETY_TEXT } from "@/lib/fit/coach";
 import { alternativesFor, getExercise } from "@/lib/fit/exercises";
@@ -46,15 +48,16 @@ export function WorkoutSheets({ sheet, setSheet, toastShow }: Props) {
 		setSheet(null);
 	};
 
-	const ACTIONS: { key: string; op?: AdaptOp; onClick?: () => void }[] = [
-		{ key: "too-hard", op: { kind: "too-hard" } },
-		{ key: "easier", op: { kind: "easier" } },
-		{ key: "more-rest", op: { kind: "more-rest" } },
-		{ key: "replace", onClick: () => setSheet("replace") },
-		{ key: "min20", op: { kind: "shorten", minutes: 20 } },
-		{ key: "tired", op: { kind: "tired" } },
+	const ACTIONS: { key: string; icon: IconDefinition; op?: AdaptOp; onClick?: () => void }[] = [
+		{ key: "too-hard", icon: Alert02Icon, op: { kind: "too-hard" } },
+		{ key: "easier", icon: ArrowDown01Icon, op: { kind: "easier" } },
+		{ key: "more-rest", icon: Clock01Icon, op: { kind: "more-rest" } },
+		{ key: "replace", icon: ArrowReloadHorizontalIcon, onClick: () => setSheet("replace") },
+		{ key: "min20", icon: Timer02Icon, op: { kind: "shorten", minutes: 20 } },
+		{ key: "tired", icon: Moon01Icon, op: { kind: "tired" } },
 		{
 			key: "skip",
+			icon: SkipForwardIcon,
 			onClick: () => {
 				if (block) dispatch({ type: "skip-exercise", blockId: block.id });
 				toastShow(t("fit.workout.skippedToast"), "info");
@@ -63,12 +66,13 @@ export function WorkoutSheets({ sheet, setSheet, toastShow }: Props) {
 		},
 		{
 			key: "pause",
+			icon: PauseIcon,
 			onClick: () => {
 				dispatch({ type: "pause" });
 				setSheet(null);
 			},
 		},
-		{ key: "end", onClick: () => setSheet("end") },
+		{ key: "end", icon: StopIcon, onClick: () => setSheet("end") },
 	];
 
 	const alternatives = block ? alternativesFor(block.exerciseId, profile, a.exercises.map((b) => b.exerciseId)) : [];
@@ -77,22 +81,12 @@ export function WorkoutSheets({ sheet, setSheet, toastShow }: Props) {
 		<>
 			<Sheet open={sheet === "adjust"} onClose={() => setSheet(null)} title={t("fit.workout.adjustTitle")} closeLabel={t("common.close")}>
 				<p className={styles.sheetLead}>{t("fit.workout.adjustLead")}</p>
-				<ul className={styles.choices}>
-					{ACTIONS.map((item) => (
-						<li key={item.key}>
-							<button type="button" className={styles.choice} onClick={() => (item.op ? run(item.op) : item.onClick?.())}>
-								<strong>{t(`fit.workout.actions.${item.key}.label`)}</strong>
-								<span>{t(`fit.workout.actions.${item.key}.hint`)}</span>
-							</button>
-						</li>
-					))}
-					<li>
-						<button type="button" className={styles.choiceDanger} onClick={() => setSheet("safety")}>
-							<strong>{t("fit.workout.unwell")}</strong>
-							<span>{t("fit.workout.unwellHint")}</span>
-						</button>
-					</li>
-				</ul>
+				<ChoiceList
+					items={[
+						...ACTIONS.map((item): Choice => ({ key: item.key, icon: item.icon, title: t(`fit.workout.actions.${item.key}.label`), hint: t(`fit.workout.actions.${item.key}.hint`), onClick: () => (item.op ? run(item.op) : item.onClick?.()) })),
+						{ key: "unwell", icon: Alert02Icon, tone: "danger", title: t("fit.workout.unwell"), hint: t("fit.workout.unwellHint"), onClick: () => setSheet("safety") },
+					]}
+				/>
 			</Sheet>
 
 			<Sheet open={sheet === "replace"} onClose={() => setSheet(null)} title={t("fit.workout.replaceTitle")} closeLabel={t("common.close")}>
@@ -100,53 +94,41 @@ export function WorkoutSheets({ sheet, setSheet, toastShow }: Props) {
 				{alternatives.length === 0 ? (
 					<EmptyState title={t("fit.session.noAlternatives")} description={t("fit.session.noAlternativesBody")} />
 				) : (
-					<ul className={styles.choices}>
-						{alternatives.map((o) => (
-							<li key={o.id}>
-								<button
-									type="button"
-									className={styles.choice}
-									onClick={() => {
-										if (block) dispatch({ type: "replace-exercise", blockId: block.id, exerciseId: o.id, today });
-										toastShow(t("fit.session.replaced", { name: o.name }), "success");
-										setSheet(null);
-									}}
-								>
-									<strong>{o.name}</strong>
-									<span>{t(`fit.level.${o.level}`)}</span>
-								</button>
-							</li>
-						))}
-					</ul>
+					<ChoiceList
+						items={alternatives.map((o) => ({
+							key: o.id,
+							icon: Dumbbell03Icon,
+							title: o.name,
+							hint: t(`fit.level.${o.level}`),
+							onClick: () => {
+								if (block) dispatch({ type: "replace-exercise", blockId: block.id, exerciseId: o.id, today });
+								toastShow(t("fit.session.replaced", { name: o.name }), "success");
+								setSheet(null);
+							},
+						}))}
+					/>
 				)}
 			</Sheet>
 
 			<Sheet open={sheet === "overview"} onClose={() => setSheet(null)} title={t("fit.workout.overviewTitle")} closeLabel={t("common.close")}>
-				<ol className={styles.choices}>
-					{a.exercises.map((b, i) => {
+				<ChoiceList
+					ordered
+					items={a.exercises.map((b, i) => {
 						const done = b.sets.filter((s) => s.done).length;
-						return (
-							<li key={b.id}>
-								<button
-									type="button"
-									className={styles.choice}
-									aria-current={i === a.index ? "step" : undefined}
-									onClick={() => {
-										dispatch({ type: "go-to", index: i });
-										setSheet(null);
-									}}
-								>
-									<strong>
-										{i + 1}. {getExercise(b.exerciseId).name}
-									</strong>
-									<span>
-										{b.skipped ? t("fit.workout.skippedLabel") : `${describeBlock(b)} · ${t("fit.workout.setsDone", { done, total: b.sets.length })}`}
-									</span>
-								</button>
-							</li>
-						);
+						const finished = !b.skipped && done === b.sets.length;
+						return {
+							key: b.id,
+							icon: finished ? Tick02Icon : b.skipped ? SkipForwardIcon : Dumbbell03Icon,
+							title: `${i + 1}. ${getExercise(b.exerciseId).name}`,
+							hint: b.skipped ? t("fit.workout.skippedLabel") : `${describeBlock(b)} · ${t("fit.workout.setsDone", { done, total: b.sets.length })}`,
+							current: i === a.index,
+							onClick: () => {
+								dispatch({ type: "go-to", index: i });
+								setSheet(null);
+							},
+						};
 					})}
-				</ol>
+				/>
 			</Sheet>
 
 			<Sheet open={sheet === "end"} onClose={() => setSheet(null)} title={t("fit.workout.endTitle")} closeLabel={t("common.close")} variant="center" footer={

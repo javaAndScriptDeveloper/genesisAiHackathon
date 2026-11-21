@@ -1,0 +1,85 @@
+// Page transitions (React <ViewTransition> + View Transitions API). Only the page content is named, so the phone
+// frame, status bar and bottom navigation stay still while the content moves.
+:root {
+	--vt-exit: 140ms;
+	--vt-enter: 240ms;
+	--vt-move: 360ms;
+}
+
+// Clicks during a transition must reach the live page.
+::view-transition {
+	pointer-events: none;
+}
+
+// Clip the moving page to its own box so it never slides over the device bezel.
+::view-transition-group(.page-forward),
+::view-transition-group(.page-back),
+::view-transition-group(.page-fade) {
+	overflow: clip;
+}
+
+::view-transition-old(.page-forward) {
+	--vt-shift: -28px;
+	animation:
+		var(--vt-exit) ease-in both vt-fade reverse,
+		var(--vt-move) cubic-bezier(0.3, 0.8, 0.2, 1) both vt-slide reverse;
+}
+
+::view-transition-new(.page-forward) {
+	--vt-shift: 28px;
+	animation:
+		var(--vt-enter) ease-out var(--vt-exit) both vt-fade,
+		var(--vt-move) cubic-bezier(0.3, 0.8, 0.2, 1) both vt-slide;
+}
+
+::view-transition-old(.page-back) {
+	--vt-shift: 28px;
+	animation:
+		var(--vt-exit) ease-in both vt-fade reverse,
+		var(--vt-move) cubic-bezier(0.3, 0.8, 0.2, 1) both vt-slide reverse;
+}
+
+::view-transition-new(.page-back) {
+	--vt-shift: -28px;
+	animation:
+		var(--vt-enter) ease-out var(--vt-exit) both vt-fade,
+		var(--vt-move) cubic-bezier(0.3, 0.8, 0.2, 1) both vt-slide;
+}
+
+// Navigation without a direction: a soft rise-and-fade.
+::view-transition-old(.page-fade) {
+	animation: var(--vt-exit) ease-in both vt-fade reverse;
+}
+
+::view-transition-new(.page-fade) {
+	animation:
+		var(--vt-enter) ease-out var(--vt-exit) both vt-fade,
+		var(--vt-move) cubic-bezier(0.3, 0.8, 0.2, 1) both vt-rise;
+}
+
+@keyframes vt-fade {
+	from {
+		opacity: 0;
+	}
+}
+
+@keyframes vt-slide {
+	from {
+		translate: var(--vt-shift) 0;
+	}
+}
+
+@keyframes vt-rise {
+	from {
+		translate: 0 10px;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	::view-transition-old(*),
+	::view-transition-new(*),
+	::view-transition-group(*) {
+		animation-duration: 0s !important;
+		animation-delay: 0s !important;
+	}
+}

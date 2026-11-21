@@ -147,7 +147,7 @@
 .legendDot {
 	width: 1rem;
 	height: 1rem;
-	border-radius: 0.3rem;
+	@include corners.radius(0.3rem);
 	background: var(--color-surfaceMuted);
 
 	&[data-state="done"] {
@@ -207,6 +207,7 @@
 }
 
 .logSummary {
+	list-style: none;
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
@@ -362,4 +363,18 @@
 	font-size: 1.3rem;
 	font-weight: 600;
 	@include mixins.focus-ring;
+}
+
+.logSummary::-webkit-details-marker {
+	display: none;
+}
+
+.chevron {
+	flex: none;
+	color: var(--color-textSubtle);
+	transition: transform var(--transition-base);
+}
+
+.log[open] .chevron {
+	transform: rotate(180deg);
 }

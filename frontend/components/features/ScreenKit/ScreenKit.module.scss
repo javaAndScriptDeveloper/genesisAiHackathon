@@ -81,9 +81,21 @@
 	}
 }
 
+// Unread: white card with an accent edge, so the icon plate (soft red) stays visible.
 .unread {
 	border-color: var(--color-accent);
-	background: var(--color-accentSoft);
+}
+
+.rowStack {
+	flex-direction: column;
+	align-items: stretch;
+	gap: var(--space-3);
+}
+
+.rowHead {
+	display: flex;
+	align-items: center;
+	gap: var(--space-3);
 }
 
 .warn {
@@ -99,4 +111,35 @@
 	display: grid;
 	grid-template-columns: 1fr 1fr;
 	gap: var(--space-3);
+}
+
+.plate {
+	display: grid;
+	flex: none;
+	place-items: center;
+	width: 4rem;
+	height: 4rem;
+	background: var(--color-accentSoft);
+	color: var(--color-accent);
+	@include corners.nested(var(--radius-card), var(--space-3));
+}
+
+.heading {
+	display: flex;
+	align-items: center;
+	gap: var(--space-2);
+
+	svg {
+		color: var(--color-accent);
+	}
+}
+
+.chips {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--space-1);
+}
+
+.pushRight {
+	margin-left: auto;
 }

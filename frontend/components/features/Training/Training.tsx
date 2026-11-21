@@ -6,9 +6,10 @@ import { useMemo, useState } from "react";
 import { ScreenHeader } from "@/components/features/ScreenHeader/ScreenHeader";
 import { WeekStrip } from "@/components/features/WeekStrip/WeekStrip";
 import { WorkoutCard } from "@/components/features/WorkoutCard/WorkoutCard";
-import { Badge, Button, Card, EmptyState, Icon, IconButton, Input, SegmentedControl } from "@/components/ui";
+import { Badge, Button, Card, Checkbox, EmptyState, Icon, IconButton, Input, SegmentedControl } from "@/components/ui";
 import { ArrowLeft01Icon, ArrowRight01Icon } from "@hugeicons/core-free-icons";
 import { addDays, mondayOf, formatMonthDay } from "@/lib/fit/dates";
+import { scrollToCenter } from "@/lib/hooks/useSlidingIndicator";
 import { EXERCISES, isUsable } from "@/lib/fit/exercises";
 import { useFit } from "@/lib/fit/store/FitProvider";
 import { useTabMemory } from "@/lib/fit/store/useTabMemory";
@@ -88,22 +89,23 @@ export function Training() {
 						</div>
 						<div className={styles.chips} role="group" aria-label={t("fit.training.filterMuscle")}>
 							{(["all", ...MUSCLES] as const).map((m) => (
-								<button key={m} type="button" className={styles.chip} aria-pressed={muscle === m} onClick={() => setMuscle(m)}>
+								<button key={m} type="button" className={styles.chip} aria-pressed={muscle === m} onClick={(e) => {
+										setMuscle(m);
+										const strip = e.currentTarget.parentElement;
+										if (strip) scrollToCenter(strip, e.currentTarget);
+									}}>
 									{t(`fit.muscle.${m}`)}
 								</button>
 							))}
 						</div>
-						<label className={styles.toggle}>
-							<input type="checkbox" checked={onlyMine} onChange={(e) => setOnlyMine(e.target.checked)} />
-							{t("fit.training.onlyMine")}
-						</label>
+						<Checkbox label={t("fit.training.onlyMine")} checked={onlyMine} onChange={(e) => setOnlyMine(e.target.checked)} />
 						{library.length === 0 ? (
 							<EmptyState title={t("fit.training.noResults")} description={t("fit.training.noResultsBody")} action={<Button variant="secondary" onClick={() => { setQuery(""); setMuscle("all"); setOnlyMine(false); }}>{t("fit.training.clearFilters")}</Button>} />
 						) : (
 							<ul className={styles.list}>
 								{library.map((e) => (
 									<li key={e.id}>
-										<Link href={`/training/exercise/${e.id}`} className={styles.exercise}>
+										<Link href={`/training/exercise/${e.id}`} transitionTypes={["nav-forward"]} className={styles.exercise}>
 											<span className={styles.exName}>{e.name}</span>
 											<span className={styles.exMeta}>
 												<Badge>{t(`fit.muscle.${e.muscle}`)}</Badge>

@@ -1,5 +1,7 @@
 "use client";
 
+import { ArrowDown01Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/ui";
 import type { Exercise } from "@/lib/fit/types";
 import { useT } from "@/lib/i18n/I18nProvider";
 import styles from "./ExerciseGuide.module.scss";
@@ -17,7 +19,10 @@ export function ExerciseGuide({ exercise, defaultOpen = "steps" }: { exercise: E
 		<div className={styles.root}>
 			{sections.map((s) => (
 				<details key={s.id} className={styles.item} open={defaultOpen === s.id}>
-					<summary className={styles.summary}>{t(`fit.guide.${s.id}`)}</summary>
+					<summary className={styles.summary}>
+						{t(`fit.guide.${s.id}`)}
+						<Icon icon={ArrowDown01Icon} size={18} className={styles.chevron} />
+					</summary>
 					{s.id === "steps" ? (
 						<ol className={styles.list}>
 							{s.body.map((line) => (
