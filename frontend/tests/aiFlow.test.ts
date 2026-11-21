@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import type { AiDeps } from "@/lib/fit/aiClient";
 import { dailyCheck, ensureBackend, rebuildPlan } from "@/lib/fit/aiFlow";
 import type { DailyResponse, PlanResponse } from "@/lib/fit/aiApi";
+import { createGate, singleFlight } from "@/lib/fit/singleFlight";
 import { toISO } from "@/lib/fit/dates";
 import { generatePlan } from "@/lib/fit/plan";
 import { emptyState } from "@/lib/fit/seed";
@@ -15,7 +16,7 @@ const profile: Profile = {
 };
 const today = toISO(new Date());
 const future = (n: number) => toISO(new Date(Date.now() + n * 86_400_000));
-const stats: DailyStats = { date: today, sleepHours: 5, restingHr: 70, hrv: 40, steps: 1000, readiness: 30 } as unknown as DailyStats;
+const stats: DailyStats = { date: today, sleepHours: 5, sleepScore: 50, restingHr: 70, hrvMs: 40, steps: 1000, activeKcal: 100, readiness: 30, source: "demo", scenario: "tired" };
 
 const base = generatePlan(profile, today, 4)[0] as PlannedWorkout;
 const todays: PlannedWorkout = { ...base, id: "w-today", date: today, status: "planned", adHoc: false };
@@ -106,5 +107,30 @@ describe("dailyCheck", () => {
 		state = reducer(state, { type: "apply-daily", ...result });
 		expect(state.planned.find((w) => w.date === today)?.title).toBe("Recovery");
 		expect(state.daily?.status).toBe("recovery");
+	});
+});
+
+describe("singleFlight", () => {
+	it("shares one execution between concurrent calls and frees the slot afterwards", async () => {
+		const fn = vi.fn(async () => { await Promise.resolve(); return Math.random(); });
+		const f = singleFlight(fn);
+		const [a, b] = await Promise.all([f(), f()]);
+		expect(a).toBe(b);
+		expect(fn).toHaveBeenCalledTimes(1);
+		await f();
+		expect(fn).toHaveBeenCalledTimes(2);
+	});
+});
+
+describe("createGate", () => {
+	const tick = () => new Promise<void>((r) => setTimeout(r, 0));
+	it("runs a concurrent non-forced call once, and a forced call after a non-forced one", async () => {
+		const gate = createGate();
+		const job = vi.fn(async () => { await tick(); });
+		await Promise.all([gate(false, job), gate(false, job)]);
+		expect(job).toHaveBeenCalledTimes(1);
+		const job2 = vi.fn(async () => { await tick(); });
+		await Promise.all([gate(false, job2), gate(true, job2), gate(true, job2)]);
+		expect(job2).toHaveBeenCalledTimes(2);
 	});
 });
