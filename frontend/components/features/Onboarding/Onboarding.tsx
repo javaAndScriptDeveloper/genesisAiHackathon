@@ -14,6 +14,7 @@ import { toISO, WEEKDAYS } from "@/lib/fit/dates";
 import { DAYS, DURATIONS, EQUIPMENT, EXPERIENCES, GENDERS, GOALS, LIMITATIONS, LOCATIONS, WEARABLES } from "@/lib/fit/options";
 import { generatePlan } from "@/lib/fit/plan";
 import { useFit } from "@/lib/fit/store/FitProvider";
+import { useActionNavigate } from "@/lib/fit/store/hooks";
 import type { Profile } from "@/lib/fit/types";
 import { useT } from "@/lib/i18n/I18nProvider";
 import styles from "./Onboarding.module.scss";
@@ -55,7 +56,8 @@ const FIELDS: Record<Step, (keyof Form)[]> = {
 export function Onboarding({ mode }: { mode: "create" | "edit" }) {
 	const t = useT();
 	const router = useRouter();
-	const { state, dispatch, today } = useFit();
+	const { state, today } = useFit();
+	const go = useActionNavigate();
 	const [step, setStep] = useState(0);
 	const [demoHistory, setDemoHistory] = useState(true);
 	const [units, setUnits] = useState<Units>(state.units);
@@ -80,9 +82,8 @@ export function Onboarding({ mode }: { mode: "create" | "edit" }) {
 		const parsed = schema.safeParse(getValues());
 		if (!parsed.success) return;
 		const profile: Profile = parsed.data;
-		if (mode === "create") dispatch({ type: "complete-onboarding", profile, units, demoHistory, today, now: new Date().toISOString() });
-		else dispatch({ type: "update-profile", profile, units, today });
-		router.replace(mode === "create" ? "/today" : "/profile");
+		if (mode === "create") go("/today", { type: "complete-onboarding", profile, units, demoHistory, today, now: new Date().toISOString() }, { replace: true });
+		else go("/profile", { type: "update-profile", profile, units, today }, { replace: true });
 	};
 
 	const preview = useMemo(() => {

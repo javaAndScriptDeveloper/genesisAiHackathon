@@ -1,16 +1,15 @@
 "use client";
 
 import { Alert02Icon, ArrowDown01Icon, ArrowReloadHorizontalIcon, Clock01Icon, Dumbbell03Icon, Moon01Icon, PauseIcon, SkipForwardIcon, StopIcon, Timer02Icon, Tick02Icon } from "@hugeicons/core-free-icons";
-import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { ChoiceList, type Choice } from "@/components/features/ChoiceList/ChoiceList";
-import { Button, Checkbox, EmptyState, Sheet, type IconDefinition } from "@/components/ui";
+import { Button, Checkbox, EmptyState, Icon, Sheet, type IconDefinition } from "@/components/ui";
 import { applyAdapt } from "@/lib/fit/adapt";
 import { SAFETY_TEXT } from "@/lib/fit/coach";
 import { alternativesFor, getExercise } from "@/lib/fit/exercises";
 import { describeBlock } from "@/lib/fit/format";
 import { useFit } from "@/lib/fit/store/FitProvider";
-import { useUnits } from "@/lib/fit/store/hooks";
+import { useActionNavigate, useUnits } from "@/lib/fit/store/hooks";
 import type { AdaptOp } from "@/lib/fit/types";
 import { useT } from "@/lib/i18n/I18nProvider";
 import styles from "./Workout.module.scss";
@@ -25,9 +24,9 @@ interface Props {
 
 export function WorkoutSheets({ sheet, setSheet, toastShow }: Props) {
 	const t = useT();
-	const router = useRouter();
 	const { state, dispatch, today } = useFit();
 	const u = useUnits();
+	const go = useActionNavigate();
 	const a = state.active;
 	const profile = state.profile;
 
@@ -141,10 +140,7 @@ export function WorkoutSheets({ sheet, setSheet, toastShow }: Props) {
 						onClick={() => {
 							setSheet(null);
 							if (setsDone > 0) dispatch({ type: "end-early" });
-							else {
-								dispatch({ type: "discard-active" });
-								router.replace("/training");
-							}
+							else go("/training", { type: "discard-active" }, { replace: true });
 						}}
 					>
 						{setsDone > 0 ? t("fit.workout.endSave") : t("fit.workout.endLeave")}
@@ -153,8 +149,16 @@ export function WorkoutSheets({ sheet, setSheet, toastShow }: Props) {
 			}>
 				<p>{setsDone > 0 ? t("fit.workout.endBody", { n: setsDone }) : t("fit.workout.endEmpty")}</p>
 				<div className={styles.endPrompt}>
-					<p>{t("fit.workout.tooHardPrompt")}</p>
-					<Button variant="secondary" iconLeft={ArrowDown01Icon} onClick={() => run({ kind: "too-hard" })}>{t("fit.workout.regenEasier")}</Button>
+					<div className={styles.endHead}>
+						<span className={styles.endPlate}>
+							<Icon icon={Alert02Icon} size={20} />
+						</span>
+						<div>
+							<strong>{t("fit.workout.tooHardPrompt")}</strong>
+							<p>{t("fit.workout.tooHardHint")}</p>
+						</div>
+					</div>
+					<Button iconLeft={ArrowDown01Icon} onClick={() => run({ kind: "too-hard" })}>{t("fit.workout.regenEasier")}</Button>
 				</div>
 			</Sheet>
 

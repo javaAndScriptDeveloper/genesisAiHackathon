@@ -3,7 +3,7 @@
 import { PlayIcon } from "@hugeicons/core-free-icons";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useRef, ViewTransition, type ReactNode } from "react";
+import { useEffect, useLayoutEffect, useRef, ViewTransition, type ReactNode } from "react";
 import { BottomNav } from "@/components/features/BottomNav/BottomNav";
 import { Celebration } from "@/components/features/Celebration/Celebration";
 import { PhoneFrame } from "@/components/features/PhoneFrame/PhoneFrame";
@@ -32,7 +32,8 @@ function Screen({ children }: { children: ReactNode }) {
 	}, [ready, state.profile, onboarding, router]);
 
 	// Each screen remembers its own scroll position, so switching tabs and coming back feels continuous.
-	useEffect(() => {
+	// Layout effect: restore before the browser paints (and before the transition snapshot), so no page jump is visible.
+	useLayoutEffect(() => {
 		const el = main.current;
 		if (!el) return;
 		el.scrollTop = scrollMemory.get(pathname) ?? 0;

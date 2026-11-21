@@ -26,3 +26,9 @@ Everything is frontend state + localStorage today. Needs a backend (Next.js rout
 
 ## Units (kg / lb)
 All data is stored metric (kg, cm). `state.units` (`metric` | `imperial`, default metric, chosen in onboarding and Settings) only changes display and input. Never write "kg" in a component: use `useUnits()` (`fmtLoad`, `fmtMass`, `mass`, `toKg`, `unit`) or `lib/fit/units.ts`. Animated numbers use `AnimatedNumber` (`@number-flow/react`).
+
+## Avoiding flicker
+- State change + navigation go through `useActionNavigate()` (one transition), never `dispatch(); router.push()`. Otherwise the current screen re-renders with the new state before the next page appears.
+- `Sheet` keeps its latest `onClose` in a ref: inline handlers must not re-run its focus effect (the workout timer re-renders the page every second).
+- Scroll restoration runs in a layout effect so it is applied before paint and before the view-transition snapshot.
+- Page crossfade uses `mix-blend-mode: plus-lighter` on old/new snapshots so the content never dips toward the background colour.

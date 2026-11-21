@@ -687,9 +687,9 @@
     },
     "today": {
       "greeting": {
-        "morning": "Good morning, {name}",
-        "afternoon": "Good afternoon, {name}",
-        "evening": "Good evening, {name}"
+        "morning": "Good morning, {name} 👋",
+        "afternoon": "Good afternoon, {name} 👋",
+        "evening": "Good evening, {name} 👋"
       },
       "notifications": "Notifications, {n} unread",
       "profile": "Profile and settings",
@@ -812,6 +812,7 @@
       "noneBody": "Start one from your plan.",
       "toTraining": "Go to training",
       "tooHardPrompt": "Is it too hard?",
+      "tooHardHint": "We can lighten the rest of the workout so you can finish it instead of stopping.",
       "regenEasier": "Make the rest easier",
       "regenShort": "Trim to 15 minutes",
       "end": "End workout",

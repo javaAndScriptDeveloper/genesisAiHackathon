@@ -1,14 +1,13 @@
 "use client";
 
 import { Clock01Icon, Dumbbell01Icon, FlashIcon } from "@hugeicons/core-free-icons";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { AnimatedNumber, Badge, Button, Card, EmptyState, Icon, Sheet, SportIcon } from "@/components/ui";
 import { kcalFor } from "@/lib/fit/calories";
 import { OptionCard } from "@/components/features/OptionCard/OptionCard";
 import { getExercise } from "@/lib/fit/exercises";
 import { useFit } from "@/lib/fit/store/FitProvider";
-import { useUnits } from "@/lib/fit/store/hooks";
+import { useActionNavigate, useUnits } from "@/lib/fit/store/hooks";
 import { previewLog } from "@/lib/fit/store/reducer";
 import type { Perceived } from "@/lib/fit/types";
 import { useT } from "@/lib/i18n/I18nProvider";
@@ -16,9 +15,9 @@ import styles from "./Workout.module.scss";
 
 export function WorkoutSummary() {
 	const t = useT();
-	const router = useRouter();
 	const { state, dispatch, today } = useFit();
 	const u = useUnits();
+	const go = useActionNavigate();
 	const [confirmDiscard, setConfirmDiscard] = useState(false);
 	const a = state.active;
 	if (!a) return null;
@@ -31,10 +30,7 @@ export function WorkoutSummary() {
 					description={t("fit.summary.emptyBody")}
 					action={
 						<Button
-							onClick={() => {
-								dispatch({ type: "finish", today, now: new Date().toISOString() });
-								router.replace("/training");
-							}}
+							onClick={() => go("/training", { type: "finish", today, now: new Date().toISOString() }, { replace: true })}
 						>
 							{t("fit.workout.toTraining")}
 						</Button>
@@ -50,8 +46,7 @@ export function WorkoutSummary() {
 	const perceived = a.perceived ?? "right";
 
 	const save = (dest: string) => {
-		dispatch({ type: "finish", today, now: new Date().toISOString() });
-		router.replace(dest);
+		go(dest, { type: "finish", today, now: new Date().toISOString() }, { replace: true });
 	};
 
 	return (
@@ -114,7 +109,7 @@ export function WorkoutSummary() {
 			<Sheet open={confirmDiscard} onClose={() => setConfirmDiscard(false)} title={t("fit.summary.discardTitle")} closeLabel={t("common.close")} variant="center" footer={
 				<>
 					<Button variant="secondary" onClick={() => setConfirmDiscard(false)}>{t("fit.common.cancel")}</Button>
-					<Button variant="danger" onClick={() => { dispatch({ type: "discard-active" }); router.replace("/training"); }}>{t("fit.summary.discardConfirm")}</Button>
+					<Button variant="danger" onClick={() => go("/training", { type: "discard-active" }, { replace: true })}>{t("fit.summary.discardConfirm")}</Button>
 				</>
 			}>
 				<p>{t("fit.summary.discardBody")}</p>

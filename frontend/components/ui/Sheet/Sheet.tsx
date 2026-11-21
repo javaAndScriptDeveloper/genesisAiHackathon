@@ -29,17 +29,23 @@ export function Sheet({ open, onClose, title, closeLabel = "Close", children, fo
 	const overlayRoot = useOverlayRoot();
 	const panelRef = ref;
 	const dragStart = useRef<number | null>(null);
+	// Parents usually pass a fresh inline onClose every render. Keep the latest in a ref so the effect below does not
+	// re-run (and steal focus) each time the page behind re-renders, e.g. the workout timer ticking every second.
+	const onCloseRef = useRef(onClose);
+	useEffect(() => {
+		onCloseRef.current = onClose;
+	});
 
 	useEffect(() => {
 		if (!open) return;
 		const previous = document.activeElement instanceof HTMLElement ? document.activeElement : null;
 		const panel = ref.current;
 		const focusable = () => Array.from(panel?.querySelectorAll<HTMLElement>('button:not([disabled]), [href], input:not([disabled]), textarea, select, [tabindex]:not([tabindex="-1"])') ?? []);
-		(panel?.querySelector<HTMLElement>("input, textarea") ?? panel)?.focus();
+		(panel?.querySelector<HTMLElement>("input, textarea") ?? panel)?.focus({ preventScroll: true });
 		const onKey = (event: KeyboardEvent) => {
 			if (event.key === "Escape" && !modal) {
 				event.stopPropagation();
-				onClose();
+				onCloseRef.current();
 			}
 			if (event.key === "Tab") {
 				const items = focusable();
@@ -58,9 +64,9 @@ export function Sheet({ open, onClose, title, closeLabel = "Close", children, fo
 		document.addEventListener("keydown", onKey);
 		return () => {
 			document.removeEventListener("keydown", onKey);
-			previous?.focus();
+			previous?.focus({ preventScroll: true });
 		};
-	}, [open, onClose, modal]);
+	}, [open, modal]);
 
 	if (!open) return null;
 	const node = (
@@ -87,7 +93,7 @@ export function Sheet({ open, onClose, title, closeLabel = "Close", children, fo
 							dragStart.current = null;
 							if (!panel || start === null) return;
 							panel.style.transition = "";
-							if (e.clientY - start > 80) onClose();
+							if (e.clientY - start > 80) onCloseRef.current();
 							else panel.style.transform = "";
 						}}
 					>

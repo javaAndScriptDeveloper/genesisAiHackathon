@@ -1,23 +1,37 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useCallback, useMemo } from "react";
+import { startTransition, useCallback, useMemo } from "react";
 import { weeklyChallenge, levelOf, totalXp } from "../gamification";
 import { nextUpcoming } from "../plan";
 import { computeStreak, consistencyScore, daysSinceLastWorkout, personalRecords, weekStats } from "../stats";
 import { fmtLoad, fmtMass, loadStep, loadValue, massUnit, massValue, toKg } from "../units";
 import { useFit } from "./FitProvider";
+import type { Action } from "./reducer";
 
-export function useStartWorkout() {
+/**
+ * Change state and navigate as one update. Without this the current screen re-renders with the new state first
+ * (e.g. Today swaps its hero for "workout in progress") and only then the new page appears, which reads as a flicker.
+ * Inside one transition React commits both together once the destination is ready.
+ */
+export function useActionNavigate() {
 	const { dispatch } = useFit();
 	const router = useRouter();
 	return useCallback(
-		(plannedId: string) => {
-			dispatch({ type: "start-workout", plannedId, now: new Date().toISOString() });
-			router.push("/workout");
+		(href: string, action?: Action, options?: { replace?: boolean }) => {
+			startTransition(() => {
+				if (action) dispatch(action);
+				if (options?.replace) router.replace(href, { transitionTypes: ["nav-forward"] });
+				else router.push(href, { transitionTypes: ["nav-forward"] });
+			});
 		},
 		[dispatch, router],
 	);
+}
+
+export function useStartWorkout() {
+	const go = useActionNavigate();
+	return useCallback((plannedId: string) => go("/workout", { type: "start-workout", plannedId, now: new Date().toISOString() }), [go]);
 }
 
 /** Derived numbers shared by Today, Progress and Coach. All of them come from state, never from constants. */

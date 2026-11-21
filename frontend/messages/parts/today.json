@@ -3,7 +3,7 @@
     "week": { "label": "This week", "state": { "rest": "recovery day", "planned": "planned", "done": "completed", "partial": "partly done", "skipped": "skipped", "missed": "missed" } },
     "status": { "planned": "Planned", "completed": "Done", "partial": "Partial", "skipped": "Skipped" },
     "today": {
-      "greeting": { "morning": "Good morning, {name}", "afternoon": "Good afternoon, {name}", "evening": "Good evening, {name}" },
+      "greeting": { "morning": "Good morning, {name} 👋", "afternoon": "Good afternoon, {name} 👋", "evening": "Good evening, {name} 👋" },
       "notifications": "Notifications, {n} unread",
       "profile": "Profile and settings",
       "empty": { "title": "No workouts planned", "body": "Update your training days and we'll build your week.", "cta": "Edit preferences" },
