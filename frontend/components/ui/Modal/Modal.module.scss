@@ -1,0 +1,57 @@
+@use "partials/corners";
+
+.dialog {
+	width: min(52rem, calc(100% - 3.2rem));
+	max-height: calc(100dvh - 6.4rem);
+	margin: auto;
+	padding: 0;
+	overflow: auto;
+	background: var(--color-surface);
+	color: var(--color-text);
+	border: 0;
+	box-shadow: var(--shadow-modal);
+	@include corners.radius(var(--radius-panel));
+
+	&::backdrop {
+		background: var(--color-overlay);
+		backdrop-filter: blur(0.2rem);
+	}
+
+	&[open] {
+		animation: rise 0.18s ease-out;
+	}
+
+	&:focus {
+		outline: none;
+	}
+}
+
+.header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1.6rem;
+	padding: 1.6rem 1.6rem 0 2.4rem;
+}
+
+.title {
+	font-size: 2rem;
+}
+
+.body {
+	padding: 1.6rem 2.4rem 2.4rem;
+}
+
+.footer {
+	display: flex;
+	justify-content: flex-end;
+	gap: 1.2rem;
+	padding: 0 2.4rem 2.4rem;
+}
+
+@keyframes rise {
+	from {
+		opacity: 0;
+		transform: translateY(1.2rem) scale(0.98);
+	}
+}

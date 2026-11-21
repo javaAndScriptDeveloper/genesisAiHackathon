@@ -1,0 +1,39 @@
+@use "partials/corners";
+@use "partials/mixins";
+
+.nav {
+	display: flex;
+	align-items: center;
+	gap: 0.4rem;
+}
+
+.page {
+	min-width: var(--hit-target);
+	height: var(--hit-target);
+	padding: 0 0.8rem;
+	font-size: 1.5rem;
+	font-weight: 550;
+	color: var(--color-textMuted);
+	transition: background-color var(--transition-fast);
+	@include corners.radius(var(--radius-control));
+	@include mixins.focus-ring;
+
+	&:hover {
+		background: var(--color-surfaceMuted);
+	}
+}
+
+.current {
+	background: var(--color-primary);
+	color: var(--color-onPrimary);
+
+	&:hover {
+		background: var(--color-primary);
+	}
+}
+
+.gap {
+	min-width: 2.4rem;
+	text-align: center;
+	color: var(--color-textSubtle);
+}

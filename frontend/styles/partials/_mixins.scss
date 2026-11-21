@@ -1,0 +1,47 @@
+@use "sass:map";
+
+// Breakpoints (px): 576 / 768 / 992 / 1200. Mobile-first: `respond(md)` = min-width 768px.
+$breakpoints: (
+	sm: 576px,
+	md: 768px,
+	lg: 992px,
+	xl: 1200px,
+);
+
+@mixin respond($key) {
+	@media (min-width: map.get($breakpoints, $key)) {
+		@content;
+	}
+}
+
+@mixin below($key) {
+	@media (max-width: map.get($breakpoints, $key) - 0.02px) {
+		@content;
+	}
+}
+
+@mixin visually-hidden {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	margin: -1px;
+	padding: 0;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+	white-space: nowrap;
+	border: 0;
+}
+
+// Keyboard focus ring for buttons/links. Text fields use a border-color change instead (see Input).
+@mixin focus-ring {
+	&:focus-visible {
+		outline: 0.2rem solid var(--color-focusRing);
+		outline-offset: 0.2rem;
+	}
+}
+
+@mixin truncate {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}

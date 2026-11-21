@@ -1,21 +1,50 @@
 {
-  "name": "frontend",
+  "name": "ai-hackathon-genesis",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "images": "node scripts/convert-images.mjs"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^1.11.0",
+    "@google/genai": "^3.6.1",
+    "@hookform/resolvers": "^7.0.7",
+    "@hugeicons/core-free-icons": "^4.4.0",
+    "@hugeicons/react": "^1.1.10",
+    "@tanstack/react-query": "^5.108.1",
+    "clsx": "^2.1.1",
     "next": "16.4.6",
     "react": "19.3.0",
-    "react-dom": "19.3.0"
+    "react-dom": "19.3.0",
+    "react-hook-form": "^7.92.0",
+    "server-only": "^0.0.1",
+    "sharp": "^0.35.5",
+    "swiper": "^14.4.0",
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "typescript": "^5"
-  }
+    "eslint": "^9",
+    "eslint-config-next": "16.4.6",
+    "sass": "^1.108.2",
+    "typescript": "^5",
+    "vitest": "^5.1.1"
+  },
+  "packageManager": "bun@1.4.0",
+  "ignoreScripts": [
+    "sharp",
+    "unrs-resolver"
+  ],
+  "trustedDependencies": [
+    "sharp",
+    "unrs-resolver"
+  ]
 }

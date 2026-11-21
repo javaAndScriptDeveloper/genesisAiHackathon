@@ -1,0 +1,50 @@
+@use "partials/corners";
+
+.row {
+	position: relative;
+	display: inline-flex;
+	align-items: center;
+	gap: 1.2rem;
+	min-height: var(--hit-target);
+	cursor: pointer;
+}
+
+.input {
+	position: absolute;
+	opacity: 0;
+	inset: 0;
+	margin: 0;
+	cursor: inherit;
+}
+
+.box {
+	display: grid;
+	place-items: center;
+	width: 2rem;
+	height: 2rem;
+	flex: none;
+	background: var(--color-surface);
+	border: 0.1rem solid var(--color-borderStrong);
+	color: transparent;
+	transition: background-color var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast);
+	@include corners.radius(0.5rem);
+
+	.input:checked + & {
+		background: var(--color-primary);
+		border-color: var(--color-primary);
+		color: var(--color-onPrimary);
+	}
+
+	.input:focus-visible + & {
+		outline: 0.2rem solid var(--color-focusRing);
+		outline-offset: 0.2rem;
+	}
+
+	.input:disabled + & {
+		opacity: 0.5;
+	}
+}
+
+.text {
+	font-size: 1.5rem;
+}

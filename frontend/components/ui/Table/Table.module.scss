@@ -1,0 +1,57 @@
+@use "partials/corners";
+@use "partials/mixins";
+
+.wrap {
+	overflow-x: auto;
+	background: var(--color-surface);
+	border: 0.1rem solid var(--color-border);
+	@include corners.radius(var(--radius-card));
+}
+
+.table {
+	width: 100%;
+	min-width: 56rem; // below this the wrap scrolls horizontally instead of squeezing columns
+	table-layout: fixed; // column widths come from `Column.width` or split evenly, never from the current page's content
+	font-size: 1.4rem;
+	text-align: left;
+
+	th {
+		padding: 1.2rem 1.6rem;
+		background: var(--color-surfaceSubtle);
+		border-bottom: 0.1rem solid var(--color-border);
+		color: var(--color-textSubtle);
+		font-size: 1.2rem;
+		font-weight: 600;
+		letter-spacing: 0.04em;
+		text-transform: uppercase;
+		white-space: nowrap;
+	}
+
+	td {
+		padding: 1.4rem 1.6rem;
+		border-bottom: 0.1rem solid var(--color-border);
+		vertical-align: middle;
+	}
+
+	tbody tr:last-child td {
+		border-bottom: 0;
+	}
+
+	tbody tr {
+		transition: background-color var(--transition-fast);
+
+		&:hover {
+			background: var(--color-surfaceSubtle);
+		}
+	}
+}
+
+.cell {
+	display: block;
+	max-width: 32rem;
+	@include mixins.truncate;
+}
+
+.right {
+	text-align: right;
+}

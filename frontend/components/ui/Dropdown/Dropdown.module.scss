@@ -1,0 +1,60 @@
+@use "partials/corners";
+
+$panel-radius: 1.2rem;
+$panel-gap: 0.4rem;
+
+.root {
+	position: relative;
+	display: inline-block;
+}
+
+.panel {
+	position: absolute;
+	z-index: var(--z-dropdown);
+	top: calc(100% + 0.4rem);
+	min-width: 20rem;
+	padding: $panel-gap;
+	background: var(--color-surface);
+	border: 0.1rem solid var(--color-border);
+	box-shadow: var(--shadow-popover);
+	animation: pop 0.12s ease-out;
+	@include corners.radius($panel-radius);
+}
+
+.end { right: 0; }
+.start { left: 0; }
+
+.item {
+	display: flex;
+	align-items: center;
+	gap: 1rem;
+	width: 100%;
+	min-height: 4rem;
+	padding: 0 1.2rem;
+	font-size: 1.5rem;
+	text-align: left;
+	@include corners.nested($panel-radius, $panel-gap + 0.1rem);
+
+	&:disabled {
+		opacity: 0.45;
+	}
+}
+
+.active {
+	background: var(--color-surfaceMuted);
+}
+
+.danger {
+	color: var(--color-dangerText);
+
+	&.active {
+		background: var(--color-dangerSoft);
+	}
+}
+
+@keyframes pop {
+	from {
+		opacity: 0;
+		transform: translateY(-0.4rem);
+	}
+}

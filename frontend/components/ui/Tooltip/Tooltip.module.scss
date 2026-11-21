@@ -1,0 +1,30 @@
+@use "partials/corners";
+
+.wrap {
+	position: relative;
+	display: inline-flex;
+
+	&:hover .tip,
+	&:focus-within .tip {
+		opacity: 1;
+		transform: translate(-50%, 0);
+	}
+}
+
+.tip {
+	position: absolute;
+	z-index: var(--z-dropdown);
+	bottom: calc(100% + 0.6rem);
+	left: 50%;
+	padding: 0.6rem 1rem;
+	background: var(--color-primary);
+	color: var(--color-onPrimary);
+	font-size: 1.2rem;
+	line-height: 1.3;
+	white-space: nowrap;
+	pointer-events: none;
+	opacity: 0;
+	transform: translate(-50%, 0.3rem);
+	transition: opacity var(--transition-fast), transform var(--transition-fast);
+	@include corners.radius(0.6rem);
+}

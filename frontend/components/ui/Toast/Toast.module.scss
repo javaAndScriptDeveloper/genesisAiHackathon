@@ -1,0 +1,49 @@
+@use "partials/corners";
+@use "partials/mixins";
+
+.region {
+	position: fixed;
+	z-index: var(--z-toast);
+	right: 1.6rem;
+	bottom: 1.6rem;
+	left: 1.6rem;
+	display: flex;
+	flex-direction: column;
+	align-items: flex-end;
+	gap: 0.8rem;
+	pointer-events: none;
+
+	@include mixins.below(sm) {
+		align-items: stretch;
+	}
+}
+
+.toast {
+	display: flex;
+	align-items: center;
+	gap: 1rem;
+	min-height: var(--hit-target);
+	padding: 0.8rem 1.6rem;
+	max-width: 40rem;
+	background: var(--color-primary);
+	color: var(--color-onPrimary);
+	font-size: 1.4rem;
+	box-shadow: var(--shadow-popover);
+	animation: slide 0.2s ease-out;
+	@include corners.radius(var(--radius-control));
+}
+
+.success {
+	background: var(--color-success);
+}
+
+.danger {
+	background: var(--color-danger);
+}
+
+@keyframes slide {
+	from {
+		opacity: 0;
+		transform: translateY(1rem);
+	}
+}
