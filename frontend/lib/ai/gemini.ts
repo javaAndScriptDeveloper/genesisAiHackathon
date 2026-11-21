@@ -1,5 +1,5 @@
 import "server-only";
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenAI, Type } from "@google/genai";
 import { AiConfigError } from "./errors";
 import { exerciseCatalog, parseAiPlan, type AiPlan, type PlanRequest } from "@/lib/fit/aiPlan";
 import { parseGoalReply } from "@/lib/fit/goalParse";
@@ -86,6 +86,38 @@ export async function transcribeAudio({ data, mimeType }: { data: Buffer; mimeTy
 	const res = await client().models.generateContent({
 		model: model(),
 		contents: [{ role: "user", parts: [{ inlineData: { mimeType, data: data.toString("base64") } }, { text: "Transcribe this audio verbatim. Return only the transcript." }] }],
+	});
+	return res.text ?? "";
+}
+
+const PHOTO_SCHEMA = {
+	type: Type.OBJECT,
+	properties: {
+		suitable: { type: Type.BOOLEAN },
+		summary: { type: Type.STRING },
+		observations: { type: Type.ARRAY, maxItems: "4", items: { type: Type.OBJECT, properties: { area: { type: Type.STRING }, text: { type: Type.STRING } }, required: ["area", "text"] } },
+		encouragement: { type: Type.STRING },
+	},
+	required: ["suitable", "summary", "observations", "encouragement"],
+};
+
+type PhotoPart = { mimeType: string; data: Buffer };
+
+/** Compares two progress photos; returns the raw JSON text (validate with zod). Images are sent inline and never stored. */
+export async function analyzeProgressPhotos({ before, after, prompt }: { before: PhotoPart; after: PhotoPart; prompt: string }): Promise<string> {
+	const res = await client().models.generateContent({
+		model: model(),
+		contents: [
+			{
+				role: "user",
+				parts: [
+					{ inlineData: { mimeType: before.mimeType, data: before.data.toString("base64") } },
+					{ inlineData: { mimeType: after.mimeType, data: after.data.toString("base64") } },
+					{ text: prompt },
+				],
+			},
+		],
+		config: { responseMimeType: "application/json", responseSchema: PHOTO_SCHEMA },
 	});
 	return res.text ?? "";
 }
