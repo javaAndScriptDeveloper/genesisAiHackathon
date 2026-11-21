@@ -110,7 +110,7 @@ export function PhotoInsightSection() {
 			records: progress.records,
 			exerciseName: (id) => findExercise(id)?.name ?? id,
 		});
-		const outcome = await requestPhotoInsight({ token: state.progressToken, locale, pair, context, mock: mockAllowed(window.location.search) });
+		const outcome = await requestPhotoInsight({ token: state.progressToken, locale: locale === "uk" ? "uk" : "en", pair, context, mock: mockAllowed(window.location.search) });
 		if (!outcome.ok) {
 			setError(outcome.error);
 			setStage("error");
