@@ -254,6 +254,11 @@ export function reducer(state: FitState, action: Action): FitState {
 			return { ...mergeUpcoming(state, action.planned, action.today), planSummary: action.summary, planSource: action.source, planWishes: action.wishes, daily: null };
 		case "apply-daily": {
 			const prev = state.daily;
+			const earlier = prev && prev.date === action.check.date && prev.original && !prev.undone ? prev.original : null;
+			if (action.check.status === "unchanged" && earlier) {
+				const back = earlier;
+				return { ...state, planned: state.planned.map((w) => (w.id === back.id ? back : w)), daily: { ...action.check, original: null, undone: false } };
+			}
 			const keep = prev && prev.date === action.check.date && prev.sessionId === action.check.sessionId && prev.original && !prev.undone ? prev.original : null;
 			const original = keep ?? (action.session ? (state.planned.find((w) => w.id === action.session?.id) ?? null) : null);
 			const session = action.session;

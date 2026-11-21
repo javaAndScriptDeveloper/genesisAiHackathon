@@ -211,6 +211,17 @@ describe("AI plan state", () => {
 		expect(run(s1, { type: "undo-daily" }).planned[0]).toEqual(original);
 	});
 
+	it("an unchanged daily check reverts today's earlier adjustment", () => {
+		const original = aiSession("w1", tomorrow);
+		const s0: FitState = { ...emptyState(), profile, planned: [original] };
+		const check = { date: today, status: "lighter" as const, note: "Tired", stats: null, sessionId: "w1" };
+		const s1 = run(s0, { type: "apply-daily", check, session: { ...original, title: "Lighter" } });
+		const s2 = run(s1, { type: "apply-daily", check: { ...check, status: "unchanged", sessionId: null }, session: null });
+		expect(s2.planned[0]).toEqual(original);
+		expect(s2.daily?.status).toBe("unchanged");
+		expect(s2.daily?.original).toBeNull();
+	});
+
 	it("old saved state without new fields loads with defaults", () => {
 		const old = { version: 1, units: "metric", profile: null, trainerId: null, planned: [], history: [], active: null, notifications: [], water: {}, subscription: { tier: "free", trialEndsAt: null }, coach: [] };
 		vi.stubGlobal("window", { localStorage: { getItem: () => JSON.stringify(old), setItem: () => undefined } });
