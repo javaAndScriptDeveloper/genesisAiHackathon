@@ -46,6 +46,10 @@
 	padding: var(--space-3) var(--space-3) 0 var(--space-4);
 }
 
+.compactHeader {
+	padding-block-start: 0;
+}
+
 .title {
 	font-size: 1.8rem;
 	font-weight: 650;

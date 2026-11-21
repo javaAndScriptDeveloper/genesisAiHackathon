@@ -1,7 +1,7 @@
 {
   "fit": {
     "coach": {
-      "title": "Personal Coach", "subtitle": "Ask, adjust, stay on track", "greeting": "Hi {name}! I know your plan, your history and how this week is going. Tell me what's up and I'll adjust your training.",
+      "title": "Personal Coach", "subtitle": "Ask, adjust, stay on track", "trainerSubtitle": "{style} · your AI coach", "greeting": "Hi {name}! I know your plan, your history and how this week is going. Tell me what's up and I'll adjust your training.",
       "suggestions": "Suggested questions", "placeholder": "Message your coach", "send": "Send message", "typing": "Coach is typing",
       "voice": "Dictate a message", "voiceUnsupported": "Voice input isn't supported in this browser. Type instead.", "voiceError": "Voice input failed. Try again or type.",
       "applied": "Applied", "backToWorkout": "Back to my workout (paused)",

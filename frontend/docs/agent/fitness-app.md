@@ -1,10 +1,11 @@
 # Fitness app (Personal Coach)
 
-Mobile-first coaching app that lives in the route group `app/(app)/`. Desktop renders it inside an iPhone-style frame; real phones (< 576px) get the bare app. The frame, red theme, bottom nav, route guard and in-frame overlays are owned by `components/features/AppShell` + `PhoneFrame`.
+Mobile-first coaching app that lives in the route group `app/(app)/`. Desktop renders it inside an iPhone-style frame; real phones (< 576px) get the bare app. The frame, theme, bottom nav, route guard and in-frame overlays are owned by `components/features/AppShell` + `PhoneFrame`.
 
 ## Layers
 - `lib/fit/` is the domain, free of React: `types`, `exercises` (library + equipment/limitation filtering), `videos` (exercise → YouTube id map), `plan` (weekly plan generator), `adapt` (pure session adjustments), `stats`, `gamification`, `coach` (deterministic intent → actions), `notifications`, `health` (provider interface + Demo provider), `analytics` (typed `track`), `seed` (demo history), `speech`, `share`.
 - `lib/fit/store/`: one reducer (`reducer.ts`), `FitProvider` (localStorage persistence under `fit.state.v1`, hydration-safe via `ready`), `observe.ts` (turns state transitions into analytics events), `hooks.ts` (`useFitStats`, `useStartWorkout`).
+- `lib/progress/` holds pure progress analytics: insights ("what's working / next"), the weekly report, per-exercise strength series and records. `historyFromFit` (`lib/progress/fromFit.ts`) adapts `FitState` into its input. Streak, consistency score, XP and achievements stay in `lib/fit`; the insights consistency hint uses the app's consistency delta (`appInsights`) so numbers never contradict. `lib/api/mock/progressDb.ts` is a deterministic test fixture.
 - `components/features/*`: screens and widgets. Screens read state with `useFit()` and dispatch typed actions. Nothing computes numbers on its own: Today, Progress and Coach all use `useFitStats()` / lib functions.
 
 ## Rules specific to this app
@@ -34,3 +35,17 @@ All data is stored metric (kg, cm). `state.units` (`metric` | `imperial`, defaul
 - `Sheet` keeps its latest `onClose` in a ref: inline handlers must not re-run its focus effect (the workout timer re-renders the page every second).
 - Scroll restoration runs in a layout effect so it is applied before paint and before the view-transition snapshot.
 - Page crossfade uses `mix-blend-mode: plus-lighter` on old/new snapshots so the content never dips toward the background colour.
+
+## Onboarding quiz (Spotty)
+`/onboarding` renders `components/features/OnboardingQuiz`: 9 steps (hello, name, gender, goal, body, level, days, choose your coach, watch sync) plus a "plan ready" screen with "why this plan" and the first sessions. The `Onboarding` component is kept for `/profile/edit`. Spotty (`components/features/Spotty`) is an inline SVG mascot with moods (`idle | wave | think | cheer`); animations stop under `prefers-reduced-motion`.
+- **Coaches:** the same backend list as Settings (`useTrainers` from `lib/api/trainers`, `GET /api/trainers`). The pick goes into `complete-onboarding` as `trainerId`, so it survives the state reset and lands in `FitState.trainerId`.
+- **Goal:** pick a preset, or type your own words. On Continue, `parseGoal` (`lib/api/onboarding.ts`) calls `POST /api/goal` (Gemini) and falls back to `matchGoalKeywords` (`lib/fit/goal.ts`) on a missing key, an error, a 6s timeout or "could not tell". The words are saved as `profile.goalText`.
+- **Personal plan:** the "plan ready" screen calls `usePersonalPlan` (`lib/api/plan.ts`) → `POST /api/plan` → Gemini (`generateAiPlan`) with the full profile, the coach's `tov` and the exercise catalog already filtered by equipment and limitations. The model returns a one-week template (`aiPlanSchema` in `lib/fit/aiPlan.ts`): session titles, exercise ids, sets/reps/rest, plus `summary` and `why`. `planFromAi` lays it onto the training days for 4 weeks; loads, durations and dates are always ours, unknown or unusable ids are dropped, and a session with fewer than 2 valid exercises becomes the rule-based workout. No key, an error or a 25s timeout → `generatePlan`. The result goes to the reducer as `complete-onboarding.planned`. Later rebuilds (profile edit, `rebuildUpcoming`) still use the rule-based generator.
+- Copy: `messages/parts/quiz.json` (English only).
+
+## Theme: Training UI design system
+The app uses the dark theme of the Training UI design system (`training-ui/` at the repo root; tokens in `training-ui/tokens.css`). `styles/partials/_training.scss` maps it onto the kit's semantic tokens (`--color-*`) and Onest. `PhoneFrame` includes it on `.device`, so every screen inside the phone gets it and `/ui-kit` keeps the base kit look. Rules from `training-ui/README.md` that apply here:
+- Text on filled colors uses `--color-onAccent` / `--color-onSuccess` / `--color-onDanger`, never `#fff`: white on volt is unreadable.
+- At most one volt (primary) button per screen. Repeated list actions use `secondary`.
+- The AI coach's voice uses `--color-coach` / `--color-coachSoft`.
+- Copy has no exclamation marks, and there are no sparkles on AI.

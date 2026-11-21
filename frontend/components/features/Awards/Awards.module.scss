@@ -620,3 +620,18 @@
 		transform: translateY(-50%);
 	}
 }
+
+.sharePreview {
+	display: flex;
+	flex-direction: column;
+	gap: var(--space-3);
+
+	img {
+		align-self: center;
+	}
+
+	p {
+		margin: 0;
+		font-size: 1.3rem;
+	}
+}

@@ -1,5 +1,5 @@
-import { Onboarding } from "@/components/features/Onboarding/Onboarding";
+import { OnboardingQuiz } from "@/components/features/OnboardingQuiz/OnboardingQuiz";
 
 export default function OnboardingPage() {
-	return <Onboarding mode="create" />;
+	return <OnboardingQuiz />;
 }

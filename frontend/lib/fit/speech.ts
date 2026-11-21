@@ -43,15 +43,3 @@ export function listenOnce(handlers: { onText: (text: string) => void; onEnd: ()
 	rec.start();
 	return () => rec.stop();
 }
-
-const NUMBER_WORDS: Record<string, number> = { one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9, ten: 10, eleven: 11, twelve: 12, thirteen: 13, fourteen: 14, fifteen: 15, sixteen: 16, eighteen: 18, twenty: 20 };
-
-/** Parses phrases like "10 reps at 20 kilos", "45 pounds" or "twelve reps" into a set entry. `unit` is set only if spoken. */
-export function parseSetPhrase(text: string): { reps?: number; weight?: number; unit?: "kg" | "lb" } {
-	const lower = text.toLowerCase().replace(/\b(one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|eighteen|twenty)\b/g, (m) => String(NUMBER_WORDS[m] ?? m));
-	const reps = /(\d+)\s*(?:reps?|repetitions?|times)/.exec(lower)?.[1];
-	const kg = /(\d+(?:\.\d+)?)\s*(?:kg|kilos?|kilograms?)/.exec(lower)?.[1];
-	const lb = /(\d+(?:\.\d+)?)\s*(?:lbs?|pounds?)/.exec(lower)?.[1];
-	const weight = kg ?? lb;
-	return { reps: reps ? Number(reps) : undefined, weight: weight ? Number(weight) : undefined, unit: kg ? "kg" : lb ? "lb" : undefined };
-}

@@ -1,0 +1,84 @@
+@use "partials/corners";
+
+.root {
+	display: flex;
+	flex-direction: column;
+	gap: var(--space-3);
+
+	.badges {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--space-2);
+	}
+
+	.p {
+		margin: 0;
+		color: var(--color-textMuted);
+		font-size: 1.4rem;
+		line-height: 1.5;
+	}
+
+	.session {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-2);
+		padding: var(--space-3);
+		background: var(--color-surfaceSubtle);
+		border: 0.1rem solid var(--color-border);
+		@include corners.radius(var(--radius-card));
+	}
+
+	.meta {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--space-2) var(--space-4);
+		font-size: 1.4rem;
+		font-weight: 600;
+
+		span {
+			display: inline-flex;
+			align-items: center;
+			gap: var(--space-1);
+		}
+	}
+
+	.quality {
+		display: flex;
+		align-items: flex-start;
+		gap: var(--space-2);
+		margin: 0;
+		color: var(--color-textMuted);
+		font-size: 1.4rem;
+		line-height: 1.4;
+
+		svg {
+			flex-shrink: 0;
+			margin-top: 0.1rem;
+		}
+
+		&[data-ok] {
+			color: var(--color-successText);
+		}
+	}
+
+	.list {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-1);
+		margin: 0;
+		padding: 0;
+		list-style: none;
+		font-size: 1.4rem;
+
+		li {
+			display: flex;
+			justify-content: space-between;
+			gap: var(--space-3);
+		}
+	}
+
+	.sub {
+		flex-shrink: 0;
+		color: var(--color-textSubtle);
+	}
+}

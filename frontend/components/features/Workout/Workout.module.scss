@@ -14,15 +14,20 @@
 }
 
 .top {
+	display: grid;
+	grid-template-columns: auto minmax(0, 1fr) auto;
+	align-items: center;
+	gap: var(--space-1);
+	padding: var(--space-2);
+}
+
+.topActions {
 	display: flex;
 	align-items: center;
-	gap: var(--space-2);
-	padding: var(--space-2) var(--space-3);
 }
 
 .topTitle {
 	display: flex;
-	flex: 1;
 	flex-direction: column;
 	min-width: 0;
 	text-align: center;
@@ -40,11 +45,12 @@
 }
 
 .scroll {
+	--workout-gutter: var(--space-4);
 	display: flex;
 	flex: 1;
 	flex-direction: column;
 	gap: var(--space-4);
-	padding: var(--space-2) var(--space-4) var(--space-7);
+	padding: var(--space-2) var(--workout-gutter) var(--space-7);
 	overflow-y: auto;
 }
 
@@ -52,6 +58,11 @@
 	display: flex;
 	flex-direction: column;
 	gap: var(--space-3);
+}
+
+.video {
+	margin-inline: calc(var(--workout-gutter) * -1);
+	margin-block-start: calc(var(--space-1) * -1);
 }
 
 .stepBlock {
@@ -203,7 +214,7 @@
 
 .setDone .setNum {
 	background: var(--color-success);
-	color: #fff;
+	color: var(--color-onSuccess);
 }
 
 .setText {
@@ -223,7 +234,7 @@
 	display: flex;
 	flex-direction: column;
 	gap: var(--space-3);
-	padding: var(--space-4);
+	padding: var(--space-2);
 	background: var(--color-surface);
 	border: 0.1rem solid var(--color-border);
 	box-shadow: var(--shadow-card);
@@ -238,20 +249,28 @@
 	text-align: center;
 }
 
-.loggerRow {
-	display: flex;
+.loggerFields {
+	display: grid;
 	gap: var(--space-2);
+
+	&[data-loaded] {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
 }
 
-.complete {
+.controls .complete {
 	flex: 1;
-	min-height: 5.6rem;
-}
+	min-width: 0;
+	min-height: 5.2rem;
+	padding-inline: var(--space-2);
 
-.hint {
-	color: var(--color-textSubtle);
-	font-size: 1.2rem;
-	text-align: center;
+	span {
+		white-space: normal;
+	}
+
+	svg {
+		flex: none;
+	}
 }
 
 .skipped {
@@ -267,7 +286,7 @@
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	gap: var(--space-3);
+	gap: var(--space-2);
 }
 
 .timerBox {

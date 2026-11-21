@@ -41,7 +41,7 @@
 .user {
 	align-self: flex-end;
 	background: var(--color-accent);
-	color: #fff;
+	color: var(--color-onAccent);
 }
 
 .safety {
@@ -148,7 +148,7 @@
 	width: var(--hit-target);
 	height: var(--hit-target);
 	background: var(--color-accent);
-	color: #fff;
+	color: var(--color-onAccent);
 	border-radius: 50%;
 	@include mixins.focus-ring;
 

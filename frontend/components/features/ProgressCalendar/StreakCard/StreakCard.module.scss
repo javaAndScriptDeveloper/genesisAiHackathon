@@ -1,0 +1,49 @@
+.root {
+	display: flex;
+	flex-direction: column;
+	gap: var(--space-2);
+
+	.head {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: var(--space-3);
+	}
+
+	.title {
+		display: flex;
+		align-items: center;
+		gap: var(--space-2);
+		margin: 0;
+		font-size: 1.6rem;
+
+		svg {
+			color: var(--color-accent);
+		}
+	}
+
+	.value {
+		display: flex;
+		align-items: baseline;
+		gap: var(--space-2);
+		margin: 0;
+
+		strong {
+			font-size: 3.6rem;
+			font-weight: 800;
+			line-height: 1;
+		}
+
+		span {
+			color: var(--color-textMuted);
+			font-size: 1.4rem;
+		}
+	}
+
+	.p {
+		margin: 0;
+		color: var(--color-textMuted);
+		font-size: 1.4rem;
+		line-height: 1.5;
+	}
+}

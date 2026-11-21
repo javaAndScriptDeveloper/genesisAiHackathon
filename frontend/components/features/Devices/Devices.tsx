@@ -8,6 +8,7 @@ import { useWorkoutHealth } from "@/components/features/WorkoutHealthPanel/useWo
 import { Badge, Button, Card, EmptyState, Icon, Input, useToast } from "@/components/ui";
 import { Notice } from "@/components/features/Notice/Notice";
 import { formatDay } from "@/lib/fit/dates";
+import { parseDecimal } from "@/lib/fit/numberInput";
 import { PROVIDERS } from "@/lib/fit/health";
 import { useFit } from "@/lib/fit/store/FitProvider";
 import { useT } from "@/lib/i18n/I18nProvider";
@@ -21,10 +22,10 @@ export function Devices() {
 	const [dia, setDia] = useState("");
 	const anyLinked = state.devices.apple || state.devices.garmin;
 	const health = useWorkoutHealth({ enabled: anyLinked, intensity: 0.25, age: state.profile?.age ?? 30 });
-	const s = Number(sys);
-	const d = Number(dia);
-	const sysErr = sys !== "" && (s < 70 || s > 250) ? t("fit.devices.bpSysError") : undefined;
-	const diaErr = dia !== "" && (d < 40 || d > 150) ? t("fit.devices.bpDiaError") : undefined;
+	const s = parseDecimal(sys) ?? Number.NaN;
+	const d = parseDecimal(dia) ?? Number.NaN;
+	const sysErr = sys !== "" && !(s >= 70 && s <= 250) ? t("fit.devices.bpSysError") : undefined;
+	const diaErr = dia !== "" && !(d >= 40 && d <= 150) ? t("fit.devices.bpDiaError") : undefined;
 	const valid = sys !== "" && dia !== "" && !sysErr && !diaErr && s > d;
 
 	return (
@@ -48,7 +49,7 @@ export function Devices() {
 								</div>
 								<div className={kit.rowHead}>
 									<Badge tone={linked ? "warning" : "neutral"}>{linked ? t("fit.devices.linkedDemo") : t("fit.devices.notLinked")}</Badge>
-									<Button size="sm" variant={linked ? "secondary" : "primary"} className={kit.pushRight} onClick={() => { dispatch({ type: "device", id: p.id, connected: !linked }); toast.show(linked ? t("fit.devices.disconnected", { name: p.name }) : t("fit.devices.connected", { name: p.name }), linked ? "info" : "success"); }}>
+									<Button size="sm" variant="secondary" className={kit.pushRight} onClick={() => { dispatch({ type: "device", id: p.id, connected: !linked }); toast.show(linked ? t("fit.devices.disconnected", { name: p.name }) : t("fit.devices.connected", { name: p.name }), linked ? "info" : "success"); }}>
 										{linked ? t("fit.devices.disconnect") : t("fit.devices.connect")}
 									</Button>
 								</div>
@@ -68,10 +69,10 @@ export function Devices() {
 					<Badge tone="warning">{t("fit.devices.bpBadge")}</Badge>
 					<p className={kit.note}>{t("fit.devices.bpNote")}</p>
 					<div className={kit.cols}>
-						<Input label={t("fit.devices.systolic")} type="number" inputMode="numeric" suffix="mmHg" value={sys} onChange={(e) => setSys(e.target.value)} error={sysErr} />
-						<Input label={t("fit.devices.diastolic")} type="number" inputMode="numeric" suffix="mmHg" value={dia} onChange={(e) => setDia(e.target.value)} error={diaErr} />
+						<Input label={t("fit.devices.systolic")} type="text" inputMode="numeric" suffix="mmHg" value={sys} onChange={(e) => setSys(e.target.value)} error={sysErr} />
+						<Input label={t("fit.devices.diastolic")} type="text" inputMode="numeric" suffix="mmHg" value={dia} onChange={(e) => setDia(e.target.value)} error={diaErr} />
 					</div>
-					<Button disabled={!valid} onClick={() => { dispatch({ type: "add-bp", systolic: s, diastolic: d, now: new Date().toISOString() }); setSys(""); setDia(""); toast.show(t("fit.devices.bpSaved"), "success"); }}>{t("fit.common.save")}</Button>
+					<Button disabled={!valid} onClick={() => { dispatch({ type: "add-bp", systolic: Math.round(s), diastolic: Math.round(d), now: new Date().toISOString() }); setSys(""); setDia(""); toast.show(t("fit.devices.bpSaved"), "success"); }}>{t("fit.common.save")}</Button>
 					{state.bloodPressure.length > 0 && (
 						<ul className={kit.list}>
 							{state.bloodPressure.slice(0, 5).map((b) => (

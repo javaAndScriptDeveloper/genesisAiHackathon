@@ -1,0 +1,358 @@
+@use "partials/corners";
+
+// Outline is the on-volt ink in both themes, so the volt bubble reads on dark and light canvases.
+$outline: 2.4;
+
+.root {
+	display: flex;
+	align-items: flex-end;
+	gap: var(--space-3);
+
+	.figure {
+		flex: none;
+		width: 7.2rem;
+		height: 8.4rem;
+		overflow: visible;
+	}
+
+	.skin {
+		fill: var(--color-primary);
+		stroke: var(--color-onPrimary);
+		stroke-width: $outline;
+	}
+
+	.limb {
+		fill: none;
+		stroke: var(--color-onPrimary);
+		stroke-linecap: round;
+		stroke-width: 9;
+	}
+
+	.limbFill {
+		fill: none;
+		stroke: var(--color-primary);
+		stroke-linecap: round;
+		stroke-width: 4.6;
+	}
+
+	.belly {
+		fill: var(--color-primaryHover);
+	}
+
+	.band {
+		fill: var(--color-danger);
+		stroke: var(--color-onPrimary);
+		stroke-linejoin: round;
+		stroke-width: $outline;
+	}
+
+	.shine {
+		fill: #fff;
+		opacity: 0.55;
+	}
+
+	.eye {
+		fill: var(--color-onPrimary);
+	}
+
+	.glint {
+		fill: #fff;
+	}
+
+	.cheek {
+		fill: var(--color-danger);
+		opacity: 0.3;
+	}
+
+	.mouth,
+	.happyEyes {
+		fill: none;
+		stroke: var(--color-onPrimary);
+		stroke-linecap: round;
+		stroke-width: 2.4;
+	}
+
+	.mouthOpen {
+		fill: var(--color-onPrimary);
+		opacity: 0;
+	}
+
+	.happyEyes {
+		opacity: 0;
+	}
+
+	.bar {
+		fill: var(--color-textMuted);
+		stroke: var(--color-onPrimary);
+		stroke-width: 1;
+	}
+
+	.plate,
+	.plateCap {
+		fill: var(--color-coach, var(--color-text));
+		stroke: var(--color-onPrimary);
+		stroke-width: 1.6;
+	}
+
+	.shadow {
+		fill: var(--color-border);
+		transform-origin: 60px 134px;
+	}
+
+	.dots {
+		opacity: 0;
+		fill: var(--color-coach, var(--color-textSubtle));
+	}
+
+	// Pivot points in SVG units: shoulders at (27,96) / (93,96), squash from the feet.
+	.armLeft {
+		transform-origin: 27px 96px;
+	}
+
+	.armRight {
+		transform-origin: 93px 96px;
+	}
+
+	.body {
+		transform-origin: 60px 131px;
+	}
+
+	.eyes {
+		transform-origin: 60px 82px;
+		animation: blink 4.5s infinite;
+	}
+
+	.bubble {
+		position: relative;
+		flex: 1;
+		margin-bottom: var(--space-5);
+		padding: var(--space-3) var(--space-4);
+		background: var(--color-coachSoft, var(--color-surface));
+		border: 0.1rem solid var(--color-border);
+		color: var(--color-text);
+		font-size: 1.5rem;
+		font-weight: 500;
+		line-height: 1.45;
+		animation: pop 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+		@include corners.radius(var(--radius-panel));
+
+		&::before {
+			position: absolute;
+			bottom: 1.2rem;
+			left: -0.7rem;
+			width: 1.2rem;
+			height: 1.2rem;
+			background: inherit;
+			border-bottom: inherit;
+			border-left: inherit;
+			transform: rotate(45deg);
+			content: "";
+		}
+	}
+}
+
+.lg {
+	flex-direction: column;
+	align-items: center;
+	text-align: center;
+
+	.figure {
+		width: 15rem;
+		height: 17.5rem;
+	}
+
+	.bubble {
+		margin-bottom: 0;
+		font-size: 1.7rem;
+
+		&::before {
+			top: -0.7rem;
+			bottom: auto;
+			left: calc(50% - 0.6rem);
+			border-top: 0.1rem solid var(--color-border);
+			border-bottom: 0;
+		}
+	}
+}
+
+// Bouncing on the spot with squash-and-stretch, alternating dumbbell curls.
+.idle {
+	.body {
+		animation: bounce 0.9s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+	}
+
+	.shadow {
+		animation: shadow 0.9s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+	}
+
+	.armRight {
+		animation: curlRight 1.8s ease-in-out infinite;
+	}
+
+	.armLeft {
+		animation: curlLeft 1.8s ease-in-out infinite 0.9s;
+	}
+}
+
+.wave {
+	.body {
+		animation: bounce 1.6s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+	}
+
+	.shadow {
+		animation: shadow 1.6s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+	}
+
+	.armRight {
+		transform: rotate(-150deg);
+		animation: wave 1.1s ease-in-out infinite;
+	}
+}
+
+.think {
+	.body {
+		transform: rotate(-5deg);
+	}
+
+	.dots {
+		animation: think 1.2s ease-in-out infinite;
+	}
+
+	.armRight {
+		transform: rotate(-70deg);
+	}
+}
+
+.cheer {
+	.body {
+		animation: jump 0.8s ease-in-out infinite;
+	}
+
+	.shadow {
+		animation: shadow 0.8s ease-in-out infinite;
+	}
+
+	.armRight {
+		transform: rotate(-165deg);
+	}
+
+	.armLeft {
+		transform: rotate(165deg);
+	}
+
+	.eyes,
+	.mouth {
+		opacity: 0;
+	}
+
+	.happyEyes,
+	.mouthOpen {
+		opacity: 1;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.root * {
+		animation: none !important;
+	}
+
+	.root .dots {
+		opacity: 1;
+	}
+}
+
+@keyframes bounce {
+	0%,
+	100% {
+		transform: translateY(0) scale(1.07, 0.93);
+	}
+	45%,
+	55% {
+		transform: translateY(-9px) scale(0.97, 1.04);
+	}
+}
+
+@keyframes shadow {
+	0%,
+	100% {
+		transform: scaleX(1);
+		opacity: 1;
+	}
+	50% {
+		transform: scaleX(0.7);
+		opacity: 0.6;
+	}
+}
+
+@keyframes curlRight {
+	0%,
+	100% {
+		transform: rotate(0deg);
+	}
+	45%,
+	55% {
+		transform: rotate(-120deg);
+	}
+}
+
+@keyframes curlLeft {
+	0%,
+	100% {
+		transform: rotate(0deg);
+	}
+	45%,
+	55% {
+		transform: rotate(120deg);
+	}
+}
+
+@keyframes blink {
+	0%,
+	92%,
+	100% {
+		transform: scaleY(1);
+	}
+	95% {
+		transform: scaleY(0.1);
+	}
+}
+
+@keyframes wave {
+	0%,
+	100% {
+		transform: rotate(-150deg);
+	}
+	50% {
+		transform: rotate(-110deg);
+	}
+}
+
+@keyframes think {
+	0%,
+	100% {
+		opacity: 0.25;
+	}
+	50% {
+		opacity: 1;
+	}
+}
+
+@keyframes jump {
+	0%,
+	100% {
+		transform: translateY(0) scale(1.08, 0.92);
+	}
+	30% {
+		transform: translateY(0) scale(1.1, 0.9);
+	}
+	60% {
+		transform: translateY(-16px) scale(0.95, 1.06);
+	}
+}
+
+@keyframes pop {
+	from {
+		opacity: 0;
+		transform: translateY(0.6rem);
+	}
+}

@@ -7,6 +7,7 @@ import { fromISO } from "@/lib/fit/dates";
 import { useI18n } from "@/lib/i18n/I18nProvider";
 import { summarizeActivity, type Period } from "@/lib/insights/activity";
 import { eventNames, readBrowserEvents, subscribeBrowserEvents } from "@/lib/insights/browserEvents";
+import { DashboardChart } from "./DashboardChart";
 import styles from "./AnalyticsDashboard.module.scss";
 
 const periodOptions: Period[] = ["week", "month", "quarter"];
@@ -70,29 +71,22 @@ export function ProductActivity() {
 					</header>
 					{!snapshot ? <Skeleton height="20rem" /> : data?.total ? (
 						<div className={styles.activityChart}>
-							<div className={styles.chart}>
-								<div className={styles.axis} aria-hidden>
-									{ticks.map((value) => <span key={value}>{formatNumber.format(value)}</span>)}
-								</div>
-								<div className={styles.plot}>
-									<div className={styles.gridlines} aria-hidden>{ticks.map((value) => <i key={value} />)}</div>
-									<ul className={styles.bars} aria-label={t("analytics.activity.chartTitle")}>
-										{data.buckets.map(({ from, to, count }) => {
-											const startLabel = formatDate.format(fromISO(from));
-											const date = from === to ? startLabel : `${startLabel} – ${formatDate.format(fromISO(to))}`;
-											const description = t("analytics.activity.chartValue", { date, count: formatNumber.format(count) });
-											return (
-												<li key={from}>
-													<span className={styles.chartBar} style={{ height: `${100 * count / ceiling}%` }} title={description}>
-														<span className={styles.srOnly}>{description}</span>
-													</span>
-													<span className={styles.tickLabel} aria-hidden>{startLabel}</span>
-												</li>
-											);
-										})}
-									</ul>
-								</div>
-							</div>
+							<DashboardChart
+								key={period}
+								label={t("analytics.activity.chartTitle")}
+								max={ceiling}
+								ticks={ticks.map((value) => ({ value, label: formatNumber.format(value) }))}
+								points={data.buckets.map(({ from, to, count }) => {
+									const start = formatDate.format(fromISO(from));
+									return {
+										id: from,
+										label: from === to ? start : `${start} – ${formatDate.format(fromISO(to))}`,
+										tick: start,
+										value: count,
+										values: [{ label: t("analytics.activity.eventCount"), amount: formatNumber.format(count) }],
+									};
+								})}
+							/>
 						</div>
 					) : (
 						<div className={styles.chartEmpty}>

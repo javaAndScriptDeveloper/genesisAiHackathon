@@ -1,6 +1,6 @@
 "use client";
 
-import { Alert02Icon, ChartUpIcon, Chat01Icon, Dumbbell03Icon, Medal01Icon, Moon01Icon, Notification01Icon, Settings02Icon, Target01Icon } from "@hugeicons/core-free-icons";
+import { Alert02Icon, ChartUpIcon, Chat01Icon, Dumbbell03Icon, Medal01Icon, Moon01Icon, Notification01Icon, Settings02Icon, Target01Icon, TickDouble02Icon } from "@hugeicons/core-free-icons";
 import { useRouter } from "next/navigation";
 import { ScreenHeader } from "@/components/features/ScreenHeader/ScreenHeader";
 import { Badge, Button, EmptyState, Icon, IconButton, type IconDefinition } from "@/components/ui";
@@ -10,6 +10,7 @@ import { useFit } from "@/lib/fit/store/FitProvider";
 import { useActionNavigate } from "@/lib/fit/store/hooks";
 import { useT } from "@/lib/i18n/I18nProvider";
 import kit from "../ScreenKit/ScreenKit.module.scss";
+import styles from "./Notifications.module.scss";
 
 const KIND_ICONS: Record<NotificationKind, IconDefinition> = { workout: Dumbbell03Icon, missed: Alert02Icon, achievement: Medal01Icon, "weekly-goal": Target01Icon, recovery: Moon01Icon, coach: Chat01Icon, "weekly-summary": ChartUpIcon };
 
@@ -35,7 +36,6 @@ export function Notifications() {
 					<EmptyState icon={Notification01Icon} title={t("fit.notifications.empty")} description={t("fit.notifications.emptyBody")} />
 				) : (
 					<>
-						<Button variant="secondary" size="sm" disabled={unread === 0} onClick={() => dispatch({ type: "notifications-read-all" })}>{t("fit.notifications.markAll")}</Button>
 						<ul className={kit.list}>
 							{state.notifications.map((n) => (
 								<li key={n.id}>
@@ -61,6 +61,9 @@ export function Notifications() {
 								</li>
 							))}
 						</ul>
+						<div className={styles.stickyBar}>
+							<Button variant="secondary" iconLeft={TickDouble02Icon} disabled={unread === 0} onClick={() => dispatch({ type: "notifications-read-all" })}>{t("fit.notifications.markAll")}</Button>
+						</div>
 					</>
 				)}
 			</div>

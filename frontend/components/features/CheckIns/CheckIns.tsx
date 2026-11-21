@@ -6,6 +6,7 @@ import { PremiumGate, usePremium } from "@/components/features/PremiumGate/Premi
 import { Button, Card, EmptyState, Icon, Input, ProgressBar, Sheet, useToast } from "@/components/ui";
 import { formatDay } from "@/lib/fit/dates";
 import { resizeToDataUrl } from "@/lib/fit/image";
+import { validateBodyWeightInput } from "@/lib/fit/numberInput";
 import { useFit } from "@/lib/fit/store/FitProvider";
 import { useUnits } from "@/lib/fit/store/hooks";
 import { useT } from "@/lib/i18n/I18nProvider";
@@ -41,10 +42,12 @@ export function CheckIns() {
 	const weight = weightDraft ?? lastValue;
 	const goal = goalDraft ?? goalValue;
 
-	const kg = u.toKg(Number(weight));
-	const validWeight = weight !== "" && kg >= 30 && kg <= 250;
-	const goalKg = u.toKg(Number(goal));
-	const validGoal = goal !== "" && goalKg >= 30 && goalKg <= 250;
+	const weightCheck = validateBodyWeightInput(weight, u.units);
+	const goalCheck = validateBodyWeightInput(goal, u.units);
+	const kg = weightCheck.kg ?? 0;
+	const validWeight = weightCheck.kg !== null;
+	const goalKg = goalCheck.kg ?? 0;
+	const validGoal = goalCheck.kg !== null;
 	const goalChanged = validGoal && Math.abs(goalKg - (state.goalWeightKg ?? 0)) > 0.01;
 
 	const change = latest && first && entries.length > 1 ? latest.kg - first.kg : null;
@@ -114,7 +117,7 @@ export function CheckIns() {
 				<h3 className={styles.h3}>{t("fit.progress.logWeight")}</h3>
 				<p className={styles.p}>{latest ? t("fit.checkins.lastHint", { value: `${u.mass(latest.kg, 1)} ${u.unit}`, when: formatStamp(latest.at, latest.date) }) : t("fit.checkins.firstHint")}</p>
 				<div className={styles.inline}>
-					<Input className={styles.grow} label={t("fit.onboarding.weight")} type="number" inputMode="decimal" step="0.1" suffix={u.unit} value={weight} onChange={(e) => setWeightDraft(e.target.value)} error={weight !== "" && !validWeight ? t("fit.onboarding.errors.weight") : undefined} />
+					<Input className={styles.grow} label={t("fit.onboarding.weight")} type="text" inputMode="decimal" suffix={u.unit} value={weight} onChange={(e) => setWeightDraft(e.target.value)} error={weightCheck.error ? t("fit.onboarding.errors.weight") : undefined} />
 					<Button
 						disabled={!validWeight}
 						onClick={() => {
@@ -134,7 +137,7 @@ export function CheckIns() {
 					{state.goalWeightKg ? t("fit.checkins.goalSet", { value: `${u.mass(state.goalWeightKg, 1)} ${u.unit}`, when: state.goalSetAt ? formatStamp(state.goalSetAt, state.goalSetAt.slice(0, 10)) : "—" }) : t("fit.progress.goalHint")}
 				</p>
 				<div className={styles.inline}>
-					<Input className={styles.grow} label={t("fit.progress.goalWeight")} type="number" inputMode="decimal" step="0.1" suffix={u.unit} value={goal} onChange={(e) => setGoalDraft(e.target.value)} error={goal !== "" && !validGoal ? t("fit.onboarding.errors.weight") : undefined} />
+					<Input className={styles.grow} label={t("fit.progress.goalWeight")} type="text" inputMode="decimal" suffix={u.unit} value={goal} onChange={(e) => setGoalDraft(e.target.value)} error={goalCheck.error ? t("fit.onboarding.errors.weight") : undefined} />
 					<Button
 						variant="secondary"
 						disabled={!goalChanged}

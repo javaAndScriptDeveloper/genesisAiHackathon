@@ -30,7 +30,9 @@
       "chartDetail": "Cumulative contribution per new subscriber over 24 months",
       "cumulative": "Cumulative contribution",
       "axis": "${value}",
-      "chartValue": "Month {month} · {value}",
+      "chartMonth": "Month {month}",
+      "costPerMonth": "Per month",
+      "costShare": "Share of gross revenue",
       "costTitle": "Monthly cost breakdown",
       "costDetail": "Per paid subscriber-month, weighted by plan mix",
       "gross": "Gross revenue per month",
@@ -68,6 +70,18 @@
         "source": "Source — Fitness Companion Market Evidence & Unit Economics Report, section 4. Values are recalculated from its input assumptions."
       }
     },
+    "build": {
+      "title": "MVP build payback",
+      "subtitle": "Hackathon build from 10:30 to 17:50. The hourly rate is an estimate you can change.",
+      "elapsed": "Elapsed build time",
+      "duration": "{hours} h {minutes} min",
+      "hourly": "Combined team rate per hour",
+      "hourlyError": "Enter 0–1 million USD. Using $50 for now.",
+      "cost": "One-time labor cost",
+      "payers": "New payers to recover labor in 12 months",
+      "recoverable": "{value} per payer in first-year contribution after blended CAC, before monthly overhead.",
+      "unrecoverable": "First-year contribution after blended CAC is {value} per payer. This acquisition mix leaves no surplus for the build."
+    },
     "activity": {
       "title": "Product activity",
       "badge": "This browser",
@@ -93,7 +107,7 @@
       "chartTitle": "Event volume",
       "chartDetail": "All tracked product events",
       "total": "{count} recorded events",
-      "chartValue": "{date} · {count} events",
+      "eventCount": "Recorded events",
       "empty": "No events in this period",
       "emptyDetail": "Finish onboarding, start a workout or use the coach to populate this view.",
       "unavailable": "Browser storage is unavailable",

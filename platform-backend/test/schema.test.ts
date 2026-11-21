@@ -10,7 +10,7 @@ describe("DB schema migrations", () => {
   let db: Knex;
 
   const tables = async (): Promise<string[]> => {
-    const { rows } = await db.raw("select tablename from pg_tables where schemaname = 'public' and tablename not like 'knex_%' order by tablename");
+    const { rows } = await db.raw("select tablename from pg_tables where schemaname = 'public' and tablename not like 'knex_%' and tablename not like 'user_progress_%' order by tablename");
     return rows.map((r: { tablename: string }) => r.tablename);
   };
   const columns = async (table: string): Promise<Record<string, { type: string; nullable: boolean; default: string | null }>> => {

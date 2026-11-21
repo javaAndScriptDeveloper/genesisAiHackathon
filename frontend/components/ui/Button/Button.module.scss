@@ -62,7 +62,7 @@
 
 .danger {
 	background: var(--color-danger);
-	color: #fff;
+	color: var(--color-onDanger);
 
 	&:hover:not(:disabled) {
 		background: var(--color-dangerText);
