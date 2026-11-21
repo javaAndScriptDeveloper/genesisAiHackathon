@@ -81,6 +81,7 @@ jobs:
         env:
           VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
           POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GHCR_USER: ${{ github.actor }}
           IMAGE_TAG: sha-${{ github.sha }}
@@ -93,7 +94,7 @@ jobs:
           scp -i key -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new \
             deploy/compose.prod.yml "root@${VPS_HOST}:/opt/app/compose.prod.yml"
           $SSH "echo '${GHCR_TOKEN}' | docker login ghcr.io -u '${GHCR_USER}' --password-stdin"
-          $SSH "umask 077 && printf 'IMAGE_PREFIX=%s\nIMAGE_TAG=%s\nPOSTGRES_PASSWORD=%s\n' '${IMAGE_PREFIX}' '${IMAGE_TAG}' '${POSTGRES_PASSWORD}' > /opt/app/.env"
+          $SSH "umask 077 && printf 'IMAGE_PREFIX=%s\nIMAGE_TAG=%s\nPOSTGRES_PASSWORD=%s\nGEMINI_API_KEY=%s\n' '${IMAGE_PREFIX}' '${IMAGE_TAG}' '${POSTGRES_PASSWORD}' '${GEMINI_API_KEY}' > /opt/app/.env"
           $SSH 'cd /opt/app && docker compose -f compose.prod.yml pull && docker compose -f compose.prod.yml up -d --remove-orphans && docker image prune -f'
           rm -f key
 
