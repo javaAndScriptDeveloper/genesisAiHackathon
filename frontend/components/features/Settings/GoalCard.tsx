@@ -31,7 +31,7 @@ export function GoalCard() {
 		try {
 			const form = new FormData();
 			form.append("audio", audio, "goal.webm");
-			const response = await fetch("/api/stt", { method: "POST", body: form });
+			const response = await fetch("/api/stt", { method: "POST", body: form, signal: AbortSignal.timeout(25_000) });
 			const data: unknown = await response.json().catch(() => null);
 			if (!response.ok || typeof data !== "object" || data === null || !("text" in data) || typeof data.text !== "string" || data.text === "") throw new Error("stt");
 			const heard = data.text;
