@@ -1,0 +1,57 @@
+{
+  "fit": {
+    "nav": {
+      "today": "Astăzi",
+      "training": "Antrenament",
+      "progress": "Progres",
+      "community": "Comunitate",
+      "profile": "Profil"
+    },
+    "common": {
+      "back": "Înapoi",
+      "save": "Salvează",
+      "cancel": "Anulează",
+      "done": "Gata",
+      "continue": "Continuă",
+      "next": "Următorul",
+      "start": "Începe"
+    },
+    "quiz": {
+      "skip": "Omite deocamdată",
+      "nameLabel": "Numele tău",
+      "hello": {
+        "cta": "Hai să ne cunoaștem",
+        "plan": "Un plan construit în jurul obiectivului, programului și echipamentului tău",
+        "coach": "Un antrenor AI care se adaptează după fiecare antrenament",
+        "honest": "Fără înregistrare, durează aproximativ un minut"
+      },
+      "steps": {
+        "name": {
+          "title": "Cum să-ți spun?"
+        },
+        "gender": {
+          "title": "Spune-mi puțin despre tine"
+        },
+        "goal": {
+          "title": "Care este obiectivul tău, {name}?"
+        },
+        "body": {
+          "title": "Punctul tău de plecare"
+        },
+        "level": {
+          "title": "Nivelul tău"
+        },
+        "days": {
+          "title": "Cât de des poți face antrenament?"
+        }
+      },
+      "language": "Limbă"
+    },
+    "settings": {
+      "languageLabel": "Limbă"
+    }
+  },
+  "common": {
+    "close": "Închide"
+  }
+}

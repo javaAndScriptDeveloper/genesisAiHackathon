@@ -1,0 +1,57 @@
+{
+  "fit": {
+    "nav": {
+      "today": "Šodien",
+      "training": "Treniņi",
+      "progress": "Progress",
+      "community": "Kopiena",
+      "profile": "Profils"
+    },
+    "common": {
+      "back": "Atpakaļ",
+      "save": "Saglabāt",
+      "cancel": "Atcelt",
+      "done": "Gatavs",
+      "continue": "Turpināt",
+      "next": "Tālāk",
+      "start": "Sākt"
+    },
+    "quiz": {
+      "skip": "Pagaidām izlaist",
+      "nameLabel": "Tavs vārds",
+      "hello": {
+        "cta": "Iepazīsimies",
+        "plan": "Plāns, kas veidots ap tavu mērķi, grafiku un aprīkojumu",
+        "coach": "MI treneris, kas pielāgojas pēc katra treniņa",
+        "honest": "Bez reģistrācijas, aizņem apmēram minūti"
+      },
+      "steps": {
+        "name": {
+          "title": "Kā lai tevi dēvēju?"
+        },
+        "gender": {
+          "title": "Pastāsti nedaudz par sevi"
+        },
+        "goal": {
+          "title": "Kāds ir tavs mērķis, {name}?"
+        },
+        "body": {
+          "title": "Tavs sākumpunkts"
+        },
+        "level": {
+          "title": "Tavs līmenis"
+        },
+        "days": {
+          "title": "Cik bieži tu vari trenēties?"
+        }
+      },
+      "language": "Valoda"
+    },
+    "settings": {
+      "languageLabel": "Valoda"
+    }
+  },
+  "common": {
+    "close": "Aizvērt"
+  }
+}

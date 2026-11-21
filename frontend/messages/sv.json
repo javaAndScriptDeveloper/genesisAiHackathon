@@ -1,0 +1,57 @@
+{
+  "fit": {
+    "nav": {
+      "today": "Idag",
+      "training": "Träning",
+      "progress": "Framsteg",
+      "community": "Community",
+      "profile": "Profil"
+    },
+    "common": {
+      "back": "Tillbaka",
+      "save": "Spara",
+      "cancel": "Avbryt",
+      "done": "Klar",
+      "continue": "Fortsätt",
+      "next": "Nästa",
+      "start": "Starta"
+    },
+    "quiz": {
+      "skip": "Hoppa över just nu",
+      "nameLabel": "Ditt namn",
+      "hello": {
+        "cta": "Låt oss lära känna varandra",
+        "plan": "En plan byggd kring ditt mål, ditt schema och din utrustning",
+        "coach": "En AI-coach som anpassar sig efter varje pass",
+        "honest": "Ingen registrering, tar ungefär en minut"
+      },
+      "steps": {
+        "name": {
+          "title": "Vad ska jag kalla dig?"
+        },
+        "gender": {
+          "title": "Berätta lite om dig själv"
+        },
+        "goal": {
+          "title": "Vad är ditt mål, {name}?"
+        },
+        "body": {
+          "title": "Din startpunkt"
+        },
+        "level": {
+          "title": "Din nivå"
+        },
+        "days": {
+          "title": "Hur ofta kan du träna?"
+        }
+      },
+      "language": "Språk"
+    },
+    "settings": {
+      "languageLabel": "Språk"
+    }
+  },
+  "common": {
+    "close": "Stäng"
+  }
+}

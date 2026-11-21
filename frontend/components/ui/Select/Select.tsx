@@ -21,10 +21,14 @@ interface SelectProps<T extends string> {
 	placeholder?: string;
 	error?: string;
 	className?: string;
+	/** Where the list opens. `up` suits fields near the bottom of the screen. */
+	placement?: "down" | "up";
+	/** Height at which the list starts to scroll (any CSS length). */
+	menuMaxHeight?: string;
 }
 
 // Keyboard: Arrow Up/Down, Home/End, Enter/Space select, Escape closes (focus returns to trigger), typeahead by first letters.
-export function Select<T extends string>({ options, value, onChange, label, placeholder = "Оберіть…", error, className }: SelectProps<T>) {
+export function Select<T extends string>({ options, value, onChange, label, placeholder = "Оберіть…", error, className, placement = "down", menuMaxHeight }: SelectProps<T>) {
 	const id = useId();
 	const rootRef = useRef<HTMLDivElement>(null);
 	const triggerRef = useRef<HTMLButtonElement>(null);
@@ -121,7 +125,7 @@ export function Select<T extends string>({ options, value, onChange, label, plac
 				<Icon icon={ArrowDown01Icon} size={18} className={styles.chevron} />
 			</button>
 			{open && (
-				<ul id={`${id}-list`} role="listbox" className={styles.panel} tabIndex={-1}>
+				<ul id={`${id}-list`} role="listbox" className={clsx(styles.panel, placement === "up" && styles.up)} style={menuMaxHeight ? { maxHeight: menuMaxHeight } : undefined} tabIndex={-1}>
 					{options.map((option, index) => (
 						<li
 							key={option.value}

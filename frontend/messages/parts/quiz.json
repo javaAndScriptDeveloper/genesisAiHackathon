@@ -94,7 +94,8 @@
         "sync": "Last step. Connect your watch so I can see heart rate and recovery.",
         "ready": "{name}, your plan is ready. Week one starts now. Easy pace, steady progress.",
         "building": "Give me a moment, {name}. I'm building your plan from everything you told me."
-      }
+      },
+      "language": "Language"
     },
     "theme": {
       "title": "Appearance",

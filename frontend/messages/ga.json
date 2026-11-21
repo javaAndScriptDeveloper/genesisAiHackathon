@@ -1,0 +1,57 @@
+{
+  "fit": {
+    "nav": {
+      "today": "Inniu",
+      "training": "Oiliúint",
+      "progress": "Dul chun cinn",
+      "community": "Pobal",
+      "profile": "Próifíl"
+    },
+    "common": {
+      "back": "Ar ais",
+      "save": "Sábháil",
+      "cancel": "Cealaigh",
+      "done": "Déanta",
+      "continue": "Lean ar aghaidh",
+      "next": "An chéad cheann eile",
+      "start": "Tosaigh"
+    },
+    "quiz": {
+      "skip": "Scipeáil anois",
+      "nameLabel": "D'ainm",
+      "hello": {
+        "cta": "Cuirimis aithne ar a chéile",
+        "plan": "Plean atá dírithe ar do sprioc, do sceideal agus do threalamh",
+        "coach": "Cóitseálaí AI a oiriúnaíonn tar éis gach seisiúin",
+        "honest": "Gan clárú, thart ar nóiméad"
+      },
+      "steps": {
+        "name": {
+          "title": "Cad ba cheart dom thú a thabhairt ort?"
+        },
+        "gender": {
+          "title": "Inis dom beagán fút féin"
+        },
+        "goal": {
+          "title": "Cén sprioc atá agat, {name}?"
+        },
+        "body": {
+          "title": "Do phointe tosaigh"
+        },
+        "level": {
+          "title": "Do leibhéal"
+        },
+        "days": {
+          "title": "Cé chomh minic is féidir leat oiliúint a dhéanamh?"
+        }
+      },
+      "language": "Teanga"
+    },
+    "settings": {
+      "languageLabel": "Teanga"
+    }
+  },
+  "common": {
+    "close": "Dún"
+  }
+}

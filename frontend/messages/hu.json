@@ -1,0 +1,57 @@
+{
+  "fit": {
+    "nav": {
+      "today": "Ma",
+      "training": "Edzés",
+      "progress": "Haladás",
+      "community": "Közösség",
+      "profile": "Profil"
+    },
+    "common": {
+      "back": "Vissza",
+      "save": "Mentés",
+      "cancel": "Mégse",
+      "done": "Kész",
+      "continue": "Tovább",
+      "next": "Következő",
+      "start": "Indítás"
+    },
+    "quiz": {
+      "skip": "Kihagyás egyelőre",
+      "nameLabel": "A neved",
+      "hello": {
+        "cta": "Ismerkedjünk meg",
+        "plan": "Terv a célod, időbeosztásod és felszerelésed alapján",
+        "coach": "MI-edző, aki minden edzés után alkalmazkodik",
+        "honest": "Regisztráció nélkül, nagyjából egy perc"
+      },
+      "steps": {
+        "name": {
+          "title": "Hogyan szólíthatlak?"
+        },
+        "gender": {
+          "title": "Mesélj egy kicsit magadról"
+        },
+        "goal": {
+          "title": "Mi a célod, {name}?"
+        },
+        "body": {
+          "title": "A kiindulópontod"
+        },
+        "level": {
+          "title": "A szinted"
+        },
+        "days": {
+          "title": "Milyen gyakran tudsz edzeni?"
+        }
+      },
+      "language": "Nyelv"
+    },
+    "settings": {
+      "languageLabel": "Nyelv"
+    }
+  },
+  "common": {
+    "close": "Bezárás"
+  }
+}

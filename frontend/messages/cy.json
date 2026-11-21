@@ -1,0 +1,57 @@
+{
+  "fit": {
+    "nav": {
+      "today": "Heddiw",
+      "training": "Hyfforddiant",
+      "progress": "Cynnydd",
+      "community": "Cymuned",
+      "profile": "Proffil"
+    },
+    "common": {
+      "back": "Yn ôl",
+      "save": "Cadw",
+      "cancel": "Canslo",
+      "done": "Wedi gorffen",
+      "continue": "Parhau",
+      "next": "Nesaf",
+      "start": "Dechrau"
+    },
+    "quiz": {
+      "skip": "Hepgor am nawr",
+      "nameLabel": "Eich enw",
+      "hello": {
+        "cta": "Dewch i ddod i adnabod ein gilydd",
+        "plan": "Cynllun wedi'i adeiladu o amgylch eich nod, eich amserlen a'ch offer",
+        "coach": "Hyfforddwr AI sy'n addasu ar ôl pob sesiwn",
+        "honest": "Dim cofrestru, mae'n cymryd tua munud"
+      },
+      "steps": {
+        "name": {
+          "title": "Beth ddylwn i eich galw chi?"
+        },
+        "gender": {
+          "title": "Dywedwch ychydig wrthyf amdanoch chi"
+        },
+        "goal": {
+          "title": "Beth yw eich nod, {name}?"
+        },
+        "body": {
+          "title": "Eich man cychwyn"
+        },
+        "level": {
+          "title": "Eich lefel"
+        },
+        "days": {
+          "title": "Pa mor aml allwch chi hyfforddi?"
+        }
+      },
+      "language": "Iaith"
+    },
+    "settings": {
+      "languageLabel": "Iaith"
+    }
+  },
+  "common": {
+    "close": "Cau"
+  }
+}

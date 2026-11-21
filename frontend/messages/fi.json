@@ -1,0 +1,57 @@
+{
+  "fit": {
+    "nav": {
+      "today": "Tänään",
+      "training": "Harjoittelu",
+      "progress": "Edistyminen",
+      "community": "Yhteisö",
+      "profile": "Profiili"
+    },
+    "common": {
+      "back": "Takaisin",
+      "save": "Tallenna",
+      "cancel": "Peruuta",
+      "done": "Valmis",
+      "continue": "Jatka",
+      "next": "Seuraava",
+      "start": "Aloita"
+    },
+    "quiz": {
+      "skip": "Ohita toistaiseksi",
+      "nameLabel": "Nimesi",
+      "hello": {
+        "cta": "Tutustutaan",
+        "plan": "Suunnitelma, joka perustuu tavoitteeseesi, aikatauluusi ja välineisiisi",
+        "coach": "Tekoälyvalmentaja, joka mukautuu jokaisen treenin jälkeen",
+        "honest": "Ei rekisteröitymistä, vie noin minuutin"
+      },
+      "steps": {
+        "name": {
+          "title": "Miksi sinua kutsutaan?"
+        },
+        "gender": {
+          "title": "Kerro hieman itsestäsi"
+        },
+        "goal": {
+          "title": "Mikä on tavoitteesi, {name}?"
+        },
+        "body": {
+          "title": "Lähtökohtasi"
+        },
+        "level": {
+          "title": "Tasosi"
+        },
+        "days": {
+          "title": "Kuinka usein voit treenata?"
+        }
+      },
+      "language": "Kieli"
+    },
+    "settings": {
+      "languageLabel": "Kieli"
+    }
+  },
+  "common": {
+    "close": "Sulje"
+  }
+}

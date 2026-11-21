@@ -83,6 +83,11 @@ $panel-gap: 0.4rem; // panel padding
 	@include corners.radius($panel-radius);
 }
 
+.up {
+	top: auto;
+	bottom: calc(100% + 0.4rem);
+}
+
 .option {
 	display: flex;
 	align-items: center;

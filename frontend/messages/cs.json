@@ -1,0 +1,57 @@
+{
+  "fit": {
+    "nav": {
+      "today": "Dnes",
+      "training": "Trénink",
+      "progress": "Pokrok",
+      "community": "Komunita",
+      "profile": "Profil"
+    },
+    "common": {
+      "back": "Zpět",
+      "save": "Uložit",
+      "cancel": "Zrušit",
+      "done": "Hotovo",
+      "continue": "Pokračovat",
+      "next": "Další",
+      "start": "Začít"
+    },
+    "quiz": {
+      "skip": "Zatím přeskočit",
+      "nameLabel": "Vaše jméno",
+      "hello": {
+        "cta": "Pojďme se seznámit",
+        "plan": "Plán postavený na vašem cíli, rozvrhu a vybavení",
+        "coach": "AI trenér, který se přizpůsobí po každém tréninku",
+        "honest": "Bez registrace, zabere asi minutu"
+      },
+      "steps": {
+        "name": {
+          "title": "Jak vám mám říkat?"
+        },
+        "gender": {
+          "title": "Řekněte mi o sobě něco málo"
+        },
+        "goal": {
+          "title": "Jaký je váš cíl, {name}?"
+        },
+        "body": {
+          "title": "Váš výchozí bod"
+        },
+        "level": {
+          "title": "Vaše úroveň"
+        },
+        "days": {
+          "title": "Jak často můžete trénovat?"
+        }
+      },
+      "language": "Jazyk"
+    },
+    "settings": {
+      "languageLabel": "Jazyk"
+    }
+  },
+  "common": {
+    "close": "Zavřít"
+  }
+}

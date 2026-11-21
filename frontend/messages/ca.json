@@ -1,0 +1,57 @@
+{
+  "fit": {
+    "nav": {
+      "today": "Avui",
+      "training": "Entrenament",
+      "progress": "Progrés",
+      "community": "Comunitat",
+      "profile": "Perfil"
+    },
+    "common": {
+      "back": "Enrere",
+      "save": "Desa",
+      "cancel": "Cancel·la",
+      "done": "Fet",
+      "continue": "Continua",
+      "next": "Següent",
+      "start": "Comença"
+    },
+    "quiz": {
+      "skip": "Omet per ara",
+      "nameLabel": "El teu nom",
+      "hello": {
+        "cta": "Anem a conèixer-nos",
+        "plan": "Un pla creat al voltant del teu objectiu, horari i material",
+        "coach": "Un entrenador d'IA que s'adapta després de cada entrenament",
+        "honest": "Sense registre, porta un minut aproximadament"
+      },
+      "steps": {
+        "name": {
+          "title": "Com et dec dir?"
+        },
+        "gender": {
+          "title": "Explica'm una mica sobre tu"
+        },
+        "goal": {
+          "title": "Quin és el teu objectiu, {name}?"
+        },
+        "body": {
+          "title": "El teu punt de partida"
+        },
+        "level": {
+          "title": "El teu nivell"
+        },
+        "days": {
+          "title": "Amb quina freqüència pots entrenar?"
+        }
+      },
+      "language": "Llengua"
+    },
+    "settings": {
+      "languageLabel": "Llengua"
+    }
+  },
+  "common": {
+    "close": "Tanca"
+  }
+}
