@@ -334,6 +334,10 @@
     },
     "profile": {
       "title": "Profile",
+      "openSettings": "Open settings",
+      "goPremium": "Go Premium",
+      "yourTrainer": "Your trainer",
+      "trainerHint": "Choose who coaches you in Settings.",
       "levelLine": "Level {level} · {xp} XP",
       "free": "Free",
       "perWeek": "days/week",
@@ -608,7 +612,8 @@
       "today": "Today",
       "training": "Training",
       "progress": "Progress",
-      "coach": "Coach"
+      "coach": "Coach",
+      "profile": "Profile"
     },
     "common": {
       "back": "Back",

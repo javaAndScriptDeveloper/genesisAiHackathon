@@ -3,7 +3,7 @@
 .nav {
 	display: grid;
 	flex: none;
-	grid-template-columns: repeat(4, 1fr);
+	grid-template-columns: repeat(5, 1fr);
 	padding: var(--space-1) var(--space-2) 2.4rem;
 	background: var(--color-surface);
 	border-top: 0.1rem solid var(--color-border);

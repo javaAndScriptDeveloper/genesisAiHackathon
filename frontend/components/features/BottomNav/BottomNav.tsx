@@ -1,7 +1,7 @@
 "use client";
 
 import clsx from "clsx";
-import { Chat01Icon, ChartUpIcon, Dumbbell03Icon, Home03Icon } from "@hugeicons/core-free-icons";
+import { Chat01Icon, ChartUpIcon, Dumbbell03Icon, Home03Icon, UserIcon } from "@hugeicons/core-free-icons";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Icon, type IconDefinition } from "@/components/ui";
@@ -13,6 +13,7 @@ const TABS: { href: string; key: string; icon: IconDefinition }[] = [
 	{ href: "/training", key: "training", icon: Dumbbell03Icon },
 	{ href: "/progress", key: "progress", icon: ChartUpIcon },
 	{ href: "/coach", key: "coach", icon: Chat01Icon },
+	{ href: "/profile", key: "profile", icon: UserIcon },
 ];
 
 export function BottomNav() {

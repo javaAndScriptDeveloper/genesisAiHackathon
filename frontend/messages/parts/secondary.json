@@ -6,7 +6,7 @@
       "kind": { "workout": "Workout", "missed": "Missed", "achievement": "Achievement", "weekly-goal": "Weekly goal", "recovery": "Recovery", "coach": "Coach", "weekly-summary": "Summary" }
     },
     "profile": {
-      "title": "Profile", "levelLine": "Level {level} · {xp} XP", "free": "Free", "perWeek": "days/week",
+      "title": "Profile", "openSettings": "Open settings", "goPremium": "Go Premium", "yourTrainer": "Your trainer", "trainerHint": "Choose who coaches you in Settings.", "levelLine": "Level {level} · {xp} XP", "free": "Free", "perWeek": "days/week",
       "links": {
         "preferences": { "label": "Training preferences", "hint": "Goal, schedule, equipment and limitations." },
         "notifications": { "label": "Notifications", "hint": "Your reminders and messages." },
