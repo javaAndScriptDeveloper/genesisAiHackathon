@@ -5,6 +5,7 @@ Mobile-first coaching app that lives in the route group `app/(app)/`. Desktop re
 ## Layers
 - `lib/fit/` is the domain, free of React: `types`, `exercises` (library + equipment/limitation filtering), `videos` (exercise → YouTube id map), `plan` (weekly plan generator), `adapt` (pure session adjustments), `stats`, `gamification`, `coach` (deterministic intent → actions), `notifications`, `health` (provider interface + Demo provider), `analytics` (typed `track`), `seed` (demo history), `speech`, `share`.
 - `lib/fit/store/`: one reducer (`reducer.ts`), `FitProvider` (localStorage persistence under `fit.state.v1`, hydration-safe via `ready`), `observe.ts` (turns state transitions into analytics events), `hooks.ts` (`useFitStats`, `useStartWorkout`).
+- `lib/progress/` holds pure progress analytics: insights ("what's working / next"), the weekly report, per-exercise strength series and records. `historyFromFit` (`lib/progress/fromFit.ts`) adapts `FitState` into its input. Streak, consistency score, XP and achievements stay in `lib/fit`; the insights consistency hint uses the app's consistency delta (`appInsights`) so numbers never contradict. `lib/api/mock/progressDb.ts` is a deterministic test fixture.
 - `components/features/*`: screens and widgets. Screens read state with `useFit()` and dispatch typed actions. Nothing computes numbers on its own: Today, Progress and Coach all use `useFitStats()` / lib functions.
 
 ## Rules specific to this app
