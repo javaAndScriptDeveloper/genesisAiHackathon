@@ -104,7 +104,7 @@ const PHOTO_SCHEMA = {
 type PhotoPart = { mimeType: string; data: Buffer };
 
 /** Compares two progress photos; returns the raw JSON text (validate with zod). Images are sent inline and never stored. */
-export async function analyzeProgressPhotos({ before, after, prompt }: { before: PhotoPart; after: PhotoPart; prompt: string }): Promise<string> {
+export async function analyzeProgressPhotos({ before, after, system, prompt }: { before: PhotoPart; after: PhotoPart; system: string; prompt: string }): Promise<string> {
 	const res = await client().models.generateContent({
 		model: model(),
 		contents: [
@@ -117,7 +117,7 @@ export async function analyzeProgressPhotos({ before, after, prompt }: { before:
 				],
 			},
 		],
-		config: { responseMimeType: "application/json", responseSchema: PHOTO_SCHEMA },
+		config: { systemInstruction: system, responseMimeType: "application/json", responseSchema: PHOTO_SCHEMA },
 	});
 	return res.text ?? "";
 }
