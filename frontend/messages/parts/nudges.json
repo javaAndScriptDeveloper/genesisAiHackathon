@@ -1,0 +1,26 @@
+{
+  "fit": {
+    "nudges": {
+      "streakChip": "{n}-week streak",
+      "levelChip": "Level {n}",
+      "dismiss": "Dismiss",
+      "open": "Open",
+      "fromTrainer": "From {name}",
+      "achievementsTitle": "Achievements",
+      "achievementsAll": "See all",
+      "achievementsNext": "Next up",
+      "achievementsEmpty": "Finish a workout to earn your first badge.",
+      "badgeProgress": "{current} of {target}",
+      "share": "Share",
+      "shareStreak": "Share streak",
+      "shareStreakText": "{n}-week streak in Personal Coach. Consistency is the whole game.",
+      "streakHeadline": "Streak",
+      "streakLine": "weeks in a row",
+      "shareReportText": "My week: {n} workouts done in Personal Coach.",
+      "reportHeadline": "My week",
+      "reportLine": "workouts done",
+      "achievementHeadline": "Unlocked",
+      "levelHeadline": "Level up"
+    }
+  }
+}

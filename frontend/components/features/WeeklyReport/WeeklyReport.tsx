@@ -1,14 +1,15 @@
 "use client";
 
-import { CheckmarkCircle02Icon, Notification03Icon, PauseIcon, Target02Icon } from "@hugeicons/core-free-icons";
+import { CheckmarkCircle02Icon, Notification03Icon, PauseIcon, Share08Icon, Target02Icon } from "@hugeicons/core-free-icons";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef } from "react";
 import { ProgressInsights } from "@/components/features/ProgressInsights/ProgressInsights";
 import { ScreenHeader } from "@/components/features/ScreenHeader/ScreenHeader";
-import { Badge, Button, Card, EmptyState, Icon, useToast } from "@/components/ui";
+import { Badge, Button, Card, EmptyState, Icon, IconButton, useToast } from "@/components/ui";
 import { formatDay, formatMonthDay } from "@/lib/fit/dates";
 import { useFit } from "@/lib/fit/store/FitProvider";
 import { useProgress, useUnits } from "@/lib/fit/store/hooks";
+import { useShare } from "@/lib/hooks/useShare";
 import { useI18n, useT } from "@/lib/i18n/I18nProvider";
 import { addDays } from "@/lib/progress/dates";
 import { isValidReportWeek, weeklyReport } from "@/lib/progress/report";
@@ -24,6 +25,7 @@ export function WeeklyReport({ week }: { week: string }) {
 	const nf = useMemo(() => new Intl.NumberFormat(locale), [locale]);
 	const router = useRouter();
 	const toast = useToast();
+	const shareWith = useShare();
 	const units = useUnits();
 	const { today, dispatch, ready } = useFit();
 	const frozen = useRef<number | null>(null);
@@ -71,7 +73,7 @@ export function WeeklyReport({ week }: { week: string }) {
 
 	return (
 		<div className={styles.root}>
-			<ScreenHeader title={t("fit.progress.report.title")} subtitle={range} back="/progress" />
+			<ScreenHeader title={t("fit.progress.report.title")} subtitle={range} back="/progress" actions={<IconButton icon={Share08Icon} label={t("fit.nudges.share")} onClick={() => void shareWith(t("fit.progress.report.title"), t("fit.nudges.shareReportText", { n: pushText.params.done }), { headline: t("fit.nudges.reportHeadline"), value: String(pushText.params.done), line: t("fit.nudges.reportLine") })} />} />
 			<div className={styles.content}>
 				<section className={styles.push} aria-label={t("fit.progress.report.push")}>
 					<span className={styles.pushIcon} aria-hidden="true"><Icon icon={Notification03Icon} size={18} /></span>

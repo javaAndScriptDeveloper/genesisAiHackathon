@@ -76,6 +76,8 @@ export type Action =
 	| { type: "coach-message"; message: CoachMessage }
 	| { type: "coach-apply"; messageId: string; action: CoachAction; today: ISODate; now: string; reply: CoachMessage }
 	| { type: "notification-read"; id: string }
+	| { type: "notification-voice"; id: string; text: string }
+	| { type: "notification-voice-failed"; id: string }
 	| { type: "notifications-read-all" }
 	| { type: "notification-settings"; settings: NotificationSettings }
 	| { type: "water"; date: ISODate; delta: number }
@@ -240,8 +242,8 @@ function recordEvents(state: FitState, events: ProgressEvent[], now: string): Fi
 	const next = reducer(state, { type: "record-events", events: fresh });
 	if (!state.notificationSettings.enabled.achievement) return next;
 	const notes = fresh.flatMap((e): AppNotification[] => {
-		if (e.kind === "badge") return [{ id: `n-badge-${e.refId}`, kind: "achievement", title: t("fit.progress.notify.badgeTitle", { title: t(`fit.progress.badge.${e.refId}.title`) }), body: t(`fit.progress.badge.${e.refId}.desc`), createdAt: now, read: false, href: "/progress" }];
-		if (e.kind === "level") return [{ id: `n-level-${e.refId}`, kind: "achievement", title: t("fit.progress.notify.levelTitle", { level: e.refId }), body: t("fit.progress.notify.levelBody"), createdAt: now, read: false, href: "/progress" }];
+		if (e.kind === "badge") return [{ id: `n-badge-${e.refId}`, kind: "achievement", title: t("fit.progress.notify.badgeTitle", { title: t(`fit.progress.badge.${e.refId}.title`) }), body: t(`fit.progress.badge.${e.refId}.desc`), createdAt: now, read: false, href: "/progress", nudge: { kind: "achievement", facts: { title: t(`fit.progress.badge.${e.refId}.title`) } } }];
+		if (e.kind === "level") return [{ id: `n-level-${e.refId}`, kind: "achievement", title: t("fit.progress.notify.levelTitle", { level: e.refId }), body: t("fit.progress.notify.levelBody"), createdAt: now, read: false, href: "/progress", nudge: { kind: "achievement", facts: { title: t("fit.progress.notify.levelTitle", { level: e.refId }) } } }];
 		return [];
 	});
 	return appendNotifications(next, notes);
@@ -480,6 +482,17 @@ export function reducer(state: FitState, action: Action): FitState {
 		}
 		case "notification-read":
 			return { ...state, notifications: state.notifications.map((n) => (n.id === action.id ? { ...n, read: true } : n)) };
+		case "notification-voice": {
+			const text = action.text.trim();
+			const target = state.notifications.find((n) => n.id === action.id);
+			if (!target || text === "" || target.aiText !== undefined) return state;
+			return { ...state, notifications: state.notifications.map((n) => (n.id === action.id ? { ...n, aiText: text } : n)) };
+		}
+		case "notification-voice-failed": {
+			const target = state.notifications.find((n) => n.id === action.id);
+			if (!target || target.aiFailed) return state;
+			return { ...state, notifications: state.notifications.map((n) => (n.id === action.id ? { ...n, aiFailed: true } : n)) };
+		}
 		case "notifications-read-all":
 			return { ...state, notifications: state.notifications.map((n) => ({ ...n, read: true })) };
 		case "notification-settings":

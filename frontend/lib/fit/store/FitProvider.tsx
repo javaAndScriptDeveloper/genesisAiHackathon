@@ -8,6 +8,8 @@ import { observeTransition } from "./observe";
 import { loadState, saveState } from "./persist";
 import { reducer, type Action } from "./reducer";
 import { useProgressSync } from "./useProgressSync";
+import { useTrainerVoice } from "./useTrainerVoice";
+import { isVoiced, showBrowserNotification } from "../notifications";
 
 interface FitApi {
 	state: FitState;
@@ -24,6 +26,11 @@ const initState = (): FitState => (typeof window === "undefined" ? emptyState() 
 
 function ProgressSync(): null {
 	useProgressSync();
+	return null;
+}
+
+function TrainerVoice(): null {
+	useTrainerVoice();
 	return null;
 }
 
@@ -65,7 +72,8 @@ export function FitProvider({ children }: { children: ReactNode }) {
 		for (const n of state.notifications) {
 			if (notified.current.has(n.id)) continue;
 			notified.current.add(n.id);
-			if (allow && !n.read && Date.now() - new Date(n.createdAt).getTime() < 60_000) new Notification(n.title, { body: n.body });
+			// Voiced kinds pop up from useTrainerVoice once the trainer text (or its failure) is known.
+			if (allow && !isVoiced(n)) showBrowserNotification(n);
 		}
 	}, [state.notifications, state.notificationSettings.browserPush, ready]);
 
@@ -77,6 +85,7 @@ export function FitProvider({ children }: { children: ReactNode }) {
 	return (
 		<FitContext.Provider value={api}>
 			<ProgressSync />
+			<TrainerVoice />
 			{children}
 		</FitContext.Provider>
 	);

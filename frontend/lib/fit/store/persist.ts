@@ -15,7 +15,11 @@ export function loadState(): FitState {
 		const raw = window.localStorage.getItem(STORAGE_KEY);
 		if (!raw) return emptyState();
 		const parsed: unknown = JSON.parse(raw);
-		return isFitState(parsed) ? { ...emptyState(), ...parsed } : emptyState();
+		if (!isFitState(parsed)) return emptyState();
+		const fresh = emptyState();
+		// Notification switches added after the save was written default to on.
+		const saved = parsed.notificationSettings;
+		return { ...fresh, ...parsed, notificationSettings: { ...fresh.notificationSettings, ...saved, enabled: { ...fresh.notificationSettings.enabled, ...saved?.enabled } } };
 	} catch {
 		return emptyState();
 	}

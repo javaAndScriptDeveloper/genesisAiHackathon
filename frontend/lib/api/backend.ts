@@ -11,6 +11,9 @@ export type Health = z.infer<typeof healthSchema>;
 export const pingSchema = z.object({ message: z.string(), time: z.string() });
 export type Ping = z.infer<typeof pingSchema>;
 
+export const trainersSchema = z.object({ trainers: z.array(z.object({ id: z.string(), name: z.string(), pathToImage: z.string(), tov: z.string() })) });
+export type TrainersResponse = z.infer<typeof trainersSchema>;
+
 export type BackendResult<T> = { ok: true; data: T } | { ok: false };
 
 async function callBackend<T>(path: string, schema: z.ZodType<T>): Promise<BackendResult<T>> {
@@ -27,4 +30,5 @@ async function callBackend<T>(path: string, schema: z.ZodType<T>): Promise<Backe
 export const backend = {
 	health: () => callBackend("/api/health", healthSchema),
 	ping: () => callBackend("/api/ping", pingSchema),
+	trainers: () => callBackend("/api/trainers", trainersSchema),
 };

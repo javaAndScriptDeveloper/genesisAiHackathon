@@ -3,7 +3,7 @@
 import { Button, Sheet, useToast } from "@/components/ui";
 import { AchievementBadge } from "@/components/features/AchievementBadge/AchievementBadge";
 import { BADGE_ICON, isBadgeId } from "@/lib/fit/awardsInfo";
-import { shareText } from "@/lib/fit/share";
+import { useShare } from "@/lib/hooks/useShare";
 import { useFit } from "@/lib/fit/store/FitProvider";
 import { useProgress } from "@/lib/fit/store/hooks";
 import { useI18n } from "@/lib/i18n/I18nProvider";
@@ -17,6 +17,7 @@ export function Celebration() {
 	const { level: current } = useProgress();
 	const { t, locale } = useI18n();
 	const toast = useToast();
+	const shareWith = useShare();
 	const group = celebrationGroup(state.progressEvents ?? []);
 	const busy = !!state.active && state.active.phase !== "summary";
 	// Saved state is only read on the client: render nothing until hydration is done (no SSR mismatch).
@@ -32,9 +33,7 @@ export function Celebration() {
 		const titles = [...badges.map((id) => t(`fit.progress.badge.${id}.title`)), ...(level !== null ? [t("fit.celebration.level", { level, name: levelName })] : [])];
 		const first = badges[0];
 		const text = t("fit.celebration.shareText", { title: titles.join(", "), description: first ? t(`fit.progress.badge.${first}.desc`) : levelName });
-		const result = await shareText(t("fit.celebration.title"), text);
-		if (result === "copied") toast.show(t("fit.common.copied"), "success");
-		if (result === "failed") toast.show(t("fit.common.shareFailed"), "danger");
+		await shareWith(t("fit.celebration.title"), text, { headline: t(level !== null && badges.length === 0 ? "fit.nudges.levelHeadline" : "fit.nudges.achievementHeadline"), value: level !== null && badges.length === 0 ? String(level) : titles[0] ?? "", line: "Personal Coach" });
 	};
 
 	return (

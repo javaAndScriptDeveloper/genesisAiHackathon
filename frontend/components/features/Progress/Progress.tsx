@@ -18,7 +18,7 @@ import { WeekBars } from "@/components/features/WeekBars/WeekBars";
 import { Icon, IconButton, SegmentedControl, Skeleton, useToast } from "@/components/ui";
 import { kcalFor } from "@/lib/fit/calories";
 import { addDays, mondayOf, weekdayIndex } from "@/lib/fit/dates";
-import { shareText } from "@/lib/fit/share";
+import { useShare } from "@/lib/hooks/useShare";
 import { nextUpcoming } from "@/lib/fit/plan";
 import { useFit } from "@/lib/fit/store/FitProvider";
 import { useProgress, useProgressAnalytics, useStartWorkout, useUnits } from "@/lib/fit/store/hooks";
@@ -73,6 +73,7 @@ function Overview() {
 	const { reportWeeks } = useProgressAnalytics();
 	const start = useStartWorkout();
 	const toast = useToast();
+	const shareWith = useShare();
 	const nf = new Intl.NumberFormat(locale);
 	const events = state.progressEvents;
 
@@ -88,10 +89,7 @@ function Overview() {
 	const dayMinutes = weekLogs.map((logs) => Math.round(logs.reduce((n, l) => n + l.durationSec, 0) / 60));
 	const dayKcal = weekLogs.map((logs) => logs.reduce((n, l) => n + kcalFor(l.exercises.filter((e) => !e.skipped).map((e) => e.exerciseId), state.profile?.weightKg ?? 70, l.durationSec / 60), 0));
 
-	const share = async () => {
-		const r = await shareText(t("fit.progress.shareTitle"), t("fit.progress.shareText", { done: p.week.quality, planned: p.week.goal, streak: p.streak.current, level: p.level.level }));
-		toast.show(r === "copied" ? t("fit.common.copied") : r === "failed" ? t("fit.common.shareFailed") : t("fit.progress.shared"), r === "failed" ? "danger" : "success");
-	};
+	const share = () => shareWith(t("fit.progress.shareTitle"), t("fit.progress.shareText", { done: p.week.quality, planned: p.week.goal, streak: p.streak.current, level: p.level.level }), { headline: t("fit.nudges.streakHeadline"), value: String(p.streak.current), line: t("fit.nudges.streakLine") });
 	const report = useMemo(() => (reportWeek ? weeklyReportV2(p.history, p.ctx, reportWeek) : null), [p.history, p.ctx, reportWeek]);
 	const latestReport = reportWeeks[0] ?? null;
 	const fresh = p.history.sessions.length === 0;

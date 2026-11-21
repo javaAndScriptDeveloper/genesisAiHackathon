@@ -1,5 +1,7 @@
 "use client";
 
+import { ProgressChips } from "@/components/features/ProgressChips/ProgressChips";
+import { TrainerNudge } from "@/components/features/TrainerNudge/TrainerNudge";
 import { Add01Icon, Alert02Icon, CheckmarkCircle01Icon, MinusSignIcon, Calendar03Icon, DropletIcon, FireIcon, Medal01Icon, Target01Icon, Notification03Icon, PlayIcon } from "@hugeicons/core-free-icons";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -51,6 +53,7 @@ export function Today() {
 				subtitle={<><Icon icon={Calendar03Icon} size={14} />{formatDay(today)}</>}
 				actions={
 					<>
+						<ProgressChips />
 						<span className={styles.bell}>
 							<IconButton icon={Notification03Icon} label={t("fit.today.notifications", { n: unread })} onClick={() => router.push("/notifications")} />
 							{unread > 0 && <span className={styles.badge} aria-hidden>{unread}</span>}
@@ -60,6 +63,7 @@ export function Today() {
 			/>
 
 			<div className={styles.content}>
+				<TrainerNudge />
 				{state.planned.length === 0 && <EmptyState title={t("fit.today.empty.title")} description={t("fit.today.empty.body")} action={<Button onClick={() => router.push("/profile/edit")}>{t("fit.today.empty.cta")}</Button>} />}
 
 				{active ? (

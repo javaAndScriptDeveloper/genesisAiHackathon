@@ -1,3 +1,4 @@
+import type { NudgeFacts, NudgeKind } from "./nudge";
 import type { ISODate } from "./dates";
 import type { ArchiveItem, ProgressEvent } from "../progress/types";
 import type { Units } from "./units";
@@ -139,7 +140,7 @@ export interface ActiveSession {
 	perceived: Perceived | null;
 }
 
-export type NotificationKind = "workout" | "missed" | "achievement" | "weekly-goal" | "recovery" | "coach" | "weekly-summary";
+export type NotificationKind = "workout" | "missed" | "achievement" | "weekly-goal" | "recovery" | "coach" | "weekly-summary" | "streak";
 
 export interface AppNotification {
 	id: string;
@@ -149,6 +150,12 @@ export interface AppNotification {
 	createdAt: string;
 	read: boolean;
 	href?: string;
+	/** Set on kinds the trainer writes in their own voice: what to ask Gemini. */
+	nudge?: { kind: NudgeKind; facts: NudgeFacts };
+	/** The trainer-voice text once Gemini has written it; the template `body` stays as the fallback. */
+	aiText?: string;
+	/** The trainer-voice request failed once; never ask again (also after a reload). */
+	aiFailed?: boolean;
 }
 
 export interface NotificationSettings {
