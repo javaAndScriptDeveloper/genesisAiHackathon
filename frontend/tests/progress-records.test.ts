@@ -14,7 +14,7 @@ function sess(id: string, date: string, sets: SetLog[], status: WorkoutSession["
 }
 const bw = (reps: number): SetLog => ({ exerciseId: "pushup", reps, weightKg: null, durationSec: null });
 const wt = (exerciseId: string, reps: number, weightKg: number): SetLog => ({ exerciseId, reps, weightKg, durationSec: null });
-const hist = (sessions: WorkoutSession[]): History => ({ today: "2026-11-21", exercises, plan: [], sessions, body: [], device: null });
+const hist = (sessions: WorkoutSession[]): History => ({ today: "2026-11-21", exercises, plan: [], sessions, body: [], checkIns: [], device: null });
 
 describe("records", () => {
 	it("Brzycki з округленням до 0.1", () => {

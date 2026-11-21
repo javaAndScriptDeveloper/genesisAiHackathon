@@ -45,7 +45,7 @@ function build(opts: {
 		workouts.slice(0, 3 - missed).forEach((d) => sessions.push(session(d)));
 	}
 	(opts.currentDone ?? []).forEach((d) => sessions.push(session(d)));
-	return { today, exercises: [], plan, sessions, body: [], device: null };
+	return { today, exercises: [], plan, sessions, body: [], checkIns: [], device: null };
 }
 
 const perfect4 = build({ fullWeeks: 4 });
@@ -120,7 +120,7 @@ function hist(specs: WeekSpec[]): History {
 		}
 		for (let i = 0; i < (s.rest ?? 0); i++) plan.push({ date: addDays(ws, s.n + i), type: "rest" });
 	}
-	return { today: "2026-11-19", exercises: [], plan, sessions, body: [], device: null };
+	return { today: "2026-11-19", exercises: [], plan, sessions, body: [], checkIns: [], device: null };
 }
 const ctx = (o: Partial<ProgressContext> = {}): ProgressContext => ({ weeklyGoal: 3, pauses: [], ...o });
 
@@ -241,7 +241,7 @@ describe("v2 edge cases", () => {
 		// Mon workout (done), Tue rest, Wed workout (not done)
 		const ws = wk(1);
 		const h: History = {
-			today: "2026-11-19", exercises: [], body: [], device: null,
+			today: "2026-11-19", exercises: [], body: [], checkIns: [], device: null,
 			plan: [
 				{ date: ws, type: "workout" },
 				{ date: addDays(ws, 1), type: "rest" },

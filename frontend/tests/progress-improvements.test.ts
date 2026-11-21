@@ -9,7 +9,7 @@ const bw = (reps: number): SetLog => ({ exerciseId: "pushup", reps, weightKg: nu
 function sess(id: string, date: string, reps: number): WorkoutSession {
 	return { id, date, planned: true, status: "completed", adapted: false, durationMin: 30, setsPlanned: 1, sets: [bw(reps)], rpe: null };
 }
-const hist = (sessions: WorkoutSession[], plan: PlannedDay[] = [], today = "2026-11-21"): History => ({ today, exercises, plan, sessions, body: [], device: null });
+const hist = (sessions: WorkoutSession[], plan: PlannedDay[] = [], today = "2026-11-21"): History => ({ today, exercises, plan, sessions, body: [], checkIns: [], device: null });
 
 describe("improvements", () => {
 	it("pushups 15 -> 18 over 4 weeks", () => {

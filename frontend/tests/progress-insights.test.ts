@@ -12,7 +12,7 @@ function sess(id: string, date: string, reps: number, rpe: Rpe | null = null, ex
 	return { id, date, planned: true, status: "completed", adapted: false, durationMin: 30, setsPlanned: 1, sets: [bw(exId, reps)], rpe };
 }
 const plan = (...dates: string[]): PlannedDay[] => dates.map((date) => ({ date, type: "workout" }));
-const hist = (sessions: WorkoutSession[], p: PlannedDay[] = []): History => ({ today: "2026-11-21", exercises, plan: p, sessions, body: [], device: null });
+const hist = (sessions: WorkoutSession[], p: PlannedDay[] = []): History => ({ today: "2026-11-21", exercises, plan: p, sessions, body: [], checkIns: [], device: null });
 
 // 2026-11-20 is Friday (weekday 4); 11-13 Friday too.
 const fridayMissPlan = plan("2026-11-13", "2026-11-20");

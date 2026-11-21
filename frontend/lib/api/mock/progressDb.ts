@@ -136,7 +136,7 @@ const DEMO: History = {
 	plan: buildPlan(),
 	sessions: buildSessions(),
 	body: buildBody(),
-	device: { avgWorkoutHeartRate: 128, avgDailySteps: 7400, avgSleepHours: 7.1 },
+	checkIns: [], device: { avgWorkoutHeartRate: 128, avgDailySteps: 7400, avgSleepHours: 7.1 },
 };
 
 export function demoHistory(): History {
@@ -144,5 +144,5 @@ export function demoHistory(): History {
 }
 
 export function emptyHistory(): History {
-	return { ...structuredClone(DEMO), sessions: [], body: [], device: null };
+	return { ...structuredClone(DEMO), sessions: [], body: [], checkIns: [], device: null };
 }

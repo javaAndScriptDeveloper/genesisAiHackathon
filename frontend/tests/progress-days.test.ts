@@ -34,7 +34,7 @@ const h: History = {
 		session({ id: "b", date: "2026-11-11", adapted: true }),
 	],
 	body: [],
-	device: null,
+	checkIns: [], device: null,
 };
 
 describe("dates", () => {

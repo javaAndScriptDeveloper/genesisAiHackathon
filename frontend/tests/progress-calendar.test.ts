@@ -41,7 +41,7 @@ function history(sessions: WorkoutSession[], plan = planFor("2026-11-02", 42)): 
 		plan,
 		sessions,
 		body: [],
-		device: null,
+		checkIns: [], device: null,
 	};
 }
 

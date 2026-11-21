@@ -20,7 +20,7 @@ const mk = (today: IsoDate, plan: string[], sessions: WorkoutSession[]): History
 	plan: plan.map((date) => ({ date, type: "workout" as const })),
 	sessions,
 	body: [],
-	device: null,
+	checkIns: [], device: null,
 });
 const get = (l: ReturnType<typeof badges>, id: string) => l.find((b) => b.id === id)!;
 

@@ -31,6 +31,14 @@ export interface BodyMeasurement {
 	date: IsoDate;
 	weightKg: number;
 }
+export interface CheckIn {
+	id: string;
+	kind: "weight" | "goal" | "photo";
+	date: IsoDate;
+	at: string;
+	weightKg?: number;
+	goalKg?: number;
+}
 export interface DeviceDemo {
 	avgWorkoutHeartRate: number;
 	avgDailySteps: number;
@@ -42,6 +50,7 @@ export interface History {
 	plan: PlannedDay[];
 	sessions: WorkoutSession[];
 	body: BodyMeasurement[];
+	checkIns: CheckIn[];
 	device: DeviceDemo | null;
 }
 export type DayStatus = "completed" | "adapted" | "missed" | "rest" | "planned" | "none";

@@ -34,7 +34,7 @@ const base: History = {
 	],
 	sessions: [session("2026-11-16"), session("2026-11-18", { reps: 10 })],
 	body: [],
-	device: null,
+	checkIns: [], device: null,
 };
 const empty: History = { ...base, plan: [], sessions: [] };
 

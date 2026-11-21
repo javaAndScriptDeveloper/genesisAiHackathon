@@ -3,7 +3,7 @@ import type { FitState, Perceived, PlannedWorkout } from "../fit/types";
 import { consistencyScore } from "../fit/stats";
 import { addDays, eachDay, weekStart } from "./dates";
 import { insights, type Insight } from "./insights";
-import type { Exercise, History, IsoDate, PlannedDay, Rpe, SetLog, WorkoutSession } from "./types";
+import type { CheckIn, Exercise, History, IsoDate, PlannedDay, Rpe, SetLog, WorkoutSession } from "./types";
 
 const RPE: Record<Perceived, Rpe> = { easy: "easy", right: "ok", hard: "hard" };
 
@@ -23,8 +23,27 @@ function buildPlan(planned: PlannedWorkout[]): PlannedDay[] {
 	return eachDay(first, last).map((date) => ({ date, type: dayType(byDate.get(date) ?? []) }));
 }
 
+function buildCheckIns(state: Parameters<typeof historyFromFit>[0], today: IsoDate): CheckIn[] {
+	const out: CheckIn[] = [];
+	const seen = new Set<string>();
+	state.bodyWeights.forEach((b, i) => {
+		let id = `w:${b.at ?? b.date}`;
+		if (seen.has(id)) id = `${id}:${i}`;
+		seen.add(id);
+		out.push({ id, kind: "weight", date: b.date, at: b.at ?? b.date, weightKg: b.kg });
+	});
+	if (state.goalWeightKg != null) {
+		const setAt = state.goalSetAt ?? null;
+		out.push({ id: `g:${setAt ?? "initial"}`, kind: "goal", date: setAt ? setAt.slice(0, 10) : today, at: setAt ?? today, goalKg: state.goalWeightKg });
+	}
+	for (const p of state.photos ?? []) {
+		out.push({ id: `p:${p.id}`, kind: "photo", date: p.date, at: p.date, ...(p.weightKg !== undefined ? { weightKg: p.weightKg } : {}) });
+	}
+	return out;
+}
+
 /** Maps the app's real state onto the pure analytics model. Unknown exercise ids are dropped. */
-export function historyFromFit(state: Pick<FitState, "planned" | "history" | "bodyWeights">, today: IsoDate): History {
+export function historyFromFit(state: Pick<FitState, "planned" | "history" | "bodyWeights"> & Partial<Pick<FitState, "photos" | "goalWeightKg" | "goalSetAt">>, today: IsoDate): History {
 	const plannedById = new Map(state.planned.map((w) => [w.id, w]));
 	const weighted = new Set<string>();
 	const used = new Map<string, Exercise>();
@@ -77,6 +96,7 @@ export function historyFromFit(state: Pick<FitState, "planned" | "history" | "bo
 		plan: buildPlan(state.planned),
 		sessions,
 		body: state.bodyWeights.map((b) => ({ date: b.date, weightKg: b.kg })),
+		checkIns: buildCheckIns(state, today),
 		device: null,
 	};
 }
