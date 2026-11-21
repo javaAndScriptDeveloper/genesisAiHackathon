@@ -95,4 +95,59 @@ describe("users and devices endpoints", () => {
     const missing = await buildApp(db).inject({ method: "POST", url: "/api/users/999999/devices", payload: { title: "X" } });
     expect(missing.statusCode).toBe(404);
   });
+
+  describe("device sync and snapshots", () => {
+    const setup = async () => {
+      const app = buildApp(db);
+      const userId = (await create()).json().id;
+      const deviceId = (await app.inject({ method: "POST", url: `/api/users/${userId}/devices`, payload: { title: "Watch" } })).json().id;
+      const sync = (payload: object, uid = userId, did = deviceId) =>
+        app.inject({ method: "POST", url: `/api/users/${uid}/devices/${did}/sync`, payload });
+      const snaps = async (q = "") => (await app.inject({ method: "GET", url: `/api/users/${userId}/snapshots${q}` })).json().snapshots;
+      return { userId, deviceId, sync, snaps };
+    };
+
+    it("sync backfills a week", async () => {
+      const { sync, snaps } = await setup();
+      const res = await sync({ date: "2026-11-21" });
+      expect(res.statusCode).toBe(200);
+      expect(res.json().snapshot.date).toBe("2026-11-21");
+      const list = await snaps("?days=7");
+      expect(list.map((s: { date: string }) => s.date)).toEqual(
+        ["2026-11-15", "2026-11-16", "2026-11-17", "2026-11-18", "2026-11-19", "2026-11-20", "2026-11-21"],
+      );
+      expect(list.every((s: { source: string }) => s.source === "demo")).toBe(true);
+    });
+
+    it("bad-night sync replaces today", async () => {
+      const { userId, sync, snaps } = await setup();
+      await sync({ date: "2026-11-21" });
+      await sync({ date: "2026-11-21", scenario: "bad-night" });
+      const list = await snaps("?days=7");
+      expect(list).toHaveLength(7);
+      expect(list[6].scenario).toBe("bad-night");
+      expect(list[6].readiness).toBeLessThan(40);
+      expect(await db("user_device_data_snapshots").where({ userId })).toHaveLength(8);
+    });
+
+    it("sync rejects a device of another user", async () => {
+      const a = await setup();
+      const b = await setup();
+      expect((await a.sync({ date: "2026-11-21" }, a.userId, b.deviceId)).statusCode).toBe(404);
+    });
+
+    it("sync rejects invalid dates and scenarios", async () => {
+      const { sync } = await setup();
+      expect((await sync({ date: "2026-02-30" })).statusCode).toBe(400);
+      expect((await sync({ date: "nope" })).statusCode).toBe(400);
+      expect((await sync({ date: "2026-11-21", scenario: "x" })).statusCode).toBe(400);
+    });
+
+    it("snapshots validates days", async () => {
+      const { snaps, userId } = await setup();
+      expect(await snaps()).toEqual([]);
+      const res = await buildApp(db).inject({ method: "GET", url: `/api/users/${userId}/snapshots?days=40` });
+      expect(res.statusCode).toBe(400);
+    });
+  });
 });
