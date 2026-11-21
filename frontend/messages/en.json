@@ -671,6 +671,17 @@
         "8": "Elite",
         "9": "Champion",
         "10": "Legend"
+      },
+      "advice": {
+        "start": "Start with one short planned session. Your progress picks up from there.",
+        "goal-remaining": "{n} more quality sessions to reach this week's goal. You still have time.",
+        "near-record": "You are close to your best on {exercise}. Another go could reach {target}.",
+        "plateau": "{exercise} has held steady for a while. Try a small change, like one more rep or a slower tempo."
+      },
+      "improvements": {
+        "record": "{exercise}: {before} to {now}, up {delta}",
+        "consistency": "Consistency up {delta} points, from {before} to {now}",
+        "streak": "Streak grew from {before} to {now} weeks"
       }
     },
     "awards": {
