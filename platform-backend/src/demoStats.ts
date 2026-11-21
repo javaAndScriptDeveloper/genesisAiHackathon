@@ -63,12 +63,6 @@ export function readinessOf(s: Pick<DailyStats, "sleepHours" | "restingHr" | "hr
   return Math.round(sleepPart + rhrPart + hrvPart);
 }
 
-// The brief's "tired" ranges can compute up to 61; keep each scenario inside its status band
-// (tired = "lighter": 40..59) so the demo is deterministic.
-function bandReadiness(r: number, scenario: Scenario): number {
-  return scenario === "tired" ? clamp(r, 40, 59) : r;
-}
-
 export function generateDailyStats(userId: number, date: string, scenario: Scenario): DailyStats {
   const b = baselineFor(userId);
   const rand = mulberry32(hash(`${userId}:${date}`));
@@ -79,7 +73,7 @@ export function generateDailyStats(userId: number, date: string, scenario: Scena
     hrvMul = between(rand(), 0.9, 1.1);
     stepsMul = between(rand(), 0.75, 1.25);
   } else if (scenario === "tired") {
-    sleep = between(rand(), 5.5, 6.0);
+    sleep = between(rand(), 5.0, 5.8);
     hr = b.restingHr + between(rand(), 4, 6);
     hrvMul = between(rand(), 0.75, 0.85);
     stepsMul = between(rand(), 0.6, 0.8);
@@ -101,7 +95,7 @@ export function generateDailyStats(userId: number, date: string, scenario: Scena
     hrvMs,
     steps,
     activeKcal: Math.round(steps * 0.045),
-    readiness: bandReadiness(readinessOf({ sleepHours, restingHr, hrvMs }, b), scenario),
+    readiness: readinessOf({ sleepHours, restingHr, hrvMs }, b),
     source: "demo",
     scenario,
   };
