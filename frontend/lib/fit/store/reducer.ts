@@ -1,3 +1,4 @@
+import { fromRemote, type RemoteSnapshot } from "../../api/progressSync";
 import { daysBetween, toISO, type ISODate } from "../dates";
 import { MAX_PAUSE_DAYS } from "../../progress/consistency";
 import type { Units } from "../units";
@@ -99,7 +100,8 @@ export type Action =
 	| { type: "record-events"; events: ProgressEvent[] }
 	| { type: "mark-seen"; kinds?: ProgressEvent["kind"][]; ids?: string[]; now: string }
 	| { type: "archive-queued"; items: ArchiveItem[] }
-	| { type: "archive-sent"; ids: string[]; weeks: string[] };
+	| { type: "archive-sent"; ids: string[]; weeks: string[] }
+	| { type: "apply-remote"; snapshot: RemoteSnapshot };
 
 /** The queue never holds more than this many items; overflow drops the oldest "change" items, never "weekly". */
 export const ARCHIVE_QUEUE_CAP = 50;
@@ -568,6 +570,23 @@ export function reducer(state: FitState, action: Action): FitState {
 		case "archive-sent": {
 			const sent = new Set(action.ids);
 			return { ...state, archiveQueue: state.archiveQueue.filter((it) => !sent.has(it.id)), archivedWeeks: [...new Set([...state.archivedWeeks, ...action.weeks])] };
+		}
+		case "apply-remote": {
+			// Only fills what is empty locally; never overwrites local data.
+			const r = fromRemote(action.snapshot);
+			const freshDevice = state.history.length === 0;
+			const have = new Set(state.progressEvents.map((e) => e.id));
+			const events = (r.progressEvents ?? []).filter((e) => !have.has(e.id));
+			return {
+				...state,
+				history: freshDevice && r.history ? r.history : state.history,
+				weeklyGoal: freshDevice && r.weeklyGoal !== undefined ? r.weeklyGoal : state.weeklyGoal,
+				pauses: state.pauses.length === 0 && r.pauses ? r.pauses : state.pauses,
+				bodyWeights: state.bodyWeights.length === 0 && r.bodyWeights ? r.bodyWeights : state.bodyWeights,
+				goalWeightKg: state.goalWeightKg === null && r.goalWeightKg != null ? r.goalWeightKg : state.goalWeightKg,
+				goalSetAt: state.goalWeightKg === null && r.goalWeightKg != null ? r.goalSetAt ?? null : state.goalSetAt,
+				progressEvents: events.length ? [...state.progressEvents, ...events] : state.progressEvents,
+			};
 		}
 		case "remove-pause": {
 			const pauses = state.pauses ?? [];

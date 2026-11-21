@@ -7,6 +7,7 @@ import type { FitState } from "../types";
 import { observeTransition } from "./observe";
 import { loadState, saveState } from "./persist";
 import { reducer, type Action } from "./reducer";
+import { useProgressSync } from "./useProgressSync";
 
 interface FitApi {
 	state: FitState;
@@ -20,6 +21,11 @@ const FitContext = createContext<FitApi | null>(null);
 
 const noopSubscribe = () => () => undefined;
 const initState = (): FitState => (typeof window === "undefined" ? emptyState() : loadState());
+
+function ProgressSync(): null {
+	useProgressSync();
+	return null;
+}
 
 export function FitProvider({ children }: { children: ReactNode }) {
 	// Saved data is read lazily on the client. `ready` is false during server render and hydration, so nothing
@@ -62,7 +68,10 @@ export function FitProvider({ children }: { children: ReactNode }) {
 
 	const dispatch = useCallback<Dispatch<Action>>((a) => rawDispatch(a), []);
 	const api = useMemo(() => ({ state, dispatch, ready, today }), [state, dispatch, ready, today]);
-	return <FitContext.Provider value={api}>{children}</FitContext.Provider>;
+	return <FitContext.Provider value={api}>
+			<ProgressSync />
+			{children}
+		</FitContext.Provider>;
 }
 
 export function useFit(): FitApi {
