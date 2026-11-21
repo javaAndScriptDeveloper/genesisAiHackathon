@@ -11,6 +11,10 @@ const bundledPortraits = new Map(
 	["mike", "john", "hanna", "caroline", "alex"].map((id) => [`/trainers/${id}.svg`, `/img/trainer-${id}@2x.webp`]),
 );
 
+export function bundledTrainerPortrait(trainerId: string): string | undefined {
+	return bundledPortraits.get(`/trainers/${trainerId}.svg`);
+}
+
 const responseSchema = z.object({ trainers: z.array(trainerSchema) });
 
 export async function fetchTrainers(): Promise<Trainer[]> {

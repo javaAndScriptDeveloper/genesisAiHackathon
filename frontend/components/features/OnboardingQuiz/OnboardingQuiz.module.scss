@@ -39,12 +39,14 @@
 		padding: var(--space-3) var(--space-4) var(--space-5);
 	}
 
+	// `var(--transition-base)` is "0.25s <easing>": inside `animation` its duration became a 0.25s delay, so the new step
+	// showed at full opacity first and then restarted from zero (the double flash). Spell the easing out and hold the first frame.
 	.fwd {
-		animation: enterFwd 0.35s var(--transition-base);
+		animation: enterFwd 0.35s cubic-bezier(0.2, 0.7, 0.2, 1) both;
 	}
 
 	.back {
-		animation: enterBack 0.35s var(--transition-base);
+		animation: enterBack 0.35s cubic-bezier(0.2, 0.7, 0.2, 1) both;
 	}
 
 	.hello {

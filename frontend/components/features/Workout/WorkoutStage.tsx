@@ -112,7 +112,7 @@ export function WorkoutStage({ onAdjust, onUnwell, sample }: { onAdjust: () => v
 				</div>
 			)}
 			{timed && timerRunning && !blockDone && (
-				<Button variant="ghost" iconLeft={Tick02Icon} onClick={() => dispatch({ type: "log-set", reps: Math.max(1, (set?.target ?? 0) - (a.workLeft ?? 0)) })}>{t("fit.workout.finishSet")}</Button>
+				<Button size="lg" iconLeft={Tick02Icon} onClick={() => dispatch({ type: "log-set", reps: Math.max(1, (set?.target ?? 0) - (a.workLeft ?? 0)) })}>{t("fit.workout.finishSet")}</Button>
 			)}
 			<Button variant="secondary" iconLeft={SlidersHorizontalIcon} onClick={onAdjust}>{t("fit.workout.adjust")}</Button>
 			<Button variant="ghost" iconLeft={Alert02Icon} onClick={onUnwell} className={styles.unwell}>{t("fit.workout.unwell")}</Button>

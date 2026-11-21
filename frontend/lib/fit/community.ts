@@ -38,6 +38,10 @@ export const BUDDIES: Buddy[] = [
 	{ id: "tom", name: "Tom W.", goal: "get-stronger", days: "Mon · Wed · Sat", level: 7, results: { weeklyWorkouts: 3, streakWeeks: 14, lastWorkout: { title: "Heavy lower body", daysAgo: 1 }, pr: { exercise: "Back squat", kg: 120 } } },
 ];
 
+export function buddyPortrait(buddy: Buddy): string {
+	return `/img/buddy-${buddy.id}@2x.webp`;
+}
+
 const REPLIES = [
 	"Hey! Great to connect. What does your week look like?",
 	"Nice, I'm doing legs on Thursday if you want to join.",

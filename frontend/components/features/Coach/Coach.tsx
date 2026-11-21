@@ -6,7 +6,9 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { ScreenHeader } from "@/components/features/ScreenHeader/ScreenHeader";
-import { Button, Icon, IconButton, useToast } from "@/components/ui";
+import { Avatar, Button, Icon, IconButton, useToast } from "@/components/ui";
+import { bundledTrainerPortrait, useTrainers } from "@/lib/api/trainers";
+import { activeTrainerId } from "@/lib/fit/options";
 import { applyAdapt, replaceUnavailable } from "@/lib/fit/adapt";
 import { coachReply, isSafetyConcern, type CoachContext } from "@/lib/fit/coach";
 import { coachPresetReply, coachPresets } from "@/lib/fit/coachPresets";
@@ -25,6 +27,10 @@ export function Coach() {
 	const toast = useToast();
 	const { state, dispatch, today } = useFit();
 	const stats = useFitStats();
+	const { data: trainers } = useTrainers();
+	const trainerId = activeTrainerId(state);
+	const trainer = trainers?.find((entry) => entry.id === trainerId);
+	const portrait = trainer?.pathToImage || bundledTrainerPortrait(trainerId);
 	const [text, setText] = useState("");
 	const [pending, setPending] = useState(false);
 	const [listening, setListening] = useState(false);
@@ -135,7 +141,7 @@ export function Coach() {
 
 	return (
 		<div className={styles.root}>
-			<ScreenHeader title={t("fit.coach.title")} />
+			<ScreenHeader title={t("fit.coach.title")} subtitle={trainer?.name} actions={portrait && <Avatar name={trainer?.name ?? t("fit.coach.title")} src={portrait} size={40} />} />
 			<div className={styles.thread} role="log" aria-live="polite" aria-label={t("fit.coach.title")}>
 				<div className={clsx(styles.bubble, styles.coach)}>
 					<p>{t("fit.coach.greeting", { name: profile.name })}</p>

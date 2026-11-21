@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useEffect, useRef } from "react";
 import { ScreenHeader } from "@/components/features/ScreenHeader/ScreenHeader";
 import { Avatar, Badge, Button, Card, Icon, useToast } from "@/components/ui";
-import { BUDDIES, buddyTier, type Buddy } from "@/lib/fit/community";
+import { BUDDIES, buddyPortrait, buddyTier, type Buddy } from "@/lib/fit/community";
 import { useFit } from "@/lib/fit/store/FitProvider";
 import { useT } from "@/lib/i18n/I18nProvider";
 import kit from "../ScreenKit/ScreenKit.module.scss";
@@ -69,7 +69,7 @@ export function Community() {
 							{connected.map((b) => (
 								<li key={b.id}>
 									<Link href={`/community/${b.id}`} transitionTypes={["nav-forward"]} className={kit.row}>
-										<Avatar name={b.name} />
+										<Avatar name={b.name} src={buddyPortrait(b)} />
 										<span className={kit.rowText}>
 											<strong>{b.name}</strong>
 											<span>{t("fit.community.lastWorkout", { title: b.results.lastWorkout.title, when: when(b.results.lastWorkout.daysAgo) })}</span>
@@ -91,7 +91,7 @@ export function Community() {
 								<li key={b.id}>
 									<Card className={kit.stack}>
 										<div style={{ display: "flex", alignItems: "center", gap: "1.2rem" }}>
-											<Avatar name={b.name} />
+											<Avatar name={b.name} src={buddyPortrait(b)} />
 											<span className={kit.rowText}>
 												<strong>{b.name}</strong>
 												<span>{t(`fit.opt.goal.${b.goal}.label`)} · {b.days}</span>
@@ -115,7 +115,7 @@ export function Community() {
 								<li key={b.id}>
 									<Card className={kit.stack}>
 										<div style={{ display: "flex", alignItems: "center", gap: "1.2rem" }}>
-											<Avatar name={b.name} />
+											<Avatar name={b.name} src={buddyPortrait(b)} />
 											<span className={kit.rowText}>
 												<strong>{b.name}</strong>
 												<span>{t(`fit.opt.goal.${b.goal}.label`)} · {b.days}</span>

@@ -7,8 +7,8 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { PremiumGate } from "@/components/features/PremiumGate/PremiumGate";
 import { ScreenHeader } from "@/components/features/ScreenHeader/ScreenHeader";
-import { Button, Card, EmptyState, IconButton, Input, Tabs, useToast } from "@/components/ui";
-import { BUDDIES, buddyReply, type Buddy } from "@/lib/fit/community";
+import { Avatar, Button, Card, EmptyState, IconButton, Input, Tabs, useToast } from "@/components/ui";
+import { BUDDIES, buddyPortrait, buddyReply, type Buddy } from "@/lib/fit/community";
 import { formatDay } from "@/lib/fit/dates";
 import { resizeToDataUrl } from "@/lib/fit/image";
 import { useFit } from "@/lib/fit/store/FitProvider";
@@ -63,7 +63,9 @@ function Chat({ buddy }: { buddy: Buddy }) {
 	const end = useRef<HTMLDivElement>(null);
 	const timers = useRef<number[]>([]);
 	useEffect(() => () => timers.current.forEach((id) => window.clearTimeout(id)), []);
-	useEffect(() => end.current?.scrollIntoView({ behavior: "smooth", block: "end" }), [messages.length, typing]);
+	useEffect(() => {
+		end.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+	}, [messages.length, typing]);
 
 	const send = (text: string, photo?: string) => {
 		const message: ChatMessage = { id: newId(), from: "me", text, photo, at: new Date().toISOString() };
@@ -134,7 +136,16 @@ export function BuddyScreen({ id }: { id: string }) {
 	}
 	return (
 		<div className={kit.page}>
-			<ScreenHeader title={buddy.name} back="/community" actions={<Button size="sm" variant="ghost" onClick={() => { dispatch({ type: "partner", id: buddy.id, status: null }); toast.show(t("fit.community.removed", { name: buddy.name }), "info"); router.push("/community", { transitionTypes: ["nav-back"] }); }}>{t("fit.community.removeBuddy")}</Button>} />
+			<ScreenHeader
+				title={buddy.name}
+				back="/community"
+				actions={
+					<>
+						<Avatar name={buddy.name} src={buddyPortrait(buddy)} size={36} />
+						<Button size="sm" variant="ghost" onClick={() => { dispatch({ type: "partner", id: buddy.id, status: null }); toast.show(t("fit.community.removed", { name: buddy.name }), "info"); router.push("/community", { transitionTypes: ["nav-back"] }); }}>{t("fit.community.removeBuddy")}</Button>
+					</>
+				}
+			/>
 			<div className={kit.content}>
 				<Tabs tabs={[{ id: "results", label: t("fit.community.resultsTab"), content: <Results buddy={buddy} /> }, { id: "chat", label: t("fit.community.chatTab"), content: <Chat buddy={buddy} /> }]} />
 			</div>
