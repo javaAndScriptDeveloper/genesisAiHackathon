@@ -2,6 +2,7 @@
 
 import { ArrowDownRight01Icon, ArrowUpRight01Icon, Camera01Icon, Clock01Icon, ScaleIcon } from "@hugeicons/core-free-icons";
 import { useRef, useState } from "react";
+import { PhotoInsightSection } from "@/components/features/PhotoInsight/PhotoInsight";
 import { PremiumGate, usePremium } from "@/components/features/PremiumGate/PremiumGate";
 import { Button, Card, EmptyState, Icon, Input, ProgressBar, Sheet, useToast } from "@/components/ui";
 import { formatDay } from "@/lib/fit/dates";
@@ -199,6 +200,7 @@ export function CheckIns() {
 						))}
 					</ul>
 				)}
+				<PhotoInsightSection />
 			</Card>
 			<Sheet open={!!removing} onClose={() => setRemoving(null)} title={t("fit.progress.removeTitle")} closeLabel={t("common.close")} variant="center" footer={
 				<>

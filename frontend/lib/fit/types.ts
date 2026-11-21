@@ -209,6 +209,19 @@ export interface PhotoCheckIn {
 	weightKg?: number;
 }
 
+export interface PhotoInsight {
+	id: string;
+	analyzedAt: string;
+	beforeDate: string;
+	afterDate: string;
+	beforeWeightKg: number | null;
+	afterWeightKg: number | null;
+	model: string;
+	engineVersion: string;
+	suitable: boolean;
+	result: { summary: string; observations: { area: string; text: string }[]; encouragement: string };
+}
+
 export interface ChatMessage {
 	id: string;
 	from: "me" | "buddy";
@@ -240,6 +253,10 @@ export interface FitState {
 	devices: DeviceState;
 	bloodPressure: BloodPressureEntry[];
 	photos: PhotoCheckIn[];
+	/** Text-only results of AI photo analyses. The photos themselves are never stored remotely. */
+	photoInsights: PhotoInsight[];
+	/** When the user agreed to send photos to the AI; null means ask every time. */
+	photoAiConsentAt: string | null;
 	/** `at` is the moment the entry was saved (absent on demo seed data). */
 	bodyWeights: { date: ISODate; kg: number; at?: string }[];
 	goalWeightKg: number | null;

@@ -44,6 +44,8 @@ export function emptyState(): FitState {
 		devices: { apple: false, garmin: false },
 		bloodPressure: [],
 		photos: [],
+		photoInsights: [],
+		photoAiConsentAt: null,
 		bodyWeights: [],
 		goalWeightKg: null,
 		partners: {},

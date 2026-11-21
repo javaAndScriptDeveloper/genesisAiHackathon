@@ -32,6 +32,7 @@ import type {
 	NotificationSettings,
 	Perceived,
 	PhotoCheckIn,
+	PhotoInsight,
 	PlannedWorkout,
 	Profile,
 	SessionLog,
@@ -86,6 +87,8 @@ export type Action =
 	| { type: "add-bp"; systolic: number; diastolic: number; now: string }
 	| { type: "remove-bp"; id: string }
 	| { type: "add-photo"; photo: PhotoCheckIn }
+	| { type: "photo-ai-consent"; at: string }
+	| { type: "add-photo-insight"; insight: PhotoInsight }
 	| { type: "remove-photo"; id: string }
 	| { type: "add-body-weight"; date: ISODate; kg: number; at?: string }
 	| { type: "partner"; id: string; status: "invited" | "accepted" | null; now?: string }
@@ -270,6 +273,8 @@ export function reducer(state: FitState, action: Action): FitState {
 				lastProgressDay: action.state.lastProgressDay ?? toISO(new Date()),
 				archivedWeeks: action.state.archivedWeeks ?? [],
 				archiveQueue: action.state.archiveQueue ?? [],
+				photoInsights: action.state.photoInsights ?? [],
+				photoAiConsentAt: action.state.photoAiConsentAt ?? null,
 			};
 		case "reset":
 			return emptyState();
@@ -502,6 +507,10 @@ export function reducer(state: FitState, action: Action): FitState {
 			return { ...state, bloodPressure: state.bloodPressure.filter((b) => b.id !== action.id) };
 		case "add-photo":
 			return { ...state, photos: [action.photo, ...state.photos].slice(0, 12) };
+		case "photo-ai-consent":
+			return { ...state, photoAiConsentAt: action.at };
+		case "add-photo-insight":
+			return state.photoInsights.some((i) => i.id === action.insight.id) ? state : { ...state, photoInsights: [action.insight, ...state.photoInsights] };
 		case "remove-photo":
 			return { ...state, photos: state.photos.filter((p) => p.id !== action.id) };
 		case "add-body-weight":

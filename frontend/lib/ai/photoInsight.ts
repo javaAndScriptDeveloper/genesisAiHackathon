@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { SAFE_TEXT_RE } from "../fit/safeText";
 
 export const MAX_PHOTO_BYTES = 400 * 1024;
 export const DAILY_LIMIT = 5;
@@ -32,7 +33,7 @@ const photo = z
 		return { date: p.date, weightKg: p.weightKg, image };
 	});
 
-const safeText = (max: number) => z.string().min(1).max(max).regex(/^[\p{L}\p{N} .,'()%/+:-]+$/u);
+const safeText = (max: number) => z.string().min(1).max(max).regex(SAFE_TEXT_RE);
 
 export const photoInsightRequestSchema = z
 	.object({
