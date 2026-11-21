@@ -99,7 +99,7 @@ function Chat({ buddy }: { buddy: Buddy }) {
 				{messages.map((m) => (
 					<div key={m.id} className={`${styles.bubble} ${m.from === "me" ? styles.mine : styles.theirs}`}>
 						{m.photo && <Image className={styles.photo} src={m.photo} alt={t("fit.community.sharedPhoto")} width={240} height={240} unoptimized />}
-						{m.text && <span>{m.text}</span>}
+						{m.text ? <span>{m.text}</span> : !m.photo && <span>{t("fit.community.photoRemoved")}</span>}
 						<time className={styles.time} dateTime={m.at}>{new Date(m.at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</time>
 					</div>
 				))}

@@ -1,3 +1,4 @@
+import { dropOldestChatPhoto } from "../community";
 import { emptyState } from "../seed";
 import type { FitState } from "../types";
 
@@ -21,9 +22,17 @@ export function loadState(): FitState {
 }
 
 export function saveState(state: FitState): void {
-	try {
-		window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-	} catch {
-		// Storage full or unavailable (e.g. many photo check-ins): the session keeps working in memory.
+	let next = state;
+	for (;;) {
+		try {
+			window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+			return;
+		} catch {
+			// Storage full or unavailable. Shed the oldest chat photo and retry so workouts and settings still save;
+			// with none left, the session keeps working in memory.
+			const smaller = dropOldestChatPhoto(next);
+			if (!smaller) return;
+			next = smaller;
+		}
 	}
 }

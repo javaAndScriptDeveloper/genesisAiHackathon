@@ -229,7 +229,8 @@
       "sharePhoto": "Share a photo",
       "photoFailed": "Couldn't use that file. Pick an image.",
       "sharedPhoto": "Shared photo",
-      "typing": "{name} is typing…"
+      "typing": "{name} is typing…",
+      "photoRemoved": "Photo removed to save space"
     },
     "health": {
       "title": "Live health",

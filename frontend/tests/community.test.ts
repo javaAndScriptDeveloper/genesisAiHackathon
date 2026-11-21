@@ -1,7 +1,8 @@
-import { describe, expect, it } from "vitest";
-import { ACCEPT_DELAY_MS, BUDDIES, MAX_CHAT_MESSAGES, buddyReply } from "@/lib/fit/community";
+import { describe, expect, it, vi } from "vitest";
+import { ACCEPT_DELAY_MS, BUDDIES, MAX_CHAT_MESSAGES, buddyReply, dropOldestChatPhoto } from "@/lib/fit/community";
 import { GOALS } from "@/lib/fit/options";
 import { emptyState } from "@/lib/fit/seed";
+import { saveState } from "@/lib/fit/store/persist";
 import { reducer, type Action } from "@/lib/fit/store/reducer";
 import type { ChatMessage, FitState } from "@/lib/fit/types";
 
@@ -75,5 +76,41 @@ describe("buddy content", () => {
 		const b = BUDDIES[0];
 		if (!b) throw new Error("no buddies");
 		expect(buddyReply(b, { text: "", hasPhoto: true }, 0)).not.toBe(buddyReply(b, { text: "hi", hasPhoto: false }, 0));
+	});
+});
+
+describe("old saves", () => {
+	it("approves a request that has no recorded invite time", () => {
+		const legacy: FitState = { ...emptyState(), partners: { maya: "invited" }, partnerInvitedAt: {} };
+		expect(run(legacy, { type: "partners-sync", now: at(0) }).partners.maya).toBe("accepted");
+	});
+});
+
+describe("storage pressure", () => {
+	const photo = (n: number): ChatMessage => msg(n, { text: "", photo: `data:image/jpeg;base64,${"x".repeat(1000)}` });
+	const withPhotos = () => run(emptyState(), { type: "chat-send", buddyId: "maya", message: photo(1) }, { type: "chat-send", buddyId: "leo", message: photo(2) }, { type: "chat-send", buddyId: "maya", message: photo(3) });
+
+	it("dropOldestChatPhoto removes the oldest photo across all chats, keeping the message", () => {
+		const smaller = dropOldestChatPhoto(withPhotos());
+		expect(smaller?.chats.maya?.[0]?.photo).toBeUndefined();
+		expect(smaller?.chats.maya?.[0]?.id).toBe("m1");
+		expect(smaller?.chats.leo?.[0]?.photo).toBeDefined();
+		expect(smaller?.chats.maya?.[1]?.photo).toBeDefined();
+	});
+	it("dropOldestChatPhoto returns null when no photos are left", () => {
+		expect(dropOldestChatPhoto(emptyState())).toBeNull();
+		expect(dropOldestChatPhoto(run(emptyState(), { type: "chat-send", buddyId: "maya", message: msg(1) }))).toBeNull();
+	});
+	it("saveState sheds chat photos when storage is full and keeps everything else", () => {
+		let stored = "";
+		vi.stubGlobal("window", { localStorage: { setItem: (_k: string, v: string) => { if (v.length > 2500) throw new Error("QuotaExceededError"); stored = v; } } });
+		const base = { ...withPhotos(), waterGoalMl: 3333 };
+		saveState(base);
+		vi.unstubAllGlobals();
+		const saved: FitState = JSON.parse(stored);
+		expect(saved.waterGoalMl).toBe(3333);
+		const photos = Object.values(saved.chats).flat().filter((m) => m.photo).length;
+		expect(photos).toBeLessThan(3);
+		expect(Object.values(saved.chats).flat()).toHaveLength(3);
 	});
 });

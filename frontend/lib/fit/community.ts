@@ -1,4 +1,4 @@
-import type { Goal } from "./types";
+import type { FitState, Goal } from "./types";
 
 // Simulated community for the hackathon demo: fixed sample buddies, fake results and scripted replies.
 // A real version needs accounts and a backend (see docs/agent/fitness-app.md).
@@ -45,4 +45,17 @@ export function buddyReply(buddy: Buddy, sent: { text: string; hasPhoto: boolean
 	const pool = sent.hasPhoto ? PHOTO_REPLIES : REPLIES;
 	const line = pool[(n + buddy.id.length) % pool.length] ?? pool[0] ?? "Nice!";
 	return line;
+}
+
+/** Frees storage space: strips the photo from the oldest chat message that has one. Null when no chat photos remain. */
+export function dropOldestChatPhoto(state: FitState): FitState | null {
+	let oldest: { buddyId: string; index: number; at: string } | null = null;
+	for (const [buddyId, messages] of Object.entries(state.chats)) {
+		messages.forEach((m, index) => {
+			if (m.photo && (!oldest || m.at < oldest.at)) oldest = { buddyId, index, at: m.at };
+		});
+	}
+	if (!oldest) return null;
+	const { buddyId, index } = oldest;
+	return { ...state, chats: { ...state.chats, [buddyId]: (state.chats[buddyId] ?? []).map((m, i) => (i === index ? { ...m, photo: undefined } : m)) } };
 }

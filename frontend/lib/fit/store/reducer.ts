@@ -486,7 +486,8 @@ export function reducer(state: FitState, action: Action): FitState {
 		}
 		case "partners-sync": {
 			const now = Date.parse(action.now);
-			const due = Object.entries(state.partners).filter(([id, status]) => status === "invited" && now - Date.parse(state.partnerInvitedAt[id] ?? action.now) >= ACCEPT_DELAY_MS);
+			// A missing invite time (requests saved by the old Gym Bro screen) counts as overdue.
+			const due = Object.entries(state.partners).filter(([id, status]) => status === "invited" && (state.partnerInvitedAt[id] === undefined || now - Date.parse(state.partnerInvitedAt[id]) >= ACCEPT_DELAY_MS));
 			if (due.length === 0) return state;
 			return { ...state, partners: { ...state.partners, ...Object.fromEntries(due.map(([id]) => [id, "accepted" as const])) } };
 		}
