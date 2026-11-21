@@ -510,7 +510,7 @@
     },
     "progress": {
       "push": {
-        "weekly": "Week done: {done} of {goal} · streak {streak} weeks"
+        "weekly": "Week done: {done} of {goal} workouts. Week streak: {streak}."
       },
       "calories": "Calories",
       "goal": "Goal",
@@ -748,6 +748,8 @@
         "notFound": "Report not found",
         "notFoundBody": "That week isn't available yet or doesn't exist.",
         "back": "Back to progress",
+        "noData": "Nothing to report yet",
+        "noDataBody": "Log your first workout and this week's report will show up here.",
         "workouts": "Workouts",
         "minutes": "Minutes",
         "adherence": "Plan completed",
@@ -766,7 +768,41 @@
         "next": "Next week's plan",
         "nextEmpty": "No plan for next week yet.",
         "workoutDay": "Workout",
-        "restDay": "Rest"
+        "restDay": "Rest",
+        "push": "Notification preview",
+        "creditedTitle": "Week counted toward your streak",
+        "notCreditedTitle": "Week not counted this time",
+        "pausedTitle": "Paused week",
+        "pausedBody": "You paused this week, so your streak stays as it was.",
+        "doneOfGoal": "{done} of {goal} workouts",
+        "creditedBody": "You reached your weekly goal.",
+        "notCreditedBody": "Every workout still counts. A fresh week starts Monday.",
+        "compare": "Compared with the week before",
+        "col": {
+          "metric": "Metric",
+          "now": "This week",
+          "before": "Before"
+        },
+        "metric": {
+          "workouts": "Workouts",
+          "minutes": "Minutes",
+          "qualitySets": "Quality sets",
+          "xp": "XP"
+        },
+        "delta": {
+          "up": "{n} more",
+          "down": "{n} fewer",
+          "same": "No change"
+        },
+        "improvement": "What improved",
+        "noImprovement": "Nothing to compare yet. Keep logging and it will show up here.",
+        "advice": "One suggestion",
+        "goalTitle": "Goal for next week",
+        "goalHint": "Quality workouts per week, 2 to 5.",
+        "goalOption": "{n} workouts",
+        "recommended": "Recommended",
+        "currentGoal": "Current",
+        "goalSaved": "Weekly goal set to {n}."
       },
       "exercise": {
         "title": "Your progress",
@@ -790,13 +826,14 @@
       "advice": {
         "start": "Start with one short planned session. Your progress picks up from there.",
         "goal-remaining": "{n} more quality sessions to reach this week's goal. You still have time.",
+        "goal-remaining-one": "1 more quality session to reach this week's goal. You still have time.",
         "near-record": "You are close to your best on {exercise}. Another go could reach {target}.",
         "plateau": "{exercise} has held steady for a while. Try a small change, like one more rep or a slower tempo."
       },
       "improvements": {
         "record": "{exercise}: {before} to {now}, up {delta}",
         "consistency": "Consistency up {delta} points, from {before} to {now}",
-        "streak": "Streak grew from {before} to {now} weeks"
+        "streak": "Week streak grew from {before} to {now}"
       },
       "badge": {
         "first-workout": {
