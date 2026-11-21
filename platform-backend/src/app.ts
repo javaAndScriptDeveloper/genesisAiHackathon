@@ -1,10 +1,16 @@
 import Fastify, { type FastifyInstance } from "fastify";
 import type { Knex } from "knex";
+import { meRoutes } from "./me.js";
 import { listTrainers } from "./trainers.js";
-import { registerUserRoutes } from "./users.js";
+import { progressRoutes } from "./progress/routes.js";
+import { usersRoutes } from "./users.js";
 
 export function buildApp(db: Knex): FastifyInstance {
-  const app = Fastify({ logger: true });
+  const app = Fastify({
+    logger: true,
+    // Strict body validation: reject unknown properties and wrong types instead of stripping/coercing them.
+    ajv: { customOptions: { removeAdditional: false, coerceTypes: false, useDefaults: false } },
+  });
 
   app.get("/api/health", async (_req, reply) => {
     try {
@@ -31,7 +37,9 @@ export function buildApp(db: Knex): FastifyInstance {
     }
   });
 
-  registerUserRoutes(app, db);
+  app.register(progressRoutes(db));
+  app.register(usersRoutes(db));
+  app.register(meRoutes(db));
 
   return app;
 }

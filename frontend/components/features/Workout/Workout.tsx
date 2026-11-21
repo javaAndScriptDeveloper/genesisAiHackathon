@@ -1,11 +1,10 @@
 "use client";
 
-import { Cancel01Icon, Logout01Icon, MusicNote01Icon, PauseIcon, PlayIcon, Refresh01Icon } from "@hugeicons/core-free-icons";
+import { Cancel01Icon, ListViewIcon, Logout01Icon, MusicNote01Icon, PauseIcon, PlayIcon, Refresh01Icon } from "@hugeicons/core-free-icons";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { Button, EmptyState, IconButton, Icon, useToast } from "@/components/ui";
 import { WorkoutMusic } from "@/components/features/WorkoutMusic/WorkoutMusic";
-import { WorkoutHealthPanel } from "@/components/features/WorkoutHealthPanel/WorkoutHealthPanel";
 import { useWorkoutHealth } from "@/components/features/WorkoutHealthPanel/useWorkoutHealth";
 import { formatClock } from "@/lib/fit/dates";
 import { getExercise } from "@/lib/fit/exercises";
@@ -51,25 +50,27 @@ export function Workout() {
 
 	if (a.phase === "summary") return <WorkoutSummary />;
 
-	const linked = state.devices.apple ? "Apple Health" : state.devices.garmin ? "Garmin" : undefined;
-
 	return (
 		<div className={styles.root}>
 			<header className={styles.top}>
-				<IconButton icon={Cancel01Icon} label={t("fit.workout.quit")} onClick={() => { dispatch({ type: "pause" }); setSheet("quit"); }} />
+				<div className={styles.topActions}>
+					<IconButton icon={Cancel01Icon} label={t("fit.workout.quit")} onClick={() => { dispatch({ type: "pause" }); setSheet("quit"); }} />
+					<IconButton icon={ListViewIcon} label={t("fit.workout.all")} onClick={() => setSheet("overview")} />
+				</div>
 				<div className={styles.topTitle}>
 					<strong>{a.title}</strong>
 					<span>
 						{formatClock(a.elapsedSec)} · {t("fit.workout.left", { n: minutesLeft })}
 					</span>
 				</div>
-				<IconButton icon={MusicNote01Icon} label={t("fit.music.title")} onClick={() => setMusicOpen(true)} />
-				<IconButton icon={PauseIcon} label={t("fit.workout.pause")} onClick={() => dispatch({ type: "pause" })} />
+				<div className={styles.topActions}>
+					<IconButton icon={MusicNote01Icon} label={t("fit.music.title")} onClick={() => setMusicOpen(true)} />
+					<IconButton icon={PauseIcon} label={t("fit.workout.pause")} onClick={() => dispatch({ type: "pause" })} />
+				</div>
 			</header>
 
 			<div className={styles.scroll}>
-				<WorkoutStage onAdjust={() => setSheet("adjust")} onOverview={() => setSheet("overview")} onUnwell={() => setSheet("safety")} bpm={health.sample?.hr ?? null} />
-				<WorkoutHealthPanel sample={health.sample} zone={health.zone} alert={health.alert} elapsedSec={a.elapsedSec} resting={a.phase === "rest"} recoveryDrop={health.recoveryDrop} linkedTo={linked} />
+				<WorkoutStage onAdjust={() => setSheet("adjust")} onUnwell={() => setSheet("safety")} sample={health.sample} />
 			</div>
 
 			{a.phase === "rest" && !a.paused && <RestView onAdjust={() => setSheet("adjust")} onMusic={() => setMusicOpen(true)} />}

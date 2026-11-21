@@ -1,6 +1,6 @@
 "use client";
 
-import { Add01Icon, Alert02Icon, Calendar03Icon, DropletIcon, FireIcon, Medal01Icon, Target01Icon, Notification03Icon, PlayIcon, UserCircleIcon } from "@hugeicons/core-free-icons";
+import { Add01Icon, Alert02Icon, CheckmarkCircle01Icon, MinusSignIcon, Calendar03Icon, DropletIcon, FireIcon, Medal01Icon, Target01Icon, Notification03Icon, PlayIcon } from "@hugeicons/core-free-icons";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { DailyCheckCard } from "@/components/features/DailyCheck/DailyCheckCard";
@@ -13,6 +13,7 @@ import { AnimatedNumber, Button, Card, EmptyState, Icon, IconButton, Picture, Pr
 import { kcalFor } from "@/lib/fit/calories";
 import { daysBetween, formatDay } from "@/lib/fit/dates";
 import { motivationFor } from "@/lib/fit/gamification";
+import { WATER_MAX_ML, WATER_STEP_ML } from "@/lib/fit/seed";
 import { unreadCount } from "@/lib/fit/notifications";
 import { useFit } from "@/lib/fit/store/FitProvider";
 import { useActionNavigate, useFitStats, useStartWorkout } from "@/lib/fit/store/hooks";
@@ -43,7 +44,7 @@ export function Today() {
 	const active = state.active && state.active.phase !== "summary" ? state.active : null;
 	const next = stats.next;
 	const unread = unreadCount(state);
-	const weekPct = stats.week.planned ? (stats.week.done / stats.week.planned) * 100 : 0;
+	const weekPct = Math.min(100, (stats.goal.done / stats.goal.target) * 100);
 
 	return (
 		<div className={styles.root}>
@@ -56,7 +57,6 @@ export function Today() {
 							<IconButton icon={Notification03Icon} label={t("fit.today.notifications", { n: unread })} onClick={() => router.push("/notifications")} />
 							{unread > 0 && <span className={styles.badge} aria-hidden>{unread}</span>}
 						</span>
-						<IconButton icon={UserCircleIcon} label={t("fit.today.profile")} onClick={() => router.push("/profile")} />
 					</>
 				}
 			/>
@@ -134,19 +134,19 @@ export function Today() {
 
 				<section aria-label={t("fit.today.weekGoal")} className={styles.goal}>
 					<ProgressRing value={weekPct} label={t("fit.today.weekGoal")} size={92}>
-						<strong className={styles.ringNum}><AnimatedNumber value={stats.week.done} />/<AnimatedNumber value={stats.week.planned} /></strong>
+						<strong className={styles.ringNum}><AnimatedNumber value={stats.goal.done} />/<AnimatedNumber value={stats.goal.target} /></strong>
 						<span className={styles.ringLabel}>{t("fit.today.sessions")}</span>
 					</ProgressRing>
 					<div className={styles.goalText}>
 						<h2>{t("fit.today.weekGoal")}</h2>
-						<p>{stats.week.planned === 0 ? t("fit.today.noPlanThisWeek") : stats.week.done >= stats.week.planned ? t("fit.today.goalDone") : t("fit.today.goalLeft", { n: stats.week.planned - stats.week.done })}</p>
+						<p>{stats.goal.done >= stats.goal.target ? t("fit.today.goalDone") : stats.week.planned === 0 && stats.goal.done === 0 ? t("fit.today.noPlanThisWeek") : t("fit.today.goalLeft", { n: stats.goal.target - stats.goal.done })}</p>
 					</div>
 				</section>
 
 				<WeekStrip planned={state.planned} today={today} />
 
 				<div className={styles.stats}>
-					<Stat label={t("fit.today.streak")} value={stats.streak.current} hint={t("fit.today.streakHint")} icon={<Icon icon={FireIcon} size={14} />} />
+					<Stat label={t("fit.today.streak")} value={stats.streak.current} hint={t(stats.streak.current === 1 ? "fit.today.streakHintOne" : "fit.today.streakHint")} icon={<Icon icon={FireIcon} size={14} />} />
 					<Stat label={t("fit.today.level")} value={stats.level.level} hint={`${stats.level.into}/${stats.level.span} XP`} icon={<Icon icon={Medal01Icon} size={14} />} />
 				</div>
 				<ProgressBar value={stats.level.pct} label={t("fit.today.xpProgress")} />
@@ -163,15 +163,29 @@ export function Today() {
 				</Card>
 
 				<Card className={styles.water}>
-					<div className={styles.waterText}>
-						<Icon icon={DropletIcon} size={22} />
-						<h3>{t("fit.today.water")}</h3>
-						<p>{water} / {state.waterGoalMl} ml</p>
+					<div className={styles.waterTop}>
+						<span className={styles.waterIcon}>
+							<Icon icon={DropletIcon} size={22} />
+						</span>
+						<div className={styles.waterText}>
+							<h3>{t("fit.today.water")}</h3>
+							<p><strong>{water}</strong> / {state.waterGoalMl} ml</p>
+						</div>
+						<div className={styles.waterActions}>
+							<IconButton icon={MinusSignIcon} variant="secondary" label={t("fit.today.waterRemove", { ml: WATER_STEP_ML })} disabled={water <= 0} onClick={() => dispatch({ type: "water", date: today, delta: -WATER_STEP_ML })} />
+							<Button iconLeft={Add01Icon} disabled={water >= WATER_MAX_ML} onClick={() => dispatch({ type: "water", date: today, delta: WATER_STEP_ML })}>{WATER_STEP_ML} ml</Button>
+						</div>
 					</div>
-					<Button size="sm" variant="secondary" iconLeft={Add01Icon} onClick={() => {
-						dispatch({ type: "water", date: today, delta: 250 });
-						toast.show(t("fit.today.waterAdded"), "success");
-					}}>250 ml</Button>
+					<ProgressBar value={Math.min(100, (water / state.waterGoalMl) * 100)} label={t("fit.today.water")} tone={water >= state.waterGoalMl ? "success" : "accent"} />
+					<p className={styles.waterStatus} data-state={water >= WATER_MAX_ML ? "limit" : water >= state.waterGoalMl ? "done" : "going"} role="status">
+						{water >= WATER_MAX_ML ? (
+							<><Icon icon={Alert02Icon} size={16} />{t("fit.today.waterLimit", { max: WATER_MAX_ML })}</>
+						) : water >= state.waterGoalMl ? (
+							<><Icon icon={CheckmarkCircle01Icon} size={16} />{t("fit.today.waterDone")}</>
+						) : (
+							t("fit.today.waterLeft", { ml: state.waterGoalMl - water })
+						)}
+					</p>
 				</Card>
 
 				{next && !todays && !active && <WorkoutCard workout={next} />}

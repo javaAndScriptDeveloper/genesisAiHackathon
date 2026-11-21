@@ -1,9 +1,20 @@
 @use "partials/corners";
 
+// The AI coach's voice: --color-coach / --color-coachSoft (Training UI).
 .root {
 	display: flex;
 	flex-direction: column;
 	gap: var(--space-3);
+	border-color: var(--color-coachSoft);
+	box-shadow: inset 0.3rem 0 0 var(--color-coach), var(--shadow-card);
+}
+
+.eyebrow {
+	font-size: 1.2rem;
+	font-weight: 700;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: var(--color-coach);
 }
 
 .head {
@@ -19,7 +30,8 @@
 .title {
 	flex: 1;
 	min-width: 0;
-	font-size: 1.5rem;
+	font-size: 1.6rem;
+	line-height: 1.3;
 }
 
 .stats {
@@ -33,23 +45,31 @@
 	flex-direction: column;
 	gap: 0.2rem;
 	padding: var(--space-2) var(--space-3);
-	background: var(--color-surfaceMuted);
-	@include corners.radius(var(--radius-control));
+	background: var(--color-coachSoft);
+	@include corners.nested(var(--radius-card), var(--space-5));
 
 	dt {
-		color: var(--color-textSubtle);
+		color: var(--color-textMuted);
 		font-size: 1.2rem;
 	}
 
 	dd {
-		font-size: 1.6rem;
+		font-size: 1.7rem;
 		font-weight: 700;
 		font-variant-numeric: tabular-nums;
 	}
 }
 
 .note {
-	color: var(--color-textMuted);
-	font-size: 1.4rem;
+	font-size: 1.5rem;
 	line-height: 1.45;
+}
+
+.caption {
+	color: var(--color-textSubtle);
+	font-size: 1.2rem;
+}
+
+.undo {
+	align-self: flex-start;
 }

@@ -59,8 +59,8 @@ export const plannedWorkoutSchema: z.ZodType<PlannedWorkout> = z.object({
 	partnerId: z.string().optional(),
 });
 
+// The user is the browser's progress token, sent as the `x-progress-token` header (see lib/fit/progressToken.ts), not in the body.
 export const planRequestSchema = z.object({
-	userId: z.number().int().positive().nullable(),
 	profile: profileSchema,
 	trainerSlug: z.string().min(1).max(100),
 	wishes: z.array(z.string().max(200)).max(10),
@@ -71,13 +71,14 @@ export type PlanRequest = z.infer<typeof planRequestSchema>;
 export const planResponseSchema = z.object({
 	planned: z.array(plannedWorkoutSchema),
 	summary: z.string(),
+	/** Short reasons that point to the user's own data (shown on the onboarding "plan ready" screen); empty for the fallback. */
+	why: z.array(z.string()),
 	createdBy: z.enum(["ai", "fallback"]),
 	trainingId: z.number().nullable(),
 });
 export type PlanResponse = z.infer<typeof planResponseSchema>;
 
 export const dailyRequestSchema = z.object({
-	userId: z.number().int().positive(),
 	profile: profileSchema,
 	trainerSlug: z.string().min(1).max(100),
 	session: plannedWorkoutSchema.nullable(),
@@ -97,7 +98,6 @@ export const dailyResponseSchema: z.ZodType<{ status: DailyStatus; session: Plan
 export type DailyResponse = z.infer<typeof dailyResponseSchema>;
 
 export const coachRequestSchema = z.object({
-	userId: z.number().int().positive().nullable(),
 	profile: profileSchema,
 	trainerSlug: z.string().min(1).max(100),
 	wishes: z.array(z.string().max(200)).max(10),

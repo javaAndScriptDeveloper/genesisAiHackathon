@@ -30,16 +30,20 @@ describe("backend", () => {
 	});
 });
 
+const TOKEN = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
 const day = { date: "2026-11-21", sleepHours: 7, sleepScore: 80, restingHr: 58, hrvMs: 60, steps: 5000, activeKcal: 300, readiness: 70, source: "demo", scenario: "tired" };
 
 describe("platform", () => {
 	it("parses snapshots and returns [] on failure or bad shape", async () => {
 		mockFetch({ snapshots: [day] });
-		expect(await getSnapshots(1, 7)).toEqual([day]);
+		expect(await getSnapshots(TOKEN, 7)).toEqual([day]);
+		const [url, init] = vi.mocked(fetch).mock.calls[0] as [string, RequestInit];
+		expect(url).toMatch(/\/api\/me\/snapshots\?days=7$/);
+		expect((init.headers as Record<string, string>)["x-progress-token"]).toBe(TOKEN);
 		mockFetch({}, 500);
-		expect(await getSnapshots(1, 7)).toEqual([]);
+		expect(await getSnapshots(TOKEN, 7)).toEqual([]);
 		mockFetch({ snapshots: [{ date: 1 }] });
-		expect(await getSnapshots(1, 7)).toEqual([]);
+		expect(await getSnapshots(TOKEN, 7)).toEqual([]);
 	});
 
 	it("saves a training and returns the id, null on failure", async () => {
@@ -51,9 +55,12 @@ describe("platform", () => {
 			planned: [],
 		};
 		mockFetch({ id: 5 }, 201);
-		expect(await saveTraining(1, "hanna", plan)).toBe(5);
+		expect(await saveTraining(TOKEN, "hanna", plan)).toBe(5);
+		const [url, init] = vi.mocked(fetch).mock.calls[0] as [string, RequestInit];
+		expect(url).toMatch(/\/api\/me\/trainings$/);
+		expect((init.headers as Record<string, string>)["x-progress-token"]).toBe(TOKEN);
 		vi.stubGlobal("fetch", vi.fn(async () => Promise.reject(new Error("down"))));
-		expect(await saveTraining(1, "hanna", plan)).toBeNull();
+		expect(await saveTraining(TOKEN, "hanna", plan)).toBeNull();
 	});
 
 	it("picks the trainer tov, with a fallback", async () => {

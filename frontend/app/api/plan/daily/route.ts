@@ -4,15 +4,19 @@ import { getSnapshots, getTrainerTov, saveTraining } from "@/lib/api/platform";
 import { dailyRequestSchema, type DailyResponse } from "@/lib/fit/aiApi";
 import { buildDailySession, fallbackDaily } from "@/lib/fit/aiPlan";
 import { statusForReadiness } from "@/lib/fit/dailyStats";
+import { isProgressToken, progressTokenOf } from "@/lib/fit/progressToken";
 import { t } from "@/lib/messages";
 
 // Daily readiness check: the status is decided from readiness alone; the AI only writes the session content and note, and never makes a day harder.
+// The user is the progress token (`x-progress-token`, required here): it picks the device stats and the plan versions.
 export async function POST(request: Request) {
+	const token = progressTokenOf(request);
+	if (!isProgressToken(token)) return NextResponse.json({ error: "Missing or invalid progress token" }, { status: 400 });
 	const body = dailyRequestSchema.safeParse(await request.json().catch(() => null));
 	if (!body.success) return NextResponse.json({ error: "Invalid body" }, { status: 400 });
-	const { userId, profile, trainerSlug, session, upcoming, today } = body.data;
+	const { profile, trainerSlug, session, upcoming, today } = body.data;
 
-	const [snapshots, trainer] = await Promise.all([getSnapshots(userId, 1), getTrainerTov(trainerSlug)]);
+	const [snapshots, trainer] = await Promise.all([getSnapshots(token, 1), getTrainerTov(trainerSlug)]);
 	const last = snapshots[snapshots.length - 1];
 	const stats = last && last.date === today ? last : null;
 	const name = trainer.name;
@@ -57,7 +61,7 @@ export async function POST(request: Request) {
 
 	const replaced = adjusted;
 	const planned = upcoming.some((w) => w.id === replaced.id) ? upcoming.map((w) => (w.id === replaced.id ? replaced : w)) : [...upcoming, replaced];
-	await saveTraining(userId, trainerSlug, { kind: "daily-adjust", createdBy, inputs: { profile, stats: [stats], wishes: body.data.wishes }, summary: note, planned });
+	await saveTraining(token, trainerSlug, { kind: "daily-adjust", createdBy, inputs: { profile, stats: [stats], wishes: body.data.wishes }, summary: note, planned });
 
 	const response: DailyResponse = { status, session: adjusted, note, stats, createdBy };
 	return NextResponse.json(response);

@@ -23,8 +23,8 @@
 	bottom: 0.3rem;
 	left: 0;
 	width: var(--ind-w, 0);
-	background: var(--color-surface);
-	box-shadow: 0 0.1rem 0.3rem rgba(10, 10, 12, 0.12);
+	background: var(--color-segmentActive, var(--color-surface));
+	box-shadow: 0 0.1rem 0.3rem rgba(10, 10, 12, 0.18), inset 0 0 0 0.1rem var(--color-border);
 	transform: translateX(var(--ind-x, 0));
 	opacity: 0;
 	@include corners.nested(var(--radius-control), 0.3rem);
@@ -55,6 +55,6 @@
 }
 
 .active {
-	color: var(--color-text);
+	color: var(--color-accentText);
 	font-weight: 700;
 }

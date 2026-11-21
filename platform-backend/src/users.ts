@@ -1,225 +1,91 @@
-import { randomBytes } from "node:crypto";
 import type { FastifyInstance } from "fastify";
 import type { Knex } from "knex";
-import { generateDailyStats, type DailyStats, type Scenario } from "./demoStats.js";
+import { resolveUser } from "./progress/repo.js";
+import { TrainerModel } from "./trainers.js";
 
-const nullable = (type: string, extra: object = {}) => ({ type: [type, "null"], ...extra });
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-const userProperties = {
-  name: { type: "string", minLength: 1, maxLength: 255 },
-  gender: nullable("string", { maxLength: 255 }),
-  dob: nullable("string", { pattern: "^\\d{4}-\\d{2}-\\d{2}$" }),
-  weightKg: nullable("number", { minimum: 0, maximum: 999 }),
-  heightCm: nullable("number", { minimum: 0, maximum: 999 }),
-  level: nullable("string", { maxLength: 255 }),
-  trainerSlug: nullable("string"),
-  onboarding: { type: "object" },
+// The rest of the onboarding answers (the AI plan's inputs), stored as-is in users.onboarding.
+const onboardingSchema = {
+  type: "object",
+  additionalProperties: false,
+  properties: {
+    goal: { enum: ["lose-fat", "build-muscle", "get-stronger", "stay-fit", "endurance"] },
+    goalText: { type: "string", maxLength: 500 },
+    equipment: { type: "array", maxItems: 10, uniqueItems: true, items: { enum: ["dumbbells", "bench", "barbell", "machines", "bands", "jump-rope"] } },
+    location: { enum: ["home", "gym", "hybrid"] },
+    limitations: { type: "array", maxItems: 10, uniqueItems: true, items: { enum: ["knees", "lower-back", "shoulders", "wrists", "heart-bp"] } },
+    limitationNote: { type: "string", maxLength: 1000 },
+    wearable: { enum: ["none", "apple", "garmin"] },
+  },
 } as const;
 
-const createUserSchema = {
-  body: { type: "object", required: ["name"], additionalProperties: false, properties: userProperties },
-};
-const patchUserSchema = {
-  params: { type: "object", properties: { id: { type: "integer", minimum: 1 } } },
-  body: { type: "object", additionalProperties: false, properties: userProperties },
-};
-const createDeviceSchema = {
-  params: { type: "object", properties: { id: { type: "integer", minimum: 1 } } },
-  body: {
-    type: "object",
-    required: ["title"],
-    additionalProperties: false,
-    properties: { title: { type: "string", minLength: 1, maxLength: 100 } },
+const bodySchema = {
+  type: "object",
+  additionalProperties: false,
+  required: ["name"],
+  properties: {
+    name: { type: "string", minLength: 1, maxLength: 100 },
+    gender: { enum: ["female", "male", "non-binary", "private"] },
+    weightKg: { type: "number", exclusiveMinimum: 0, maximum: 999 },
+    heightCm: { type: "number", exclusiveMinimum: 0, maximum: 300 },
+    level: { enum: ["beginner", "intermediate", "advanced"] },
+    trainerId: { type: "string", minLength: 1, maxLength: 64 },
+    daysPerWeek: { type: "integer", minimum: 1, maximum: 7 },
+    durationMin: { type: "integer", minimum: 1, maximum: 600 },
+    onboarding: onboardingSchema,
   },
-};
-
-const syncSchema = {
-  params: {
-    type: "object",
-    properties: { id: { type: "integer", minimum: 1 }, deviceId: { type: "integer", minimum: 1 } },
-  },
-  body: {
-    type: "object",
-    required: ["date"],
-    additionalProperties: false,
-    properties: {
-      date: { type: "string", format: "date" },
-      scenario: { type: "string", enum: ["normal", "tired", "bad-night"] },
-    },
-  },
-};
-const snapshotsSchema = {
-  params: { type: "object", properties: { id: { type: "integer", minimum: 1 } } },
-  querystring: {
-    type: "object",
-    properties: { days: { type: "integer", minimum: 1, maximum: 31, default: 7 } },
-  },
-};
-
-const idParams = { type: "object", properties: { id: { type: "integer", minimum: 1 } } };
-const createTrainingSchema = {
-  params: idParams,
-  body: {
-    type: "object",
-    required: ["trainerSlug", "planData"],
-    additionalProperties: false,
-    properties: { trainerSlug: nullable("string"), planData: { type: "object" } },
-  },
-};
-const latestTrainingSchema = { params: idParams };
-
-// Pure calendar arithmetic on YYYY-MM-DD (UTC, so no DST/timezone drift).
-function shiftDate(date: string, days: number): string {
-  const d = new Date(`${date}T00:00:00Z`);
-  d.setUTCDate(d.getUTCDate() + days);
-  return d.toISOString().slice(0, 10);
-}
+} as const;
 
 interface UserBody {
-  name?: string;
-  gender?: string | null;
-  dob?: string | null;
-  weightKg?: number | null;
-  heightCm?: number | null;
-  level?: string | null;
-  trainerSlug?: string | null;
-  onboarding?: object;
+  name: string;
+  gender?: string;
+  weightKg?: number;
+  heightCm?: number;
+  level?: string;
+  trainerId?: string;
+  daysPerWeek?: number;
+  durationMin?: number;
+  onboarding?: Record<string, unknown>;
 }
 
-// Maps API fields to columns, only for fields present in the body. Unknown trainer slug -> null.
-async function toColumns(db: Knex, body: UserBody): Promise<Record<string, unknown>> {
-  const cols: Record<string, unknown> = {};
-  for (const key of ["name", "gender", "dob", "level"] as const) {
-    if (body[key] !== undefined) cols[key] = body[key];
-  }
-  if (body.weightKg !== undefined) cols.weight = body.weightKg;
-  if (body.heightCm !== undefined) cols.height = body.heightCm;
-  if (body.onboarding !== undefined) cols.onboarding = JSON.stringify(body.onboarding);
-  if (body.trainerSlug !== undefined) {
-    const trainer = body.trainerSlug === null ? undefined : await db("trainers").where({ slug: body.trainerSlug }).first("id");
-    cols.trainerId = trainer?.id ?? null;
-  }
-  return cols;
-}
-
-export function registerUserRoutes(app: FastifyInstance, db: Knex): void {
-  app.post<{ Body: UserBody }>("/api/users", { schema: createUserSchema }, async (req, reply) => {
-    const email = `demo-${randomBytes(6).toString("hex")}@demo.local`;
-    const [row] = await db("users")
-      .insert({ ...(await toColumns(db, req.body)), email })
-      .returning("id");
-    return reply.code(201).send({ id: Number(row.id) });
-  });
-
-  app.patch<{ Params: { id: number }; Body: UserBody }>("/api/users/:id", { schema: patchUserSchema }, async (req, reply) => {
-    const rows = await db("users")
-      .where({ id: req.params.id })
-      .update({ ...(await toColumns(db, req.body)), updatedAt: db.fn.now() })
-      .returning("id");
-    if (rows.length === 0) return reply.code(404).send({ error: "user not found" });
-    return { id: Number(rows[0].id) };
-  });
-
-  app.post<{ Params: { id: number }; Body: { title: string } }>("/api/users/:id/devices", { schema: createDeviceSchema }, async (req, reply) => {
-    const user = await db("users").where({ id: req.params.id }).first("id");
-    if (!user) return reply.code(404).send({ error: "user not found" });
-    const [row] = await db("user_devices").insert({ userId: req.params.id, title: req.body.title }).returning("id");
-    return reply.code(201).send({ id: Number(row.id) });
-  });
-
-  app.post<{ Params: { id: number; deviceId: number }; Body: { date: string; scenario?: Scenario } }>(
-    "/api/users/:id/devices/:deviceId/sync",
-    { schema: syncSchema },
-    async (req, reply) => {
-      const { id: userId, deviceId } = req.params;
-      const { date, scenario } = req.body;
-      const device = await db("user_devices").where({ id: deviceId, userId }).first("id");
-      if (!device) return reply.code(404).send({ error: "device not found" });
-
-      // A sync without a scenario is idempotent for a date that already has data: it never overwrites a
-      // simulated night with a "normal" one. An explicit scenario always appends (latest row per date wins).
-      const snapshot = await db.transaction(async (trx) => {
-        const previous = Array.from({ length: 6 }, (_, i) => shiftDate(date, i - 6));
-        const have = await trx("user_device_data_snapshots")
-          .where({ userId, deviceId })
-          .whereRaw("data->>'date' = any(?)", [previous])
-          .select(trx.raw("data->>'date' as date"));
-        const existing = new Set(have.map((r: { date: string }) => r.date));
-        const rows = previous
-          .filter((d) => !existing.has(d))
-          .map((d) => ({ userId, deviceId, data: JSON.stringify(generateDailyStats(userId, d, "normal")) }));
-        const current: { data: DailyStats } | undefined = scenario
-          ? undefined
-          : await trx("user_device_data_snapshots")
-              .where({ userId, deviceId })
-              .whereRaw("data->>'date' = ?", [date])
-              .orderBy("id", "desc")
-              .first("data");
-        const result = current?.data ?? generateDailyStats(userId, date, scenario ?? "normal");
-        if (!current) rows.push({ userId, deviceId, data: JSON.stringify(result) });
-        if (rows.length > 0) await trx("user_device_data_snapshots").insert(rows);
-        return result;
-      });
-      return { snapshot };
-    },
-  );
-
-  app.get<{ Params: { id: number }; Querystring: { days: number } }>(
-    "/api/users/:id/snapshots",
-    { schema: snapshotsSchema },
-    async (req) => {
-      const userId = req.params.id;
-      const newest = await db("user_device_data_snapshots")
-        .where({ userId })
-        .max({ d: db.raw("data->>'date'") })
-        .first();
-      if (!newest?.d) return { snapshots: [] };
-      const from = shiftDate(newest.d as string, -(req.query.days - 1));
-      const result = await db.raw(
-        `select data from (
-           select distinct on (data->>'date') data, data->>'date' as d
-           from user_device_data_snapshots
-           where user_id = ? and data->>'date' >= ? and data->>'date' <= ?
-           order by data->>'date', id desc
-         ) t order by d asc`,
-        [userId, from, newest.d],
-      );
-      return { snapshots: result.rows.map((r: { data: DailyStats }) => r.data) };
-    },
-  );
-
-  app.post<{ Params: { id: number }; Body: { trainerSlug: string | null; planData: object } }>(
-    "/api/users/:id/trainings",
-    { schema: createTrainingSchema },
-    async (req, reply) => {
-      const user = await db("users").where({ id: req.params.id }).first("id");
-      if (!user) return reply.code(404).send({ error: "user not found" });
-      const { trainerSlug, planData } = req.body;
-      const trainer = trainerSlug === null ? undefined : await db("trainers").where({ slug: trainerSlug }).first("id");
-      const [row] = await db("user_trainings")
-        .insert({ userId: req.params.id, trainerId: trainer?.id ?? null, planData: JSON.stringify(planData) })
-        .returning("id");
-      return reply.code(201).send({ id: Number(row.id) });
-    },
-  );
-
-  app.get<{ Params: { id: number } }>("/api/users/:id/trainings/latest", { schema: latestTrainingSchema }, async (req) => {
-    const row = await db("user_trainings as ut")
-      .leftJoin("trainers as t", "t.id", "ut.trainerId")
-      .where("ut.userId", req.params.id)
-      .orderBy([
-        { column: "ut.createdAt", order: "desc" },
-        { column: "ut.id", order: "desc" },
-      ])
-      .first("ut.id", "ut.planData", "ut.createdAt", "t.slug as trainerSlug");
-    if (!row) return { training: null };
-    return {
-      training: {
-        id: Number(row.id),
-        trainerSlug: row.trainerSlug ?? null,
-        planData: row.planData,
-        createdAt: new Date(row.createdAt).toISOString(),
-      },
-    };
-  });
+// The browser has no login yet, so a user is the device's progress token: the same guest user that progress sync
+// creates gets its real profile here. users.id stays internal and is never returned.
+export function usersRoutes(db: Knex) {
+  return async (app: FastifyInstance): Promise<void> => {
+    app.post<{ Body: UserBody }>("/api/users", { schema: { body: bodySchema } }, async (req, reply) => {
+      const header = req.headers["x-progress-token"];
+      if (typeof header !== "string" || !UUID.test(header)) return reply.code(400).send({ error: "invalid progress token" });
+      const token = header.toLowerCase();
+      const b = req.body;
+      try {
+        let trainerRowId: number | null = null;
+        if (b.trainerId !== undefined) {
+          const trainer = await TrainerModel.query(db).findOne({ slug: b.trainerId });
+          if (!trainer) return reply.code(400).send({ error: "unknown trainer" });
+          trainerRowId = Number(trainer.id);
+        }
+        const existed = (await resolveUser(db, token, { create: false })) !== null;
+        const userId = await resolveUser(db, token, { create: true });
+        await db("users").where({ id: userId }).update({
+          name: b.name,
+          gender: b.gender ?? null,
+          weight: b.weightKg ?? null,
+          height: b.heightCm ?? null,
+          level: b.level ?? null,
+          trainerId: trainerRowId,
+          daysPerWeek: b.daysPerWeek ?? null,
+          durationMin: b.durationMin ?? null,
+          onboarding: b.onboarding === undefined ? null : JSON.stringify(b.onboarding),
+          updatedAt: db.fn.now(),
+        });
+        return reply.code(existed ? 200 : 201).send({
+          user: { name: b.name, gender: b.gender ?? null, weightKg: b.weightKg ?? null, heightCm: b.heightCm ?? null, level: b.level ?? null, trainerId: b.trainerId ?? null, daysPerWeek: b.daysPerWeek ?? null, durationMin: b.durationMin ?? null },
+        });
+      } catch (err) {
+        app.log.error(err, "saving user failed");
+        return reply.code(503).send({ error: "users unavailable" });
+      }
+    });
+  };
 }

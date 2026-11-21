@@ -6,8 +6,8 @@ import { toISO } from "@/lib/fit/dates";
 import { DEFAULT_TRAINER_ID, activeTrainerId } from "@/lib/fit/options";
 import { estimateMinutes, generatePlan, nextUpcoming } from "@/lib/fit/plan";
 import { emptyState } from "@/lib/fit/seed";
-import { computeStreak } from "@/lib/fit/stats";
 import { loadState } from "@/lib/fit/store/persist";
+import { progressOf } from "@/lib/fit/store/progressStats";
 import { reducer, type Action } from "@/lib/fit/store/reducer";
 import type { FitState, PlannedWorkout, Profile } from "@/lib/fit/types";
 
@@ -74,16 +74,18 @@ describe("end to end journey", () => {
 		s = run(s, { type: "finish", today, now });
 		expect(s.active).toBeNull();
 		expect(s.history.length).toBe(before + 1);
-		expect(s.unlocked["first-rep"]).toBeDefined();
-		expect(s.unlocked["adapt-overcome"]).toBeDefined();
-		expect(s.celebrate.length).toBeGreaterThan(0);
+		// The engine judges achievements now: legacy fields are not written, the finish is reflected in lib/progress.
+		expect(s.unlocked).toEqual({});
+		expect(s.celebrate).toEqual([]);
+		expect(s.history[s.history.length - 1]?.xp).toBeGreaterThan(0);
+		expect(progressOf(s, today).badges.find((b) => b.id === "first-workout")?.unlocked).toBe(true);
 	});
-	it("recovery skip does not break the streak", () => {
+	it("skipping an upcoming workout never breaks the (weekly) streak", () => {
 		const s = run(emptyState(), { type: "complete-onboarding", units: "metric", profile, demoHistory: true, today, now });
-		const before = computeStreak(s.planned, today).current;
+		const before = progressOf(s, today).streak.current;
 		const next = nextUpcoming(s.planned, today);
 		const skipped = run(s, { type: "skip-planned", id: next?.id ?? "", reason: "recovery" });
-		expect(computeStreak(skipped.planned, today).current).toBeGreaterThanOrEqual(before);
+		expect(progressOf(skipped, today).streak.current).toBeGreaterThanOrEqual(before);
 	});
 	it("removing dumbbells swaps exercises", () => {
 		let s = run(emptyState(), { type: "complete-onboarding", units: "metric", profile, demoHistory: false, today, now });
@@ -96,7 +98,7 @@ describe("end to end journey", () => {
 });
 
 describe("coach", () => {
-	const ctx: CoachContext = { profile, next: undefined, todayDone: false, inSession: false, streak: 2, weekDone: 1, weekPlanned: 3, consistency: 80, xp: 300, sessions: 6, lastPr: null, premium: false };
+	const ctx: CoachContext = { profile, next: undefined, todayDone: false, inSession: false, streak: 2, weekDone: 1, weekPlanned: 3, consistency: 80, xp: 300, level: 2, sessions: 6, lastPr: null, premium: false };
 	it("prioritizes safety over adaptation", () => {
 		expect(isSafetyConcern("I feel dizzy and have chest pain")).toBe(true);
 		const r = coachReply("I feel dizzy", ctx);
@@ -259,10 +261,24 @@ describe("AI plan state", () => {
 		expect(s.daily).toBeNull();
 	});
 
-	it("complete-onboarding with ai uses the AI plan and stores backend ids", () => {
+	it("old saved state with a numeric-user backend drops it, so a device is registered under the token", () => {
+		const old = { version: 1, units: "metric", profile: null, trainerId: null, planned: [], history: [], active: null, notifications: [], water: {}, subscription: { tier: "free", trialEndsAt: null }, coach: [], backend: { userId: 7, deviceId: 9 } };
+		vi.stubGlobal("window", { localStorage: { getItem: () => JSON.stringify(old), setItem: () => undefined } });
+		expect(loadState().backend).toBeNull();
+		const kept = { ...old, backend: { deviceId: 9 } };
+		vi.stubGlobal("window", { localStorage: { getItem: () => JSON.stringify(kept), setItem: () => undefined } });
+		expect(loadState().backend).toEqual({ deviceId: 9 });
+		// The same rule on hydrate (dev scenarios, restores).
+		const legacy: FitState = JSON.parse(JSON.stringify({ ...emptyState(), backend: { userId: 7, deviceId: 9 } }));
+		expect(run(emptyState(), { type: "hydrate", state: legacy }).backend).toBeNull();
+	});
+
+	it("complete-onboarding with ai uses the AI plan and stores the backend device", () => {
+		const token = "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb";
 		for (const demoHistory of [false, true]) {
-			const s = run(emptyState(), { type: "complete-onboarding", units: "metric", profile, demoHistory, today, now, ai: { backend: { userId: 7, deviceId: 9 }, planned: [aiSession("ai-a", tomorrow)], summary: "Hello", source: "fallback" } });
-			expect(s.backend).toEqual({ userId: 7, deviceId: 9 });
+			const s = run(emptyState(), { type: "complete-onboarding", units: "metric", profile, demoHistory, today, now, planned: [aiSession("ai-a", tomorrow)], ai: { backend: { deviceId: 9 }, summary: "Hello", source: "fallback", progressToken: token } });
+			expect(s.backend).toEqual({ deviceId: 9 });
+			expect(s.progressToken).toBe(token);
 			expect(s.planSummary).toBe("Hello");
 			expect(s.planSource).toBe("fallback");
 			expect(s.planned.some((w) => w.id === "ai-a")).toBe(true);
@@ -292,6 +308,6 @@ describe("AI plan state", () => {
 		expect(run(s0, { type: "update-profile", profile: { ...profile, daysPerWeek: 4 }, units: "metric", today }).planSource).toBe("rules");
 		// A rule-built plan has no trainer summary, so the AI summary card does not describe a plan it didn't make.
 		expect(run({ ...s0, planSummary: "AI week" }, { type: "update-profile", profile: { ...profile, daysPerWeek: 4 }, units: "metric", today }).planSummary).toBeNull();
-		expect(run(s0, { type: "set-backend", backend: { userId: 1, deviceId: 2 } }).backend).toEqual({ userId: 1, deviceId: 2 });
+		expect(run(s0, { type: "set-backend", backend: { deviceId: 2 } }).backend).toEqual({ deviceId: 2 });
 	});
 });

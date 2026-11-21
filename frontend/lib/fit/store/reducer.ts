@@ -1,16 +1,26 @@
-import { toISO, type ISODate } from "../dates";
+import { fromRemote, type RemoteSnapshot } from "../../api/progressSync";
+import { tokenBackend } from "../aiFlow";
+import { daysBetween, toISO, type ISODate } from "../dates";
+import { MAX_PAUSE_DAYS } from "../../progress/consistency";
 import type { Units } from "../units";
 import { findExercise, getExercise } from "../exercises";
 import { applyAdapt, replaceBlock, replaceUnavailable } from "../adapt";
-import { evaluateAchievements, achievementById, totalXp } from "../gamification";
+import { ACCEPT_DELAY_MS, MAX_CHAT_MESSAGES } from "../community";
 import { deriveNotifications } from "../notifications";
 import { buildAdHocWorkout, estimateMinutes, generatePlan, nextUpcoming } from "../plan";
-import { emptyState, seedHistory } from "../seed";
-import { applyProgression, detectPrs, mean, sessionXp, volumeOf, weekStats } from "../stats";
+import { defaultWeeklyGoal, emptyState, newProgressToken, seedHistory, WATER_MAX_ML } from "../seed";
+import type { ArchiveItem, ProgressEvent } from "../../progress/types";
+import { applyProgression, detectPrs, mean, volumeOf } from "../stats";
+import { detectEvents, reportReadyEvent } from "../../progress/events";
+import { historyFromFit } from "../../progress/fromFit";
+import { xpForSession } from "../../progress/xp";
+import { t } from "../../messages";
+import { progressCtx, progressOf } from "./progressStats";
 import type {
 	ActiveSession,
 	AdaptOp,
 	AppNotification,
+	ChatMessage,
 	Goal,
 	CoachAction,
 	CoachMessage,
@@ -30,7 +40,7 @@ import type {
 	SkipReason,
 } from "../types";
 
-type Backend = { userId: number; deviceId: number };
+type Backend = NonNullable<FitState["backend"]>;
 
 export type Action =
 	| { type: "hydrate"; state: FitState }
@@ -39,7 +49,19 @@ export type Action =
 	| { type: "apply-ai-plan"; planned: PlannedWorkout[]; summary: string; source: "ai" | "fallback"; wishes: string[]; today: ISODate }
 	| { type: "apply-daily"; check: Omit<DailyCheck, "original" | "undone">; session: PlannedWorkout | null }
 	| { type: "undo-daily" }
-	| { type: "complete-onboarding"; profile: Profile; units: Units; demoHistory: boolean; today: ISODate; now: string; ai?: { backend: Backend | null; planned: PlannedWorkout[]; summary: string; source: "ai" | "fallback" } }
+	| {
+			type: "complete-onboarding";
+			profile: Profile;
+			units: Units;
+			demoHistory: boolean;
+			today: ISODate;
+			now: string;
+			trainerId?: string;
+			/** A plan built before dispatch (the AI plan from onboarding); otherwise the rule-based one. */
+			planned?: PlannedWorkout[];
+			/** Who built `planned` and the backend device it used; the token is kept, so the user and device saved under it stay this user's. */
+			ai?: { backend: Backend | null; summary: string | null; source: FitState["planSource"]; progressToken: string };
+	  }
 	| { type: "update-profile"; profile: Profile; units: Units; today: ISODate }
 	| { type: "set-goal"; goal: Goal; goalText: string; today: ISODate }
 	| { type: "set-trainer"; trainerId: string }
@@ -87,10 +109,22 @@ export type Action =
 	| { type: "add-photo"; photo: PhotoCheckIn }
 	| { type: "remove-photo"; id: string }
 	| { type: "add-body-weight"; date: ISODate; kg: number; at?: string }
-	| { type: "partner"; id: string; status: "invited" | "accepted" | null }
+	| { type: "partner"; id: string; status: "invited" | "accepted" | null; now?: string }
+	| { type: "partners-sync"; now: string }
+	| { type: "chat-send"; buddyId: string; message: ChatMessage }
 	| { type: "joint-workout"; workoutId: string; partnerId: string | null }
-	| { type: "dismiss-celebration" }
-	| { type: "clear-demo-history"; today: ISODate };
+	| { type: "clear-demo-history"; today: ISODate }
+	| { type: "add-pause"; from: ISODate; to: ISODate }
+	| { type: "remove-pause"; from: ISODate }
+	| { type: "set-weekly-goal"; goal: number }
+	| { type: "record-events"; events: ProgressEvent[] }
+	| { type: "mark-seen"; kinds?: ProgressEvent["kind"][]; ids?: string[]; now: string }
+	| { type: "archive-queued"; items: ArchiveItem[] }
+	| { type: "archive-sent"; ids: string[]; weeks: string[] }
+	| { type: "apply-remote"; snapshot: RemoteSnapshot };
+
+/** The queue never holds more than this many items; overflow drops the oldest "change" items, never "weekly". */
+export const ARCHIVE_QUEUE_CAP = 50;
 
 const uid = (p: string) => `${p}${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
 
@@ -140,6 +174,14 @@ function advanceAfterRest(a: ActiveSession): ActiveSession {
 	return { ...a, phase: "work", restLeft: 0, index: stay ? a.index : Math.max(0, nextIndexAfter(a.exercises, a.index)) };
 }
 
+/** State with a finished session applied: log appended, its planned workout closed, progression pushed forward. */
+function withLog(state: FitState, a: ActiveSession, log: SessionLog, today: ISODate): FitState {
+	let planned = state.planned;
+	if (a.plannedId) planned = planned.map((w) => (w.id === a.plannedId ? { ...w, status: log.status, logId: log.id, exercises: a.exercises } : w));
+	planned = applyProgression(planned, log, today);
+	return { ...state, history: [...state.history, log], planned };
+}
+
 export function previewLog(state: FitState, a: ActiveSession, today: ISODate): SessionLog {
 	const exercises = a.exercises.map((b) => ({
 		exerciseId: b.exerciseId,
@@ -148,9 +190,7 @@ export function previewLog(state: FitState, a: ActiveSession, today: ISODate): S
 	}));
 	const status = allDone(a.exercises) ? "completed" : "partial";
 	const prs = detectPrs(state.history, exercises);
-	const planned = a.plannedId ? state.planned.find((w) => w.id === a.plannedId) : undefined;
-	const extra = !!planned?.adHoc && weekStats(state.planned, state.history, today).remaining === 0;
-	return {
+	const log: SessionLog = {
 		id: `l-${a.id}`,
 		plannedId: a.plannedId,
 		date: today,
@@ -163,9 +203,15 @@ export function previewLog(state: FitState, a: ActiveSession, today: ISODate): S
 		adaptations: a.adaptations,
 		avgHr: a.hrSamples.length ? Math.round(mean(a.hrSamples)) : undefined,
 		hrDemo: a.hrSamples.length ? true : undefined,
-		xp: sessionXp({ status, durationSec: a.elapsedSec, prs: prs.length, adHocExtra: !!planned?.adHoc && extra }),
+		xp: 0,
 		prs,
 	};
+	// XP is the engine's (lib/progress): what this session adds once it is in the history. A same-week early start is
+	// dated on its planned day, so read it as of that day (the engine only counts sessions up to "today").
+	const plannedDate = a.plannedId ? state.planned.find((w) => w.id === a.plannedId)?.date : undefined;
+	const asOf = plannedDate !== undefined && plannedDate > today ? plannedDate : today;
+	const after = historyFromFit(withLog(state, a, log, today), asOf);
+	return { ...log, xp: xpForSession(after, progressCtx(state), log.id).total };
 }
 
 function adaptTarget(state: FitState, op: AdaptOp, today: ISODate): { state: FitState; message: string; changed: boolean } {
@@ -202,16 +248,27 @@ function rebuildUpcoming(state: FitState, profile: Profile, today: ISODate): Fit
 	return { ...mergeUpcoming(state, generatePlan(profile, today, 4), today), profile, planSource: "rules", planSummary: null, daily: null };
 }
 
-function unlockNew(state: FitState, today: ISODate, now: string): FitState {
-	const ids = evaluateAchievements(state, today);
-	if (ids.length === 0) return state;
-	const unlocked = { ...state.unlocked, ...Object.fromEntries(ids.map((id) => [id, today])) };
-	const notes: AppNotification[] = ids.flatMap((id) => {
-		const def = achievementById(id);
-		if (!def || !state.notificationSettings.enabled.achievement) return [];
-		return [{ id: `n-ach-${id}`, kind: "achievement" as NotificationKind, title: `Unlocked: ${def.title}`, body: `${def.description} +${def.xp} XP`, createdAt: now, read: false, href: "/progress" }];
+/**
+ * New badges, level-ups and records between two states, recorded as progress events in the same step
+ * (the engine is the only judge; legacy `state.unlocked` / `state.celebrate` are no longer written).
+ */
+function recordProgress(before: FitState, after: FitState, today: ISODate, now: string): FitState {
+	return recordEvents(after, detectEvents(progressOf(before, today), progressOf(after, today), now), now);
+}
+
+/** Records events not seen before (by id) and announces new badges/levels in the notification list. */
+function recordEvents(state: FitState, events: ProgressEvent[], now: string): FitState {
+	const have = new Set(state.progressEvents.map((e) => e.id));
+	const fresh = events.filter((e) => !have.has(e.id));
+	if (fresh.length === 0) return state;
+	const next = reducer(state, { type: "record-events", events: fresh });
+	if (!state.notificationSettings.enabled.achievement) return next;
+	const notes = fresh.flatMap((e): AppNotification[] => {
+		if (e.kind === "badge") return [{ id: `n-badge-${e.refId}`, kind: "achievement", title: t("fit.progress.notify.badgeTitle", { title: t(`fit.progress.badge.${e.refId}.title`) }), body: t(`fit.progress.badge.${e.refId}.desc`), createdAt: now, read: false, href: "/progress" }];
+		if (e.kind === "level") return [{ id: `n-level-${e.refId}`, kind: "achievement", title: t("fit.progress.notify.levelTitle", { level: e.refId }), body: t("fit.progress.notify.levelBody"), createdAt: now, read: false, href: "/progress" }];
+		return [];
 	});
-	return appendNotifications({ ...state, unlocked, celebrate: [...state.celebrate, ...ids] }, notes);
+	return appendNotifications(next, notes);
 }
 
 function finishSession(state: FitState, today: ISODate, now: string): FitState {
@@ -219,33 +276,45 @@ function finishSession(state: FitState, today: ISODate, now: string): FitState {
 	if (!a || a.phase !== "summary") return state;
 	if (a.outcome === "empty") return { ...state, active: null };
 	const log = previewLog(state, a, today);
-	const history = [...state.history, log];
-	let planned = state.planned;
-	if (a.plannedId) planned = planned.map((w) => (w.id === a.plannedId ? { ...w, status: log.status, logId: log.id, exercises: a.exercises } : w));
-	planned = applyProgression(planned, log, today);
-	let next: FitState = { ...state, history, planned, active: null };
-	next = unlockNew(next, today, now);
+	let next: FitState = { ...withLog(state, a, log, today), active: null };
+	next = recordProgress(state, next, today, now);
 	return appendNotifications(next, deriveNotifications(next, new Date(now)));
 }
 
 export function reducer(state: FitState, action: Action): FitState {
 	switch (action.type) {
 		case "hydrate":
-			return action.state;
+			// Older saved state has no pauses yet.
+			// Older saved state also lacks the progress fields.
+			return {
+				...emptyState(),
+				...action.state,
+				pauses: action.state.pauses ?? [],
+				progressToken: action.state.progressToken ?? newProgressToken(),
+				weeklyGoal: action.state.weeklyGoal ?? defaultWeeklyGoal(action.state.profile ?? null),
+				progressEvents: action.state.progressEvents ?? [],
+				// Old saves start diffing from today, so badges they already hold are never announced retroactively.
+				lastProgressDay: action.state.lastProgressDay ?? toISO(new Date()),
+				archivedWeeks: action.state.archivedWeeks ?? [],
+				archiveQueue: action.state.archiveQueue ?? [],
+				backend: tokenBackend(action.state.backend),
+			};
 		case "reset":
 			return emptyState();
 		case "complete-onboarding": {
-			const base: FitState = { ...emptyState(), units: action.units, profile: action.profile, notificationSettings: state.notificationSettings, bodyWeights: [{ date: action.today, kg: action.profile.weightKg }] };
+			const base: FitState = { ...emptyState(), units: action.units, trainerId: action.trainerId ?? null, profile: action.profile, notificationSettings: state.notificationSettings, bodyWeights: [{ date: action.today, kg: action.profile.weightKg }], weeklyGoal: defaultWeeklyGoal(action.profile), ...(action.ai ? { progressToken: action.ai.progressToken } : {}) };
 			const devices = { apple: action.profile.wearable === "apple", garmin: action.profile.wearable === "garmin" };
 			if (action.demoHistory) {
 				const seeded = seedHistory(action.profile, action.today);
 				const { futureFrom: _unused, ...rest } = seeded;
 				void _unused;
-				let s: FitState = { ...base, ...rest, devices };
+				// Demo history fills the past; the user's own plan, when given, owns everything from today on.
+				const planned = action.planned ? [...rest.planned.filter((w) => w.date < action.today), ...action.planned] : rest.planned;
+				let s: FitState = { ...base, ...rest, planned, devices };
 				s = appendNotifications(s, [{ id: "n-welcome", kind: "coach", title: "Your plan is ready", body: "I built it from your goal, schedule and equipment. Ask me to adjust anything.", createdAt: action.now, read: false, href: "/coach" }]);
 				return finishOnboarding(s, action);
 			}
-			const planned = generatePlan(action.profile, action.today, 4);
+			const planned = action.planned ?? generatePlan(action.profile, action.today, 4);
 			let s: FitState = { ...base, planned, devices };
 			s = appendNotifications(s, [{ id: "n-welcome", kind: "coach", title: "Your plan is ready", body: "I built it from your goal, schedule and equipment. Ask me to adjust anything.", createdAt: action.now, read: false, href: "/coach" }]);
 			return finishOnboarding(s, action);
@@ -288,8 +357,19 @@ export function reducer(state: FitState, action: Action): FitState {
 			return state.profile ? reducer(state, { type: "update-profile", profile: { ...state.profile, goal: action.goal, goalText: action.goalText }, units: state.units, today: action.today }) : state;
 		case "set-trainer":
 			return { ...state, trainerId: action.trainerId };
-		case "sync":
-			return state.profile ? appendNotifications(state, deriveNotifications(state, new Date(action.now))) : state;
+		case "sync": {
+			if (!state.profile) return state;
+			const day = toISO(new Date(action.now));
+			let s = appendNotifications(state, deriveNotifications(state, new Date(action.now)));
+			// Day/week rollover: a finished week can credit a perfect week, week XP or rest XP (new badges, levels).
+			// Diff the snapshot of the last synced day against today's; event ids make repeats harmless.
+			const last = state.lastProgressDay;
+			if (last !== null && last < day) s = recordEvents(s, detectEvents(progressOf(state, last), progressOf(state, day), action.now), action.now);
+			if (last !== day) s = { ...s, lastProgressDay: day };
+			// From Monday on, last week's report is "new" until opened. Ids are per week, so this never duplicates.
+			const report = reportReadyEvent(historyFromFit(state, day), progressCtx(state), action.now);
+			return report ? reducer(s, { type: "record-events", events: [report] }) : s;
+		}
 		case "start-workout": {
 			const w = state.planned.find((p) => p.id === action.plannedId);
 			if (!w) return state;
@@ -397,7 +477,7 @@ export function reducer(state: FitState, action: Action): FitState {
 		case "discard-active":
 			return { ...state, active: null };
 		case "skip-planned":
-			return unlockNew(patchPlanned(state, action.id, (w) => ({ ...w, status: "skipped", skipReason: action.reason })), toISO(new Date()), new Date().toISOString());
+			return patchPlanned(state, action.id, (w) => ({ ...w, status: "skipped", skipReason: action.reason }));
 		case "move-planned": {
 			const clash = state.planned.some((w) => w.date === action.date && w.id !== action.id && !w.adHoc);
 			if (clash) return state;
@@ -443,7 +523,7 @@ export function reducer(state: FitState, action: Action): FitState {
 				next = rebuildUpcoming(state, state.profile, action.today);
 			}
 			const coach = next.coach.map((m) => (m.id === action.messageId ? { ...m, appliedAction: a.id } : m));
-			return unlockNew({ ...next, coach: [...coach, action.reply].slice(-80) }, action.today, action.now);
+			return { ...next, coach: [...coach, action.reply].slice(-80) };
 		}
 		case "notification-read":
 			return { ...state, notifications: state.notifications.map((n) => (n.id === action.id ? { ...n, read: true } : n)) };
@@ -453,8 +533,7 @@ export function reducer(state: FitState, action: Action): FitState {
 			return { ...state, notificationSettings: action.settings };
 		case "water": {
 			const current = state.water[action.date] ?? 0;
-			const next = { ...state, water: { ...state.water, [action.date]: Math.max(0, current + action.delta) } };
-			return unlockNew(next, action.date, new Date().toISOString());
+			return { ...state, water: { ...state.water, [action.date]: Math.max(0, Math.min(Math.max(current, WATER_MAX_ML), current + action.delta)) } };
 		}
 		case "water-goal":
 			return { ...state, waterGoalMl: Math.max(1000, Math.min(6000, action.ml)) };
@@ -481,14 +560,32 @@ export function reducer(state: FitState, action: Action): FitState {
 			return { ...state, bodyWeights: [...state.bodyWeights.filter((b) => b.date !== action.date), { date: action.date, kg: action.kg, at: action.at }].sort((a, b) => a.date.localeCompare(b.date)) };
 		case "partner": {
 			const partners = { ...state.partners };
-			if (action.status === null) delete partners[action.id];
-			else partners[action.id] = action.status;
-			return { ...state, partners };
+			const partnerInvitedAt = { ...state.partnerInvitedAt };
+			const chats = { ...state.chats };
+			if (action.status === null) {
+				delete partners[action.id];
+				delete partnerInvitedAt[action.id];
+				delete chats[action.id];
+			} else {
+				partners[action.id] = action.status;
+				if (action.status === "invited" && action.now) partnerInvitedAt[action.id] = action.now;
+			}
+			return { ...state, partners, partnerInvitedAt, chats };
+		}
+		case "partners-sync": {
+			const now = Date.parse(action.now);
+			// A missing invite time (requests saved by the old Gym Bro screen) counts as overdue.
+			const due = Object.entries(state.partners).filter(([id, status]) => status === "invited" && (state.partnerInvitedAt[id] === undefined || now - Date.parse(state.partnerInvitedAt[id]) >= ACCEPT_DELAY_MS));
+			if (due.length === 0) return state;
+			return { ...state, partners: { ...state.partners, ...Object.fromEntries(due.map(([id]) => [id, "accepted" as const])) } };
+		}
+		case "chat-send": {
+			const { message, buddyId } = action;
+			if (message.text.trim() === "" && !message.photo) return state;
+			return { ...state, chats: { ...state.chats, [buddyId]: [...(state.chats[buddyId] ?? []), message].slice(-MAX_CHAT_MESSAGES) } };
 		}
 		case "joint-workout":
 			return patchPlanned(state, action.workoutId, (w) => ({ ...w, partnerId: action.partnerId ?? undefined }));
-		case "dismiss-celebration":
-			return { ...state, celebrate: [] };
 		case "clear-demo-history": {
 			const keepLogs = state.history.filter((l) => !l.demo);
 			const keepIds = new Set(keepLogs.map((l) => l.id));
@@ -496,14 +593,78 @@ export function reducer(state: FitState, action: Action): FitState {
 			const unlocked = Object.fromEntries(Object.entries(state.unlocked).filter(([id]) => keepLogs.length > 0 && id !== "none"));
 			return { ...state, history: keepLogs, planned, hasDemoHistory: false, unlocked: keepLogs.length ? unlocked : {}, bodyWeights: state.bodyWeights.slice(-1), water: {} };
 		}
+		case "add-pause": {
+			const pauses = state.pauses ?? [];
+			const len = daysBetween(action.from, action.to);
+			// 1 day … 4 weeks (to − from ≤ 27), never overlapping an existing pause.
+			if (len < 0 || len > MAX_PAUSE_DAYS) return state;
+			if (pauses.some((p) => p.from <= action.to && p.to >= action.from)) return state;
+			return { ...state, pauses: [...pauses, { from: action.from, to: action.to }].sort((a, b) => a.from.localeCompare(b.from)) };
+		}
+		case "set-weekly-goal":
+			return { ...state, weeklyGoal: Math.min(5, Math.max(2, Math.round(action.goal))) };
+		case "record-events": {
+			const have = new Set(state.progressEvents.map((e) => e.id));
+			const fresh: ProgressEvent[] = [];
+			for (const e of action.events) {
+				if (have.has(e.id)) continue;
+				have.add(e.id);
+				fresh.push(e);
+			}
+			return fresh.length === 0 ? state : { ...state, progressEvents: [...state.progressEvents, ...fresh] };
+		}
+		case "mark-seen": {
+			const match = (e: ProgressEvent) => (action.kinds?.includes(e.kind) ?? false) || (action.ids?.includes(e.id) ?? false);
+			if (!state.progressEvents.some((e) => e.seenAt === null && match(e))) return state;
+			return { ...state, progressEvents: state.progressEvents.map((e) => (e.seenAt === null && match(e) ? { ...e, seenAt: action.now } : e)) };
+		}
+		case "archive-queued": {
+			let queue = [...state.archiveQueue, ...action.items];
+			let over = queue.length - ARCHIVE_QUEUE_CAP;
+			if (over > 0) {
+				// Drop the oldest "change" items first (queue order is oldest first); weekly reports are never dropped.
+				queue = queue.filter((it) => {
+					if (over > 0 && it.period === "change") {
+						over -= 1;
+						return false;
+					}
+					return true;
+				});
+			}
+			return { ...state, archiveQueue: queue };
+		}
+		case "archive-sent": {
+			const sent = new Set(action.ids);
+			return { ...state, archiveQueue: state.archiveQueue.filter((it) => !sent.has(it.id)), archivedWeeks: [...new Set([...state.archivedWeeks, ...action.weeks])] };
+		}
+		case "apply-remote": {
+			// Only fills what is empty locally; never overwrites local data.
+			const r = fromRemote(action.snapshot);
+			const freshDevice = state.history.length === 0;
+			const have = new Set(state.progressEvents.map((e) => e.id));
+			const events = (r.progressEvents ?? []).filter((e) => !have.has(e.id));
+			return {
+				...state,
+				history: freshDevice && r.history ? r.history : state.history,
+				weeklyGoal: freshDevice && r.weeklyGoal !== undefined ? r.weeklyGoal : state.weeklyGoal,
+				pauses: state.pauses.length === 0 && r.pauses ? r.pauses : state.pauses,
+				bodyWeights: state.bodyWeights.length === 0 && r.bodyWeights ? r.bodyWeights : state.bodyWeights,
+				goalWeightKg: state.goalWeightKg === null && r.goalWeightKg != null ? r.goalWeightKg : state.goalWeightKg,
+				goalSetAt: state.goalWeightKg === null && r.goalWeightKg != null ? r.goalSetAt ?? null : state.goalSetAt,
+				progressEvents: events.length ? [...state.progressEvents, ...events] : state.progressEvents,
+			};
+		}
+		case "remove-pause": {
+			const pauses = state.pauses ?? [];
+			if (!pauses.some((p) => p.from === action.from)) return state;
+			return { ...state, pauses: pauses.filter((p) => p.from !== action.from) };
+		}
 	}
 }
 
 function finishOnboarding(state: FitState, action: Extract<Action, { type: "complete-onboarding" }>): FitState {
 	const ai = action.ai;
-	const next: FitState = ai
-		? { ...mergeUpcoming(state, ai.planned, action.today), backend: ai.backend, planSummary: ai.summary, planSource: ai.source }
-		: { ...state, planSource: "rules", planSummary: null };
+	const next: FitState = ai ? { ...state, backend: ai.backend, planSummary: ai.summary, planSource: ai.source } : { ...state, planSource: "rules", planSummary: null };
 	return appendNotifications(next, deriveNotifications(next, new Date(action.now)));
 }
 
@@ -523,4 +684,4 @@ function applyProfileChange(state: FitState, profile: Profile, today: ISODate): 
 	return { ...state, profile, planned, active, daily: null };
 }
 
-export { findExercise, totalXp };
+export { findExercise };

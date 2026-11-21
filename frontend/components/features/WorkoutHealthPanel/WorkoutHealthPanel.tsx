@@ -2,7 +2,7 @@
 
 import { Cardiogram01Icon } from "@hugeicons/core-free-icons";
 import clsx from "clsx";
-import { Badge, Icon } from "@/components/ui";
+import { Icon } from "@/components/ui";
 import { formatClock } from "@/lib/fit/dates";
 import type { HealthSample } from "@/lib/fit/health";
 import { useT } from "@/lib/i18n/I18nProvider";
@@ -15,12 +15,10 @@ interface Props {
 	elapsedSec: number;
 	resting: boolean;
 	recoveryDrop: number;
-	/** Name of a linked provider; data stays simulated until a native integration exists. */
-	linkedTo?: string;
 }
 
 // Heart rate, duration, activity and recovery. Simulated values are always labelled; nothing here is a medical measurement.
-export function WorkoutHealthPanel({ sample, zone, alert, elapsedSec, resting, recoveryDrop, linkedTo }: Props) {
+export function WorkoutHealthPanel({ sample, zone, alert, elapsedSec, resting, recoveryDrop }: Props) {
 	const t = useT();
 	return (
 		<section className={styles.panel} aria-label={t("fit.health.title")}>
@@ -29,7 +27,6 @@ export function WorkoutHealthPanel({ sample, zone, alert, elapsedSec, resting, r
 					<Icon icon={Cardiogram01Icon} size={16} />
 					{t("fit.health.title")}
 				</span>
-				{sample?.simulated && <Badge tone="warning">{t("fit.health.demo")}</Badge>}
 			</div>
 			<div className={styles.grid}>
 				<div>
@@ -53,7 +50,6 @@ export function WorkoutHealthPanel({ sample, zone, alert, elapsedSec, resting, r
 					{alert}
 				</p>
 			)}
-			<p className={styles.foot}>{linkedTo ? t("fit.health.linkedDemo", { name: linkedTo }) : t("fit.health.demoNote")}</p>
 		</section>
 	);
 }

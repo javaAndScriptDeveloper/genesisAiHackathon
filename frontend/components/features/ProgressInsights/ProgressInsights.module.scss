@@ -1,0 +1,38 @@
+.h3 {
+	margin-bottom: var(--space-2);
+	font-size: 1.6rem;
+}
+
+.p {
+	margin-bottom: var(--space-3);
+	color: var(--color-textMuted);
+	font-size: 1.4rem;
+	line-height: 1.5;
+}
+
+.list {
+	display: flex;
+	flex-direction: column;
+	gap: var(--space-3);
+	margin-bottom: var(--space-3);
+	padding: 0;
+	list-style: none;
+}
+
+.item {
+	display: flex;
+	flex-direction: column;
+	gap: 0.2rem;
+	overflow-wrap: anywhere;
+}
+
+.title {
+	font-size: 1.5rem;
+	line-height: 1.4;
+}
+
+.next {
+	color: var(--color-textMuted);
+	font-size: 1.4rem;
+	line-height: 1.5;
+}

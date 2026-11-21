@@ -1,9 +1,11 @@
 import "server-only";
 import { z } from "zod";
 import { dailyStatsSchema, type DailyStats } from "@/lib/fit/dailyStats";
+import { PROGRESS_TOKEN_HEADER } from "@/lib/fit/progressToken";
 import type { Profile, PlannedWorkout } from "@/lib/fit/types";
 
-// Server-side calls to platform-backend for AI training plans (users, snapshots, saved plans, trainers).
+// Server-side calls to platform-backend for AI training plans (snapshots, saved plans, trainers). The user is the
+// browser's progress token, forwarded as `x-progress-token` to the token-scoped `/api/me/...` routes.
 const BACKEND_URL = process.env.BACKEND_URL ?? "http://platform-backend:3000";
 const TIMEOUT_MS = 5000;
 
@@ -12,6 +14,7 @@ export interface PlanData {
 	createdBy: "ai" | "fallback";
 	inputs: { profile: Profile; stats: DailyStats[]; wishes: string[] };
 	summary: string;
+	why?: string[];
 	planned: PlannedWorkout[];
 }
 
@@ -21,9 +24,10 @@ const trainersSchema = z.object({ trainers: z.array(z.object({ id: z.string(), n
 
 const FALLBACK_TRAINER = { name: "Coach", tov: "Friendly, clear and encouraging." };
 
-export async function getSnapshots(userId: number, days: number): Promise<DailyStats[]> {
+/** The latest snapshot per day for the last `days` days, oldest first; [] on any failure. */
+export async function getSnapshots(token: string, days: number): Promise<DailyStats[]> {
 	try {
-		const response = await fetch(`${BACKEND_URL}/api/users/${userId}/snapshots?days=${days}`, { cache: "no-store", signal: AbortSignal.timeout(TIMEOUT_MS) });
+		const response = await fetch(`${BACKEND_URL}/api/me/snapshots?days=${days}`, { headers: { [PROGRESS_TOKEN_HEADER]: token }, cache: "no-store", signal: AbortSignal.timeout(TIMEOUT_MS) });
 		if (!response.ok) return [];
 		const parsed = snapshotsSchema.safeParse(await response.json());
 		return parsed.success ? parsed.data.snapshots : [];
@@ -32,11 +36,12 @@ export async function getSnapshots(userId: number, days: number): Promise<DailyS
 	}
 }
 
-export async function saveTraining(userId: number, trainerSlug: string, planData: PlanData): Promise<number | null> {
+/** Saves a plan version for the token's user; the new row id, or null on any failure. */
+export async function saveTraining(token: string, trainerSlug: string, planData: PlanData): Promise<number | null> {
 	try {
-		const response = await fetch(`${BACKEND_URL}/api/users/${userId}/trainings`, {
+		const response = await fetch(`${BACKEND_URL}/api/me/trainings`, {
 			method: "POST",
-			headers: { "content-type": "application/json" },
+			headers: { "content-type": "application/json", [PROGRESS_TOKEN_HEADER]: token },
 			body: JSON.stringify({ trainerSlug, planData }),
 			cache: "no-store",
 			signal: AbortSignal.timeout(TIMEOUT_MS),

@@ -36,11 +36,14 @@ const profile: Profile = {
 	wearable: "none",
 };
 const today = "2026-11-23";
-const req = (body: unknown) => new Request("http://x/api/plan", { method: "POST", body: JSON.stringify(body) });
-const base = { userId: 7, profile, trainerSlug: "john", wishes: ["more legs"], today };
+const TOKEN = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
+const withToken = (token: string | null): HeadersInit => (token === null ? {} : { "x-progress-token": token });
+const req = (body: unknown, token: string | null = TOKEN) => new Request("http://x/api/plan", { method: "POST", headers: withToken(token), body: JSON.stringify(body) });
+const base = { profile, trainerSlug: "john", wishes: ["more legs"], today };
 
 const goodWeek: AiWeek = {
 	summary: "AI summary",
+	why: ["Three days fit your week"],
 	sessions: [1, 3, 5].map((weekday) => ({ weekday, title: "Day", focus: "Full body", exercises: [{ exerciseId: "squat", sets: 3, reps: 10, restSec: 60 }] })),
 };
 
@@ -64,10 +67,12 @@ describe("POST /api/plan", () => {
 		expect(res.status).toBe(200);
 		expect(json.createdBy).toBe("ai");
 		expect(json.summary).toBe("AI summary");
+		expect(json.why).toEqual(["Three days fit your week"]);
 		expect(json.trainingId).toBe(42);
 		expect(saveTraining).toHaveBeenCalledTimes(1);
+		expect(getSnapshots).toHaveBeenCalledWith(TOKEN, 7);
 		const call = vi.mocked(saveTraining).mock.calls[0];
-		expect(call?.[0]).toBe(7);
+		expect(call?.[0]).toBe(TOKEN);
 		expect(call?.[2].kind).toBe("weekly");
 		expect(call?.[2].inputs.wishes).toEqual(["more legs"]);
 	});
@@ -79,20 +84,28 @@ describe("POST /api/plan", () => {
 		expect(res.status).toBe(200);
 		expect(json.createdBy).toBe("fallback");
 		expect(json.summary).toContain("John here");
+		expect(json.why).toEqual([]);
 		expect(json.planned.length).toBe(profile.daysPerWeek * 4);
 		expect(vi.mocked(saveTraining).mock.calls[0]?.[2].kind).toBe("fallback");
 	});
 
 	it("falls back when the AI returns only invalid ids", async () => {
-		vi.mocked(generateWeek).mockResolvedValue({ summary: "s", sessions: [{ weekday: 1, title: "x", focus: "y", exercises: [{ exerciseId: "nope", sets: 3, reps: 10, restSec: 60 }] }] });
+		vi.mocked(generateWeek).mockResolvedValue({ summary: "s", why: [], sessions: [{ weekday: 1, title: "x", focus: "y", exercises: [{ exerciseId: "nope", sets: 3, reps: 10, restSec: 60 }] }] });
 		const json: PlanResponse = await (await POST(req(base))).json();
 		expect(json.createdBy).toBe("fallback");
 		expect(json.planned.length).toBe(profile.daysPerWeek * 4);
 	});
 
-	it("skips the backend for anonymous users", async () => {
+	it("falls back with 200 when the Gemini key is missing", async () => {
+		vi.mocked(generateWeek).mockRejectedValue(new AiConfigError("GEMINI_API_KEY"));
+		const res = await POST(req(base));
+		expect(res.status).toBe(200);
+		expect(((await res.json()) as PlanResponse).createdBy).toBe("fallback");
+	});
+
+	it("skips the backend without a progress token", async () => {
 		vi.mocked(generateWeek).mockRejectedValue(new Error("boom"));
-		const json: PlanResponse = await (await POST(req({ ...base, userId: null }))).json();
+		const json: PlanResponse = await (await POST(req(base, null))).json();
 		expect(json.trainingId).toBeNull();
 		expect(getSnapshots).not.toHaveBeenCalled();
 		expect(saveTraining).not.toHaveBeenCalled();
@@ -100,6 +113,8 @@ describe("POST /api/plan", () => {
 
 	it("rejects an invalid body with 400", async () => {
 		expect((await POST(req({ ...base, today: "tomorrow" }))).status).toBe(400);
+		expect((await POST(req(base, "not-a-uuid"))).status).toBe(400);
+		expect((await POST(req({ profile: { age: 3 } }))).status).toBe(400);
 		expect((await POST(req({ ...base, wishes: Array(11).fill("x") }))).status).toBe(400);
 		expect((await POST(new Request("http://x/api/plan", { method: "POST", body: "nope" }))).status).toBe(400);
 	});
@@ -109,8 +124,8 @@ describe("POST /api/plan/daily", () => {
 	const upcoming = generatePlan(profile, today, 4);
 	const session = upcoming[0]!;
 	const stats = (readiness: number): DailyStats => ({ date: today, sleepHours: 6, sleepScore: 60, restingHr: 60, hrvMs: 50, steps: 3000, activeKcal: 200, readiness, source: "demo", scenario: "tired" });
-	const dreq = (body: unknown) => new Request("http://x/api/plan/daily", { method: "POST", body: JSON.stringify(body) });
-	const dbase = { userId: 7, profile, trainerSlug: "john", session, upcoming, wishes: [], today };
+	const dreq = (body: unknown, token: string | null = TOKEN) => new Request("http://x/api/plan/daily", { method: "POST", headers: withToken(token), body: JSON.stringify(body) });
+	const dbase = { profile, trainerSlug: "john", session, upcoming, wishes: [], today };
 	const run = async (body: unknown): Promise<{ status: number; json: DailyResponse }> => {
 		const res = await DAILY(dreq(body));
 		return { status: res.status, json: await res.json() };
@@ -126,6 +141,8 @@ describe("POST /api/plan/daily", () => {
 		expect(json.session?.id).toBe(session.id);
 		expect(json.session?.durationMin).toBeLessThanOrEqual(30);
 		const call = vi.mocked(saveTraining).mock.calls[0];
+		expect(getSnapshots).toHaveBeenCalledWith(TOKEN, 1);
+		expect(call?.[0]).toBe(TOKEN);
 		expect(call?.[2].kind).toBe("daily-adjust");
 		expect(call?.[2].planned).toHaveLength(upcoming.length);
 		expect(call?.[2].inputs.stats).toEqual([stats(30)]);
@@ -187,13 +204,16 @@ describe("POST /api/plan/daily", () => {
 
 	it("rejects an invalid body with 400", async () => {
 		expect((await DAILY(dreq({ ...dbase, today: "x" }))).status).toBe(400);
+		expect((await DAILY(dreq(dbase, null))).status).toBe(400);
+		expect((await DAILY(dreq(dbase, "nope"))).status).toBe(400);
+		expect(getSnapshots).not.toHaveBeenCalled();
 		expect((await DAILY(new Request("http://x/api/plan/daily", { method: "POST", body: "nope" }))).status).toBe(400);
 	});
 });
 
 describe("POST /api/coach", () => {
-	const creq = (body: unknown) => new Request("http://x/api/coach", { method: "POST", body: JSON.stringify(body) });
-	const cbase = { userId: 7, profile, trainerSlug: "john", wishes: [], planSummary: "plan", messages: [{ from: "user", text: "make it shorter" }] };
+	const creq = (body: unknown, token: string | null = TOKEN) => new Request("http://x/api/coach", { method: "POST", headers: withToken(token), body: JSON.stringify(body) });
+	const cbase = { profile, trainerSlug: "john", wishes: [], planSummary: "plan", messages: [{ from: "user", text: "make it shorter" }] };
 	const run = async (body: unknown): Promise<{ status: number; json: CoachResponse & { error?: string } }> => {
 		const res = await COACH(creq(body));
 		return { status: res.status, json: await res.json() };
@@ -234,6 +254,14 @@ describe("POST /api/coach", () => {
 		const { status, json } = await run(cbase);
 		expect(status).toBe(200);
 		expect(json).toEqual({ reply: "Sure thing", rebuild, safety: false });
+		expect(getSnapshots).toHaveBeenCalledWith(TOKEN, 7);
+	});
+
+	it("works without a token (no device stats) and rejects a bad one", async () => {
+		vi.mocked(coachChat).mockResolvedValue({ reply: "Hi", rebuild: null });
+		expect((await COACH(creq(cbase, null))).status).toBe(200);
+		expect(getSnapshots).not.toHaveBeenCalled();
+		expect((await COACH(creq(cbase, "nope"))).status).toBe(400);
 	});
 
 	it("returns 503 when Gemini fails", async () => {

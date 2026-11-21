@@ -2,11 +2,13 @@
 
 import { useRouter } from "next/navigation";
 import { startTransition, useCallback, useMemo } from "react";
-import { weeklyChallenge, levelOf, totalXp } from "../gamification";
+import { appInsights, consistencyDeltaOf, reportWeeksOf } from "../../progress/fromFit";
+import { weeklyChallenge } from "../gamification";
 import { nextUpcoming } from "../plan";
-import { computeStreak, consistencyScore, daysSinceLastWorkout, personalRecords, weekStats } from "../stats";
+import { daysSinceLastWorkout, personalRecords, weekStats } from "../stats";
 import { fmtLoad, fmtMass, loadStep, loadValue, massUnit, massValue, toKg } from "../units";
 import { useFit } from "./FitProvider";
+import { fitStatsFromSnapshot, progressOf, type ProgressView } from "./progressStats";
 import type { Action } from "./reducer";
 
 /**
@@ -34,21 +36,25 @@ export function useStartWorkout() {
 	return useCallback((plannedId: string) => go("/workout", { type: "start-workout", plannedId, now: new Date().toISOString() }), [go]);
 }
 
-/** Derived numbers shared by Today, Progress and Coach. All of them come from state, never from constants. */
+/**
+ * The single source of progress numbers: the lib/progress snapshot of the current state (streak in weeks, consistency,
+ * level/XP, badges, records, advice) plus its input history, context and the unseen "new" events.
+ */
+export function useProgress(): ProgressView {
+	const { state, today } = useFit();
+	return useMemo(() => progressOf(state, today), [state, today]);
+}
+
+/** Derived numbers shared by Today, Progress and Coach. Streak, consistency, level and XP come from lib/progress. */
 export function useFitStats() {
 	const { state, today } = useFit();
 	return useMemo(() => {
-		const streak = computeStreak(state.planned, today);
 		const week = weekStats(state.planned, state.history, today);
 		const lastWeek = weekStats(state.planned, state.history, today, -1);
-		const level = levelOf(state);
 		return {
-			streak,
+			...fitStatsFromSnapshot(progressOf(state, today)),
 			week,
 			lastWeek,
-			level,
-			xp: totalXp(state),
-			consistency: consistencyScore(state.planned, today),
 			challenge: weeklyChallenge(state, today),
 			records: personalRecords(state.history),
 			next: nextUpcoming(state.planned, today),
@@ -74,4 +80,23 @@ export function useUnits() {
 		}),
 		[units],
 	);
+}
+
+/** Progress analytics (pure lib/progress) fed from the real app state. Consistency delta uses the same score as the ring. */
+export function useProgressAnalytics() {
+	const { state, today } = useFit();
+	return useMemo(() => {
+		const { history, ctx } = progressOf(state, today);
+		const consistencyDelta = consistencyDeltaOf(history, ctx);
+		return { history, insights: appInsights(history, consistencyDelta), consistencyDelta, reportWeeks: reportWeeksOf(history) };
+	}, [state, today]);
+}
+
+/** Progress v2 inputs for the calendar: analytics history plus the same context as every other screen. */
+export function useProgressCalendar() {
+	const { state, today, ready } = useFit();
+	return useMemo(() => {
+		const { history, ctx } = progressOf(state, today);
+		return { history, ctx, today, ready, pauses: ctx.pauses };
+	}, [state, today, ready]);
 }

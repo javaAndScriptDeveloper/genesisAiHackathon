@@ -1,7 +1,10 @@
-import { addDays, formatDay, toISO, weekKey } from "./dates";
+import { addDays, formatDay, mondayOf, toISO, weekKey } from "./dates";
 import { weeklyChallenge } from "./gamification";
-import { computeStreak, weekStats } from "./stats";
-import { fmtMass } from "./units";
+import { weekStats } from "./stats";
+import { historyFromFit } from "../progress/fromFit";
+import { weeklyReportV2 } from "../progress/report";
+import { t } from "../messages";
+import { progressCtx, progressOf } from "./store/progressStats";
 import type { AppNotification, FitState, NotificationKind, NotificationSettings } from "./types";
 
 export const NOTIFICATION_LABELS: Record<NotificationKind, { label: string; hint: string }> = {
@@ -50,15 +53,17 @@ export function deriveNotifications(state: FitState, now: Date): AppNotification
 		push({ id: `n-recovery-${today}`, kind: "recovery", title: "Time for a lighter day", body: "Three sessions in three days. Recovery is where the gains happen, so keep tomorrow easy.", href: "/coach" });
 	}
 
-	const stats = weekStats(state.planned, state.history, today);
-	if (stats.planned > 0 && stats.done === stats.planned) {
-		push({ id: `n-goal-${weekKey(today)}`, kind: "weekly-goal", title: "Weekly goal complete", body: `All ${stats.planned} planned sessions done this week. Enjoy the rest.`, href: "/progress" });
+	const { week: goal } = progressOf(state, today);
+	if (goal.quality >= goal.goal) {
+		push({ id: `n-goal-${weekKey(today)}`, kind: "weekly-goal", title: "Weekly goal complete", body: `${goal.quality} of ${goal.goal} quality workouts done this week. Enjoy the rest.`, href: "/progress" });
 	}
 
 	if (now.getDay() === 1 || state.history.length > 0) {
 		const last = weekStats(state.planned, state.history, today, -1);
 		if (last.planned > 0) {
-			push({ id: `n-summary-${weekKey(addDays(today, -7))}`, kind: "weekly-summary", title: "Your week in review", body: `${last.done} of ${last.planned} sessions, ${last.minutes} min training, ${fmtMass(last.volume, state.units)} lifted. Streak: ${computeStreak(state.planned, today).current}.`, href: "/progress" });
+			// Text comes from the engine's weekly report (stub for a real Monday 9:00 local push).
+			const { pushText } = weeklyReportV2(historyFromFit(state, today), progressCtx(state), addDays(mondayOf(today), -7));
+			push({ id: `n-summary-${weekKey(addDays(today, -7))}`, kind: "weekly-summary", title: "Your week in review", body: t(pushText.key, pushText.params), href: "/progress" });
 		}
 	}
 

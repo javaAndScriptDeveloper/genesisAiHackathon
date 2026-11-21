@@ -6,68 +6,70 @@
 }
 
 .frame {
-	position: relative;
-	aspect-ratio: 16 / 9;
-	min-height: 20rem;
 	overflow: hidden;
 	background: #131316;
 	color: #fff;
-	container-type: size;
 	@include corners.radius(var(--radius-card));
+}
+
+.media {
+	position: relative;
+	width: 100%;
+	aspect-ratio: 16 / 9;
+	min-height: 20rem;
 
 	&[data-compact] {
 		aspect-ratio: 2 / 1;
 	}
 
-	&[data-hero] {
-		aspect-ratio: 4 / 3.4;
+	[data-hero] & {
 		min-height: 26rem;
 	}
 }
 
-// Dark scrim at the top of the hero video carrying the exercise title and info. Clicks pass through to the player.
-.overlay {
-	position: absolute;
-	inset: 0 0 auto;
-	z-index: 2;
-	padding: var(--space-4) var(--space-4) 6rem;
-	background: linear-gradient(180deg, rgba(10, 10, 12, 0.82) 0%, rgba(10, 10, 12, 0.5) 55%, transparent 100%);
-	pointer-events: none;
+[data-full-width] {
+	.frame {
+		border-radius: 0;
+		corner-shape: round;
+	}
 
-	button {
-		pointer-events: auto;
+	.related {
+		padding-inline: var(--space-4);
 	}
 }
 
-// "Cover" sizing: the 16:9 player is scaled up until it fills the frame, so there are no black bars; the overflow is cropped.
+.header {
+	padding: var(--space-4);
+	background: linear-gradient(135deg, #27262c, #131316);
+}
+
 .iframe {
 	position: absolute;
-	top: 50%;
-	left: 50%;
-	width: max(100cqw, 177.78cqh);
-	height: max(100cqh, 56.25cqw);
+	inset: 0;
+	width: 100%;
+	height: 100%;
 	border: 0;
-	transform: translate(-50%, -50%) scale(1.3);
+	pointer-events: none;
+	object-fit: cover;
 }
 
-[data-hero] {
-	// Bottom scrim hides YouTube's "more videos" strip if the player ever shows it (paused / ended).
-	&::after {
-		content: "";
-		position: absolute;
-		inset: auto 0 0;
-		z-index: 1;
-		height: 7rem;
-		background: linear-gradient(0deg, rgba(10, 10, 12, 0.75), transparent);
-		pointer-events: none;
-	}
+// Opaque cover over the player while YouTube would show its own UI (loading, paused, ended).
+.shield {
+	position: absolute;
+	inset: 0;
+	z-index: 2;
+	isolation: isolate;
+	background: #131316;
+	pointer-events: none;
 
-	.iframe {
-		pointer-events: none;
+	// Fades out smoothly, but appears at once so the player UI is never visible while pausing.
+	&[data-hidden] {
+		opacity: 0;
+		transition: opacity 0.5s ease;
 	}
 }
 
-// The only control on the hero video: play / pause.
+// The only control on the video: play / pause.
 .toggle {
 	position: absolute;
 	right: var(--space-3);
@@ -112,27 +114,9 @@
 }
 
 .related {
-	margin-bottom: var(--space-2);
+	margin-top: var(--space-2);
+	color: inherit;
+	opacity: 0.75;
 	font-size: 1.3rem;
 	font-weight: 600;
-}
-
-.caption {
-	display: flex;
-	flex-wrap: wrap;
-	gap: var(--space-2);
-	margin-top: var(--space-2);
-	color: var(--color-textSubtle);
-	font-size: 1.2rem;
-}
-
-.link {
-	display: inline-flex;
-	align-items: center;
-	min-height: 3.2rem;
-	color: var(--color-accentText);
-	font-weight: 600;
-	text-decoration: underline;
-	text-underline-offset: 0.2rem;
-	@include mixins.focus-ring;
 }

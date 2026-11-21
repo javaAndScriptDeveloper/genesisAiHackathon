@@ -18,10 +18,13 @@ export function PlanSummaryCard() {
 
 	return (
 		<Card className={styles.root}>
+			<div className={styles.top}>
+				<p className={styles.eyebrow}>{t("fit.ai.planCard.eyebrow")}</p>
+				<Badge>{t(state.planSource === "ai" ? "fit.ai.planCard.ai" : "fit.ai.planCard.standard")}</Badge>
+			</div>
 			<div className={styles.head}>
 				{trainer && <Avatar name={trainer.name} src={trainer.pathToImage} size={40} />}
 				<h2 className={styles.title}>{t("fit.ai.planCard.title", { name })}</h2>
-				<Badge tone={state.planSource === "ai" ? "accent" : "neutral"}>{t(state.planSource === "ai" ? "fit.ai.planCard.ai" : "fit.ai.planCard.standard")}</Badge>
 			</div>
 			<p className={styles.summary}>{state.planSummary}</p>
 		</Card>

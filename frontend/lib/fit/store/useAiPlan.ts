@@ -3,16 +3,15 @@
 import { useCallback, useLayoutEffect, useRef, useSyncExternalStore } from "react";
 import { aiClient } from "../aiClient";
 import { dailyCheck, ensureBackend, rebuildPlan } from "../aiFlow";
-import { toBackendUser } from "../backendUser";
 import { createGate, singleFlight } from "../singleFlight";
 import type { Scenario } from "../dailyStats";
 import { activeTrainerId } from "../options";
-import type { DailyCheck, Profile } from "../types";
+import type { DailyCheck, FitState, Profile } from "../types";
 import type { Dispatch } from "react";
 import { useFit } from "./FitProvider";
 import { reducer, type Action } from "./reducer";
 
-type Backend = { userId: number; deviceId: number };
+type Backend = NonNullable<FitState["backend"]>;
 
 // Several components use this hook at once, so the guards are shared at module level.
 const ensureShared = singleFlight(async (args: Parameters<typeof ensureBackend>[1], dispatch: Dispatch<Action>): Promise<Backend | null> => {
@@ -52,10 +51,11 @@ export function useAiPlan() {
 	});
 
 	const ensure = useCallback(
-		async (profile: Profile): Promise<Backend | null> => {
-			const { backend } = latest.current;
-			if (backend) return backend;
-			return ensureShared({ backend: null, profile, trainerSlug: activeTrainerId(latest.current), today }, dispatch);
+		async (profile: Profile, trainerSlug: string): Promise<{ backend: Backend; fresh: boolean } | null> => {
+			const { backend, progressToken: token } = latest.current;
+			if (backend) return { backend, fresh: false };
+			const created = await ensureShared({ backend: null, profile, trainerSlug, today, token }, dispatch);
+			return created ? { backend: created, fresh: true } : null;
 		},
 		[dispatch, today],
 	);
@@ -68,10 +68,10 @@ export function useAiPlan() {
 				await dailyGate(o.force === true, async () => {
 					const profile = latest.current.profile;
 					if (!profile) return;
-					const backend = await ensure(profile);
-					if (!backend) return;
+					const ensured = await ensure(profile, activeTrainerId(latest.current));
+					if (!ensured) return;
 					const s = latest.current;
-					const result = await dailyCheck(aiClient, { backend, profile, trainerSlug: activeTrainerId(s), planned: s.planned, wishes: s.planWishes, today, daily: s.daily, scenario: o.scenario, force: o.force });
+					const result = await dailyCheck(aiClient, { backend: ensured.backend, token: s.progressToken, profile, trainerSlug: activeTrainerId(s), planned: s.planned, wishes: s.planWishes, today, daily: s.daily, scenario: o.scenario, force: o.force });
 					if (result) {
 						const applied = { type: "apply-daily", ...result } as const;
 						// The reducer is pure, so the resulting check (with `original`) is derived here for the caller.
@@ -90,10 +90,13 @@ export function useAiPlan() {
 			if (!profile) return "failed";
 			const wishes = o.wishes ?? latest.current.planWishes;
 			const trainerSlug = o.trainerSlug ?? activeTrainerId(latest.current);
+			const token = latest.current.progressToken;
 			return tracked(async () => {
-				const backend = await ensure(profile);
-				if (backend) await aiClient.patchUser(backend.userId, toBackendUser(profile, trainerSlug, today)).catch(() => undefined);
-				const plan = await rebuildPlan(aiClient, { backend, profile, trainerSlug, wishes, today });
+				const ensured = await ensure(profile, trainerSlug);
+				// Profile edits re-POST the user (an upsert per token); a fresh registration has just saved it.
+				if (ensured && !ensured.fresh) await aiClient.saveUser(profile, trainerSlug, token);
+				const backend = ensured?.backend ?? null;
+				const plan = await rebuildPlan(aiClient, { profile, trainerSlug, wishes, today, token });
 				if (!plan) return "failed";
 				const applied = { type: "apply-ai-plan", planned: plan.planned, summary: plan.summary, source: plan.createdBy, wishes, today } as const;
 				// The forced daily check needs the fresh plan, which is not in `latest` until the next render; the reducer is pure, so derive it here.
@@ -101,7 +104,7 @@ export function useAiPlan() {
 				dispatch(applied);
 				if (backend) {
 					await dailyGate(true, async () => {
-						const result = await dailyCheck(aiClient, { backend, profile, trainerSlug, planned, wishes, today, daily: null, force: true });
+						const result = await dailyCheck(aiClient, { backend, token, profile, trainerSlug, planned, wishes, today, daily: null, force: true });
 						if (result) dispatch({ type: "apply-daily", ...result });
 					});
 				}

@@ -22,8 +22,6 @@
       "play": "Play {name}",
       "playLabel": "Play video",
       "related": "Related clip · {name}",
-      "searchExact": "Find this exercise",
-      "openYoutube": "Open on YouTube",
       "pause": "Pause video",
       "resume": "Play video"
     },
@@ -88,8 +86,9 @@
       "thisWeek": "This week",
       "emptyWeek": "Nothing planned",
       "emptyWeekBody": "This week is all recovery. Use it well.",
-      "recoveryNote": "Training days are spaced so there is recovery between sessions. Days without a workout are recovery days.",
-      "editPlan": "Edit training days and preferences",
+      "recoveryTitle": "Rest is part of training",
+      "recoveryNote": "Days between workouts give your body time to recover.",
+      "editPlan": "Edit training plan",
       "exerciseCount": {
         "one": "{count} exercise",
         "other": "{count} exercises"

@@ -1,20 +1,22 @@
 import { z } from "zod";
+import { createUser } from "../api/users";
 import { ApiError } from "../api/types";
 import { coachResponseSchema, dailyResponseSchema, planResponseSchema, type CoachRequest, type CoachResponse, type DailyRequest, type DailyResponse, type PlanRequest, type PlanResponse } from "./aiApi";
-import type { BackendUserBody } from "./backendUser";
 import { dailyStatsSchema, type DailyStats, type Scenario } from "./dailyStats";
 import type { ISODate } from "./dates";
+import { PROGRESS_TOKEN_HEADER } from "./progressToken";
 
-// Browser client for the backend (through the /api rewrite) and the Next AI routes. Every response is zod-parsed.
+// Browser client for the backend (through the /api rewrite) and the Next AI routes. Every call carries the progress
+// token (`x-progress-token`); every response is zod-parsed.
 
-async function call<T>(method: "POST" | "PATCH", url: string, body: unknown, schema: z.ZodType<T>): Promise<T> {
+async function call<T>(token: string, url: string, body: unknown, schema: z.ZodType<T>): Promise<T> {
 	let response: Response;
 	try {
-		response = await fetch(url, { method, headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+		response = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json", [PROGRESS_TOKEN_HEADER]: token }, body: JSON.stringify(body) });
 	} catch {
 		throw new ApiError("Network error", 0);
 	}
-	if (!response.ok) throw new ApiError(`Request failed: ${method} ${url}`, response.status);
+	if (!response.ok) throw new ApiError(`Request failed: POST ${url}`, response.status);
 	let data: unknown;
 	try {
 		data = await response.json();
@@ -29,27 +31,22 @@ async function call<T>(method: "POST" | "PATCH", url: string, body: unknown, sch
 const idSchema = z.object({ id: z.number().int() });
 const snapshotSchema = z.object({ snapshot: dailyStatsSchema });
 
-async function createUser(body: BackendUserBody): Promise<number> {
-	return (await call("POST", "/api/users", body, idSchema)).id;
+async function createDevice(token: string, title: string): Promise<number> {
+	return (await call(token, "/api/me/devices", { title }, idSchema)).id;
 }
-async function patchUser(id: number, body: Partial<BackendUserBody>): Promise<void> {
-	await call("PATCH", `/api/users/${id}`, body, idSchema);
+async function syncDevice(token: string, deviceId: number, date: ISODate, scenario?: Scenario): Promise<DailyStats> {
+	return (await call(token, `/api/me/devices/${deviceId}/sync`, scenario ? { date, scenario } : { date }, snapshotSchema)).snapshot;
 }
-async function createDevice(userId: number, title: string): Promise<number> {
-	return (await call("POST", `/api/users/${userId}/devices`, { title }, idSchema)).id;
+async function requestPlan(token: string, body: PlanRequest): Promise<PlanResponse> {
+	return call(token, "/api/plan", body, planResponseSchema);
 }
-async function syncDevice(userId: number, deviceId: number, date: ISODate, scenario?: Scenario): Promise<DailyStats> {
-	return (await call("POST", `/api/users/${userId}/devices/${deviceId}/sync`, scenario ? { date, scenario } : { date }, snapshotSchema)).snapshot;
+async function requestDaily(token: string, body: DailyRequest): Promise<DailyResponse> {
+	return call(token, "/api/plan/daily", body, dailyResponseSchema);
 }
-async function requestPlan(body: PlanRequest): Promise<PlanResponse> {
-	return call("POST", "/api/plan", body, planResponseSchema);
-}
-async function requestDaily(body: DailyRequest): Promise<DailyResponse> {
-	return call("POST", "/api/plan/daily", body, dailyResponseSchema);
-}
-async function requestCoach(body: CoachRequest): Promise<CoachResponse> {
-	return call("POST", "/api/coach", body, coachResponseSchema);
+async function requestCoach(token: string, body: CoachRequest): Promise<CoachResponse> {
+	return call(token, "/api/coach", body, coachResponseSchema);
 }
 
-export const aiClient = { createUser, patchUser, createDevice, syncDevice, requestPlan, requestDaily, requestCoach };
+/** `saveUser` is the team's `createUser` (POST /api/users, an upsert per token): true when stored. */
+export const aiClient = { saveUser: createUser, createDevice, syncDevice, requestPlan, requestDaily, requestCoach };
 export type AiDeps = typeof aiClient;

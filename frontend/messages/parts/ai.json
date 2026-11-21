@@ -8,15 +8,11 @@
       "dailyRecovery": "Your body needs rest today, so I cut this down to a short, easy session.",
       "restDayLighter": "It's a rest day, and you're a bit worn down. Rest well today; a gentle walk at most.",
       "restDayRecovery": "It's a rest day, and your body really needs it after that night. Take it easy; a gentle walk at most.",
-      "building": "{name} is building your plan…",
-      "buildingNote": "This usually takes a few seconds.",
-      "buildFailed": "The AI trainer is unavailable, so I built your plan from your answers instead.",
       "rebuilding": "Your trainer is rebuilding your plan…",
       "rebuilt": "Your plan is updated.",
       "rebuildFailed": "Couldn't rebuild with AI. Your current plan stays.",
       "daily": {
         "title": "Today's check-in",
-        "demo": "Demo",
         "undo": "Undo",
         "undone": "Back to your original session.",
         "sleep": "Sleep",
@@ -27,26 +23,15 @@
         "hrValue": "{bpm} bpm",
         "hrvValue": "{ms} ms",
         "readinessValue": "{n}/100",
-        "loading": "Checking how you feel today…"
-      },
-      "demoSim": {
-        "title": "Demo: simulate tonight",
-        "note": "Pick how last night went. Your trainer reads the new numbers and may adjust today's session.",
-        "label": "Scenario",
-        "normal": "Normal",
-        "tired": "Tired",
-        "badNight": "Bad night",
-        "simulate": "Simulate",
-        "fine": "Stats synced. Your plan stays as it is.",
-        "lighter": "Your trainer made today's session lighter.",
-        "recovery": "Your trainer switched today to recovery.",
-        "restDay": "Rest day: your trainer suggests taking it easy.",
-        "failed": "Couldn't run the check. Try again."
+        "loading": "Checking how you feel today…",
+        "simulated": "Simulated device data, not real measurements.",
+        "eyebrow": "Daily check-in"
       },
       "trainerFallback": "Your trainer",
       "planCard": {
+        "eyebrow": "Your plan",
         "title": "{name} · Your plan",
-        "ai": "AI plan",
+        "ai": "Written by your trainer",
         "standard": "Standard plan"
       },
       "recreate": "Recreate my plan",
@@ -63,6 +48,20 @@
         "daysPerWeek": "Days per week: {from} → {to}",
         "durationMin": "Session length: {from} → {to} min",
         "goal": "Goal: {from} → {to}"
+      },
+      "simulate": {
+        "title": "Simulate tonight",
+        "note": "Pick how last night went. The values are simulated, not real measurements. Your trainer reads them and may adjust today's session.",
+        "label": "Last night",
+        "normal": "Normal",
+        "tired": "Tired",
+        "badNight": "Bad night",
+        "run": "Simulate",
+        "fine": "Stats synced. Your plan stays as it is.",
+        "lighter": "Your trainer made today's session lighter.",
+        "recovery": "Your trainer switched today to recovery.",
+        "restDay": "Rest day: your trainer suggests taking it easy.",
+        "failed": "Couldn't run the check. Try again."
       }
     }
   }

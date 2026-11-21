@@ -13,7 +13,9 @@
 	width: 4.8rem;
 	height: 4.8rem;
 	flex: none;
-	background: var(--color-surfaceMuted);
+	// Outlined so it reads on any surface; a filled muted button disappears on the dark theme card.
+	background: transparent;
+	border: 0.1rem solid var(--color-borderStrong);
 	color: var(--color-text);
 	transition: background-color var(--transition-fast), transform var(--transition-fast);
 	@include corners.radius(var(--radius-control));
@@ -21,7 +23,8 @@
 
 	&:active:not(:disabled) {
 		transform: scale(0.96);
-		background: var(--color-surfaceHover);
+		background: var(--color-accentSoft);
+		border-color: var(--color-accent);
 	}
 
 	&:disabled {
@@ -47,4 +50,29 @@
 .unit {
 	color: var(--color-textSubtle);
 	font-size: 1.4rem;
+}
+
+.root[data-compact] {
+	gap: var(--space-1);
+
+	.button {
+		width: var(--hit-target);
+		height: var(--hit-target);
+	}
+
+	.value {
+		min-width: 0;
+		flex-direction: column;
+		align-items: center;
+		gap: 0;
+		line-height: 1.15;
+	}
+
+	.number {
+		font-size: 1.6rem;
+	}
+
+	.unit {
+		font-size: 1.1rem;
+	}
 }

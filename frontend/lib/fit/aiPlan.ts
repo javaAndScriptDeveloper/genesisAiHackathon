@@ -2,10 +2,18 @@ import { z } from "zod";
 import { applyAdapt } from "./adapt";
 import type { DailyStatus } from "./dailyStats";
 import { addDays, mondayOf, type ISODate } from "./dates";
-import { findExercise, getExercise, isUsable } from "./exercises";
+import { EXERCISES, findExercise, getExercise, isUsable } from "./exercises";
 import { EQUIPMENT, GOALS, LIMITATIONS, LOCATIONS } from "./options";
 import { DAY_PATTERNS, buildAdHocWorkout, difficultyOf, estimateMinutes, generatePlan, nextBlockId, roundLoad, startingWeight } from "./plan";
 import type { Exercise, ExerciseBlock, PlannedWorkout, Profile, SetEntry } from "./types";
+
+// The AI writes plans only from our exercise library: the model picks exercise ids and the dose; dates, loads and
+// durations are computed here, so a bad reply can never produce an exercise the user cannot do or a nonsense schedule.
+
+/** The part of the library the user can actually do, in the compact shape sent to the model. */
+export function exerciseCatalog(profile: Pick<Profile, "location" | "equipment" | "limitations">) {
+	return EXERCISES.filter((e) => isUsable(e, profile)).map((e) => ({ id: e.id, name: e.name, muscle: e.muscle, kind: e.kind, level: e.level, timed: Boolean(e.timed) }));
+}
 
 export const aiExerciseSchema = z.object({
 	exerciseId: z.string(),
@@ -16,6 +24,8 @@ export const aiExerciseSchema = z.object({
 });
 export const aiWeekSchema = z.object({
 	summary: z.string(),
+	/** 3-4 short reasons that point to the person's own data (goal, age, schedule, equipment, level). */
+	why: z.array(z.string()).max(5).default([]),
 	sessions: z.array(z.object({ weekday: z.number().int(), title: z.string(), focus: z.string(), exercises: z.array(aiExerciseSchema) })),
 });
 export const aiSessionSchema = z.object({ note: z.string(), title: z.string(), exercises: z.array(aiExerciseSchema) });

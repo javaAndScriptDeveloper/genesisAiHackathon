@@ -1,3 +1,5 @@
+import { dropOldestChatPhoto } from "../community";
+import { tokenBackend } from "../aiFlow";
 import { emptyState } from "../seed";
 import type { FitState } from "../types";
 
@@ -14,16 +16,27 @@ export function loadState(): FitState {
 		const raw = window.localStorage.getItem(STORAGE_KEY);
 		if (!raw) return emptyState();
 		const parsed: unknown = JSON.parse(raw);
-		return isFitState(parsed) ? { ...emptyState(), ...parsed } : emptyState();
+		if (!isFitState(parsed)) return emptyState();
+		const state: FitState = { ...emptyState(), ...parsed };
+		// Older saves keep a `{ userId, deviceId }` from before the token-scoped backend routes.
+		return { ...state, backend: tokenBackend(state.backend) };
 	} catch {
 		return emptyState();
 	}
 }
 
 export function saveState(state: FitState): void {
-	try {
-		window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-	} catch {
-		// Storage full or unavailable (e.g. many photo check-ins): the session keeps working in memory.
+	let next = state;
+	for (;;) {
+		try {
+			window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+			return;
+		} catch {
+			// Storage full or unavailable. Shed the oldest chat photo and retry so workouts and settings still save;
+			// with none left, the session keeps working in memory.
+			const smaller = dropOldestChatPhoto(next);
+			if (!smaller) return;
+			next = smaller;
+		}
 	}
 }

@@ -6,14 +6,15 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { ScreenHeader } from "@/components/features/ScreenHeader/ScreenHeader";
-import { Button, Icon, IconButton, useToast } from "@/components/ui";
-import { useTrainers } from "@/lib/api/trainers";
+import { Avatar, Button, Icon, IconButton, useToast } from "@/components/ui";
+import { bundledTrainerPortrait, useTrainers } from "@/lib/api/trainers";
+import { activeTrainerId } from "@/lib/fit/options";
 import { applyAdapt, replaceUnavailable } from "@/lib/fit/adapt";
 import { aiClient } from "@/lib/fit/aiClient";
 import { diffPlans } from "@/lib/fit/aiPlan";
-import { coachReply, isSafetyConcern, SUGGESTED_PROMPTS, type CoachContext } from "@/lib/fit/coach";
+import { coachReply, isSafetyConcern, type CoachContext } from "@/lib/fit/coach";
 import { chatHistory, mergeProfile, planSummaryText, profileAfterAction, profileDiff } from "@/lib/fit/coachChat";
-import { activeTrainerId } from "@/lib/fit/options";
+import { coachPresetReply, coachPresets } from "@/lib/fit/coachPresets";
 import { listenOnce, speechSupported } from "@/lib/fit/speech";
 import { useFit } from "@/lib/fit/store/FitProvider";
 import { useFitStats } from "@/lib/fit/store/hooks";
@@ -30,11 +31,14 @@ export function Coach() {
 	const router = useRouter();
 	const toast = useToast();
 	const { state, dispatch, today } = useFit();
+	const stats = useFitStats();
 	const { rebuild, busy } = useAiPlan();
-	const { data: trainers } = useTrainers();
 	const [awaiting, setAwaiting] = useState<{ before: PlannedWorkout[] } | null>(null);
 	const [recreating, setRecreating] = useState(false);
-	const stats = useFitStats();
+	const { data: trainers } = useTrainers();
+	const trainerId = activeTrainerId(state);
+	const trainer = trainers?.find((entry) => entry.id === trainerId);
+	const portrait = trainer?.pathToImage || bundledTrainerPortrait(trainerId);
 	const [text, setText] = useState("");
 	const [pending, setPending] = useState(false);
 	const [listening, setListening] = useState(false);
@@ -72,14 +76,37 @@ export function Coach() {
 		todayDone: state.planned.some((w) => w.date === today && (w.status === "completed" || w.status === "partial")),
 		inSession: !!active,
 		streak: stats.streak.current,
-		weekDone: stats.week.done,
-		weekPlanned: stats.week.planned,
+		weekDone: stats.goal.done,
+		weekPlanned: stats.goal.target,
 		consistency: stats.consistency,
 		xp: stats.xp,
+		level: stats.level.level,
 		sessions: state.history.length,
 		lastPr: [...state.history].reverse().find((l) => l.prs.length)?.prs[0] ?? null,
 		premium: state.subscription.tier === "premium",
 	});
+
+	const send = (raw: string, chosen?: (typeof coachPresets)[number]) => {
+		const value = raw.trim();
+		if (!value || pending) return;
+		const preset = chosen ?? coachPresets.find(({ id, request }) => {
+			const normalized = value.toLowerCase();
+			return [t(`fit.coach.presets.questions.${id}`), request].some((question) => question.toLowerCase() === normalized);
+		});
+		setText("");
+		const message: CoachMessage = { id: uid(), from: "user", text: value, at: new Date().toISOString() };
+		dispatch({ type: "coach-message", message });
+		// Presets keep their scripted replies and actions.
+		if (preset) {
+			const reply = coachPresetReply(preset, context(), t);
+			dispatch({ type: "coach-message", message: { id: uid(), from: "coach", text: reply.text, at: new Date().toISOString(), actions: reply.actions } });
+			return;
+		}
+		setPending(true);
+		// Symptom messages never reach the AI: the local coach answers them with the safety guidance.
+		if (isSafetyConcern(value)) localReply(value);
+		else void ask(value, [...state.coach, message]);
+	};
 
 	const post = (message: Omit<CoachMessage, "id" | "from" | "at">) => dispatch({ type: "coach-message", message: { id: uid(), from: "coach", at: new Date().toISOString(), ...message } });
 
@@ -93,6 +120,7 @@ export function Coach() {
 		}, 650);
 	};
 
+	// Free-typed messages go to the AI trainer, which can propose recreating the plan (RebuildCard).
 	const ask = async (value: string, history: CoachMessage[]) => {
 		const messages = chatHistory(history);
 		if (messages.length === 0) {
@@ -100,10 +128,9 @@ export function Coach() {
 			return;
 		}
 		try {
-			const res = await aiClient.requestCoach({
-				userId: state.backend?.userId ?? null,
+			const res = await aiClient.requestCoach(state.progressToken, {
 				profile,
-				trainerSlug: activeTrainerId(state),
+				trainerSlug: trainerId,
 				wishes: state.planWishes.slice(-10).map((w) => w.slice(0, 200)),
 				planSummary: planSummaryText(state.planned, today),
 				messages,
@@ -116,18 +143,7 @@ export function Coach() {
 		}
 	};
 
-	const send = (raw: string) => {
-		const value = raw.trim();
-		if (!value || pending) return;
-		setText("");
-		const message: CoachMessage = { id: uid(), from: "user", text: value, at: new Date().toISOString() };
-		dispatch({ type: "coach-message", message });
-		setPending(true);
-		if (isSafetyConcern(value)) localReply(value);
-		else void ask(value, [...state.coach, message]);
-	};
-
-	const trainerName = trainers?.find((tr) => tr.id === activeTrainerId(state))?.name ?? t("fit.ai.trainerFallback");
+	const trainerName = trainer?.name ?? t("fit.ai.trainerFallback");
 
 	const recreate = async (message: CoachMessage) => {
 		const proposal = message.rebuild;
@@ -200,7 +216,7 @@ export function Coach() {
 
 	return (
 		<div className={styles.root}>
-			<ScreenHeader title={t("fit.coach.title")} subtitle={t("fit.coach.subtitle")} />
+			<ScreenHeader title={t("fit.coach.title")} subtitle={trainer?.name} actions={portrait && <Avatar name={trainer?.name ?? t("fit.coach.title")} src={portrait} size={40} />} />
 			<div className={styles.thread} role="log" aria-live="polite" aria-label={t("fit.coach.title")}>
 				<div className={clsx(styles.bubble, styles.coach)}>
 					<p>{t("fit.coach.greeting", { name: profile.name })}</p>
@@ -235,9 +251,10 @@ export function Coach() {
 
 			<div className={styles.composer}>
 				<div className={styles.prompts} role="group" aria-label={t("fit.coach.suggestions")}>
-					{SUGGESTED_PROMPTS.map((p) => (
-						<button key={p} type="button" className={styles.prompt} disabled={pending} onClick={() => send(p)}>{p}</button>
-					))}
+					{coachPresets.map((preset) => {
+						const question = t(`fit.coach.presets.questions.${preset.id}`);
+						return <button key={preset.id} type="button" className={styles.prompt} disabled={pending} onClick={() => send(question, preset)}>{question}</button>;
+					})}
 				</div>
 				<form className={styles.form} onSubmit={(e) => { e.preventDefault(); send(text); }}>
 					<input className={styles.input} value={text} onChange={(e) => setText(e.target.value)} placeholder={t("fit.coach.placeholder")} aria-label={t("fit.coach.placeholder")} maxLength={300} />

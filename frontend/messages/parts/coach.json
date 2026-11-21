@@ -1,11 +1,54 @@
 {
   "fit": {
     "coach": {
-      "title": "Personal Coach", "subtitle": "Ask, adjust, stay on track", "greeting": "Hi {name}! I know your plan, your history and how this week is going. Tell me what's up and I'll adjust your training.",
-      "suggestions": "Suggested questions", "placeholder": "Message your coach", "send": "Send message", "typing": "Coach is typing",
-      "voice": "Dictate a message", "voiceUnsupported": "Voice input isn't supported in this browser. Type instead.", "voiceError": "Voice input failed. Try again or type.",
-      "applied": "Applied", "backToWorkout": "Back to my workout (paused)",
-      "doneRecovery": "Done. Today is a recovery day and your streak is safe. Come back refreshed.", "doneEquipment": "Done. I removed that equipment from your profile and swapped {n} exercises in your next workout. Later sessions are updated too.", "doneLimitation": "Done. I'll avoid those movements in upcoming sessions and swapped what I could.", "doneRebuild": "Done. Your upcoming weeks are rebuilt from your latest preferences and history."
+      "title": "Personal Coach",
+      "subtitle": "Ask, adjust, stay on track",
+      "trainerSubtitle": "{style} · your AI coach",
+      "greeting": "Hi {name}! I know your plan, your history and how this week is going. Tell me what's up and I'll adjust your training.",
+      "suggestions": "Suggested questions",
+      "placeholder": "Message your coach",
+      "send": "Send message",
+      "typing": "Coach is typing",
+      "voice": "Dictate a message",
+      "voiceUnsupported": "Voice input isn't supported in this browser. Type instead.",
+      "voiceError": "Voice input failed. Try again or type.",
+      "applied": "Applied",
+      "backToWorkout": "Back to my workout (paused)",
+      "doneRecovery": "Done. Today is a recovery day. Come back refreshed.",
+      "doneEquipment": "Done. I removed that equipment from your profile and swapped {n} exercises in your next workout. Later sessions are updated too.",
+      "doneLimitation": "Done. I'll avoid those movements in upcoming sessions and swapped what I could.",
+      "doneRebuild": "Done. Your upcoming weeks are rebuilt from your latest preferences and history.",
+      "presets": {
+        "questions": {
+          "difficulty": "My workout is too difficult",
+          "equipment": "I don't have dumbbells",
+          "time": "I only have 20 minutes",
+          "progress": "How am I progressing?",
+          "today": "What should I train today?",
+          "tired": "I feel exhausted"
+        },
+        "replies": {
+          "difficulty": "Let’s make the session easier. I can lower the load or reps and give you more rest between sets.",
+          "equipment": "You can still train. I can swap the dumbbell exercises for options that fit the equipment you have.",
+          "time": "Let’s use those 20 minutes for the main exercises. I can trim extra sets and accessory work.",
+          "progress": "You’ve finished {done} of {planned} planned workouts this week. Open Progress for your training history and records.",
+          "todayDone": "You’ve already trained today. If you feel like moving, a short walk or some gentle mobility is enough.",
+          "todayNext": "Your next workout is {workout}. It takes about {minutes} minutes.",
+          "todayEmpty": "There’s no workout scheduled. Open your training preferences to choose days for your plan.",
+          "tired": "Take a recovery day or choose a lighter session if you feel up to it. A recovery day keeps your streak."
+        },
+        "actions": {
+          "hard": "Make it easier",
+          "eq-dumbbells": "Replace dumbbell exercises",
+          "time-20": "Fit into 20 min",
+          "see-progress": "Open Progress",
+          "mob": "Open training",
+          "prefs": "Edit preferences",
+          "start-next": "View workout",
+          "tired": "Use a lighter session",
+          "recover": "Take a recovery day"
+        }
+      }
     }
   }
 }

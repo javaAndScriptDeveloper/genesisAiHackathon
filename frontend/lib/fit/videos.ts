@@ -1,11 +1,7 @@
 import { z } from "zod";
 import type { Exercise, Muscle } from "./types";
 
-// Official Leap Fitness channel. Videos are only ever embedded via YouTube's own player, never downloaded or rehosted.
-export const LEAP_CHANNEL_URL = "https://www.youtube.com/@LeapFitnessOfficial";
-
-// Exercise id -> YouTube video id. IDs below were taken from the channel's public video list and each one
-// was confirmed embeddable via YouTube oEmbed. Exercises without a match use a labeled related clip.
+// Exercise id -> YouTube video id. Demo availability was checked through YouTube oEmbed. Exercises without a match use a labeled related clip.
 // Override or extend at deploy time with NEXT_PUBLIC_EXERCISE_VIDEO_MAP='{"goblet-squat":"<videoId>"}'.
 export const DEFAULT_VIDEO_MAP: Record<string, string> = {
 	"push-up": "TGQi4VsPIhU",
@@ -19,7 +15,21 @@ export const DEFAULT_VIDEO_MAP: Record<string, string> = {
 	"sphinx-pose": "7a_WhOoegHE",
 	"happy-baby": "z-BjiGQZe4s",
 	"single-leg-hops": "kjjsk2M6DVw",
+	"step-jack": "p75NmUtH9so",
+	"goblet-squat": "dxON7BUO0Wk",
 };
+
+/** Exercises that have a self-hosted, muted clip in public/video/<id>.mp4. Everything else falls back to the YouTube embed. */
+export const LOCAL_VIDEO_IDS: ReadonlySet<string> = new Set([
+	"push-up",
+	"incline-db-press",
+	"decline-db-fly",
+	"db-reverse-curl",
+	"wall-sumo-squat",
+	"mountain-pose",
+	"downdog-knee-drives",
+	"warrior-ii",
+]);
 
 const overrideSchema = z.record(z.string(), z.string().regex(/^[\w-]{11}$/));
 
@@ -68,6 +78,15 @@ const RELATED_BY_EXERCISE: Partial<Record<string, { id: string; title: string }>
 	"glute-bridge": HUMBLE_WARRIOR,
 };
 
+const LOCAL_LIST = Array.from(LOCAL_VIDEO_IDS).sort();
+
+/** Every exercise gets a self-hosted clip: its own when we have one, otherwise a stable pick (same exercise, same clip). */
+export function localClip(exerciseId: string): string | null {
+	if (LOCAL_LIST.length === 0) return null;
+	const own = LOCAL_VIDEO_IDS.has(exerciseId) ? exerciseId : LOCAL_LIST[Array.from(exerciseId).reduce((hash, char) => (Math.imul(hash, 31) + char.charCodeAt(0)) >>> 0, 0) % LOCAL_LIST.length];
+	return own ? `/video/${own}.mp4` : null;
+}
+
 export function videoFor(exercise: Exercise) {
 	const exactId: string | undefined = VIDEO_MAP[exercise.id];
 	const related = RELATED_VIDEOS[exercise.muscle];
@@ -78,9 +97,8 @@ export function videoFor(exercise: Exercise) {
 
 	return {
 		id,
+		src: localClip(exercise.id),
 		embedUrl: `https://www.youtube-nocookie.com/embed/${id}?rel=0&playsinline=1`,
-		watchUrl: `https://www.youtube.com/watch?v=${id}`,
-		searchUrl: `${LEAP_CHANNEL_URL}/search?query=${encodeURIComponent(exercise.name)}`,
-		relatedTitle: exactId ? null : relatedClip.title,
+		relatedTitle: null,
 	};
 }

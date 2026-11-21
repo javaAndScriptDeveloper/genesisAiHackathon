@@ -62,7 +62,6 @@ export function History() {
 										</span>
 										<span className={styles.badges}>
 											<Badge tone={l.status === "completed" ? "success" : "warning"}>{t(`fit.status.${l.status}`)}</Badge>
-											{l.demo && <Badge>{t("fit.common.demo")}</Badge>}
 										</span>
 										<Icon icon={ArrowDown01Icon} size={18} className={styles.chevron} />
 									</summary>

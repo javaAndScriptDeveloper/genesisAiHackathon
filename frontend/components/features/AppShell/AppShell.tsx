@@ -7,6 +7,7 @@ import { useEffect, useLayoutEffect, useRef, ViewTransition, type ReactNode } fr
 import { BottomNav } from "@/components/features/BottomNav/BottomNav";
 import { DailyCheckRunner } from "@/components/features/DailyCheck/DailyCheckRunner";
 import { Celebration } from "@/components/features/Celebration/Celebration";
+import { ScenarioLoader } from "@/components/features/AppShell/ScenarioLoader";
 import { PhoneFrame } from "@/components/features/PhoneFrame/PhoneFrame";
 import { Icon, Skeleton, ToastProvider } from "@/components/ui";
 import { formatClock } from "@/lib/fit/dates";
@@ -16,7 +17,8 @@ import styles from "./AppShell.module.scss";
 
 const FULL_SCREEN = ["/workout", "/onboarding", "/profile/edit"];
 const scrollMemory = new Map<string, number>();
-const PAGE_MOTION = { "nav-forward": "page-forward", "nav-back": "page-back", default: "page-fade" } as const;
+const PAGE_MOTION = { "nav-forward": "page-forward", "nav-back": "page-back", "nav-exercise": "none", default: "page-fade" } as const;
+const TRAINING_PAGE_MOTION = { ...PAGE_MOTION, default: "none" } as const;
 
 function Screen({ children }: { children: ReactNode }) {
 	const { state, ready } = useFit();
@@ -50,7 +52,7 @@ function Screen({ children }: { children: ReactNode }) {
 		<>
 			{/* The fixed-size scroll area is what animates on navigation, so the motion stays inside the screen.
 			    Direction comes from transitionTypes on the navigating Link/router call; other changes get a soft fade. */}
-			<ViewTransition update={PAGE_MOTION} default="none">
+			<ViewTransition update={pathname === "/training" ? TRAINING_PAGE_MOTION : PAGE_MOTION} default="none">
 				<main ref={main} className={styles.main}>
 					{ready && (state.profile || onboarding) ? children : <LoadingScreen />}
 				</main>
@@ -85,6 +87,7 @@ function LoadingScreen() {
 export function AppShell({ children }: { children: ReactNode }) {
 	return (
 		<FitProvider>
+			<ScenarioLoader />
 			<PhoneFrame>
 				<ToastProvider>
 					<Screen>{children}</Screen>

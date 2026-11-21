@@ -25,8 +25,6 @@ export async function askJson<T>(schema: z.ZodType<T>, o: { system: string; prom
 					systemInstruction: o.system,
 					responseMimeType: "application/json",
 					responseJsonSchema: z.toJSONSchema(schema),
-					// No thinking: keeps gemini-2.5-flash calls well under the timeout.
-					thinkingConfig: { thinkingBudget: 0 },
 					abortSignal: AbortSignal.timeout(ms),
 				},
 			}),

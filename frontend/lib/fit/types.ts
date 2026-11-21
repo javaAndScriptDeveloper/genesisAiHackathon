@@ -1,6 +1,7 @@
 import type { CoachAiReply } from "./aiPlan";
 import type { ISODate } from "./dates";
 import type { DailyStats, DailyStatus } from "./dailyStats";
+import type { ArchiveItem, ProgressEvent } from "../progress/types";
 import type { Units } from "./units";
 
 export type Goal = "lose-fat" | "build-muscle" | "get-stronger" | "stay-fit" | "endurance";
@@ -212,6 +213,15 @@ export interface PhotoCheckIn {
 	weightKg?: number;
 }
 
+export interface ChatMessage {
+	id: string;
+	from: "me" | "buddy";
+	text: string;
+	/** Resized JPEG data URL of a shared photo. */
+	photo?: string;
+	at: string;
+}
+
 export type MealSlot = "breakfast" | "lunch" | "snack" | "dinner";
 
 export interface DailyCheck {
@@ -250,14 +260,35 @@ export interface FitState {
 	/** When the current goal weight was set. */
 	goalSetAt?: string | null;
 	partners: Record<string, "invited" | "accepted">;
+	/** When each pending request was sent (ISO). Approval is derived from it, so it survives navigation and reloads. */
+	partnerInvitedAt: Record<string, string>;
+	/** Simulated chats with connected gym buddies, keyed by buddy id. */
+	chats: Record<string, ChatMessage[]>;
 	hasDemoHistory: boolean;
 	celebrate: string[];
-	/** Ids issued by platform-backend for this browser; null until registered. */
-	backend: { userId: number; deviceId: number } | null;
+	/** Streak pauses (illness, holiday): whole weeks from a Monday, at most 4 weeks each, never overlapping. */
+	pauses: Pause[];
+	/** Anonymous id used to sync progress with the backend. */
+	progressToken: string;
+	/** Planned workouts per week the user commits to (2..5). */
+	weeklyGoal: number;
+	progressEvents: ProgressEvent[];
+	/** Last day `sync` diffed the progress snapshot on (rollover badges/levels); null until the first sync. */
+	lastProgressDay: ISODate | null;
+	/** Mondays (ISO dates) whose weekly report is already archived. */
+	archivedWeeks: string[];
+	archiveQueue: ArchiveItem[];
+	/** The demo device registered in platform-backend for this browser's progress token; null until registered. */
+	backend: { deviceId: number } | null;
 	/** The user's own plan wishes, passed to the AI planner. */
 	planWishes: string[];
 	planSource: "ai" | "fallback" | "rules";
 	planSummary: string | null;
 	/** Today's readiness check, null until it has run. */
 	daily: DailyCheck | null;
+}
+
+export interface Pause {
+	from: ISODate;
+	to: ISODate;
 }

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Input, SegmentedControl } from "@/components/ui";
+import { parseDecimal } from "@/lib/fit/numberInput";
 import { cmToFtIn, ftInToCm, KG_PER_LB, massValue, type Units } from "@/lib/fit/units";
 import { useT } from "@/lib/i18n/I18nProvider";
 import styles from "./Onboarding.module.scss";
@@ -18,7 +19,8 @@ interface BodyStepProps {
 	weightError?: string;
 }
 
-const num = (s: string) => (s.trim() === "" ? Number.NaN : Number(s));
+// Accepts "," or "." (type="number" drops a locale comma in Chrome and turns 62,5 into 625).
+const num = (s: string) => parseDecimal(s) ?? Number.NaN;
 
 // Units are asked first; fields then take that unit and always store metric underneath.
 export function BodyStep(props: BodyStepProps) {
@@ -57,14 +59,14 @@ function Fields({ units, heightCm, weightKg, onHeight, onWeight, heightError, we
 	return (
 		<>
 			{units === "metric" ? (
-				<Input label={t("fit.onboarding.height")} type="number" inputMode="numeric" suffix="cm" value={cm} error={heightError} onChange={(e) => { setCm(e.target.value); onHeight(num(e.target.value)); }} />
+				<Input label={t("fit.onboarding.height")} type="text" inputMode="numeric" suffix="cm" value={cm} error={heightError} onChange={(e) => { setCm(e.target.value); onHeight(num(e.target.value)); }} />
 			) : (
 				<div className={styles.pair}>
-					<Input label={t("fit.onboarding.height")} type="number" inputMode="numeric" suffix="ft" value={ft} error={heightError} onChange={(e) => { setFt(e.target.value); onHeight(ftInToCm(num(e.target.value), num(inch) || 0)); }} />
-					<Input label={t("fit.onboarding.inches")} type="number" inputMode="numeric" suffix="in" value={inch} onChange={(e) => { setInch(e.target.value); onHeight(ftInToCm(num(ft), num(e.target.value) || 0)); }} />
+					<Input label={t("fit.onboarding.height")} type="text" inputMode="numeric" suffix="ft" value={ft} error={heightError} onChange={(e) => { setFt(e.target.value); onHeight(ftInToCm(num(e.target.value), num(inch) || 0)); }} />
+					<Input label={t("fit.onboarding.inches")} type="text" inputMode="numeric" suffix="in" value={inch} onChange={(e) => { setInch(e.target.value); onHeight(ftInToCm(num(ft), num(e.target.value) || 0)); }} />
 				</div>
 			)}
-			<Input label={t("fit.onboarding.weight")} type="number" inputMode="decimal" step="0.1" suffix={units === "metric" ? "kg" : "lb"} value={weight} error={weightError} onChange={(e) => changeWeight(e.target.value)} />
+			<Input label={t("fit.onboarding.weight")} type="text" inputMode="decimal" suffix={units === "metric" ? "kg" : "lb"} value={weight} error={weightError} onChange={(e) => changeWeight(e.target.value)} />
 		</>
 	);
 }

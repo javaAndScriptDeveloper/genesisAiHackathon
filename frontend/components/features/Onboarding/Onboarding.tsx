@@ -8,18 +8,16 @@ import { BodyStep } from "./BodyStep";
 import type { Units } from "@/lib/fit/units";
 import { z } from "zod";
 import { OptionCard } from "@/components/features/OptionCard/OptionCard";
-import { Avatar, Badge, Button, Card, Input, ProgressBar, Skeleton, Switch, Textarea, IconButton, useToast } from "@/components/ui";
+import { Badge, Button, Card, Input, ProgressBar, Switch, Textarea, IconButton } from "@/components/ui";
 import { ArrowLeft02Icon } from "@hugeicons/core-free-icons";
-import { useTrainers } from "@/lib/api/trainers";
-import { aiClient } from "@/lib/fit/aiClient";
-import { ensureBackend, rebuildPlan } from "@/lib/fit/aiFlow";
-import { toISO, WEEKDAYS } from "@/lib/fit/dates";
-import { activeTrainerId, DAYS, DURATIONS, EQUIPMENT, EXPERIENCES, GENDERS, GOALS, LIMITATIONS, LOCATIONS, WEARABLES } from "@/lib/fit/options";
+import { WEEKDAYS } from "@/lib/fit/dates";
+import { DAYS, DURATIONS, EQUIPMENT, EXPERIENCES, GENDERS, GOALS, LIMITATIONS, LOCATIONS, WEARABLES } from "@/lib/fit/options";
 import { generatePlan } from "@/lib/fit/plan";
+import { createUser } from "@/lib/api/users";
 import { useFit } from "@/lib/fit/store/FitProvider";
 import { useActionNavigate } from "@/lib/fit/store/hooks";
 import { useAiPlan } from "@/lib/fit/store/useAiPlan";
-import type { PlannedWorkout, Profile } from "@/lib/fit/types";
+import type { Profile } from "@/lib/fit/types";
 import { useT } from "@/lib/i18n/I18nProvider";
 import styles from "./Onboarding.module.scss";
 
@@ -43,9 +41,6 @@ const makeSchema = (t: (k: string, p?: Record<string, string | number>) => strin
 
 type Form = z.infer<ReturnType<typeof makeSchema>>;
 
-const BUILD_TIMEOUT_MS = 25_000;
-type AiBuild = { backend: { userId: number; deviceId: number }; planned: PlannedWorkout[]; summary: string; source: "ai" | "fallback" };
-
 const STEPS = ["about", "body", "goal", "experience", "where", "schedule", "limits", "wearable", "summary"] as const;
 type Step = (typeof STEPS)[number];
 const FIELDS: Record<Step, (keyof Form)[]> = {
@@ -65,11 +60,8 @@ export function Onboarding({ mode }: { mode: "create" | "edit" }) {
 	const router = useRouter();
 	const { state, today } = useFit();
 	const go = useActionNavigate();
-	const [step, setStep] = useState(0);
-	const toast = useToast();
 	const { rebuild } = useAiPlan();
-	const { data: trainers } = useTrainers();
-	const [building, setBuilding] = useState(false);
+	const [step, setStep] = useState(0);
 	const [demoHistory, setDemoHistory] = useState(true);
 	const [units, setUnits] = useState<Units>(state.units);
 	const schema = useMemo(() => makeSchema(t), [t]);
@@ -83,63 +75,33 @@ export function Onboarding({ mode }: { mode: "create" | "edit" }) {
 	const current = STEPS[step] ?? "about";
 	const values = watch();
 	const last = step === STEPS.length - 1;
-	const trainer = trainers?.find((tr) => tr.id === activeTrainerId(state));
 
 	const next = async () => {
 		const ok = await trigger(FIELDS[current]);
 		if (ok) setStep((s) => Math.min(STEPS.length - 1, s + 1));
 	};
 
-	const buildWithAi = async (profile: Profile): Promise<AiBuild | null> => {
-		const base = { backend: null, profile, trainerSlug: activeTrainerId(state), today };
-		const backend = await ensureBackend(aiClient, base);
-		if (!backend) return null;
-		const plan = await rebuildPlan(aiClient, { ...base, backend, wishes: [] });
-		return plan ? { backend, planned: plan.planned, summary: plan.summary, source: plan.createdBy } : null;
-	};
-
-	const submit = async () => {
-		if (building) return;
+	const submit = () => {
 		const parsed = schema.safeParse(getValues());
 		if (!parsed.success) return;
 		const profile: Profile = parsed.data;
-		if (mode === "edit") {
+		// Fire and forget: the app works offline, the server copy is created when reachable.
+		if (mode === "create") void createUser(profile, state.trainerId, state.progressToken);
+		if (mode === "create") go("/today", { type: "complete-onboarding", profile, units, demoHistory, today, now: new Date().toISOString() }, { replace: true });
+		else {
+			// The rule-based rebuild applies at once; the AI trainer then re-saves the user and recreates the plan with the stored wishes.
 			go("/profile", { type: "update-profile", profile, units, today }, { replace: true });
 			void rebuild({ profile });
-			return;
 		}
-		setBuilding(true);
-		let timer: ReturnType<typeof setTimeout> | undefined;
-		const timeout = new Promise<null>((resolve) => {
-			timer = setTimeout(() => resolve(null), BUILD_TIMEOUT_MS);
-		});
-		const ai = await Promise.race([buildWithAi(profile), timeout]).catch(() => null);
-		clearTimeout(timer);
-		if (!ai) toast.show(t("fit.ai.buildFailed"), "danger");
-		go("/today", { type: "complete-onboarding", profile, units, demoHistory, today, now: new Date().toISOString(), ...(ai ? { ai } : {}) }, { replace: true });
 	};
 
 	const preview = useMemo(() => {
 		if (!last) return [];
 		const parsed = schema.safeParse(values);
-		return parsed.success ? generatePlan(parsed.data, today, 1).concat(generatePlan(parsed.data, toISO(new Date(Date.now() + 7 * 86_400_000)), 1)).slice(0, parsed.data.daysPerWeek) : [];
+		return parsed.success ? generatePlan(parsed.data, today, 2).slice(0, parsed.data.daysPerWeek) : [];
 	}, [last, schema, values, today]);
 
 	const toggle = <T extends string>(list: T[], item: T): T[] => (list.includes(item) ? list.filter((i) => i !== item) : [...list, item]);
-
-	if (building) {
-		const name = trainer?.name ?? t("fit.ai.trainerFallback");
-		return (
-			<div className={styles.root}>
-				<div className={styles.building} role="status" aria-live="polite">
-					{trainer ? <Avatar name={trainer.name} src={trainer.pathToImage} size={96} /> : <Skeleton width="9.6rem" height="9.6rem" className={styles.buildingAvatar} />}
-					<h1 className={styles.buildingTitle}>{t("fit.ai.building", { name })}</h1>
-					<p className={styles.note}>{t("fit.ai.buildingNote")}</p>
-					<Skeleton width="60%" height="1.6rem" />
-				</div>
-			</div>
-		);
-	}
 
 	return (
 		<div className={styles.root}>

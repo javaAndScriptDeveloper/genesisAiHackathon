@@ -25,9 +25,13 @@ describe("apiFetch", () => {
 
 describe("fetchTrainers", () => {
 	const trainer = { id: "mike", name: "Mike", pathToImage: "/trainers/mike.svg", tov: "Blunt." };
-	it("parses the backend payload", async () => {
-		stub({ trainers: [trainer] });
-		await expect(fetchTrainers()).resolves.toEqual([trainer]);
+	it("uses a bundled portrait for a seeded trainer and preserves custom paths", async () => {
+		const customTrainer = { ...trainer, pathToImage: "/trainers/custom-mike.webp" };
+		stub({ trainers: [trainer, customTrainer] });
+		await expect(fetchTrainers()).resolves.toEqual([
+			{ ...trainer, pathToImage: "/img/trainer-mike@2x.webp" },
+			customTrainer,
+		]);
 	});
 	it("calls the real backend path, not the mock api", async () => {
 		stub({ trainers: [] });

@@ -30,7 +30,7 @@ export function RestView({ onAdjust, onMusic }: { onAdjust: () => void; onMusic:
 	return (
 		<div className={`${styles.overlay} ${styles.restScreen}`} role="dialog" aria-modal="true" aria-label={t("fit.workout.rest")}>
 			<div className={styles.restTop}>
-				<IconButton icon={MusicNote01Icon} label={t("fit.music.title")} onClick={onMusic} variant="secondary" />
+				<IconButton icon={MusicNote01Icon} label={t("fit.music.title")} onClick={onMusic} variant="secondary" className={styles.restMusic} />
 				<p className={styles.restLabel}>{t("fit.workout.rest")}</p>
 				<p className={styles.restTime} aria-live="off">{formatClock(a.restLeft)}</p>
 				<span className={styles.restBar} role="progressbar" aria-label={t("fit.workout.rest")} aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(pct)}>

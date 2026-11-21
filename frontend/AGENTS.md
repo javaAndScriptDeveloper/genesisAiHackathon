@@ -46,7 +46,7 @@ Design history: `docs/superpowers/specs/` and `docs/superpowers/plans/`.
 - **Icons:** Hugeicons via `components/ui/Icon` (individual named imports). Sport pictograms only: `components/ui/SportIcon` (Tabler). Never emoji or text glyphs as icons.
 - **Images:** WebP, @2x when possible, always through `next/image` (`Picture`). Convert with `bun run images`.
 - **Copy / i18n:** the app is multilingual, English is the default and source language. All user-facing text lives in `messages/<locale>.json` (`en`, `uk`; add a locale in `lib/i18n/config.ts`), read with `useT()` in client components or `t(key, params, locale)` elsewhere; `{name}` interpolation, missing keys fall back to English. Never hardcode UI strings in components. Domain content that is data (exercise library in `lib/fit/exercises.ts`, coach replies in `lib/fit/coach.ts`) is English-only for now and is the next thing to move into message files.
-- **Theme:** one light theme, no theme switcher.
+- **Theme:** the base kit (`/ui-kit`) has one light theme. The fitness app uses the Training UI design system (`training-ui/`, `styles/partials/_training.scss`) with a dark/light switch (`useTheme`, `ThemeToggle`, Settings → Appearance), applied on `PhoneFrame`.
 - **Forms:** react-hook-form + zod; no browser-native validation; show errors in the kit's own UI.
 - **Loading/empty/error:** every data view has a skeleton, an empty state and an error state. Data that can take a while to load or switch (pagination, tabs, filters, search, refetch) MUST show skeletons during the switch, not stale/blank content; skeleton keeps the same layout (columns, row count, heights) so nothing jumps.
 - **Destructive actions** always go through `ConfirmDialog`.

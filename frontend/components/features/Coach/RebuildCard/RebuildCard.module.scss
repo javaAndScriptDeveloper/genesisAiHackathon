@@ -1,12 +1,14 @@
 @use "partials/corners";
 
+// The AI coach's proposal inside its chat bubble: coach voice colors (Training UI).
 .root {
 	display: flex;
 	flex-direction: column;
 	align-items: flex-start;
 	gap: var(--space-2);
 	padding: var(--space-3);
-	background: var(--color-accentSoft);
+	background: var(--color-coachSoft);
+	border: 0.1rem solid var(--color-coach);
 	@include corners.nested(var(--radius-panel), var(--space-3));
 }
 
@@ -21,5 +23,6 @@
 	gap: var(--space-1);
 	margin: 0;
 	padding-left: var(--space-4);
+	color: var(--color-textMuted);
 	font-size: 1.4rem;
 }

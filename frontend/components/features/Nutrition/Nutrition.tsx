@@ -4,11 +4,12 @@ import { Add01Icon, DropletIcon, FireIcon, MinusSignIcon } from "@hugeicons/core
 import { Notice } from "@/components/features/Notice/Notice";
 import { ScreenHeader } from "@/components/features/ScreenHeader/ScreenHeader";
 import { Stat } from "@/components/features/Stat/Stat";
-import { Button, Card, Checkbox, Icon, ProgressRing, Stepper } from "@/components/ui";
+import { Button, Card, Checkbox, Icon, Picture, ProgressRing, Stepper } from "@/components/ui";
 import { useFit } from "@/lib/fit/store/FitProvider";
 import type { MealSlot, Profile } from "@/lib/fit/types";
 import { useT } from "@/lib/i18n/I18nProvider";
 import kit from "../ScreenKit/ScreenKit.module.scss";
+import styles from "./Nutrition.module.scss";
 
 const SLOTS: MealSlot[] = ["breakfast", "lunch", "snack", "dinner"];
 
@@ -48,7 +49,8 @@ export function Nutrition() {
 					<h2 className={kit.h2}>{t("fit.nutrition.mealsTitle")}</h2>
 					<p className={kit.note}>{t(`fit.nutrition.goalTip.${p.goal}`)}</p>
 					{SLOTS.map((slot) => (
-						<div key={slot}>
+						<div key={slot} className={styles.meal}>
+							<Picture name={`meal-${slot}`} alt="" width={192} height={192} sizes="52px" className={styles.photo} />
 							<Checkbox label={`${t(`fit.nutrition.slot.${slot}`)}: ${t(`fit.nutrition.idea.${slot}`)}`} checked={meals.includes(slot)} onChange={() => dispatch({ type: "toggle-meal", date: today, slot })} />
 						</div>
 					))}

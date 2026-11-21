@@ -1,6 +1,7 @@
 "use client";
 
 import { ExerciseGuide } from "@/components/features/ExerciseGuide/ExerciseGuide";
+import { ExerciseProgress } from "@/components/features/ExerciseProgress/ExerciseProgress";
 import { ExerciseVideo } from "@/components/features/ExerciseVideo/ExerciseVideo";
 import { ScreenHeader } from "@/components/features/ScreenHeader/ScreenHeader";
 import { Badge, Button, EmptyState } from "@/components/ui";
@@ -17,8 +18,8 @@ export function ExerciseDetail({ id }: { id: string }) {
 	return (
 		<div className={styles.root}>
 			<ScreenHeader title={exercise.name} back />
+			<ExerciseVideo exercise={exercise} autoPlay fullWidth />
 			<div className={styles.content}>
-				<ExerciseVideo exercise={exercise} />
 				<div className={styles.badges}>
 					<Badge tone="accent">{t(`fit.muscle.${exercise.muscle}`)}</Badge>
 					<Badge>{t(`fit.level.${exercise.level}`)}</Badge>
@@ -26,6 +27,7 @@ export function ExerciseDetail({ id }: { id: string }) {
 				</div>
 				<p className={styles.summary}>{exercise.summary}</p>
 				<ExerciseGuide exercise={exercise} />
+				<ExerciseProgress exerciseId={exercise.id} />
 			</div>
 		</div>
 	);

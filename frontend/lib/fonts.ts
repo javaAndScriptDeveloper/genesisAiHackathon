@@ -1,4 +1,4 @@
-import { Inter, Montserrat, Poppins, Unbounded } from "next/font/google";
+import { Inter, Montserrat, Onest, Poppins, Unbounded } from "next/font/google";
 
 // Body text. Cyrillic subset is required for Ukrainian copy.
 export const inter = Inter({
@@ -29,4 +29,11 @@ export const poppins = Poppins({
 	display: "swap",
 });
 
-export const fontVariables = [inter, unbounded, montserrat, poppins].map((f) => f.variable).join(" ");
+// Training UI design system body font (onboarding quiz), opt-in via `var(--font-onest)`.
+export const onest = Onest({
+	subsets: ["latin", "cyrillic"],
+	variable: "--font-onest",
+	display: "swap",
+});
+
+export const fontVariables = [inter, unbounded, montserrat, poppins, onest].map((f) => f.variable).join(" ");

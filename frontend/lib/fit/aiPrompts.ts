@@ -1,6 +1,6 @@
 import { statsSummary, type DailyStats, type DailyStatus } from "./dailyStats";
-import { EXERCISES, isUsable } from "./exercises";
-import type { ExerciseKind, Muscle, PlannedWorkout, Profile } from "./types";
+import { exerciseCatalog } from "./aiPlan";
+import type { PlannedWorkout, Profile } from "./types";
 
 export interface TrainerVoice {
 	name: string;
@@ -8,15 +8,11 @@ export interface TrainerVoice {
 }
 
 export function systemFor(trainer: TrainerVoice): string {
-	return `You are ${trainer.name}, a personal fitness trainer. Tone of voice: ${trainer.tov}. Stay in this tone in every text you write. Never diagnose or give medical advice. Never encourage training through pain, dizziness or chest symptoms; tell the user to stop and rest, and see a professional if it persists. Keep replies short (2-4 sentences). Use only exercise ids from the provided list.`;
-}
-
-export function usableExerciseList(profile: Profile): { id: string; name: string; muscle: Muscle; kind: ExerciseKind; level: number; timed: boolean }[] {
-	return EXERCISES.filter((e) => isUsable(e, profile)).map((e) => ({ id: e.id, name: e.name, muscle: e.muscle, kind: e.kind, level: e.level, timed: Boolean(e.timed) }));
+	return `You are ${trainer.name}, a certified strength and conditioning coach working as a personal trainer. Tone of voice: ${trainer.tov}. Stay in this tone in every text you write. Never diagnose or give medical advice. Never encourage training through pain, dizziness or chest symptoms; tell the user to stop and rest, and see a professional if it persists. Keep replies short (2-4 sentences). Use only exercise ids from the provided list.`;
 }
 
 const profileJson = (profile: Profile) => JSON.stringify(profile);
-const exerciseJson = (profile: Profile) => JSON.stringify(usableExerciseList(profile));
+const exerciseJson = (profile: Profile) => JSON.stringify(exerciseCatalog(profile));
 
 function wishLines(wishes: string[]): string {
 	return wishes.length ? wishes.map((w) => `- ${w}`).join("\n") : "- none";
@@ -26,10 +22,16 @@ export function weekPrompt(i: { profile: Profile; stats: DailyStats[]; wishes: s
 	const { profile } = i;
 	const last = i.stats[i.stats.length - 1];
 	const light = last && last.readiness < 60 ? "Recent readiness is below 60: make the first days lighter (fewer sets, easier exercises).\n" : "";
-	return `Create one weekly training plan with exactly ${profile.daysPerWeek} sessions. Weekday 0 = Monday, 6 = Sunday; use distinct weekdays.
-Each session should take about ${profile.durationMin} minutes. Leave rest days between hard days. Respect the user's limitations (${profile.limitations.join(", ") || "none"}; note: ${profile.limitationNote || "none"}) and these wishes:
+	return `Create one weekly training plan with exactly ${profile.daysPerWeek} sessions. Weekday 0 = Monday, 6 = Sunday; use distinct weekdays. Sessions repeat every week.
+Each session should take about ${profile.durationMin} minutes: roughly 3 exercises for 20 min, 4 for 30, 5 for 45, 6 for 60, plus an optional mobility finisher.
+Dose by goal and level: strength 3-5 sets of 3-6 reps, rest 120-180s; muscle 3-4x8-12, rest 60-90s; fat loss and endurance 2-3x12-20, rest 30-45s; general fitness 3x10-12. Beginners get fewer sets and easier (level 1-2) exercises.
+Balance muscle groups across the week; do not hit the same muscle hard on back-to-back days. Leave rest days between hard days.
+Use the person's own words about their goal (goalText) and any injury note. Older or heavier beginners get gentler, joint-friendly choices.
+Respect the user's limitations (${profile.limitations.join(", ") || "none"}; note: ${profile.limitationNote || "none"}) and these wishes:
 ${wishLines(i.wishes)}
-${light}Each exercise needs exerciseId (from the list), sets, reps (or seconds for timed ones) and restSec. Reply with JSON: summary, sessions[{weekday,title,focus,exercises[]}].
+${light}Each exercise needs exerciseId (from the list), sets, reps (or seconds for exercises with "timed": true, 20-60) and restSec.
+"summary": 1-2 sentences addressing the person by name. "why": 3-4 short reasons that point to their actual data (goal, age, schedule, equipment, level). No exclamation marks, no emoji.
+Reply with JSON: summary, why[], sessions[{weekday,title,focus,exercises[]}].
 
 Device data: ${statsSummary(i.stats)}
 Profile: ${profileJson(profile)}

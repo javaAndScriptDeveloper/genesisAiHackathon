@@ -1,0 +1,130 @@
+// Training UI design system (training-ui/tokens.css), dark theme, mapped onto the app's semantic tokens.
+// Include inside a scope (e.g. the onboarding quiz) to restyle every kit component there without touching them.
+@mixin dark {
+	--color-canvas: #0e0f0c;
+	--color-surface: #171915;
+	--color-surfaceSubtle: #171915;
+	--color-surfaceMuted: #20231d;
+	--color-surfaceHover: #20231d;
+	--color-overlay: rgba(5, 6, 4, 0.72);
+
+	--color-text: #f2f4ee;
+	--color-textMuted: #a9afa1;
+	--color-textSubtle: #8a9081;
+	--color-placeholder: #8a9081;
+
+	--color-segmentTrack: #1b1e17;
+	--color-segmentActive: #2f3528;
+	--color-border: #2e3229;
+	--color-borderStrong: #6a7262;
+
+	// volt: brand and the primary action only; on-volt text is never white.
+	--color-accent: #c8f03c;
+	--color-accentHover: #b8de32;
+	--color-accentSoft: #283112;
+	--color-accentText: #d4f566;
+	--color-onAccent: #11140a;
+	--color-primary: #c8f03c;
+	--color-primaryHover: #b8de32;
+	--color-onPrimary: #11140a;
+
+	// AI coach voice.
+	--color-coach: #8fd3ff;
+	--color-coachSoft: #13283a;
+
+	--color-success: #5bd68a;
+	--color-successText: #5bd68a;
+	--color-successSoft: #132d1e;
+	--color-warning: #ffb547;
+	--color-warningText: #ffb547;
+	--color-warningSoft: #33260f;
+	--color-danger: #ff7a6e;
+	--color-dangerText: #ff7a6e;
+	--color-dangerSoft: #3a1714;
+	--color-dangerBorder: #6b2a24;
+
+	--color-onSuccess: #0e0f0c;
+	--color-onDanger: #0e0f0c;
+	--color-successMuted: #2f6b45;
+	--color-onSuccessMuted: #d6f5e0;
+	--color-warningBorder: #5c4316;
+	--color-hero: #20231d;
+	--color-onHero: #f2f4ee;
+	--color-onHeroMuted: #a9afa1;
+	--color-heroAccent: #d4f566;
+	--color-heroLine: #6a7262;
+
+	--color-focusRing: #c8f03c;
+	--color-fieldFocus: #c8f03c;
+
+	--shadow-card: 0 0.1rem 0.2rem rgba(0, 0, 0, 0.5);
+	--shadow-popover: 0 0.8rem 2.4rem rgba(0, 0, 0, 0.55);
+	--shadow-modal: 0 2.4rem 4.8rem rgba(0, 0, 0, 0.6);
+
+	font-family: var(--font-onest), var(--font-body), system-ui, sans-serif;
+	color-scheme: dark;
+}
+
+// Light theme (training-ui [data-theme="light"]): for daytime. volt stays the button fill;
+// graphics and accents use the darker volt-mark, because volt on white is unreadable.
+@mixin light {
+	--color-canvas: #f4f5f0;
+	--color-surface: #ffffff;
+	--color-surfaceSubtle: #fafbf7;
+	--color-surfaceMuted: #eceee7;
+	--color-surfaceHover: #eceee7;
+	--color-overlay: rgba(20, 23, 15, 0.48);
+
+	--color-text: #14170f;
+	--color-textMuted: #545a4c;
+	--color-textSubtle: #646a5d;
+	--color-placeholder: #646a5d;
+
+	--color-segmentTrack: #e4e7dc;
+	--color-segmentActive: #ffffff;
+	--color-border: #dde0d6;
+	--color-borderStrong: #8a9080;
+
+	--color-accent: #5f8000;
+	--color-accentHover: #506c00;
+	--color-accentSoft: #eef8c8;
+	--color-accentText: #3f5500;
+	--color-onAccent: #ffffff;
+	--color-primary: #c8f03c;
+	--color-primaryHover: #b8de32;
+	--color-onPrimary: #11140a;
+
+	--color-coach: #0b65a8;
+	--color-coachSoft: #e3f1fc;
+
+	--color-success: #18733e;
+	--color-successText: #18733e;
+	--color-successSoft: #e2f5e9;
+	--color-warning: #9a5b00;
+	--color-warningText: #9a5b00;
+	--color-warningSoft: #fdf0dc;
+	--color-danger: #c0322a;
+	--color-dangerText: #c0322a;
+	--color-dangerSoft: #fce6e4;
+	--color-dangerBorder: #f3c2bd;
+
+	--color-onSuccess: #ffffff;
+	--color-onDanger: #ffffff;
+	--color-successMuted: #bfe8cd;
+	--color-onSuccessMuted: #0f4a27;
+	--color-warningBorder: #f3d9a8;
+	--color-hero: #14170f;
+	--color-onHero: #f2f4ee;
+	--color-onHeroMuted: #a9afa1;
+	--color-heroAccent: #c8f03c;
+	--color-heroLine: #545a4c;
+
+	--color-focusRing: #3f5500;
+	--color-fieldFocus: #3f5500;
+
+	--shadow-card: 0 0.1rem 0.2rem rgba(20, 23, 15, 0.08);
+	--shadow-popover: 0 0.6rem 2rem rgba(20, 23, 15, 0.1);
+	--shadow-modal: 0 2rem 4rem rgba(20, 23, 15, 0.16);
+
+	color-scheme: light;
+}
