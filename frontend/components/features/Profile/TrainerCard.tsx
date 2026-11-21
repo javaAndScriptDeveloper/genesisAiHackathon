@@ -19,14 +19,14 @@ export function TrainerCard() {
 
 	return (
 		<Card className={kit.stack}>
-			<h2 className={`${kit.h2} ${kit.heading}`}><Icon icon={UserGroupIcon} size={20} />{t("fit.settings.trainerTitle")}</h2>
-			<p className={kit.note}>{t("fit.settings.trainerNote")}</p>
+			<h2 className={`${kit.h2} ${kit.heading}`}><Icon icon={UserGroupIcon} size={20} />{t("fit.profile.trainerTitle")}</h2>
+			<p className={kit.note}>{t("fit.profile.trainerNote")}</p>
 			{isPending && <Skeleton height="8rem" />}
-			{isError && <p className={kit.note}>{t("fit.settings.trainerLoadFailed")}</p>}
+			{isError && <p className={kit.note}>{t("fit.profile.trainerLoadFailed")}</p>}
 			{trainers?.map((tr) => (
 				<div key={tr.id} className={styles.item}>
 					<Avatar name={tr.name} src={tr.pathToImage} size={48} />
-					<OptionCard type="radio" name="trainer" label={tr.name} hint={tr.tov} checked={tr.id === selected} onChange={() => { dispatch({ type: "set-trainer", trainerId: tr.id }); toast.show(t("fit.settings.trainerSet", { name: tr.name }), "success"); }} />
+					<OptionCard type="radio" name="trainer" label={tr.name} hint={tr.tov} checked={tr.id === selected} onChange={() => { dispatch({ type: "set-trainer", trainerId: tr.id }); toast.show(t("fit.profile.trainerSet", { name: tr.name }), "success"); }} />
 				</div>
 			))}
 		</Card>
