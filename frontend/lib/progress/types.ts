@@ -62,3 +62,20 @@ export interface ProgressContext {
 	weeklyGoal: number; // 2..5
 	pauses: Pause[];
 }
+
+export interface ProgressEvent {
+	id: string;
+	kind: "badge" | "level" | "pr" | "report";
+	refId: string;
+	createdAt: string;
+	seenAt: string | null;
+}
+export interface ArchiveItem {
+	id: string;
+	period: "weekly" | "change";
+	weekStart: IsoDate | null;
+	takenAt: string;
+	engineVersion: string;
+	payload: unknown; // Task 7 tightens this
+	payloadHash: string;
+}
