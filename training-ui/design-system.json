@@ -1,0 +1,25 @@
+{
+  "v": 3,
+  "layout": "files",
+  "createdOnFiles": {
+    "v": 1,
+    "at": "2026-11-21T11:55:00Z"
+  },
+  "title": "Training UI",
+  "namespace": "TrainingUI",
+  "libraries": [],
+  "sections": {},
+  "groups": [],
+  "assetGroups": {},
+  "blobs": {},
+  "docs": {
+    "readme": "project/README.md",
+    "sections": []
+  },
+  "lastChange": {
+    "by": "Dmytro",
+    "at": "2026-11-21T12:10:00Z",
+    "via": "Claude (chat)",
+    "note": "All copy translated to English: README, component guidelines, preview copy, token usage notes"
+  }
+}

@@ -1,0 +1,183 @@
+/* Training UI components — classes prefixed ds-. Load after tokens.css. */
+body { margin: 0; font-family: var(--font-sans); background: var(--bg); color: var(--ink); -webkit-font-smoothing: antialiased; }
+.ds-stage { padding: var(--space-4); display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
+.ds-col { display: flex; flex-direction: column; gap: var(--space-3); }
+:where(.ds-btn, .ds-chip, .ds-input, .ds-tab, .ds-link):focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+
+/* Button */
+.ds-btn { font: 600 15px/20px var(--font-sans); letter-spacing: .01em; display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2);
+  height: var(--size-touch); padding: 0 var(--space-5); border-radius: var(--radius-md); border: 1px solid transparent; cursor: pointer; transition: filter 150ms, background 150ms; }
+.ds-btn--lg { height: var(--size-control); font-size: 16px; padding: 0 var(--space-6); }
+.ds-btn--block { width: 100%; }
+.ds-btn--primary { background: var(--volt); color: var(--on-volt); }
+.ds-btn--primary:hover { filter: brightness(.94); }
+.ds-btn--secondary { background: transparent; color: var(--ink); border-color: var(--line-strong); }
+.ds-btn--secondary:hover { background: var(--surface-raised); }
+.ds-btn--ghost { background: transparent; color: var(--volt-ink); padding: 0 var(--space-3); }
+.ds-btn--danger { background: transparent; color: var(--danger); border-color: var(--danger); }
+.ds-btn:disabled, .ds-btn[aria-disabled="true"] { background: var(--surface-sunken); color: var(--ink-subtle); border-color: transparent; cursor: not-allowed; filter: none; }
+.ds-btn svg { width: var(--size-icon); height: var(--size-icon); }
+
+/* Chip (selectable) */
+.ds-chip { font: 600 13px/18px var(--font-sans); display: inline-flex; align-items: center; gap: var(--space-2); min-height: 36px; padding: 0 var(--space-4);
+  border-radius: var(--radius-full); border: 1px solid var(--line-strong); background: transparent; color: var(--ink); cursor: pointer; }
+.ds-chip[aria-pressed="true"] { background: var(--volt-soft); border-color: var(--volt-mark); color: var(--volt-ink); }
+
+/* Badge (status) */
+.ds-badge { font: 600 12px/16px var(--font-sans); display: inline-flex; align-items: center; gap: var(--space-1); padding: 2px var(--space-2); border-radius: var(--radius-sm); background: var(--surface-sunken); color: var(--ink-muted); }
+.ds-badge svg { width: 12px; height: 12px; }
+.ds-badge--success { background: var(--success-soft); color: var(--success); }
+.ds-badge--warning { background: var(--warning-soft); color: var(--warning); }
+.ds-badge--danger { background: var(--danger-soft); color: var(--danger); }
+.ds-badge--coach { background: var(--coach-soft); color: var(--coach); }
+
+/* Card */
+.ds-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg); padding: var(--space-5); }
+.ds-overline { font: 700 11px/14px var(--font-sans); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-muted); }
+
+/* MetricTile */
+.ds-metric { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-md); padding: var(--space-4); min-width: 136px; display: flex; flex-direction: column; gap: var(--space-1); }
+.ds-metric__label { font: 600 13px/18px var(--font-sans); color: var(--ink-muted); }
+.ds-metric__value { font: 600 28px/32px var(--font-display); letter-spacing: -.01em; color: var(--ink); font-variant-numeric: tabular-nums; }
+.ds-metric__unit { font: 600 13px/18px var(--font-sans); color: var(--ink-muted); margin-left: var(--space-1); letter-spacing: 0; }
+.ds-metric__delta { font: 500 12px/16px var(--font-mono); color: var(--ink-muted); }
+.ds-metric__delta--up { color: var(--success); }
+.ds-metric__delta--down { color: var(--danger); }
+
+/* ZoneBar */
+.ds-zones { display: flex; flex-direction: column; gap: var(--space-2); }
+.ds-zones__track { display: flex; gap: 2px; height: 12px; }
+.ds-zones__seg { border-radius: var(--radius-xs); min-width: 4px; }
+.ds-zones__legend { display: flex; gap: var(--space-3); flex-wrap: wrap; font: 500 12px/16px var(--font-mono); color: var(--ink-muted); }
+.ds-zones__key { display: inline-flex; align-items: center; gap: var(--space-1); }
+.ds-zones__dot { width: 8px; height: 8px; border-radius: 2px; }
+.z1 { background: var(--zone-1); } .z2 { background: var(--zone-2); } .z3 { background: var(--zone-3); } .z4 { background: var(--zone-4); } .z5 { background: var(--zone-5); }
+
+/* ProgressRing */
+.ds-ring { position: relative; display: inline-grid; place-items: center; }
+.ds-ring svg { transform: rotate(-90deg); }
+.ds-ring__track { stroke: var(--surface-sunken); }
+.ds-ring__fill { stroke: var(--volt-mark); stroke-linecap: round; }
+.ds-ring__center { position: absolute; text-align: center; }
+.ds-ring__value { font: 600 24px/28px var(--font-display); color: var(--ink); }
+.ds-ring__label { font: 500 12px/16px var(--font-sans); color: var(--ink-muted); }
+
+/* WorkoutCard */
+.ds-workout { display: flex; flex-direction: column; gap: var(--space-4); max-width: 360px; }
+.ds-workout__head { display: flex; justify-content: space-between; align-items: flex-start; gap: var(--space-3); }
+.ds-workout__title { font: 600 19px/26px var(--font-sans); margin: var(--space-1) 0 0; }
+.ds-workout__meta { display: flex; gap: var(--space-4); font: 500 14px/20px var(--font-mono); color: var(--ink-muted); }
+.ds-workout__meta b { color: var(--ink); font-weight: 500; }
+
+/* WeekStrip */
+.ds-week { display: grid; grid-template-columns: repeat(7, 1fr); gap: var(--space-1); max-width: 380px; }
+.ds-day { display: flex; flex-direction: column; align-items: center; gap: var(--space-1); padding: var(--space-2) 0; border-radius: var(--radius-md); }
+.ds-day__name { font: 600 11px/14px var(--font-sans); letter-spacing: .06em; text-transform: uppercase; color: var(--ink-muted); }
+.ds-day__num { font: 600 15px/20px var(--font-sans); color: var(--ink); }
+.ds-day__mark { width: 6px; height: 6px; border-radius: var(--radius-full); }
+.ds-day--today { background: var(--volt); }
+.ds-day--today .ds-day__name, .ds-day--today .ds-day__num { color: var(--on-volt); }
+.ds-day--today .ds-day__mark { background: var(--on-volt); }
+.ds-mark--done { background: var(--success); }
+.ds-mark--missed { background: transparent; box-shadow: inset 0 0 0 1.5px var(--danger); }
+.ds-mark--planned { background: var(--line-strong); }
+.ds-mark--rest { background: transparent; }
+
+/* CoachMessage */
+.ds-coach { display: flex; gap: var(--space-3); max-width: 380px; }
+.ds-coach__avatar { flex: none; width: 32px; height: 32px; border-radius: var(--radius-full); background: var(--coach-soft); border: 1.5px solid var(--coach); display: grid; place-items: center; color: var(--coach); font: 700 12px/1 var(--font-display); }
+.ds-coach__bubble { background: var(--coach-soft); border-radius: var(--radius-sm) var(--radius-lg) var(--radius-lg) var(--radius-lg); padding: var(--space-4); display: flex; flex-direction: column; gap: var(--space-3); }
+.ds-coach__who { font: 600 13px/18px var(--font-sans); color: var(--coach); }
+.ds-coach__text { font: 400 17px/26px var(--font-sans); color: var(--ink); margin: 0; }
+.ds-coach__why { font: 400 15px/22px var(--font-sans); color: var(--ink-muted); margin: 0; padding-top: var(--space-3); border-top: 1px solid var(--line); }
+.ds-coach__actions { display: flex; gap: var(--space-2); flex-wrap: wrap; }
+.ds-coach__typing { display: inline-flex; gap: 4px; padding: var(--space-3) var(--space-4); background: var(--coach-soft); border-radius: var(--radius-lg); }
+.ds-coach__typing i { width: 6px; height: 6px; border-radius: 50%; background: var(--coach); opacity: .5; }
+.ds-coach__typing i:nth-child(2) { opacity: .75; } .ds-coach__typing i:nth-child(3) { opacity: 1; }
+.ds-user-msg { align-self: flex-end; max-width: 300px; background: var(--surface-raised); border: 1px solid var(--line); border-radius: var(--radius-lg) var(--radius-sm) var(--radius-lg) var(--radius-lg); padding: var(--space-3) var(--space-4); font: 400 15px/22px var(--font-sans); }
+
+/* Input */
+.ds-field { display: flex; flex-direction: column; gap: var(--space-2); width: 280px; }
+.ds-field__label { font: 600 13px/18px var(--font-sans); color: var(--ink); }
+.ds-input { font: 400 16px/22px var(--font-sans); height: var(--size-control); padding: 0 var(--space-4); border-radius: var(--radius-sm); border: 1px solid var(--line-strong); background: var(--surface-sunken); color: var(--ink); box-sizing: border-box; width: 100%; }
+.ds-input::placeholder { color: var(--ink-subtle); }
+.ds-field--error .ds-input { border-color: var(--danger); }
+.ds-field__hint { font: 500 12px/16px var(--font-sans); color: var(--ink-muted); }
+.ds-field--error .ds-field__hint { color: var(--danger); }
+
+/* TabBar */
+.ds-tabbar { display: flex; justify-content: space-around; height: var(--size-tabbar); background: var(--surface-raised); border: 1px solid var(--line); border-radius: var(--radius-lg); box-shadow: var(--shadow-md); width: 360px; padding: 0 var(--space-2); box-sizing: border-box; }
+.ds-tab { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; background: none; border: 0; color: var(--ink-subtle); font: 600 11px/14px var(--font-sans); cursor: pointer; border-radius: var(--radius-md); }
+.ds-tab svg { width: var(--size-icon-lg); height: var(--size-icon-lg); }
+.ds-tab[aria-current="page"] { color: var(--ink); }
+.ds-tab[aria-current="page"] svg { color: var(--volt-mark); }
+
+/* DeviceRow */
+.ds-device { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-4); background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-md); width: 360px; box-sizing: border-box; }
+.ds-device__icon { flex: none; width: 40px; height: 40px; border-radius: var(--radius-sm); background: var(--surface-sunken); display: grid; place-items: center; color: var(--ink-muted); }
+.ds-device__icon svg { width: var(--size-icon); height: var(--size-icon); }
+.ds-device__body { flex: 1; min-width: 0; }
+.ds-device__name { font: 600 15px/20px var(--font-sans); }
+.ds-device__status { font: 500 12px/16px var(--font-sans); color: var(--ink-muted); }
+
+@media (prefers-reduced-motion: reduce) { .ds-btn { transition: none; } }
+
+/* RecordButton */
+.ds-record { font: 600 16px/20px var(--font-sans); display: inline-flex; align-items: center; gap: var(--space-2); height: var(--size-control); padding: 0 var(--space-6) 0 var(--space-5); border-radius: var(--radius-full); border: 0; background: var(--volt); color: var(--on-volt); box-shadow: var(--shadow-md); cursor: pointer; }
+.ds-record--compact { width: var(--size-control); padding: 0; justify-content: center; }
+.ds-record__dot { width: 12px; height: 12px; border-radius: var(--radius-full); background: var(--on-volt); }
+.ds-record:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+
+/* WorkoutSteps */
+.ds-steps { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; max-width: 380px; }
+.ds-step { display: grid; grid-template-columns: 20px 1fr auto; column-gap: var(--space-3); position: relative; padding-bottom: var(--space-4); }
+.ds-step:last-child { padding-bottom: 0; }
+.ds-step__rail { display: flex; flex-direction: column; align-items: center; }
+.ds-step__node { width: 12px; height: 12px; margin-top: 4px; border-radius: var(--radius-full); border: 2px solid var(--line-strong); background: var(--surface); box-sizing: border-box; }
+.ds-step__line { flex: 1; width: 2px; background: var(--line); margin-top: var(--space-1); }
+.ds-step:last-child .ds-step__line { display: none; }
+.ds-step--main .ds-step__node { border-color: var(--volt-mark); background: var(--volt-mark); }
+.ds-step__phase { font: 700 11px/14px var(--font-sans); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-muted); }
+.ds-step__title { font: 600 15px/22px var(--font-sans); color: var(--ink); margin: 2px 0; }
+.ds-step__detail { font: 400 13px/18px var(--font-sans); color: var(--ink-muted); }
+.ds-step__zone { font: 500 12px/16px var(--font-mono); display: inline-flex; align-items: center; gap: var(--space-1); color: var(--ink); align-self: start; padding: 2px var(--space-2); border-radius: var(--radius-sm); background: var(--surface-sunken); }
+.ds-step__zone i { width: 8px; height: 8px; border-radius: 2px; }
+.ds-steps__purpose { font: 400 15px/22px var(--font-sans); color: var(--ink-muted); margin: 0 0 var(--space-4); max-width: 380px; }
+
+/* CheckIn */
+.ds-checkin { display: flex; flex-direction: column; gap: var(--space-4); max-width: 380px; }
+.ds-checkin__q { font: 600 19px/26px var(--font-sans); margin: 0; }
+.ds-checkin__opts { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.ds-checkin__scale { display: grid; grid-template-columns: repeat(5, 1fr); gap: var(--space-2); }
+.ds-checkin__pt { font: 600 12px/16px var(--font-sans); display: flex; flex-direction: column; align-items: center; gap: var(--space-1); padding: var(--space-3) 0; border-radius: var(--radius-md); border: 1px solid var(--line-strong); background: transparent; color: var(--ink-muted); cursor: pointer; }
+.ds-checkin__pt b { font: 600 19px/24px var(--font-display); color: var(--ink); }
+.ds-checkin__pt[aria-pressed="true"] { background: var(--volt-soft); border-color: var(--volt-mark); color: var(--volt-ink); }
+.ds-checkin__pt[aria-pressed="true"] b { color: var(--volt-ink); }
+.ds-checkin__pt:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+
+/* LiveMetrics */
+.ds-live { background: var(--bg); color: var(--ink); width: 360px; padding: var(--space-5); box-sizing: border-box; display: flex; flex-direction: column; gap: var(--space-5); border-radius: var(--radius-lg); border: 1px solid var(--line); }
+.ds-live__interval { display: flex; justify-content: space-between; align-items: center; font: 600 13px/18px var(--font-sans); color: var(--ink-muted); }
+.ds-live__track { height: 6px; border-radius: var(--radius-full); background: var(--surface-sunken); overflow: hidden; }
+.ds-live__fill { height: 100%; background: var(--volt-mark); border-radius: var(--radius-full); }
+.ds-live__hero { text-align: center; }
+.ds-live__hero-value { font: 700 64px/68px var(--font-display); letter-spacing: -.03em; font-variant-numeric: tabular-nums; }
+.ds-live__hero-label { font: 600 13px/18px var(--font-sans); color: var(--ink-muted); }
+.ds-live__target { font: 500 12px/16px var(--font-mono); color: var(--success); margin-top: var(--space-1); }
+.ds-live__grid { display: grid; grid-template-columns: 1fr 1fr 1fr; text-align: center; border-top: 1px solid var(--line); padding-top: var(--space-4); }
+.ds-live__v { font: 600 22px/28px var(--font-display); font-variant-numeric: tabular-nums; }
+.ds-live__l { font: 500 12px/16px var(--font-sans); color: var(--ink-muted); }
+.ds-live__controls { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); }
+
+/* ExerciseCard */
+.ds-exercise { display: flex; flex-direction: column; width: 320px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg); overflow: hidden; }
+.ds-exercise__media { position: relative; aspect-ratio: 16 / 9; background: var(--surface-sunken); display: grid; place-items: center; color: var(--ink-subtle); }
+.ds-exercise__play { width: 48px; height: 48px; border-radius: var(--radius-full); background: var(--surface-raised); color: var(--ink); display: grid; place-items: center; box-shadow: var(--shadow-sm); }
+.ds-exercise__dur { position: absolute; right: var(--space-2); bottom: var(--space-2); font: 500 12px/16px var(--font-mono); background: var(--surface-raised); color: var(--ink); padding: 2px var(--space-2); border-radius: var(--radius-sm); }
+.ds-exercise__body { padding: var(--space-4); display: flex; flex-direction: column; gap: var(--space-3); }
+.ds-exercise__name { font: 600 17px/24px var(--font-sans); margin: 0; }
+.ds-exercise__sets { display: flex; gap: var(--space-2); }
+.ds-set { flex: 1; text-align: center; padding: var(--space-2) 0; border-radius: var(--radius-sm); background: var(--surface-sunken); font: 500 14px/20px var(--font-mono); color: var(--ink-muted); }
+.ds-set--done { background: var(--success-soft); color: var(--success); }
+.ds-set--current { background: var(--volt); color: var(--on-volt); }
+.ds-exercise__tip { font: 400 13px/18px var(--font-sans); color: var(--ink-muted); margin: 0; }

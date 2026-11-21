@@ -1,0 +1,15 @@
+Training UI — local preview
+
+1. Unzip the archive.
+2. In a terminal, inside the training-ui folder:  python3 -m http.server 8000
+3. Open http://localhost:8000 — a gallery of every component with a Dark/Light switch at the top.
+
+Double-clicking index.html (file://) also works, but frames won't auto-fit their height and guideline .md files may not open — the local server is better.
+
+Files for development:
+- tokens.json — the token source (dark/light colors, type, spacing, radii, shadows, sizes)
+- tokens.css — CSS variables generated from tokens.json; theme via <html data-theme="dark|light">
+- components/bundle.css — component classes (prefix ds-)
+- components/<Name>/preview.html — example markup; README.md — usage rules
+- README.md — system-wide rules
+Fonts (Onest, Unbounded, JetBrains Mono) load from Google Fonts — offline you'll get the system font.

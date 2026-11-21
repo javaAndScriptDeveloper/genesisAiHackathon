@@ -1,0 +1,62 @@
+<!-- @dsCard height=288 -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><link rel="stylesheet" href="../../tokens.css"><link rel="stylesheet" href="../bundle.css"><script>document.documentElement.dataset.theme=new URLSearchParams(location.search).get("theme")||"dark"</script>
+<title>Training UI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@700&display=swap">
+<style>
+  html, body { margin:0; height:100%; }
+  body { background:var(--bg); color:var(--ink); font-family:var(--font-sans); overflow:hidden; }
+  .cover { position:relative; width:960px; height:288px; overflow:hidden; }
+  .art { position:absolute; top:0; left:480px; width:480px; height:288px; overflow:hidden; }
+  .art svg { display:block; }
+  .volt { fill:var(--volt); }
+  .coach { fill:var(--coach); }
+  .deep { fill:var(--ink); }
+  .blk { rx:var(--radius-lg); }
+  .lane { fill:none; stroke:var(--bg); stroke-width:3; }
+  .lane-v { fill:none; stroke:var(--on-volt); stroke-width:3; }
+  .words { position:absolute; left:var(--space-8); bottom:var(--space-8); max-width:440px; }
+  .name { margin:0; font-family:var(--font-display); font-size:64px; line-height:.95; font-weight:700; letter-spacing:-.03em; color:var(--ink); }
+</style>
+</head>
+<body>
+<div class="cover">
+<div class="art" aria-hidden="true">
+<svg viewBox="0 0 480 288" width="480" height="288">
+<!--
+  blocks      volt 168×248 slab bled off the top (identity, largest) · coach 120×168 (the AI voice) · ink 176×240 bled off the right edge (deep) — ≈ 30% of 960×288
+  arrangement one tall volt slab with two satellites, bottoms aligned space-6 above the edge, space-4 gutters
+  pattern     literal motif "running track": stadium-lane arcs at a space-6 pitch, cut into the ink block in bg and three short lane arcs in on-volt on the slab — the app is about laps, lanes and pace
+  scales      sides in space-2 multiples; gutters space-4; lane pitch space-6; corners radius-lg
+-->
+<defs>
+  <clipPath id="inkclip"><rect x="320" y="24" width="176" height="240" rx="22"/></clipPath>
+  <clipPath id="voltclip"><rect x="0" y="-24" width="168" height="288" rx="22"/></clipPath>
+</defs>
+<rect class="volt blk" x="0" y="-24" width="168" height="288" rx="22"/>
+<rect class="coach blk" x="184" y="96" width="120" height="168" rx="22"/>
+<rect class="deep blk" x="320" y="24" width="176" height="240" rx="22"/>
+<g clip-path="url(#inkclip)">
+  <circle class="lane" cx="496" cy="264" r="48"/>
+  <circle class="lane" cx="496" cy="264" r="72"/>
+  <circle class="lane" cx="496" cy="264" r="96"/>
+  <circle class="lane" cx="496" cy="264" r="120"/>
+  <circle class="lane" cx="496" cy="264" r="144"/>
+  <circle class="lane" cx="496" cy="264" r="168"/>
+  <circle class="lane" cx="496" cy="264" r="192"/>
+</g>
+<g clip-path="url(#voltclip)">
+  <circle class="lane-v" cx="0" cy="264" r="72"/>
+  <circle class="lane-v" cx="0" cy="264" r="96"/>
+  <circle class="lane-v" cx="0" cy="264" r="120"/>
+</g>
+</svg>
+</div>
+<div class="words">
+<h1 class="name">Training<br>UI</h1>
+</div>
+</div>
+</body>
+</html>

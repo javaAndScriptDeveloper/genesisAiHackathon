@@ -1,0 +1,107 @@
+/* Training UI — generated from tokens.json */
+:root, [data-theme="dark"] {
+  --bg: #0e0f0c;
+  --surface: #171915;
+  --surface-raised: #20231d;
+  --surface-sunken: #0a0b09;
+  --line: #2e3229;
+  --line-strong: #6a7262;
+  --ink: #f2f4ee;
+  --ink-muted: #a9afa1;
+  --ink-subtle: #8a9081;
+  --volt: #c8f03c;
+  --volt-mark: #c8f03c;
+  --on-volt: #11140a;
+  --volt-soft: #283112;
+  --volt-ink: #d4f566;
+  --coach: #8fd3ff;
+  --coach-soft: #13283a;
+  --success: #5bd68a;
+  --success-soft: #132d1e;
+  --warning: #ffb547;
+  --warning-soft: #33260f;
+  --danger: #ff7a6e;
+  --danger-soft: #3a1714;
+  --zone-1: #8b94a7;
+  --zone-2: #5ab4ff;
+  --zone-3: #5bd68a;
+  --zone-4: #ffb547;
+  --zone-5: #ff6a5c;
+  --focus-ring: #c8f03c;
+  --scrim: rgba(5,6,4,0.72);
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.5);
+  --shadow-md: 0 8px 24px rgba(0,0,0,0.55);
+  --shadow-lg: 0 24px 48px rgba(0,0,0,0.6);
+}
+[data-theme="light"] {
+  --bg: #f4f5f0;
+  --surface: #ffffff;
+  --surface-raised: #ffffff;
+  --surface-sunken: #eceee7;
+  --line: #dde0d6;
+  --line-strong: #8a9080;
+  --ink: #14170f;
+  --ink-muted: #545a4c;
+  --ink-subtle: #646a5d;
+  --volt: #c8f03c;
+  --volt-mark: #5f8000;
+  --on-volt: #11140a;
+  --volt-soft: #eef8c8;
+  --volt-ink: #3f5500;
+  --coach: #0b65a8;
+  --coach-soft: #e3f1fc;
+  --success: #18733e;
+  --success-soft: #e2f5e9;
+  --warning: #9a5b00;
+  --warning-soft: #fdf0dc;
+  --danger: #c0322a;
+  --danger-soft: #fce6e4;
+  --zone-1: #6b7385;
+  --zone-2: #2b84cc;
+  --zone-3: #23934f;
+  --zone-4: #b86e00;
+  --zone-5: #d93a2e;
+  --focus-ring: #3f5500;
+  --scrim: rgba(20,23,15,0.48);
+  --shadow-sm: 0 1px 2px rgba(20,23,15,0.08);
+  --shadow-md: 0 6px 20px rgba(20,23,15,0.10);
+  --shadow-lg: 0 20px 40px rgba(20,23,15,0.16);
+}
+:root {
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 22px;
+  --radius-full: 999px;
+  --size-touch: 44px;
+  --size-control: 52px;
+  --size-icon-sm: 16px;
+  --size-icon: 20px;
+  --size-icon-lg: 24px;
+  --size-tabbar: 64px;
+  --font-display: Unbounded, "Arial Black", system-ui, sans-serif;
+  --font-sans: Onest, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+.display-xl { font-family: var(--font-display); font-size: 48px; line-height: 52px; font-weight: 700; letter-spacing: -0.02em; }
+.display-l { font-family: var(--font-display); font-size: 32px; line-height: 38px; font-weight: 600; letter-spacing: -0.01em; }
+.metric { font-family: var(--font-display); font-size: 28px; line-height: 32px; font-weight: 600; letter-spacing: -0.01em; }
+.h1 { font-family: var(--font-display); font-size: 24px; line-height: 30px; font-weight: 600; }
+.h2 { font-family: var(--font-sans); font-size: 19px; line-height: 26px; font-weight: 600; }
+.body-l { font-family: var(--font-sans); font-size: 17px; line-height: 26px; font-weight: 400; }
+.body { font-family: var(--font-sans); font-size: 15px; line-height: 22px; font-weight: 400; }
+.label { font-family: var(--font-sans); font-size: 13px; line-height: 18px; font-weight: 600; letter-spacing: 0.01em; }
+.caption { font-family: var(--font-sans); font-size: 12px; line-height: 16px; font-weight: 500; }
+.overline { font-family: var(--font-sans); font-size: 11px; line-height: 14px; font-weight: 700; letter-spacing: 0.08em; }
+.data { font-family: var(--font-mono); font-size: 14px; line-height: 20px; font-weight: 500; }
+.data-s { font-family: var(--font-mono); font-size: 12px; line-height: 16px; font-weight: 500; }
