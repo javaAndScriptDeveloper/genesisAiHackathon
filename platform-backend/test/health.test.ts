@@ -1,19 +1,20 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { PostgreSqlContainer, StartedPostgreSqlContainer } from "@testcontainers/postgresql";
-import pg from "pg";
+import type { Knex } from "knex";
 import { buildApp } from "../src/app.js";
+import { createDb } from "../src/db.js";
 
 describe("GET /api/health", () => {
   let container: StartedPostgreSqlContainer;
-  let pool: pg.Pool;
+  let pool: Knex;
 
   beforeAll(async () => {
     container = await new PostgreSqlContainer("postgres:17-alpine").start();
-    pool = new pg.Pool({ connectionString: container.getConnectionUri() });
+    pool = createDb(container.getConnectionUri());
   });
 
   afterAll(async () => {
-    await pool?.end();
+    await pool?.destroy();
     await container?.stop();
   });
 
@@ -25,8 +26,10 @@ describe("GET /api/health", () => {
   });
 
   it("returns 503 when the database is unreachable", async () => {
-    const app = buildApp({ query: () => Promise.reject(new Error("connection refused")) });
+    const broken = createDb("postgres://x:x@127.0.0.1:1/x");
+    const app = buildApp(broken);
     const res = await app.inject({ method: "GET", url: "/api/health" });
+    await broken.destroy();
     expect(res.statusCode).toBe(503);
     expect(res.json()).toEqual({ status: "error", db: false });
   });

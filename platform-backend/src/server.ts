@@ -1,5 +1,6 @@
-import pg from "pg";
 import { buildApp } from "./app.js";
+import { createDb, migrate } from "./db.js";
+import { seedTrainers } from "./trainers.js";
 
 const databaseUrl = process.env.DATABASE_URL;
 if (!databaseUrl) {
@@ -7,15 +8,15 @@ if (!databaseUrl) {
   process.exit(1);
 }
 
-const pool = new pg.Pool({ connectionString: databaseUrl });
-// An idle-client error (e.g. DB restart) must not crash the process.
-pool.on("error", (err) => console.error("pg pool error", err));
+const db = createDb(databaseUrl);
+await migrate(db);
+await seedTrainers(db);
 
-const app = buildApp(pool);
+const app = buildApp(db);
 
 const shutdown = async () => {
   await app.close();
-  await pool.end();
+  await db.destroy();
   process.exit(0);
 };
 process.on("SIGTERM", shutdown);
