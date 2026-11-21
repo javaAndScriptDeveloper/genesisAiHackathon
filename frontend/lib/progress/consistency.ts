@@ -1,6 +1,7 @@
-import { addDays, eachDay, weekStart } from "./dates";
+import { addDays, daysBetween, eachDay, weekStart } from "./dates";
 import { dayStatus } from "./days";
-import type { DayStatus, History, IsoDate } from "./types";
+import { isQualitySession } from "./days";
+import type { DayStatus, History, IsoDate, ProgressContext } from "./types";
 
 export interface Consistency {
 	score: number | null;
@@ -103,4 +104,95 @@ export function streakWeeks(h: History): number {
 	let streak = weekAllDone(h, current) ? 1 : 0;
 	for (let ws = addDays(current, -7); weekAllDone(h, ws); ws = addDays(ws, -7)) streak++;
 	return streak;
+}
+
+// ---- v2 ----
+
+const WEIGHTS_V2 = [0.4, 0.3, 0.2, 0.1] as const;
+const MAX_PAUSE_DAYS = 27; // 4 weeks: to − from ≤ 27
+
+const hasQuality = (h: History, date: IsoDate): boolean => h.sessions.some((s) => s.date === date && isQualitySession(s));
+
+/** Rest day is credited when the nearest planned training day of the same week was quality-completed. */
+export function restDayCredited(h: History, date: IsoDate): boolean {
+	const entry = h.plan.find((p) => p.date === date);
+	if (!entry || entry.type !== "rest") return false;
+	const ws = weekStart(date);
+	let best: IsoDate | null = null;
+	let bestDist = Infinity;
+	for (const d of eachDay(ws, addDays(ws, 6))) {
+		if (h.plan.find((p) => p.date === d)?.type !== "workout") continue;
+		const dist = Math.abs(daysBetween(date, d));
+		// tie → either; prefer a quality-completed one
+		if (dist < bestDist || (dist === bestDist && best !== null && !hasQuality(h, best) && hasQuality(h, d))) {
+			best = d;
+			bestDist = dist;
+		}
+	}
+	return best !== null && hasQuality(h, best);
+}
+
+/** C_week in 0..100, or null when the week has no plan entries. */
+export function weekScore(h: History, ws: IsoDate): number | null {
+	let planned = 0;
+	let good = 0;
+	for (const d of eachDay(ws, addDays(ws, 6))) {
+		const entry = h.plan.find((p) => p.date === d);
+		if (!entry) continue;
+		planned++;
+		if (entry.type === "workout" ? hasQuality(h, d) : restDayCredited(h, d)) good++;
+	}
+	return planned === 0 ? null : Math.min(100, Math.round((good / planned) * 100));
+}
+
+export function isPausedWeek(ctx: ProgressContext, ws: IsoDate): boolean {
+	const end = addDays(ws, 6);
+	return ctx.pauses.some((p) => {
+		const len = daysBetween(p.from, p.to);
+		return len >= 0 && len <= MAX_PAUSE_DAYS && p.from <= end && p.to >= ws;
+	});
+}
+
+function earliestActivity(h: History): IsoDate | null {
+	const dates = [...h.plan.map((p) => p.date), ...h.sessions.map((s) => s.date)];
+	return dates.reduce<IsoDate | null>((min, d) => (min === null || d < min ? d : min), null);
+}
+
+export function consistencyV2(
+	h: History,
+	ctx: ProgressContext,
+): { score: number | null; weeks: { weekStart: IsoDate; score: number; weight: number }[] } {
+	const earliest = earliestActivity(h);
+	if (earliest === null) return { score: null, weeks: [] };
+	const found: { weekStart: IsoDate; score: number }[] = [];
+	for (let ws = addDays(weekStart(h.today), -7); ws >= weekStart(earliest) && found.length < WEIGHTS_V2.length; ws = addDays(ws, -7)) {
+		if (isPausedWeek(ctx, ws)) continue;
+		const s = weekScore(h, ws);
+		if (s !== null) found.push({ weekStart: ws, score: s });
+	}
+	if (found.length === 0) return { score: null, weeks: [] };
+	const sum = WEIGHTS_V2.slice(0, found.length).reduce((a, b) => a + b, 0);
+	const weeks = found.map((w, i) => ({ ...w, weight: Math.round(((WEIGHTS_V2[i] ?? 0) / sum) * 1e6) / 1e6 }));
+	const score = Math.round(weeks.reduce((a, w) => a + w.score * w.weight, 0));
+	return { score, weeks };
+}
+
+export function weekCredited(h: History, ctx: ProgressContext, ws: IsoDate): boolean {
+	const goal = Math.min(5, Math.max(2, ctx.weeklyGoal));
+	const end = addDays(ws, 6);
+	return h.sessions.filter((s) => s.date >= ws && s.date <= end && isQualitySession(s)).length >= goal;
+}
+
+export function streakV2(h: History, ctx: ProgressContext): { current: number; best: number } {
+	const earliest = earliestActivity(h);
+	if (earliest === null) return { current: 0, best: 0 };
+	const currentWs = weekStart(h.today);
+	let current = 0;
+	let best = 0;
+	for (let ws = weekStart(earliest); ws <= currentWs; ws = addDays(ws, 7)) {
+		if (weekCredited(h, ctx, ws)) current++;
+		else if (ws < currentWs && !isPausedWeek(ctx, ws)) current = 0;
+		best = Math.max(best, current);
+	}
+	return { current, best };
 }

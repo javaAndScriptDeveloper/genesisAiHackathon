@@ -45,3 +45,11 @@ export interface History {
 	device: DeviceDemo | null;
 }
 export type DayStatus = "completed" | "adapted" | "missed" | "rest" | "planned" | "none";
+export interface Pause {
+	from: IsoDate;
+	to: IsoDate;
+}
+export interface ProgressContext {
+	weeklyGoal: number; // 2..5
+	pauses: Pause[];
+}

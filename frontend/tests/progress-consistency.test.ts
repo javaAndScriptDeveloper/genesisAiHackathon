@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { consistencyScore, isRestKept, streakWeeks, weeklyGoal } from "@/lib/progress/consistency";
+import { consistencyScore, consistencyV2, isPausedWeek, isRestKept, restDayCredited, streakV2, streakWeeks, weekCredited, weeklyGoal, weekScore } from "@/lib/progress/consistency";
 import { addDays, weekday } from "@/lib/progress/dates";
-import type { History, IsoDate, PlannedDay, WorkoutSession } from "@/lib/progress/types";
+import type { History, IsoDate, PlannedDay, ProgressContext, WorkoutSession } from "@/lib/progress/types";
 
 function session(date: IsoDate, o: Partial<WorkoutSession> = {}): WorkoutSession {
 	return {
@@ -97,5 +97,128 @@ describe("consistency", () => {
 	it("streak: виконаний поточний тиждень додає 1", () => {
 		const done = build({ fullWeeks: 2, currentDone: ["2026-11-16", "2026-11-18", "2026-11-20"], today: "2026-11-21" });
 		expect(streakWeeks(done)).toBe(3);
+	});
+});
+
+// ---- v2 ----
+const W0 = "2026-11-16"; // current week (Monday); today is Thursday 2026-11-19
+const wk = (ago: number): IsoDate => addDays(W0, -7 * ago);
+interface WeekSpec {
+	ago: number;
+	n: number; // workout days planned (Mon..)
+	k: number; // quality sessions done (first k)
+	rest?: number; // extra rest days planned after workouts
+}
+function hist(specs: WeekSpec[]): History {
+	const plan: PlannedDay[] = [];
+	const sessions: WorkoutSession[] = [];
+	for (const s of specs) {
+		const ws = wk(s.ago);
+		for (let i = 0; i < s.n; i++) {
+			plan.push({ date: addDays(ws, i), type: "workout" });
+			if (i < s.k) sessions.push(session(addDays(ws, i)));
+		}
+		for (let i = 0; i < (s.rest ?? 0); i++) plan.push({ date: addDays(ws, s.n + i), type: "rest" });
+	}
+	return { today: "2026-11-19", exercises: [], plan, sessions, body: [], device: null };
+}
+const ctx = (o: Partial<ProgressContext> = {}): ProgressContext => ({ weeklyGoal: 3, pauses: [], ...o });
+
+describe("weekScore (C_week)", () => {
+	it("is 0 with plan 3+4 and nothing done", () => {
+		expect(weekScore(hist([{ ago: 1, n: 3, k: 0, rest: 4 }]), wk(1))).toBe(0);
+	});
+	it("is 100 with 3 quality sessions credits rest days", () => {
+		expect(weekScore(hist([{ ago: 1, n: 3, k: 3, rest: 4 }]), wk(1))).toBe(100);
+	});
+	it("is null without plan", () => {
+		expect(weekScore(hist([]), wk(1))).toBeNull();
+	});
+	it("does not credit rest days in a week without training days", () => {
+		const h = hist([{ ago: 1, n: 0, k: 0, rest: 3 }]);
+		expect(restDayCredited(h, wk(1))).toBe(false);
+		expect(weekScore(h, wk(1))).toBe(0);
+	});
+	it("credits rest only when nearest training day is quality", () => {
+		const h = hist([{ ago: 1, n: 3, k: 1, rest: 1 }]); // Mon done, Tue,Wed not; rest Thu next to Wed
+		expect(restDayCredited(h, addDays(wk(1), 3))).toBe(false);
+		const h2 = hist([{ ago: 1, n: 1, k: 1, rest: 2 }]);
+		expect(restDayCredited(h2, addDays(wk(1), 1))).toBe(true);
+	});
+});
+
+describe("consistencyV2", () => {
+	const weeks = [
+		{ ago: 1, n: 4, k: 3 }, // 75
+		{ ago: 2, n: 5, k: 4 }, // 80
+		{ ago: 3, n: 3, k: 3 }, // 100
+		{ ago: 4, n: 5, k: 4 }, // 80
+	];
+	it("weighted 75/80/100/80 gives 82 and excludes the current week", () => {
+		const h = hist([...weeks, { ago: 0, n: 3, k: 0 }]);
+		const r = consistencyV2(h, ctx());
+		expect(r.score).toBe(82);
+		expect(r.weeks.map((w) => w.weight)).toEqual([0.4, 0.3, 0.2, 0.1]);
+		expect(r.weeks[0]?.weekStart).toBe(wk(1));
+	});
+	it("renormalises with fewer weeks", () => {
+		const r = consistencyV2(hist([{ ago: 1, n: 4, k: 3 }, { ago: 2, n: 5, k: 4 }]), ctx());
+		expect(r.score).toBe(77); // (0.4*75+0.3*80)/0.7
+		expect(r.weeks[0]?.weight).toBeCloseTo(4 / 7);
+	});
+	it("skips a paused week and takes the next older one", () => {
+		const h = hist([...weeks, { ago: 5, n: 3, k: 0 }]);
+		const c = ctx({ pauses: [{ from: wk(2), to: addDays(wk(2), 6) }] });
+		const r = consistencyV2(h, c);
+		expect(r.weeks.map((w) => w.weekStart)).toEqual([wk(1), wk(3), wk(4), wk(5)]);
+	});
+	it("null without usable weeks", () => {
+		expect(consistencyV2(hist([{ ago: 0, n: 3, k: 3 }]), ctx()).score).toBeNull();
+	});
+});
+
+describe("isPausedWeek", () => {
+	it("any day in a valid pause counts; pause over 4 weeks is ignored", () => {
+		expect(isPausedWeek(ctx({ pauses: [{ from: addDays(wk(2), 6), to: wk(1) }] }), wk(2))).toBe(true);
+		expect(isPausedWeek(ctx({ pauses: [{ from: wk(5), to: addDays(wk(1), 6) }] }), wk(3))).toBe(false); // 34 days
+		expect(isPausedWeek(ctx({ pauses: [{ from: wk(4), to: addDays(wk(1), 6) }] }), wk(3))).toBe(true); // 27 days, valid
+	});
+});
+
+describe("weekCredited and streakV2", () => {
+	it("needs quality sessions >= goal (clamped 2..5)", () => {
+		const h = hist([{ ago: 1, n: 3, k: 2 }]);
+		expect(weekCredited(h, ctx({ weeklyGoal: 2 }), wk(1))).toBe(true);
+		expect(weekCredited(h, ctx({ weeklyGoal: 3 }), wk(1))).toBe(false);
+		expect(weekCredited(h, ctx({ weeklyGoal: 0 }), wk(1))).toBe(true);
+		expect(weekCredited(h, ctx({ weeklyGoal: 9 }), wk(1))).toBe(false);
+	});
+	it("3 credited + pause + 1 credited = 4", () => {
+		const h = hist([
+			{ ago: 5, n: 3, k: 3 }, { ago: 4, n: 3, k: 3 }, { ago: 3, n: 3, k: 3 },
+			{ ago: 2, n: 3, k: 0 }, { ago: 1, n: 3, k: 3 },
+		]);
+		const c = ctx({ pauses: [{ from: wk(2), to: addDays(wk(2), 6) }] });
+		expect(streakV2(h, c)).toEqual({ current: 4, best: 4 });
+	});
+	it("uncredited week without pause resets to 0", () => {
+		const h = hist([{ ago: 2, n: 3, k: 3 }, { ago: 1, n: 3, k: 0 }]);
+		expect(streakV2(h, ctx()).current).toBe(0);
+		expect(streakV2(h, ctx()).best).toBe(1);
+	});
+	it("unfinished current week never resets, adds when credited", () => {
+		const base = [{ ago: 2, n: 3, k: 3 }, { ago: 1, n: 3, k: 3 }];
+		expect(streakV2(hist([...base, { ago: 0, n: 3, k: 1 }]), ctx()).current).toBe(2);
+		expect(streakV2(hist([...base, { ago: 0, n: 3, k: 3 }]), ctx()).current).toBe(3);
+	});
+	it("best is the maximum over history", () => {
+		const h = hist([
+			{ ago: 5, n: 3, k: 3 }, { ago: 4, n: 3, k: 3 }, { ago: 3, n: 3, k: 3 },
+			{ ago: 2, n: 3, k: 0 }, { ago: 1, n: 3, k: 3 },
+		]);
+		expect(streakV2(h, ctx())).toEqual({ current: 1, best: 3 });
+	});
+	it("empty history gives zeros", () => {
+		expect(streakV2(hist([]), ctx())).toEqual({ current: 0, best: 0 });
 	});
 });
