@@ -40,7 +40,7 @@ export function Devices() {
 									<span>{p.description}</span>
 									<span>{linked ? t("fit.devices.linkedDemo") : t("fit.devices.notLinked")}</span>
 								</span>
-								<Button size="sm" variant={linked ? "secondary" : "primary"} onClick={() => { dispatch({ type: "device", id: p.id, connected: !linked }); toast.show(linked ? t("fit.devices.disconnected", { name: p.name }) : t("fit.devices.connected", { name: p.name }), linked ? "info" : "success"); }}>
+								<Button size="sm" variant="secondary" onClick={() => { dispatch({ type: "device", id: p.id, connected: !linked }); toast.show(linked ? t("fit.devices.disconnected", { name: p.name }) : t("fit.devices.connected", { name: p.name }), linked ? "info" : "success"); }}>
 									{linked ? t("fit.devices.disconnect") : t("fit.devices.connect")}
 								</Button>
 							</li>

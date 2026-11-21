@@ -3,6 +3,7 @@
 import { ArrowLeft02Icon } from "@hugeicons/core-free-icons";
 import { useRouter } from "next/navigation";
 import type { ReactNode } from "react";
+import { ThemeToggle } from "@/components/features/ThemeToggle/ThemeToggle";
 import { IconButton } from "@/components/ui";
 import { useT } from "@/lib/i18n/I18nProvider";
 import styles from "./ScreenHeader.module.scss";
@@ -25,7 +26,10 @@ export function ScreenHeader({ title, subtitle, back, actions }: ScreenHeaderPro
 				<h1 className={styles.title}>{title}</h1>
 				{subtitle && <p className={styles.subtitle}>{subtitle}</p>}
 			</div>
-			{actions && <div className={styles.actions}>{actions}</div>}
+			<div className={styles.actions}>
+				{actions}
+				<ThemeToggle />
+			</div>
 		</header>
 	);
 }

@@ -38,6 +38,7 @@
     "coach": {
       "title": "Personal Coach",
       "subtitle": "Ask, adjust, stay on track",
+      "trainerSubtitle": "{style} · your AI coach",
       "greeting": "Hi {name}! I know your plan, your history and how this week is going. Tell me what's up and I'll adjust your training.",
       "suggestions": "Suggested questions",
       "placeholder": "Message your coach",
@@ -310,6 +311,108 @@
       "removeConfirm": "Remove",
       "photosLockedTitle": "Unlimited photo check-ins",
       "photosLockedBody": "Free includes {n} photos. Premium keeps your whole journey."
+    },
+    "quiz": {
+      "skip": "Skip for now",
+      "nameLabel": "Your name",
+      "errors": {
+        "goal": "Pick a goal or describe your own.",
+        "trainer": "Pick a coach to continue."
+      },
+      "hello": {
+        "cta": "Let's get acquainted",
+        "plan": "A plan built around your goal, schedule and gear",
+        "coach": "An AI coach who adapts after every workout",
+        "honest": "No sign-up, takes about a minute"
+      },
+      "gender": {
+        "male": "Male",
+        "female": "Female",
+        "non-binary": "Other"
+      },
+      "goal": {
+        "typeLabel": "Or describe it in your own words",
+        "placeholder": "e.g. I want to lose 5 kg and feel stronger"
+      },
+      "fighter": {
+        "loading": "Loading coaches",
+        "intensity": "Intensity {n} of 3",
+        "errorTitle": "Coaches didn't load",
+        "errorText": "Check your connection and try again.",
+        "retry": "Try again",
+        "emptyTitle": "No coaches yet",
+        "emptyText": "Spotty will coach you for now."
+      },
+      "sync": {
+        "cta": "Build my plan"
+      },
+      "ready": {
+        "cta": "Start week one",
+        "coach": "{trainer} will coach you in a {style} style.",
+        "why": "Why this plan",
+        "whyGoal": "Built for your goal: {hint}",
+        "whyDays": "{n} sessions a week, {min} minutes each, with recovery days in between.",
+        "whyWatch": "{device} will feed heart rate and recovery into the plan.",
+        "whyLevel": "Exercises matched to your {level} level."
+      },
+      "steps": {
+        "name": {
+          "title": "What should I call you?"
+        },
+        "gender": {
+          "title": "Tell me a bit about you"
+        },
+        "goal": {
+          "title": "What's your goal, {name}?"
+        },
+        "body": {
+          "title": "Your starting point"
+        },
+        "level": {
+          "title": "Your level"
+        },
+        "days": {
+          "title": "How often can you train?"
+        },
+        "fighter": {
+          "title": "Choose your coach"
+        },
+        "sync": {
+          "title": "Sync your watch (optional)"
+        },
+        "ready": {
+          "title": "Your plan is ready"
+        }
+      },
+      "spotty": {
+        "hello": "Hi, I'm Spotty, your running buddy. Every finish line starts with one easy step. I'll build a plan that fits your life and run every kilometre of it with you.",
+        "name": "First things first. Let's get to know each other.",
+        "nameKnown": "{name}. Good name for a finisher. Ready when you are.",
+        "gender": "Nice to meet you, {name}. This helps me tune load and recovery.",
+        "goal": "Now the big one. Pick a goal, or tell me in your own words, {name}.",
+        "thinking": "Hmm, let me think about that…",
+        "goalGot": "Got it: {goal}. We'll get there step by step.",
+        "goalUnsure": "I didn't quite catch that. Pick the closest goal above?",
+        "body": "Just numbers to set your starting weights. No judgement here, only progress.",
+        "level": {
+          "beginner": "Everyone starts somewhere. I'll teach every move step by step.",
+          "intermediate": "Solid base. Time to add structure and progress.",
+          "advanced": "A seasoned athlete. I'll keep the challenge real."
+        },
+        "days": "{n} days a week, {min} minutes each. Consistency beats intensity, and that's very doable.",
+        "daysMany": "{n} days a week. Strong commitment. I'll make sure you still recover.",
+        "fighter": "Now the fun part: choose your coach. Your coach sets the tone of every workout.",
+        "fighterPicked": "Good pick. {trainer} and I make a strong team.",
+        "sync": "Last step. Connect your watch so I can see heart rate and recovery.",
+        "ready": "{name}, your plan is ready. Week one starts now. Easy pace, steady progress."
+      }
+    },
+    "theme": {
+      "title": "Appearance",
+      "dark": "Dark",
+      "light": "Light",
+      "toLight": "Switch to light theme",
+      "toDark": "Switch to dark theme"
     },
     "notifications": {
       "title": "Notifications",

@@ -1,7 +1,14 @@
 @use "partials/corners";
 @use "partials/mixins";
+@use "partials/training";
 
 .stage {
+	@include training.dark;
+
+	&[data-theme="light"] {
+		@include training.light;
+	}
+
 	display: grid;
 	place-items: center;
 	min-height: 100dvh;
@@ -13,17 +20,8 @@
 	}
 }
 
-// Fitness theme: red accent scoped to the device, so the rest of the kit keeps its own look.
+// Fitness app theme: Training UI design system (training-ui/), dark. Scoped to the device so /ui-kit keeps the base kit look.
 .device {
-	--color-accent: #e5242e;
-	--color-accentHover: #c71a24;
-	--color-accentSoft: #fdecee;
-	--color-accentText: #b4141d;
-	--color-primary: #e5242e;
-	--color-primaryHover: #c71a24;
-	--color-focusRing: rgba(229, 36, 46, 0.5);
-	--color-canvas: #f5f5f6;
-	--color-surfaceSubtle: #f9f9fa;
 
 	position: relative;
 	width: 41.4rem;

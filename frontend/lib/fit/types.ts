@@ -26,6 +26,10 @@ export interface Profile {
 	limitations: Limitation[];
 	limitationNote: string;
 	wearable: WearableChoice;
+	/** AI trainer picked in the onboarding quiz ("Choose your fighter"). */
+	trainerId?: string;
+	/** The user's own words (typed or spoken) for their goal. */
+	goalText?: string;
 }
 
 export interface Exercise {

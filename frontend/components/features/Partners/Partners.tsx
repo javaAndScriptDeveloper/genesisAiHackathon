@@ -54,7 +54,7 @@ export function Partners() {
 										</span>
 										{status && <Badge tone={status === "accepted" ? "success" : "warning"}>{t(`fit.partners.status.${status}`)}</Badge>}
 									</div>
-									{!status && <Button size="sm" onClick={() => invite(p.id, p.name)}>{t("fit.partners.invite")}</Button>}
+									{!status && <Button size="sm" variant="secondary" onClick={() => invite(p.id, p.name)}>{t("fit.partners.invite")}</Button>}
 									{status === "accepted" && next && (
 										premium ? (
 											<Button size="sm" variant={joint ? "secondary" : "primary"} onClick={() => { dispatch({ type: "joint-workout", workoutId: next.id, partnerId: joint ? null : p.id }); toast.show(joint ? t("fit.partners.unscheduled") : t("fit.partners.scheduled", { name: p.name, day: formatDay(next.date) }), "success"); }}>

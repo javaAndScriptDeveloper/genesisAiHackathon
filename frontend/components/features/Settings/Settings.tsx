@@ -3,9 +3,10 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { ScreenHeader } from "@/components/features/ScreenHeader/ScreenHeader";
-import { Button, Card, Input, Select, Sheet, Switch, useToast } from "@/components/ui";
+import { Button, Card, Input, SegmentedControl, Select, Sheet, Switch, useToast } from "@/components/ui";
 import { NOTIFICATION_LABELS } from "@/lib/fit/notifications";
 import { useFit } from "@/lib/fit/store/FitProvider";
+import { useTheme, type Theme } from "@/lib/hooks/useTheme";
 import type { NotificationKind } from "@/lib/fit/types";
 import { LOCALES, LOCALE_LABELS, isLocale } from "@/lib/i18n/config";
 import { useI18n } from "@/lib/i18n/I18nProvider";
@@ -19,6 +20,7 @@ export function Settings() {
 	const toast = useToast();
 	const { state, dispatch, today } = useFit();
 	const [confirm, setConfirm] = useState<Confirm>(null);
+	const { theme, setTheme } = useTheme();
 	const s = state.notificationSettings;
 	const kinds = Object.keys(NOTIFICATION_LABELS) as NotificationKind[];
 
@@ -40,6 +42,11 @@ export function Settings() {
 					<h2 className={kit.h2}>{t("fit.settings.language")}</h2>
 					<Select label={t("fit.settings.language")} value={locale} options={LOCALES.map((l) => ({ value: l, label: LOCALE_LABELS[l] }))} onChange={(v) => isLocale(v) && setLocale(v)} />
 					<p className={kit.note}>{t("fit.settings.languageNote")}</p>
+				</Card>
+
+				<Card className={kit.stack}>
+					<h2 className={kit.h2}>{t("fit.theme.title")}</h2>
+					<SegmentedControl<Theme> label={t("fit.theme.title")} value={theme} onChange={setTheme} options={[{ id: "dark", label: t("fit.theme.dark") }, { id: "light", label: t("fit.theme.light") }]} />
 				</Card>
 
 				<Card className={kit.stack}>

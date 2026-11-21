@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { ScreenHeader } from "@/components/features/ScreenHeader/ScreenHeader";
 import { Button, Icon, IconButton, useToast } from "@/components/ui";
+import { useTrainers } from "@/lib/api/onboarding";
 import { applyAdapt, replaceUnavailable } from "@/lib/fit/adapt";
 import { coachReply, isSafetyConcern, SUGGESTED_PROMPTS, type CoachContext } from "@/lib/fit/coach";
 import { listenOnce, speechSupported } from "@/lib/fit/speech";
@@ -23,6 +24,7 @@ export function Coach() {
 	const router = useRouter();
 	const toast = useToast();
 	const { state, dispatch, today } = useFit();
+	const trainer = useTrainers().data?.find((tr) => tr.id === state.profile?.trainerId);
 	const stats = useFitStats();
 	const [text, setText] = useState("");
 	const [pending, setPending] = useState(false);
@@ -124,7 +126,7 @@ export function Coach() {
 
 	return (
 		<div className={styles.root}>
-			<ScreenHeader title={t("fit.coach.title")} subtitle={t("fit.coach.subtitle")} />
+			<ScreenHeader title={trainer ? trainer.name : t("fit.coach.title")} subtitle={trainer ? t("fit.coach.trainerSubtitle", { style: trainer.style }) : t("fit.coach.subtitle")} />
 			<div className={styles.thread} role="log" aria-live="polite" aria-label={t("fit.coach.title")}>
 				<div className={clsx(styles.bubble, styles.coach)}>
 					<p>{t("fit.coach.greeting", { name: profile.name })}</p>

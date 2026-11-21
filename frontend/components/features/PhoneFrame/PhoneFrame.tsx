@@ -1,10 +1,12 @@
 "use client";
 
 import { useEffect, useState, type ReactNode } from "react";
+import { useTheme } from "@/lib/hooks/useTheme";
 import styles from "./PhoneFrame.module.scss";
 
 // Desktop: a centered iPhone-style device. Real phones (< 576px wide): the frame disappears and the app fills the screen.
 export function PhoneFrame({ children, hideStatusBar = false }: { children: ReactNode; hideStatusBar?: boolean }) {
+	const { theme } = useTheme();
 	const [clock, setClock] = useState("9:41");
 	useEffect(() => {
 		const tick = () => setClock(new Date().toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: false }));
@@ -14,7 +16,7 @@ export function PhoneFrame({ children, hideStatusBar = false }: { children: Reac
 	}, []);
 
 	return (
-		<div className={styles.stage}>
+		<div className={styles.stage} data-theme={theme}>
 			<div className={styles.device}>
 				<div className={styles.screen}>
 					{!hideStatusBar && (

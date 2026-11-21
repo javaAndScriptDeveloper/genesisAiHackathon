@@ -8,7 +8,7 @@ import { z } from "zod";
 import { OptionCard } from "@/components/features/OptionCard/OptionCard";
 import { Badge, Button, Card, Input, ProgressBar, Switch, Textarea, IconButton } from "@/components/ui";
 import { ArrowLeft02Icon } from "@hugeicons/core-free-icons";
-import { toISO, WEEKDAYS } from "@/lib/fit/dates";
+import { WEEKDAYS } from "@/lib/fit/dates";
 import { DAYS, DURATIONS, EQUIPMENT, EXPERIENCES, GENDERS, GOALS, LIMITATIONS, LOCATIONS, WEARABLES } from "@/lib/fit/options";
 import { generatePlan } from "@/lib/fit/plan";
 import { useFit } from "@/lib/fit/store/FitProvider";
@@ -76,7 +76,8 @@ export function Onboarding({ mode }: { mode: "create" | "edit" }) {
 	const submit = () => {
 		const parsed = schema.safeParse(getValues());
 		if (!parsed.success) return;
-		const profile: Profile = parsed.data;
+		// Keep quiz-only fields (trainer, goal text) that this form does not edit.
+		const profile: Profile = { ...existing, ...parsed.data };
 		if (mode === "create") dispatch({ type: "complete-onboarding", profile, demoHistory, today, now: new Date().toISOString() });
 		else dispatch({ type: "update-profile", profile, today });
 		router.replace(mode === "create" ? "/today" : "/profile");
@@ -85,7 +86,7 @@ export function Onboarding({ mode }: { mode: "create" | "edit" }) {
 	const preview = useMemo(() => {
 		if (!last) return [];
 		const parsed = schema.safeParse(values);
-		return parsed.success ? generatePlan(parsed.data, today, 1).concat(generatePlan(parsed.data, toISO(new Date(Date.now() + 7 * 86_400_000)), 1)).slice(0, parsed.data.daysPerWeek) : [];
+		return parsed.success ? generatePlan(parsed.data, today, 2).slice(0, parsed.data.daysPerWeek) : [];
 	}, [last, schema, values, today]);
 
 	const toggle = <T extends string>(list: T[], item: T): T[] => (list.includes(item) ? list.filter((i) => i !== item) : [...list, item]);

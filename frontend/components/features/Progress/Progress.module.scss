@@ -98,12 +98,12 @@
 
 	&[data-state="done"] {
 		background: var(--color-success);
-		color: #fff;
+		color: var(--color-onSuccess);
 	}
 
 	&[data-state="partial"] {
-		background: #86efac;
-		color: #14532d;
+		background: var(--color-successMuted);
+		color: var(--color-onSuccessMuted);
 	}
 
 	&[data-state="planned"] {
@@ -155,7 +155,7 @@
 	}
 
 	&[data-state="partial"] {
-		background: #86efac;
+		background: var(--color-successMuted);
 	}
 
 	&[data-state="planned"] {
