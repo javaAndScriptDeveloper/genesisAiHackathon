@@ -11,6 +11,8 @@ import type { NotificationKind } from "@/lib/fit/types";
 import { LOCALES, LOCALE_LABELS, isLocale } from "@/lib/i18n/config";
 import { useI18n } from "@/lib/i18n/I18nProvider";
 import kit from "../ScreenKit/ScreenKit.module.scss";
+import { GoalCard } from "./GoalCard";
+import { TrainerCard } from "./TrainerCard";
 
 type Confirm = null | "demo" | "reset";
 
@@ -37,6 +39,9 @@ export function Settings() {
 		<div className={kit.page}>
 			<ScreenHeader title={t("fit.settings.title")} back />
 			<div className={kit.content}>
+				<GoalCard />
+				<TrainerCard />
+
 				<Card className={kit.stack}>
 					<h2 className={`${kit.h2} ${kit.heading}`}><Icon icon={Globe02Icon} size={20} />{t("fit.settings.language")}</h2>
 					<Select label={t("fit.settings.languageLabel")} value={locale} options={LOCALES.map((l) => ({ value: l, label: LOCALE_LABELS[l] }))} onChange={(v) => isLocale(v) && setLocale(v)} />

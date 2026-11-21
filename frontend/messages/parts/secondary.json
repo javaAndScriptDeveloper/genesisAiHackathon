@@ -18,7 +18,7 @@
       }
     },
     "settings": {
-      "title": "Settings", "language": "Language", "languageLabel": "Show the app in", "languageNote": "More languages are on the way. Anything not translated yet appears in English.",
+      "title": "Settings", "goalTitle": "Your goal", "goalLabel": "Describe your goal", "goalHint": "For example: run a half marathon by June.", "goalSave": "Save goal", "goalSaved": "Goal updated and plan refreshed", "goalKept": "Saved your wording, but it didn't match a preset, so your plan is unchanged.", "trainerTitle": "Your trainer", "trainerNote": "Pick who coaches you.", "trainerLoadFailed": "Couldn't load trainers. Try again later.", "trainerSet": "Trainer set to {name}", "language": "Language", "languageLabel": "Show the app in", "languageNote": "More languages are on the way. Anything not translated yet appears in English.",
       "reminders": "Reminders", "remindersNote": "Fewer, kinder notifications. You choose which ones you want.", "reminderTime": "Workout reminder time", "reminderTimeHint": "When your daily workout nudge arrives on training days.", "setTime": "Set time",
       "push": "Browser notifications", "pushNote": "Shows system notifications while this app is open in a browser. Real push needs a server and isn't set up in this demo.",
       "pushUnsupported": "This browser doesn't support notifications", "pushDenied": "Notification permission was not granted", "pushOn": "Browser notifications on", "pushOff": "Browser notifications off",

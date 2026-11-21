@@ -1,6 +1,8 @@
 import "server-only";
 import { GoogleGenAI } from "@google/genai";
 import { AiConfigError } from "./errors";
+import { parseGoalReply } from "@/lib/fit/goalParse";
+import type { Goal } from "@/lib/fit/types";
 import type { AskOptions } from "./claude";
 
 function client() {
@@ -37,4 +39,15 @@ export function streamGemini({ prompt, system, model: m }: AskOptions): Readable
 			}
 		},
 	});
+}
+
+const GOAL_SYSTEM = `Map the user's fitness goal to exactly one preset id: lose-fat, build-muscle, get-stronger, stay-fit, endurance. Reply only with JSON like {"goal":"build-muscle"}. Running, cycling, swimming or stamina goals are "endurance". General health or staying active is "stay-fit".`;
+
+export async function classifyGoal(text: string): Promise<Goal | null> {
+	const res = await client().models.generateContent({
+		model: model(),
+		contents: text,
+		config: { systemInstruction: GOAL_SYSTEM, responseMimeType: "application/json" },
+	});
+	return parseGoalReply(res.text ?? "");
 }

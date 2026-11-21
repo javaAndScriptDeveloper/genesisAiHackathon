@@ -1,3 +1,3 @@
 export { askClaude, streamClaude, type AskOptions } from "./claude";
-export { askGemini, streamGemini } from "./gemini";
+export { askGemini, classifyGoal, streamGemini } from "./gemini";
 export { AiConfigError } from "./errors";
