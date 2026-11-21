@@ -27,6 +27,24 @@
 		}
 	}
 
+	// Streak: the card is a link, the share button sits on top of its corner (a button can't live inside a link).
+	.streak {
+		position: relative;
+		display: flex;
+		min-width: 0;
+
+		.card {
+			flex: 1;
+			padding-right: calc(var(--hit-target) + var(--space-1));
+		}
+	}
+
+	.share {
+		position: absolute;
+		top: var(--space-1);
+		right: var(--space-1);
+	}
+
 	.first {
 		grid-column: 1 / -1;
 		flex-direction: row;
@@ -99,10 +117,11 @@
 		overflow: hidden;
 		@include corners.radius(0.4rem);
 
+		// Charts use the second palette colour (the neutral ink of WeekBars); the accent stays for actions and "done".
 		span {
 			display: block;
 			width: 100%;
-			background: var(--color-accent);
+			background: var(--color-text);
 		}
 
 		&[data-empty] span {

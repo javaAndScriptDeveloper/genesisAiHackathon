@@ -8,7 +8,8 @@ import { Badge, Button, Card, Icon } from "@/components/ui";
 import { useUnits } from "@/lib/fit/store/hooks";
 import { useI18n } from "@/lib/i18n/I18nProvider";
 import type { Advice, Improvement } from "@/lib/progress/improvements";
-import { mainMetric, type PersonalRecord, type RecordMetric } from "@/lib/progress/records";
+import { formatRecordValue, seriesMetric, type RecordFormat } from "@/lib/progress/mainScreen";
+import type { PersonalRecord, RecordMetric } from "@/lib/progress/records";
 import type { Exercise } from "@/lib/progress/types";
 import styles from "./ProgressHighlights.module.scss";
 
@@ -20,22 +21,26 @@ interface ProgressHighlightsProps {
 	onStart: () => void;
 	onCalendar: () => void;
 	records: { record: PersonalRecord; isNew: boolean }[];
+	/** All personal records, to know which metric an exercise's series uses (e1RM or max weight). */
+	allRecords: PersonalRecord[];
 }
 
 const recordsHref = (exerciseId: string) => `/progress/records?exercise=${encodeURIComponent(exerciseId)}`;
 
 /** "What improved" (≤ 2), "What next" (one action) and "New records" (2 cards). Each block hides when it has nothing to say. */
-export function ProgressHighlights({ exercises, improvements, advice, action, onStart, onCalendar, records }: ProgressHighlightsProps) {
+export function ProgressHighlights({ exercises, improvements, advice, action, onStart, onCalendar, records, allRecords }: ProgressHighlightsProps) {
 	const { t, locale } = useI18n();
 	const u = useUnits();
 	const nf = new Intl.NumberFormat(locale, { maximumFractionDigits: 1 });
 	const nameOf = (id: string) => exercises.find((e) => e.id === id)?.name ?? id;
-	/** A record value in the user's units: loads via useUnits (kg/lb), reps and seconds as counts. */
-	const value = (metric: RecordMetric, v: number): string => {
-		if (metric === "reps") return `${nf.format(v)} ${t("fit.progress.unit.reps")}`;
-		if (metric === "time") return `${nf.format(v)} ${t("fit.progress.unit.s")}`;
-		return `${nf.format(u.load(v))} ${u.unit}`;
+	/** Loads via useUnits (kg/lb), reps and seconds as counts; e1RM always as an estimate ("≈"). */
+	const fmt: RecordFormat = {
+		load: (kg) => `${nf.format(u.load(kg))} ${u.unit}`,
+		reps: (n) => `${nf.format(n)} ${t("fit.progress.unit.reps")}`,
+		time: (sec) => `${nf.format(sec)} ${t("fit.progress.unit.s")}`,
+		estimate: (text) => t("fit.progress.main.records.estimate", { value: text }),
 	};
+	const value = (metric: RecordMetric, v: number): string => formatRecordValue(metric, v, fmt);
 
 	const improvementText = (i: Improvement): string => {
 		if (i.kind === "record") return t("fit.progress.improvements.record", { exercise: nameOf(i.exerciseId), before: value(i.metric, i.before), now: value(i.metric, i.now), delta: value(i.metric, i.delta) });
@@ -44,9 +49,10 @@ export function ProgressHighlights({ exercises, improvements, advice, action, on
 
 	const adviceText = (a: Advice): string => {
 		if (a.id === "near-record") {
-			const ex = exercises.find((e) => e.id === a.vars.exerciseId);
+			const id = String(a.vars.exerciseId ?? "");
 			const target = Number(a.vars.target);
-			return t("fit.progress.advice.near-record", { exercise: String(a.vars.exercise ?? ""), target: Number.isFinite(target) ? value(mainMetric(ex?.kind ?? "weighted"), target) : "" });
+			const metric = seriesMetric(exercises.find((e) => e.id === id)?.kind, allRecords, id);
+			return t("fit.progress.advice.near-record", { exercise: String(a.vars.exercise ?? ""), target: Number.isFinite(target) ? value(metric, target) : "" });
 		}
 		return t(`fit.progress.advice.${a.id}`, Object.fromEntries(Object.entries(a.vars).map(([k, v]) => [k, typeof v === "number" ? nf.format(v) : v])));
 	};
@@ -97,7 +103,7 @@ export function ProgressHighlights({ exercises, improvements, advice, action, on
 					</h2>
 					<ul className={styles.recordGrid}>
 						{records.map(({ record: r, isNew }) => {
-							const shown = r.metric === "e1rm" ? t("fit.progress.main.records.estimate", { value: value(r.metric, r.value) }) : value(r.metric, r.value);
+							const shown = value(r.metric, r.value);
 							return (
 								<li key={`${r.exerciseId}-${r.metric}-${r.date}`}>
 									<Link href={recordsHref(r.exerciseId)} transitionTypes={["nav-forward"]} className={clsx(styles.record, isNew && styles.isNew)}>

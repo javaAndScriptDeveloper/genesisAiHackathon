@@ -2,8 +2,8 @@
 import type { WeekGoalDay } from "./consistency";
 import { addDays } from "./dates";
 import type { Advice } from "./improvements";
-import type { PersonalRecord } from "./records";
-import type { IsoDate, ProgressEvent } from "./types";
+import type { PersonalRecord, RecordMetric } from "./records";
+import type { ExerciseKind, IsoDate, ProgressEvent } from "./types";
 
 /** The refId of a "pr" event for this record (same key as `detectEvents`). */
 export const prEventKey = (r: Pick<PersonalRecord, "exerciseId" | "metric" | "date">): string => `${r.exerciseId}:${r.metric}:${r.date}`;
@@ -49,8 +49,34 @@ export function consistencyBars<T extends { weekStart: IsoDate }>(weeks: T[]): T
 	return [...weeks].sort((a, b) => a.weekStart.localeCompare(b.weekStart));
 }
 
-/** The button under "What next": start the next planned workout when there is one, else open the calendar. */
+/**
+ * The button under "What next": start the next planned workout when there is one, else open the calendar.
+ * The "start" advice sits right under the weekly-goal card's own Start button, so it gets the calendar instead.
+ */
 export function mainAction(advice: Advice | null, hasPlannedWorkout: boolean): "start" | "calendar" | null {
 	if (!advice) return null;
-	return hasPlannedWorkout ? "start" : "calendar";
+	return hasPlannedWorkout && advice.id !== "start" ? "start" : "calendar";
+}
+
+export interface RecordFormat {
+	load: (kg: number) => string;
+	reps: (n: number) => string;
+	time: (sec: number) => string;
+	/** Wraps an e1RM value as an estimate ("≈ …"); e1RM is never shown as a plain maximum. */
+	estimate: (text: string) => string;
+}
+
+/** A record-metric value as text. e1RM always carries the estimate mark (also for before/after and deltas). */
+export function formatRecordValue(metric: RecordMetric, value: number, f: RecordFormat): string {
+	if (metric === "reps") return f.reps(value);
+	if (metric === "time") return f.time(value);
+	const text = f.load(value);
+	return metric === "e1rm" ? f.estimate(text) : text;
+}
+
+/** The metric of an exercise's progress series: e1RM for weighted work when any e1RM record exists, else max weight. */
+export function seriesMetric(kind: ExerciseKind | undefined, records: Pick<PersonalRecord, "exerciseId" | "metric">[], exerciseId: string): RecordMetric {
+	if (kind === "bodyweight") return "reps";
+	if (kind === "timed") return "time";
+	return records.some((r) => r.exerciseId === exerciseId && r.metric === "e1rm") ? "e1rm" : "weight";
 }

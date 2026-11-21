@@ -11,14 +11,16 @@ import { ProgressNavList, type ProgressNavItem } from "@/components/features/Pro
 import { ProgressScoreCards } from "@/components/features/ProgressScoreCards/ProgressScoreCards";
 import { ProgressWeekGoal } from "@/components/features/ProgressWeekGoal/ProgressWeekGoal";
 import { ScreenHeader } from "@/components/features/ScreenHeader/ScreenHeader";
-import { Icon, IconButton, Skeleton } from "@/components/ui";
+import { WeekBars } from "@/components/features/WeekBars/WeekBars";
+import { Icon, IconButton, Skeleton, useToast } from "@/components/ui";
+import { kcalFor } from "@/lib/fit/calories";
+import { addDays, mondayOf, weekdayIndex } from "@/lib/fit/dates";
+import { shareText } from "@/lib/fit/share";
 import { nextUpcoming } from "@/lib/fit/plan";
 import { useFit } from "@/lib/fit/store/FitProvider";
 import { useProgress, useProgressAnalytics, useStartWorkout, useUnits } from "@/lib/fit/store/hooks";
 import { useI18n } from "@/lib/i18n/I18nProvider";
 import { nextBadges, recentBadges } from "@/lib/progress/badges";
-import { isPausedWeek } from "@/lib/progress/consistency";
-import { weekStart } from "@/lib/progress/dates";
 import { mainAction, newRecords, unseenReportWeek, weekDayStates } from "@/lib/progress/mainScreen";
 import { weeklyReportV2 } from "@/lib/progress/report";
 import styles from "./Progress.module.scss";
@@ -47,6 +49,7 @@ function Overview() {
 	const p = useProgress();
 	const { reportWeeks } = useProgressAnalytics();
 	const start = useStartWorkout();
+	const toast = useToast();
 	const nf = new Intl.NumberFormat(locale);
 	const events = state.progressEvents;
 
@@ -55,6 +58,17 @@ function Overview() {
 	const openCalendar = () => router.push("/progress/calendar", { transitionTypes: ["nav-forward"] });
 
 	const reportWeek = unseenReportWeek(events, today);
+
+	// This week per day: training minutes and estimated calories from the logged sessions.
+	const monday = mondayOf(today);
+	const weekLogs = Array.from({ length: 7 }, (_, i) => state.history.filter((l) => l.date === addDays(monday, i)));
+	const dayMinutes = weekLogs.map((logs) => Math.round(logs.reduce((n, l) => n + l.durationSec, 0) / 60));
+	const dayKcal = weekLogs.map((logs) => logs.reduce((n, l) => n + kcalFor(l.exercises.filter((e) => !e.skipped).map((e) => e.exerciseId), state.profile?.weightKg ?? 70, l.durationSec / 60), 0));
+
+	const share = async () => {
+		const r = await shareText(t("fit.progress.shareTitle"), t("fit.progress.shareText", { done: p.week.quality, planned: p.week.goal, streak: p.streak.current, level: p.level.level }));
+		toast.show(r === "copied" ? t("fit.common.copied") : r === "failed" ? t("fit.common.shareFailed") : t("fit.progress.shared"), r === "failed" ? "danger" : "success");
+	};
 	const report = useMemo(() => (reportWeek ? weeklyReportV2(p.history, p.ctx, reportWeek) : null), [p.history, p.ctx, reportWeek]);
 	const latestReport = reportWeeks[0] ?? null;
 	const fresh = p.history.sessions.length === 0;
@@ -68,7 +82,7 @@ function Overview() {
 			id: "report",
 			href: latestReport ? `/progress/week/${latestReport}` : null,
 			hint: latestReport ? t("fit.progress.main.nav.reportHint", { date: fmtShort(latestReport, locale) }) : t("fit.progress.main.nav.reportNone"),
-			mark: p.unseen.byKind.report > 0 ? t("fit.progress.main.nav.new") : undefined,
+			mark: reportWeek ? t("fit.progress.main.nav.new") : undefined,
 		},
 		{
 			id: "achievements",
@@ -103,13 +117,23 @@ function Overview() {
 				days={weekDayStates(p.week.days, today)}
 				done={p.week.quality}
 				goal={p.week.goal}
-				paused={isPausedWeek(p.ctx, weekStart(today))}
+				paused={p.weekPaused}
 				month={today.slice(0, 7)}
 				today={today}
 				onStart={onStart}
 			/>
 
-			<ProgressScoreCards fresh={fresh} consistency={p.consistency} streak={p.streak} />
+			<section className={styles.week} aria-labelledby="progress-this-week">
+				<h2 id="progress-this-week" className={styles.h2}>
+					{t("fit.progress.thisWeek")}
+				</h2>
+				<div className={styles.grid2}>
+					<WeekBars title={t("fit.progress.time")} unit={t("fit.common.minShort")} values={dayMinutes} todayIndex={weekdayIndex(today)} tone="neutral" sport="stopwatch" />
+					<WeekBars title={t("fit.progress.calories")} unit="kcal" values={dayKcal} todayIndex={weekdayIndex(today)} tone="accent" sport="flame" />
+				</div>
+			</section>
+
+			<ProgressScoreCards fresh={fresh} consistency={p.consistency} streak={p.streak} onShare={share} />
 
 			<ProgressLevelBar level={p.level} next={nextBadges(p.badges, 3)} recent={recentBadges(p.badges, 3)} newLevel={p.unseen.byKind.level > 0} />
 
@@ -121,6 +145,7 @@ function Overview() {
 				onStart={() => onStart?.()}
 				onCalendar={openCalendar}
 				records={newRecords(p.records, events, 2)}
+				allRecords={p.records}
 			/>
 
 			<ProgressNavList items={nav} />

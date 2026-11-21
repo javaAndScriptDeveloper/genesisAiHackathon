@@ -1,9 +1,9 @@
 "use client";
 
-import { FireIcon, Target02Icon } from "@hugeicons/core-free-icons";
+import { FireIcon, Share08Icon, Target02Icon } from "@hugeicons/core-free-icons";
 import Link from "next/link";
 import { fmtShort } from "@/components/features/ProgressCalendar/format";
-import { Icon } from "@/components/ui";
+import { Icon, IconButton } from "@/components/ui";
 import { useI18n } from "@/lib/i18n/I18nProvider";
 import { consistencyBars } from "@/lib/progress/mainScreen";
 import type { IsoDate } from "@/lib/progress/types";
@@ -14,12 +14,14 @@ interface ProgressScoreCardsProps {
 	fresh: boolean;
 	consistency: { score: number | null; weeks: { weekStart: IsoDate; score: number; weight: number }[] };
 	streak: { current: number; best: number };
+	/** Shares this week's progress (goal, streak, level) through the system share sheet or the clipboard. */
+	onShare: () => void;
 }
 
 const BARS = 4;
 
 /** Consistency (weighted score of the last 4 finished weeks) and streak (credited weeks in a row); both open the calendar. */
-export function ProgressScoreCards({ fresh, consistency, streak }: ProgressScoreCardsProps) {
+export function ProgressScoreCards({ fresh, consistency, streak, onShare }: ProgressScoreCardsProps) {
 	const { t, locale } = useI18n();
 	const nf = new Intl.NumberFormat(locale);
 
@@ -64,17 +66,20 @@ export function ProgressScoreCards({ fresh, consistency, streak }: ProgressScore
 					</>
 				)}
 			</Link>
-			<Link href="/progress/calendar" transitionTypes={["nav-forward"]} className={styles.card}>
-				<span className={styles.title}>
-					<Icon icon={FireIcon} size={16} className={styles.icon} />
-					{t("fit.progress.main.streak.title")}
-				</span>
-				<span className={styles.value}>
-					<strong>{nf.format(streak.current)}</strong>
-					<span>{streak.current === 1 ? t("fit.progress.main.streak.week") : t("fit.progress.main.streak.weeks")}</span>
-				</span>
-				<span className={styles.note}>{streak.current === 0 && streak.best === 0 ? t("fit.progress.main.streak.zero") : t("fit.progress.main.streak.best", { n: nf.format(streak.best) })}</span>
-			</Link>
+			<div className={styles.streak}>
+				<Link href="/progress/calendar" transitionTypes={["nav-forward"]} className={styles.card}>
+					<span className={styles.title}>
+						<Icon icon={FireIcon} size={16} className={styles.icon} />
+						{t("fit.progress.main.streak.title")}
+					</span>
+					<span className={styles.value}>
+						<strong>{nf.format(streak.current)}</strong>
+						<span>{streak.current === 1 ? t("fit.progress.main.streak.week") : t("fit.progress.main.streak.weeks")}</span>
+					</span>
+					<span className={styles.note}>{streak.current === 0 && streak.best === 0 ? t("fit.progress.main.streak.zero") : t("fit.progress.main.streak.best", { n: nf.format(streak.best) })}</span>
+				</Link>
+				<IconButton icon={Share08Icon} label={t("fit.progress.main.streak.share")} onClick={onShare} className={styles.share} />
+			</div>
 		</div>
 	);
 }

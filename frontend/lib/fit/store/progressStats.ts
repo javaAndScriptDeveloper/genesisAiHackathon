@@ -1,3 +1,5 @@
+import { isPausedWeek } from "../../progress/consistency";
+import { weekStart } from "../../progress/dates";
 import { progressSnapshot, type ProgressSnapshot } from "../../progress/engine";
 import { unseen } from "../../progress/events";
 import { historyFromFit } from "../../progress/fromFit";
@@ -12,7 +14,8 @@ export function progressCtx(state: Pick<FitState, "weeklyGoal" | "pauses" | "pro
 	return { weeklyGoal: Math.min(5, Math.max(2, Math.round(goal))), pauses: state.pauses ?? [] };
 }
 
-export type ProgressView = ProgressSnapshot & { history: History; ctx: ProgressContext; xp: number; unseen: ReturnType<typeof unseen> };
+/** `weekPaused`: the current week is inside a pause (no pressure, streak frozen). */
+export type ProgressView = ProgressSnapshot & { history: History; ctx: ProgressContext; xp: number; unseen: ReturnType<typeof unseen>; weekPaused: boolean };
 
 // Every screen reads the same state object; compute its snapshot once per (state, today) instead of once per hook.
 const cache = new WeakMap<FitState, Map<ISODate, ProgressView>>();
@@ -30,6 +33,7 @@ export function progressOf(state: FitState, today: ISODate): ProgressView {
 		ctx,
 		xp: xpLedger(history, ctx).reduce((n, e) => n + e.amount, 0),
 		unseen: unseen(state.progressEvents ?? []),
+		weekPaused: isPausedWeek(ctx, weekStart(today)),
 	};
 	if (!byDay) {
 		byDay = new Map();

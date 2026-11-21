@@ -3,16 +3,6 @@
     "gate": {
       "cta": "See Premium"
     },
-    "insight": {
-      "headNone": "Your insights start with your first workout",
-      "headDone": "Weekly goal reached. Well done.",
-      "headSome": "On track, {left} more to go this week",
-      "headFresh": "A fresh week, start with your next session",
-      "tipConsistent": "Consistency is your superpower. Keep protecting your rest days.",
-      "tipVolumeDown": "Volume dipped compared with last week. Normal after a lighter week, so build back gradually.",
-      "tipStreak": "{n} weeks in a row at your weekly goal. Rest days never break it.",
-      "tipDefault": "Small, steady sessions beat rare heroic ones. Aim for your next planned day."
-    },
     "progress": {
       "push": {
         "weekly": "Week done: {done} of {goal} · streak {streak} weeks"
@@ -28,40 +18,17 @@
       "toGain": "to gain to reach your goal",
       "title": "Progress",
       "subtitle": "Your training, in numbers",
-      "overview": "Overview",
-      "history": "History",
-      "awards": "Awards",
-      "checkins": "Check-ins",
       "demoNote": "Includes 5 weeks of demo history. Remove it anytime in Settings.",
-      "period": "Period",
       "thisWeek": "This week",
-      "last4": "Last 4 weeks",
-      "sessions": "Sessions",
-      "completedVsPlanned": "done / planned",
-      "ofWeeklyGoal": "of weekly goal",
       "time": "Training time",
-      "volume": "Volume",
-      "streakLabel": "Streak",
-      "longest": "best {n} wk",
-      "consistency": "Consistency",
-      "consistencyBody": "Your last 4 finished weeks, recent ones weigh more. Paused weeks are skipped.",
       "consistencyEmpty": "Your score appears after your first full week of training.",
-      "insight": "Training insight",
-      "summaryNone": "Finish your first workout and your personal summary shows up here.",
-      "summary": "You've done {done} of {planned} planned sessions this week with {score}% consistency over four weeks. Your training volume is {trend} compared with last week.",
-      "trendUp": "up or steady",
-      "trendDown": "lower",
       "shareTitle": "My progress",
       "shareText": "This week: {done}/{planned} workouts toward my weekly goal, {streak}-week streak, level {level} in Personal Coach.",
       "shareAwards": "Level {level}, {xp} XP and {badges} badges in Personal Coach.",
       "shared": "Shared",
       "shareAchievements": "Share my achievements",
-      "weeklyVolume": "Weekly volume",
-      "noData": "Not enough data yet.",
       "calendar": {
         "title": "Training calendar",
-        "open": "Open calendar",
-        "openAria": "Training calendar, open the full calendar",
         "screenTitle": "Calendar",
         "screenSubtitle": "Your plan, workouts and streak",
         "prevMonth": "Previous month",
@@ -179,13 +146,6 @@
           "removed": "Pause removed"
         }
       },
-      "bodyWeight": "Body weight",
-      "weightNeedMore": "Log your weight at least twice to see a trend.",
-      "insightsLockedTitle": "Advanced training insights",
-      "insightsLockedBody": "Strength progression per exercise and muscle-group balance, built from your own history.",
-      "strength": "Strength progression",
-      "muscles": "Muscle balance",
-      "premiumActive": "Premium (demo) active",
       "historyEmpty": "No workouts yet",
       "historyEmptyBody": "Your completed sessions will appear here.",
       "adaptedCount": "{n} adjustments",
@@ -212,7 +172,6 @@
       "removeConfirm": "Remove",
       "photosLockedTitle": "Unlimited photo check-ins",
       "photosLockedBody": "Free includes {n} photos. Premium keeps your whole journey.",
-      "consistencyDelta": "{sign}{n} vs last week",
       "weekdays": {
         "0": "Monday",
         "1": "Tuesday",
@@ -433,7 +392,8 @@
           "weeks": "weeks",
           "week": "week",
           "best": "Best {n}",
-          "zero": "Reach your weekly goal to start one."
+          "zero": "Reach your weekly goal to start one.",
+          "share": "Share your progress"
         },
         "first": {
           "title": "Your first workout starts your progress",

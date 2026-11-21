@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { scenarioState } from "@/lib/fit/scenarios";
 import { progressOf } from "@/lib/fit/store/progressStats";
 import type { WeekGoalDay } from "@/lib/progress/consistency";
-import { consistencyBars, mainAction, newRecords, prEventKey, unseenReportWeek, weekDayStates } from "@/lib/progress/mainScreen";
+import { consistencyBars, formatRecordValue, mainAction, newRecords, prEventKey, seriesMetric, unseenReportWeek, weekDayStates, type RecordFormat } from "@/lib/progress/mainScreen";
 import type { PersonalRecord } from "@/lib/progress/records";
 import type { ProgressEvent } from "@/lib/progress/types";
 
@@ -101,14 +101,39 @@ describe("mainAction", () => {
 		expect(mainAction({ id: "plateau", vars: {} }, false)).toBe("calendar");
 		expect(mainAction(null, true)).toBeNull();
 	});
+	it("never repeats the goal card's Start button for the 'start' advice", () => {
+		expect(mainAction({ id: "start", vars: {} }, true)).toBe("calendar");
+	});
+});
+
+describe("formatRecordValue", () => {
+	const f: RecordFormat = { load: (kg) => `${kg} kg`, reps: (n) => `${n} reps`, time: (s) => `${s} s`, estimate: (x) => `≈ ${x}` };
+	it("marks every e1RM value as an estimate", () => {
+		expect(formatRecordValue("e1rm", 36, f)).toBe("≈ 36 kg");
+	});
+	it("leaves weight, reps and time plain", () => {
+		expect(formatRecordValue("weight", 32, f)).toBe("32 kg");
+		expect(formatRecordValue("reps", 18, f)).toBe("18 reps");
+		expect(formatRecordValue("time", 45, f)).toBe("45 s");
+	});
+});
+
+describe("seriesMetric", () => {
+	it("uses e1RM for weighted work only when an e1RM record exists", () => {
+		expect(seriesMetric("weighted", [{ exerciseId: "a", metric: "e1rm" }], "a")).toBe("e1rm");
+		expect(seriesMetric("weighted", [{ exerciseId: "a", metric: "weight" }], "a")).toBe("weight");
+		expect(seriesMetric("bodyweight", [], "b")).toBe("reps");
+		expect(seriesMetric("timed", [], "c")).toBe("time");
+	});
 });
 
 describe("scenarios", () => {
 	const today = "2026-11-21";
 	it("S0: no records, no report card, every day upcoming / rest / today", () => {
-		const p = progressOf(scenarioState("S0", today), today);
-		expect(newRecords(p.records, [], 2)).toEqual([]);
-		expect(unseenReportWeek([], today)).toBeNull();
+		const s = scenarioState("S0", today);
+		const p = progressOf(s, today);
+		expect(newRecords(p.records, s.progressEvents, 2)).toEqual([]);
+		expect(unseenReportWeek(s.progressEvents, today)).toBeNull();
 		const states = weekDayStates(p.week.days, today).map((d) => d.state);
 		expect(states).not.toContain("done");
 		expect(p.consistency.score).toBeNull();
