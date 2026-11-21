@@ -34,7 +34,10 @@
 	pointer-events: none;
 }
 
-.hero {
+.root .hero {
+	position: relative;
+	isolation: isolate;
+	overflow: hidden;
 	display: flex;
 	flex-direction: column;
 	gap: var(--space-2);
@@ -48,7 +51,22 @@
 	}
 }
 
+.heroPhoto {
+	position: absolute;
+	z-index: -1;
+	inset-block-start: 0;
+	inset-inline-end: 0;
+	width: min(65%, 22rem);
+	height: auto;
+	opacity: 0.45;
+	mask-image: linear-gradient(to left, #000, transparent), linear-gradient(to bottom, #000 55%, transparent);
+	mask-composite: intersect;
+}
+
 .eyebrow {
+	display: flex;
+	align-items: center;
+	gap: 0.4rem;
 	font-size: 1.2rem;
 	font-weight: 700;
 	letter-spacing: 0.08em;
@@ -72,22 +90,17 @@
 
 .heroActions {
 	display: flex;
-	flex-wrap: wrap;
+	flex-direction: column;
 	gap: var(--space-2);
 	margin-top: var(--space-2);
 
-	> :first-child {
-		flex: 1;
+	> * {
+		width: 100%;
 	}
 }
 
-.hero :global(button[class*="secondary"]) {
-	background: transparent;
-	color: var(--color-onHero);
-	border-color: var(--color-heroLine);
-}
 
-.notice {
+.root .notice {
 	display: flex;
 	gap: var(--space-3);
 	background: var(--color-warningSoft);
@@ -157,6 +170,18 @@
 .challengeMeta {
 	color: var(--color-textSubtle);
 	font-size: 1.2rem;
+}
+
+.waterText {
+	display: grid;
+	grid-template-columns: auto 1fr;
+	column-gap: var(--space-3);
+	align-items: center;
+
+	svg {
+		grid-row: span 2;
+		color: var(--color-accent);
+	}
 }
 
 .water {

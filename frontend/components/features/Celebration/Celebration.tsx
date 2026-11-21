@@ -30,7 +30,7 @@ export function Celebration() {
 			<ul className={styles.list}>
 				{defs.map((d) => (
 					<li key={d.id} className={styles.item}>
-						<AchievementBadge icon={d.icon} />
+						<AchievementBadge icon={d.icon} awardId={d.id} />
 						<span className={styles.text}>
 							<strong>{d.title}</strong>
 							<span>{d.description}</span>

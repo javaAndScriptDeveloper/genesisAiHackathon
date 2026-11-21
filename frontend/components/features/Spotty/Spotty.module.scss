@@ -28,6 +28,13 @@ $outline: 2.4;
 		stroke-width: 9;
 	}
 
+	.limbFill {
+		fill: none;
+		stroke: var(--color-primary);
+		stroke-linecap: round;
+		stroke-width: 4.6;
+	}
+
 	.belly {
 		fill: var(--color-primaryHover);
 	}

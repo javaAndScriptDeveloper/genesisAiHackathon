@@ -60,3 +60,34 @@
 	font-size: 1.3rem;
 	color: var(--color-dangerText);
 }
+
+// Number fields use our own validation and steppers elsewhere; hide the browser's spin buttons.
+.input[type="number"] {
+	appearance: textfield;
+	-moz-appearance: textfield;
+
+	&::-webkit-inner-spin-button,
+	&::-webkit-outer-spin-button {
+		appearance: none;
+		margin: 0;
+	}
+}
+
+.control {
+	position: relative;
+	display: flex;
+	align-items: center;
+}
+
+.withSuffix {
+	padding-right: 5rem;
+}
+
+.suffix {
+	position: absolute;
+	right: 1.4rem;
+	color: var(--color-placeholder);
+	font-size: 1.4rem;
+	font-weight: 550;
+	pointer-events: none;
+}

@@ -46,11 +46,13 @@ export function Spotty({ mood = "idle", size = "sm", children, className }: Spot
 
 					<g className={styles.armLeft}>
 						<polyline className={styles.limb} points="27,96 18,112" />
+						<polyline className={styles.limbFill} points="27,96 18,112" />
 						<Dumbbell x={17} y={113} angle={30} />
 						<circle className={styles.skin} cx="17.5" cy="112.5" r="4.5" />
 					</g>
 					<g className={styles.armRight}>
 						<polyline className={styles.limb} points="93,96 102,112" />
+						<polyline className={styles.limbFill} points="93,96 102,112" />
 						<Dumbbell x={103} y={113} angle={-30} />
 						<circle className={styles.skin} cx="102.5" cy="112.5" r="4.5" />
 					</g>

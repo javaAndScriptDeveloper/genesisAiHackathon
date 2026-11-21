@@ -1,0 +1,115 @@
+// Page transitions (React <ViewTransition> + View Transitions API). Only the screen's content area is animated, so the
+// phone frame, status bar and bottom navigation stay still while the content changes.
+:root {
+	--vt-time: 260ms;
+	--vt-ease: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+// Clicks during a transition must reach the live page.
+::view-transition {
+	pointer-events: none;
+}
+
+// Old and new content crossfade on top of each other (plus-lighter keeps the combined opacity at 100%, so the page
+// never dips toward the background colour mid-transition) and the group is clipped to the content area.
+::view-transition-group(.page-forward),
+::view-transition-group(.page-back),
+::view-transition-group(.page-fade),
+::view-transition-image-pair(.page-forward),
+::view-transition-image-pair(.page-back),
+::view-transition-image-pair(.page-fade) {
+	overflow: clip;
+}
+
+::view-transition-image-pair(.page-forward),
+::view-transition-image-pair(.page-back),
+::view-transition-image-pair(.page-fade) {
+	isolation: isolate;
+}
+
+::view-transition-old(.page-forward),
+::view-transition-new(.page-forward),
+::view-transition-old(.page-back),
+::view-transition-new(.page-back),
+::view-transition-old(.page-fade),
+::view-transition-new(.page-fade) {
+	mix-blend-mode: plus-lighter;
+}
+
+::view-transition-old(.page-forward) {
+	--out-x: -14px;
+	animation:
+		var(--vt-time) var(--vt-ease) both vt-out,
+		var(--vt-time) var(--vt-ease) both vt-move-out;
+}
+
+::view-transition-new(.page-forward) {
+	--in-x: 14px;
+	animation:
+		var(--vt-time) var(--vt-ease) both vt-in,
+		var(--vt-time) var(--vt-ease) both vt-move-in;
+}
+
+::view-transition-old(.page-back) {
+	--out-x: 14px;
+	animation:
+		var(--vt-time) var(--vt-ease) both vt-out,
+		var(--vt-time) var(--vt-ease) both vt-move-out;
+}
+
+::view-transition-new(.page-back) {
+	--in-x: -14px;
+	animation:
+		var(--vt-time) var(--vt-ease) both vt-in,
+		var(--vt-time) var(--vt-ease) both vt-move-in;
+}
+
+// No direction (e.g. browser back, programmatic change): a plain crossfade with a tiny rise.
+::view-transition-old(.page-fade) {
+	animation: var(--vt-time) var(--vt-ease) both vt-out;
+}
+
+::view-transition-new(.page-fade) {
+	animation:
+		var(--vt-time) var(--vt-ease) both vt-in,
+		var(--vt-time) var(--vt-ease) both vt-rise;
+}
+
+@keyframes vt-out {
+	to {
+		opacity: 0;
+	}
+}
+
+@keyframes vt-in {
+	from {
+		opacity: 0;
+	}
+}
+
+@keyframes vt-move-out {
+	to {
+		translate: var(--out-x) 0;
+	}
+}
+
+@keyframes vt-move-in {
+	from {
+		translate: var(--in-x) 0;
+	}
+}
+
+@keyframes vt-rise {
+	from {
+		translate: 0 8px;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	::view-transition-old(*),
+	::view-transition-new(*),
+	::view-transition-group(*) {
+		animation-duration: 0s !important;
+		animation-delay: 0s !important;
+	}
+}

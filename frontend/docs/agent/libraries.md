@@ -16,3 +16,7 @@
 | vitest | unit tests for `lib/` |
 
 Add a dependency only with a present need. Tabler/Iconoir are not installed; Hugeicons only.
+
+- `@number-flow/react`: rolling digits (`AnimatedNumber`).
+- `@tabler/icons-react`: sport pictograms only (`SportIcon`).
+- `react-body-highlighter`: anterior/posterior muscle diagram (`MuscleMap`).

@@ -1,26 +1,27 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { Globe02Icon, Notification03Icon, RulerIcon, Shield01Icon } from "@hugeicons/core-free-icons";
 import { useState } from "react";
 import { ScreenHeader } from "@/components/features/ScreenHeader/ScreenHeader";
-import { Button, Card, Input, SegmentedControl, Select, Sheet, Switch, useToast } from "@/components/ui";
+import { Button, Card, Icon, SegmentedControl, Select, Sheet, Switch, TimePicker, useToast } from "@/components/ui";
 import { NOTIFICATION_LABELS } from "@/lib/fit/notifications";
 import { useFit } from "@/lib/fit/store/FitProvider";
-import { useTheme, type Theme } from "@/lib/hooks/useTheme";
+import { useActionNavigate } from "@/lib/fit/store/hooks";
 import type { NotificationKind } from "@/lib/fit/types";
 import { LOCALES, LOCALE_LABELS, isLocale } from "@/lib/i18n/config";
 import { useI18n } from "@/lib/i18n/I18nProvider";
 import kit from "../ScreenKit/ScreenKit.module.scss";
+import { GoalCard } from "./GoalCard";
+import { TrainerCard } from "./TrainerCard";
 
 type Confirm = null | "demo" | "reset";
 
 export function Settings() {
 	const { t, locale, setLocale } = useI18n();
-	const router = useRouter();
 	const toast = useToast();
+	const go = useActionNavigate();
 	const { state, dispatch, today } = useFit();
 	const [confirm, setConfirm] = useState<Confirm>(null);
-	const { theme, setTheme } = useTheme();
 	const s = state.notificationSettings;
 	const kinds = Object.keys(NOTIFICATION_LABELS) as NotificationKind[];
 
@@ -38,19 +39,23 @@ export function Settings() {
 		<div className={kit.page}>
 			<ScreenHeader title={t("fit.settings.title")} back />
 			<div className={kit.content}>
+				<GoalCard />
+				<TrainerCard />
+
 				<Card className={kit.stack}>
-					<h2 className={kit.h2}>{t("fit.settings.language")}</h2>
-					<Select label={t("fit.settings.language")} value={locale} options={LOCALES.map((l) => ({ value: l, label: LOCALE_LABELS[l] }))} onChange={(v) => isLocale(v) && setLocale(v)} />
+					<h2 className={`${kit.h2} ${kit.heading}`}><Icon icon={Globe02Icon} size={20} />{t("fit.settings.language")}</h2>
+					<Select label={t("fit.settings.languageLabel")} value={locale} options={LOCALES.map((l) => ({ value: l, label: LOCALE_LABELS[l] }))} onChange={(v) => isLocale(v) && setLocale(v)} />
 					<p className={kit.note}>{t("fit.settings.languageNote")}</p>
 				</Card>
 
 				<Card className={kit.stack}>
-					<h2 className={kit.h2}>{t("fit.theme.title")}</h2>
-					<SegmentedControl<Theme> label={t("fit.theme.title")} value={theme} onChange={setTheme} options={[{ id: "dark", label: t("fit.theme.dark") }, { id: "light", label: t("fit.theme.light") }]} />
+					<h2 className={`${kit.h2} ${kit.heading}`}><Icon icon={RulerIcon} size={20} />{t("fit.settings.units")}</h2>
+					<SegmentedControl label={t("fit.settings.units")} value={state.units} onChange={(units) => dispatch({ type: "set-units", units })} options={[{ id: "metric", label: t("fit.onboarding.metric") }, { id: "imperial", label: t("fit.onboarding.imperial") }]} />
+					<p className={kit.note}>{t("fit.settings.unitsNote")}</p>
 				</Card>
 
 				<Card className={kit.stack}>
-					<h2 className={kit.h2}>{t("fit.settings.reminders")}</h2>
+					<h2 className={`${kit.h2} ${kit.heading}`}><Icon icon={Notification03Icon} size={20} />{t("fit.settings.reminders")}</h2>
 					<p className={kit.note}>{t("fit.settings.remindersNote")}</p>
 					{kinds.map((k) => (
 						<div key={k}>
@@ -58,13 +63,13 @@ export function Settings() {
 							<p className={kit.note}>{NOTIFICATION_LABELS[k].hint}</p>
 						</div>
 					))}
-					<Input label={t("fit.settings.reminderTime")} type="time" value={s.reminderTime} onChange={(e) => e.target.value && dispatch({ type: "notification-settings", settings: { ...s, reminderTime: e.target.value } })} />
+					<TimePicker label={t("fit.settings.reminderTime")} title={t("fit.settings.reminderTime")} hint={t("fit.settings.reminderTimeHint")} confirmLabel={t("fit.settings.setTime")} cancelLabel={t("fit.common.cancel")} closeLabel={t("common.close")} value={s.reminderTime} onChange={(value) => dispatch({ type: "notification-settings", settings: { ...s, reminderTime: value } })} />
 					<Switch label={t("fit.settings.push")} checked={s.browserPush} onChange={(e) => setPush(e.target.checked)} />
 					<p className={kit.note}>{t("fit.settings.pushNote")}</p>
 				</Card>
 
 				<Card className={kit.stack}>
-					<h2 className={kit.h2}>{t("fit.settings.data")}</h2>
+					<h2 className={`${kit.h2} ${kit.heading}`}><Icon icon={Shield01Icon} size={20} />{t("fit.settings.data")}</h2>
 					<p className={kit.note}>{t("fit.settings.dataNote")}</p>
 					<Button variant="secondary" disabled={!state.hasDemoHistory} onClick={() => setConfirm("demo")}>{t("fit.settings.removeDemo")}</Button>
 					<Button variant="danger" onClick={() => setConfirm("reset")}>{t("fit.settings.reset")}</Button>
@@ -81,7 +86,7 @@ export function Settings() {
 			<Sheet open={confirm === "reset"} onClose={() => setConfirm(null)} title={t("fit.settings.resetTitle")} closeLabel={t("common.close")} variant="center" footer={
 				<>
 					<Button variant="secondary" onClick={() => setConfirm(null)}>{t("fit.common.cancel")}</Button>
-					<Button variant="danger" onClick={() => { dispatch({ type: "reset" }); setConfirm(null); router.replace("/onboarding"); }}>{t("fit.settings.resetConfirm")}</Button>
+					<Button variant="danger" onClick={() => { setConfirm(null); go("/onboarding", { type: "reset" }, { replace: true }); }}>{t("fit.settings.resetConfirm")}</Button>
 				</>
 			}><p>{t("fit.settings.resetBody")}</p></Sheet>
 		</div>

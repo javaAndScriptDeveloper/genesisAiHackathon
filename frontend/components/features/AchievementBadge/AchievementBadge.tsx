@@ -1,15 +1,24 @@
 import clsx from "clsx";
-import { Calendar03Icon, DropletIcon, FireIcon, FlashIcon, HeartCheckIcon, Medal01Icon, Shield01Icon, Target01Icon } from "@hugeicons/core-free-icons";
-import { Icon, type IconDefinition } from "@/components/ui";
+import { Picture } from "@/components/ui";
 import type { BadgeIcon } from "@/lib/fit/gamification";
 import styles from "./AchievementBadge.module.scss";
 
-const ICONS: Record<BadgeIcon, IconDefinition> = { flame: FireIcon, medal: Medal01Icon, target: Target01Icon, heart: HeartCheckIcon, drop: DropletIcon, bolt: FlashIcon, calendar: Calendar03Icon, shield: Shield01Icon };
+const SPECIAL_TROPHIES: Readonly<Partial<Record<string, string>>> = {
+	"ten-sessions": "champion",
+	"streak-5": "phoenix",
+	"listen-to-body": "recovery",
+	"iron-month": "barbell",
+};
 
-export function AchievementBadge({ icon, locked = false, size = "md" }: { icon: BadgeIcon; locked?: boolean; size?: "md" | "lg" }) {
+export function AchievementBadge({ icon, awardId, locked = false, size = "md" }: { icon: BadgeIcon; awardId?: string; locked?: boolean; size?: "md" | "lg" | "xl" }) {
 	return (
-		<span className={clsx(styles.badge, styles[size], locked && styles.locked)}>
-			<Icon icon={ICONS[icon]} size={size === "lg" ? 40 : 24} />
-		</span>
+		<Picture
+			name={`award-${(awardId && SPECIAL_TROPHIES[awardId]) || icon}`}
+			alt=""
+			width={400}
+			height={400}
+			sizes={size === "xl" ? "176px" : size === "lg" ? "96px" : "56px"}
+			className={clsx(styles.badge, styles[size], locked && styles.locked)}
+		/>
 	);
 }

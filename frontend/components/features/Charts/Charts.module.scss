@@ -37,3 +37,14 @@
 	stroke: var(--color-accent);
 	stroke-width: 2.5;
 }
+
+.goal {
+	stroke: var(--color-success);
+	stroke-width: 1.5;
+}
+
+.goalText {
+	fill: var(--color-successText);
+	font-size: 10px;
+	font-weight: 700;
+}

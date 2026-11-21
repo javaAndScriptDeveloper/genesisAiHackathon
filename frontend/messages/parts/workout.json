@@ -1,41 +1,149 @@
 {
   "fit": {
-    "safety": { "title": "Stop and rest", "rested": "I've rested and I feel normal again", "resume": "Resume workout" },
+    "safety": {
+      "title": "Stop and rest",
+      "rested": "I've rested and I feel normal again",
+      "resume": "Resume workout"
+    },
     "workout": {
-      "noneTitle": "No workout in progress", "noneBody": "Start one from your plan.", "toTraining": "Go to training",
-      "end": "End workout", "pause": "Pause workout", "resume": "Resume", "paused": "Workout paused", "pausedBody": "Take your time. The timer is stopped.",
-      "left": "~{n} min left", "progress": "{done} of {total} exercises done",
-      "exerciseOf": "Exercise {n} of {total}", "target": "{sets} sets × {reps}", "sets": "Sets", "logged": "Logged", "current": "Now",
-      "skippedNote": "You skipped this exercise.", "blockDone": "All sets done. Move to the next exercise.", "skippedLabel": "Skipped", "skippedToast": "Exercise skipped",
-      "startTimer": "Start {s}s timer", "finishSet": "Finish set", "repsLabel": "Repetitions", "weightLabel": "Weight", "decrease": "Decrease", "increase": "Increase",
-      "completeSet": "Complete set", "voiceStart": "Dictate reps and weight", "voiceStop": "Stop listening", "voiceHint": "Tap the mic and say, for example, \"10 reps at 20 kilos\".",
-      "voiceUnsupported": "Voice input isn't supported in this browser. Use the steppers.", "voiceHeard": "Heard {reps} reps at {weight} kg. Tap Complete set to log.", "voiceUnclear": "Couldn't read a number from \"{text}\".", "voiceError": "Voice input failed. Try again or use the steppers.",
-      "prev": "Back", "all": "All", "nextEx": "Next", "adjust": "Adjust this workout",
-      "rest": "Rest", "addRest": "+30 s", "skipRest": "Skip rest", "upNext": "Up next", "setOf": "Set {n} of {total}", "tooHardRest": "This is too hard or I need changes",
-      "unwell": "I feel unwell", "unwellHint": "Chest pain, dizziness or severe discomfort: stop and get safety guidance.",
-      "adjustTitle": "Adjust workout", "adjustLead": "Completed sets are always kept. Changes apply to what's left.",
+      "noneTitle": "No workout in progress",
+      "noneBody": "Start one from your plan.",
+      "toTraining": "Go to training",
+      "tooHardPrompt": "Is it too hard?",
+      "tooHardHint": "We can lighten the rest of the workout so you can finish it instead of stopping.",
+      "regenEasier": "Make the rest easier",
+      "regenShort": "Trim to 15 minutes",
+      "end": "End workout",
+      "pause": "Pause workout",
+      "resume": "Resume",
+      "paused": "Workout paused",
+      "pausedBody": "Take your time. The timer is stopped.",
+      "left": "~{n} min left",
+      "progress": "{done} of {total} exercises done",
+      "exerciseOf": "Exercise {n} of {total}",
+      "target": "{sets} sets × {reps}",
+      "sets": "Sets",
+      "logged": "Logged",
+      "current": "Now",
+      "skippedNote": "You skipped this exercise.",
+      "blockDone": "All sets done. Move to the next exercise.",
+      "skippedLabel": "Skipped",
+      "skippedToast": "Exercise skipped",
+      "startTimer": "Start {s}s timer",
+      "finishSet": "Finish set",
+      "repsLabel": "Repetitions",
+      "weightLabel": "Weight",
+      "decrease": "Decrease",
+      "increase": "Increase",
+      "completeSet": "Complete set",
+      "voiceStart": "Dictate reps and weight",
+      "voiceStop": "Stop listening",
+      "voiceHint": "Tap the mic and say, for example, \"10 reps at 20 kilos\".",
+      "voiceUnsupported": "Voice input isn't supported in this browser. Use the steppers.",
+      "voiceHeard": "Heard {reps} reps at {weight} kg. Tap Complete set to log.",
+      "voiceUnclear": "Couldn't read a number from \"{text}\".",
+      "voiceError": "Voice input failed. Try again or use the steppers.",
+      "prev": "Back",
+      "all": "All",
+      "nextEx": "Next",
+      "adjust": "Adjust this workout",
+      "rest": "Rest",
+      "addRest": "+30 s",
+      "skipRest": "Skip rest",
+      "upNext": "Up next",
+      "setOf": "Set {n} of {total}",
+      "tooHardRest": "This is too hard or I need changes",
+      "unwell": "I feel unwell",
+      "unwellHint": "Chest pain, dizziness or severe discomfort: stop and get safety guidance.",
+      "adjustTitle": "Adjust workout",
+      "adjustLead": "Completed sets are always kept. Changes apply to what's left.",
       "actions": {
-        "too-hard": { "label": "This is too hard", "hint": "Lighter loads, softer reps and a bit more rest." },
-        "easier": { "label": "Make it easier", "hint": "About 10% lighter or an easier variation." },
-        "more-rest": { "label": "I need more rest", "hint": "Adds 30 seconds between sets." },
-        "replace": { "label": "Replace this exercise", "hint": "Swap it for one that fits your equipment." },
-        "min20": { "label": "I only have 20 minutes", "hint": "Keeps the essentials and trims the rest." },
-        "tired": { "label": "I'm feeling tired", "hint": "Fewer sets, lighter loads, longer rests." },
-        "skip": { "label": "Skip this exercise", "hint": "Move on without logging it." },
-        "pause": { "label": "Pause workout", "hint": "Stops the timers until you resume." },
-        "end": { "label": "End workout", "hint": "Save what you've done and finish." }
+        "too-hard": {
+          "label": "This is too hard",
+          "hint": "Lighter loads, softer reps and a bit more rest."
+        },
+        "easier": {
+          "label": "Make it easier",
+          "hint": "About 10% lighter or an easier variation."
+        },
+        "more-rest": {
+          "label": "I need more rest",
+          "hint": "Adds 30 seconds between sets."
+        },
+        "replace": {
+          "label": "Replace this exercise",
+          "hint": "Swap it for one that fits your equipment."
+        },
+        "min20": {
+          "label": "I only have 20 minutes",
+          "hint": "Keeps the essentials and trims the rest."
+        },
+        "tired": {
+          "label": "I'm feeling tired",
+          "hint": "Fewer sets, lighter loads, longer rests."
+        },
+        "skip": {
+          "label": "Skip this exercise",
+          "hint": "Move on without logging it."
+        },
+        "pause": {
+          "label": "Pause workout",
+          "hint": "Stops the timers until you resume."
+        },
+        "end": {
+          "label": "End workout",
+          "hint": "Save what you've done and finish."
+        }
       },
-      "replaceTitle": "Replace exercise", "replaceLead": "Pick a replacement for {name}.",
-      "overviewTitle": "All exercises", "setsDone": "{done}/{total} sets",
-      "endTitle": "End workout?", "endBody": "Your {n} completed sets will be saved as a partial workout.", "endEmpty": "You haven't logged any sets. Leave without saving?", "keepGoing": "Keep going", "endSave": "End and save", "endLeave": "Leave workout"
+      "replaceTitle": "Replace exercise",
+      "replaceLead": "Pick a replacement for {name}.",
+      "overviewTitle": "All exercises",
+      "setsDone": "{done}/{total} sets",
+      "endTitle": "End workout?",
+      "endBody": "Your {n} completed sets will be saved as a partial workout.",
+      "endEmpty": "You haven't logged any sets. Leave without saving?",
+      "keepGoing": "Keep going",
+      "endSave": "End and save",
+      "endLeave": "Leave workout",
+      "restart": "Restart",
+      "quit": "Quit",
+      "quitTitle": "Why are you leaving?",
+      "quitLead": "Pick the closest reason. We'll help you with it before you quit.",
+      "reasonUnwell": "I don't feel well right now",
+      "reasonHard": "It's too hard",
+      "reasonHardHint": "Make the rest of the workout easier and carry on.",
+      "reasonUnsure": "I don't know how to do this",
+      "reasonUnsureHint": "Swap this exercise for another one.",
+      "feedback": "Tell us what went wrong"
     },
     "summary": {
-      "title": "Workout complete", "partialTitle": "Good effort", "complete": "Completed", "partial": "Partial",
-      "lead": "{title} is done. Here's how it went.", "partialLead": "You stopped early and that's fine. What you did still counts.",
-      "emptyTitle": "No sets logged", "emptyBody": "Nothing to save this time. Come back whenever you're ready.",
-      "avgHr": "Average heart rate {n} bpm (simulated, demo mode).", "prs": "New personal records", "adapted": "Adjustments made", "adaptNote": "Your next sessions take your feedback into account.", "exercises": "Exercises",
-      "feelTitle": "How did it feel?", "feelNote": "Your answer tunes the loads in your next sessions.", "feel": { "easy": "Too easy", "right": "Just right", "hard": "Too hard" },
-      "save": "Save and view progress", "saveHome": "Save and go home", "discard": "Discard workout", "discardTitle": "Discard workout?", "discardBody": "This session will not be saved and won't count toward progress.", "discardConfirm": "Discard"
+      "setsLine": "{sets} sets across {exercises} exercises.",
+      "title": "Workout complete",
+      "partialTitle": "Good effort",
+      "complete": "Completed",
+      "partial": "Partial",
+      "lead": "{title} is done. Here's how it went.",
+      "partialLead": "You stopped early and that's fine. What you did still counts.",
+      "emptyTitle": "No sets logged",
+      "emptyBody": "Nothing to save this time. Come back whenever you're ready.",
+      "avgHr": "Average heart rate {n} bpm (simulated, demo mode).",
+      "prs": "New personal records",
+      "adapted": "Adjustments made",
+      "adaptNote": "Your next sessions take your feedback into account.",
+      "exercises": "Exercises",
+      "feelTitle": "How did it feel?",
+      "feelNote": "Your answer tunes the loads in your next sessions.",
+      "feel": {
+        "easy": "Too easy",
+        "right": "Just right",
+        "hard": "Too hard"
+      },
+      "save": "Save and view progress",
+      "saveHome": "Save and go home",
+      "discard": "Discard workout",
+      "discardTitle": "Discard workout?",
+      "discardBody": "This session will not be saved and won't count toward progress.",
+      "discardConfirm": "Discard"
     }
   }
 }

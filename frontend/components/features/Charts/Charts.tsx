@@ -31,14 +31,15 @@ export function BarChart({ data, label, unit = "", height = 120 }: { data: BarDa
 	);
 }
 
-export function LineChart({ data, label, unit = "" }: { data: BarDatum[]; label: string; unit?: string }) {
+export function LineChart({ data, label, unit = "", goal, goalLabel = "Goal" }: { data: BarDatum[]; label: string; unit?: string; goal?: number; goalLabel?: string }) {
 	const w = 300;
 	const h = 110;
 	const pad = 14;
 	if (data.length === 0) return null;
 	const values = data.map((d) => d.value);
-	const min = Math.min(...values);
-	const max = Math.max(...values);
+	const extent = goal === undefined ? values : [...values, goal];
+	const min = Math.min(...extent);
+	const max = Math.max(...extent);
 	const span = Math.max(0.5, max - min);
 	const points = data.map((d, i) => {
 		const x = pad + (data.length === 1 ? (w - pad * 2) / 2 : (i * (w - pad * 2)) / (data.length - 1));
@@ -48,6 +49,12 @@ export function LineChart({ data, label, unit = "" }: { data: BarDatum[]; label:
 	return (
 		<figure className={styles.figure}>
 			<svg viewBox={`0 0 ${w} ${h + 22}`} role="img" aria-label={`${label}: ${data.map((d) => `${d.label} ${d.value}${unit}`).join(", ")}`} className={styles.svg}>
+				{goal !== undefined && (
+					<g>
+						<line x1={pad} x2={w - pad} y1={pad + (1 - (goal - min) / span) * (h - pad * 2)} y2={pad + (1 - (goal - min) / span) * (h - pad * 2)} className={styles.goal} strokeDasharray="5 4" />
+						<text x={w - pad} y={pad + (1 - (goal - min) / span) * (h - pad * 2) - 5} textAnchor="end" className={styles.goalText}>{goalLabel} {goal}{unit}</text>
+					</g>
+				)}
 				<polyline fill="none" className={styles.line} strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" points={points.map((p) => `${p.x},${p.y}`).join(" ")} />
 				{points.map((p, i) => (
 					<g key={i}>

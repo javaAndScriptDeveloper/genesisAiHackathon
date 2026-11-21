@@ -1,0 +1,33 @@
+@use "partials/corners";
+
+.notice {
+	display: flex;
+	align-items: flex-start;
+	gap: var(--space-2);
+	padding: var(--space-3);
+	font-size: 1.3rem;
+	line-height: 1.45;
+	@include corners.radius(var(--radius-control));
+
+	svg {
+		flex: none;
+		margin-top: 0.1rem;
+	}
+
+	p {
+		margin: 0;
+		font-size: inherit;
+		line-height: inherit;
+		color: inherit;
+	}
+}
+
+.warning {
+	background: var(--color-warningSoft);
+	color: var(--color-warningText);
+}
+
+.info {
+	background: var(--color-accentSoft);
+	color: var(--color-accentText);
+}

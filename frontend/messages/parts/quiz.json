@@ -24,7 +24,6 @@
       },
       "fighter": {
         "loading": "Loading coaches",
-        "intensity": "Intensity {n} of 3",
         "errorTitle": "Coaches didn't load",
         "errorText": "Check your connection and try again.",
         "retry": "Try again",
@@ -36,7 +35,8 @@
       },
       "ready": {
         "cta": "Start week one",
-        "coach": "{trainer} will coach you in a {style} style.",
+        "building": "Building your plan",
+        "coach": "{trainer} will be your coach.",
         "why": "Why this plan",
         "whyGoal": "Built for your goal: {hint}",
         "whyDays": "{n} sessions a week, {min} minutes each, with recovery days in between.",
@@ -92,7 +92,8 @@
         "fighter": "Now the fun part: choose your coach. Your coach sets the tone of every workout.",
         "fighterPicked": "Good pick. {trainer} and I make a strong team.",
         "sync": "Last step. Connect your watch so I can see heart rate and recovery.",
-        "ready": "{name}, your plan is ready. Week one starts now. Easy pace, steady progress."
+        "ready": "{name}, your plan is ready. Week one starts now. Easy pace, steady progress.",
+        "building": "Give me a moment, {name}. I'm building your plan from everything you told me."
       }
     },
     "theme": {

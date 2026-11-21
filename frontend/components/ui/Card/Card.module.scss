@@ -1,6 +1,7 @@
 @use "partials/corners";
 
-.card {
+// :where keeps this at zero specificity, so a feature's own class can restyle a Card in any CSS order.
+:where(.card) {
 	background: var(--color-surface);
 	border: 0.1rem solid var(--color-border);
 	box-shadow: var(--shadow-card);
@@ -8,7 +9,7 @@
 }
 
 .padded {
-	padding: var(--space-5);
+	padding: var(--card-padding, var(--space-5));
 }
 
 .interactive {

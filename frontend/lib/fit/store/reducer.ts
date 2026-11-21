@@ -1,4 +1,5 @@
 import { toISO, type ISODate } from "../dates";
+import type { Units } from "../units";
 import { findExercise, getExercise } from "../exercises";
 import { applyAdapt, replaceBlock, replaceUnavailable } from "../adapt";
 import { evaluateAchievements, achievementById, totalXp } from "../gamification";
@@ -10,6 +11,7 @@ import type {
 	ActiveSession,
 	AdaptOp,
 	AppNotification,
+	Goal,
 	CoachAction,
 	CoachMessage,
 	Equipment,
@@ -30,10 +32,15 @@ import type {
 export type Action =
 	| { type: "hydrate"; state: FitState }
 	| { type: "reset" }
-	| { type: "complete-onboarding"; profile: Profile; demoHistory: boolean; today: ISODate; now: string }
-	| { type: "update-profile"; profile: Profile; today: ISODate }
+	| { type: "complete-onboarding"; profile: Profile; units: Units; demoHistory: boolean; today: ISODate; now: string; trainerId?: string; /** A plan built before dispatch (the AI plan from onboarding); otherwise the rule-based one. */ planned?: PlannedWorkout[] }
+	| { type: "update-profile"; profile: Profile; units: Units; today: ISODate }
+	| { type: "set-goal"; goal: Goal; goalText: string; today: ISODate }
+	| { type: "set-trainer"; trainerId: string }
+	| { type: "set-units"; units: Units }
+	| { type: "set-goal-weight"; kg: number | null; at?: string }
 	| { type: "sync"; now: string }
 	| { type: "start-workout"; plannedId: string; now: string }
+	| { type: "restart-workout" }
 	| { type: "go-to"; index: number }
 	| { type: "log-set"; reps: number; weight?: number }
 	| { type: "start-timed" }
@@ -71,7 +78,7 @@ export type Action =
 	| { type: "remove-bp"; id: string }
 	| { type: "add-photo"; photo: PhotoCheckIn }
 	| { type: "remove-photo"; id: string }
-	| { type: "add-body-weight"; date: ISODate; kg: number }
+	| { type: "add-body-weight"; date: ISODate; kg: number; at?: string }
 	| { type: "partner"; id: string; status: "invited" | "accepted" | null }
 	| { type: "joint-workout"; workoutId: string; partnerId: string | null }
 	| { type: "dismiss-celebration" }
@@ -214,25 +221,39 @@ export function reducer(state: FitState, action: Action): FitState {
 		case "reset":
 			return emptyState();
 		case "complete-onboarding": {
-			const base: FitState = { ...emptyState(), profile: action.profile, notificationSettings: state.notificationSettings, bodyWeights: [{ date: action.today, kg: action.profile.weightKg }] };
+			const base: FitState = { ...emptyState(), units: action.units, trainerId: action.trainerId ?? null, profile: action.profile, notificationSettings: state.notificationSettings, bodyWeights: [{ date: action.today, kg: action.profile.weightKg }] };
 			const devices = { apple: action.profile.wearable === "apple", garmin: action.profile.wearable === "garmin" };
 			if (action.demoHistory) {
 				const seeded = seedHistory(action.profile, action.today);
 				const { futureFrom: _unused, ...rest } = seeded;
 				void _unused;
-				let s: FitState = { ...base, ...rest, devices };
+				// Demo history fills the past; the user's own plan, when given, owns everything from today on.
+				const planned = action.planned ? [...rest.planned.filter((w) => w.date < action.today), ...action.planned] : rest.planned;
+				let s: FitState = { ...base, ...rest, planned, devices };
 				s = appendNotifications(s, [{ id: "n-welcome", kind: "coach", title: "Your plan is ready", body: "I built it from your goal, schedule and equipment. Ask me to adjust anything.", createdAt: action.now, read: false, href: "/coach" }]);
 				return appendNotifications(s, deriveNotifications(s, new Date(action.now)));
 			}
-			const planned = generatePlan(action.profile, action.today, 4);
+			const planned = action.planned ?? generatePlan(action.profile, action.today, 4);
 			let s: FitState = { ...base, planned, devices };
 			s = appendNotifications(s, [{ id: "n-welcome", kind: "coach", title: "Your plan is ready", body: "I built it from your goal, schedule and equipment. Ask me to adjust anything.", createdAt: action.now, read: false, href: "/coach" }]);
 			return appendNotifications(s, deriveNotifications(s, new Date(action.now)));
 		}
 		case "update-profile": {
 			const devices = { apple: action.profile.wearable === "apple" ? true : state.devices.apple && action.profile.wearable === "none" ? state.devices.apple : state.devices.apple, garmin: state.devices.garmin };
-			return rebuildUpcoming({ ...state, devices }, action.profile, action.today);
+			// The preferences form does not carry the free-text goal; keep it unless the preset goal changed.
+			const prev = state.profile;
+			const profile = action.profile.goalText === undefined && prev?.goalText && prev.goal === action.profile.goal ? { ...action.profile, goalText: prev.goalText } : action.profile;
+			return rebuildUpcoming({ ...state, devices, units: action.units }, profile, action.today);
 		}
+		case "set-goal-weight":
+			return { ...state, goalWeightKg: action.kg, goalSetAt: action.kg === null ? null : (action.at ?? null) };
+		case "set-units": {
+			return { ...state, units: action.units };
+		}
+		case "set-goal":
+			return state.profile ? reducer(state, { type: "update-profile", profile: { ...state.profile, goal: action.goal, goalText: action.goalText }, units: state.units, today: action.today }) : state;
+		case "set-trainer":
+			return { ...state, trainerId: action.trainerId };
 		case "sync":
 			return state.profile ? appendNotifications(state, deriveNotifications(state, new Date(action.now))) : state;
 		case "start-workout": {
@@ -260,6 +281,11 @@ export function reducer(state: FitState, action: Action): FitState {
 			};
 			return { ...state, active };
 		}
+		case "restart-workout":
+			return withActive(state, (a) => {
+				const exercises = a.exercises.map((b) => ({ ...b, sets: b.sets.map((s) => ({ ...s, done: false, reps: undefined, weight: undefined })), skipped: false }));
+				return { ...a, exercises, index: 0, phase: "work", paused: false, safetyStop: false, elapsedSec: 0, restLeft: 0, restTotal: 0, workLeft: null, hrSamples: [], outcome: null };
+			});
 		case "go-to":
 			return withActive(state, (a) => (a.phase === "summary" ? a : { ...a, index: Math.min(Math.max(0, action.index), a.exercises.length - 1), phase: a.phase === "rest" ? a.phase : "work", workLeft: null }));
 		case "log-set":
@@ -416,7 +442,7 @@ export function reducer(state: FitState, action: Action): FitState {
 		case "remove-photo":
 			return { ...state, photos: state.photos.filter((p) => p.id !== action.id) };
 		case "add-body-weight":
-			return { ...state, bodyWeights: [...state.bodyWeights.filter((b) => b.date !== action.date), { date: action.date, kg: action.kg }].sort((a, b) => a.date.localeCompare(b.date)) };
+			return { ...state, bodyWeights: [...state.bodyWeights.filter((b) => b.date !== action.date), { date: action.date, kg: action.kg, at: action.at }].sort((a, b) => a.date.localeCompare(b.date)) };
 		case "partner": {
 			const partners = { ...state.partners };
 			if (action.status === null) delete partners[action.id];

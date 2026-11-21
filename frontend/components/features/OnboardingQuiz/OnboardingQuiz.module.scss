@@ -145,6 +145,7 @@
 	.trainer {
 		position: relative;
 		display: flex;
+		align-items: center;
 		gap: var(--space-3);
 		padding: var(--space-3) var(--space-4);
 		background: var(--color-surface);
@@ -174,42 +175,11 @@
 		pointer-events: none;
 	}
 
-	.avatar {
-		display: grid;
-		flex: none;
-		place-items: center;
-		width: 3.2rem;
-		height: 3.2rem;
-		font-size: 1.2rem;
-		font-weight: 800;
-		border-radius: 50%;
-	}
 
-	.avatarLg {
-		width: 5.6rem;
-		height: 5.6rem;
-		font-size: 1.8rem;
-	}
 
-	.accent {
-		background: var(--color-accentSoft);
-		color: var(--color-accentText);
-	}
 
-	.success {
-		background: var(--color-successSoft);
-		color: var(--color-successText);
-	}
 
-	.warning {
-		background: var(--color-warningSoft);
-		color: var(--color-warningText);
-	}
 
-	.danger {
-		background: var(--color-dangerSoft);
-		color: var(--color-dangerText);
-	}
 
 	.trainerText {
 		display: flex;
@@ -219,24 +189,11 @@
 		min-width: 0;
 	}
 
-	.trainerHead {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		gap: var(--space-2);
-	}
 
 	.trainerName {
 		font-size: 1.6rem;
 	}
 
-	.trainerStyle {
-		color: var(--color-accentText);
-		font-size: 1.2rem;
-		font-weight: 700;
-		letter-spacing: 0.06em;
-		text-transform: uppercase;
-	}
 
 	.tagline {
 		color: var(--color-textMuted);
@@ -244,21 +201,8 @@
 		line-height: 1.4;
 	}
 
-	.intensity {
-		display: inline-flex;
-		gap: 0.3rem;
-	}
 
-	.bolt {
-		width: 0.6rem;
-		height: 1.4rem;
-		background: var(--color-border);
-		border-radius: var(--radius-pill);
-	}
 
-	.boltOn {
-		background: var(--color-accent);
-	}
 
 	.badges {
 		display: flex;

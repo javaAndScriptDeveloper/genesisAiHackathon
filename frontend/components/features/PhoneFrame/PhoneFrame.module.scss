@@ -22,6 +22,7 @@
 
 // Fitness app theme: Training UI design system (training-ui/), dark. Scoped to the device so /ui-kit keeps the base kit look.
 .device {
+	--card-padding: var(--space-4);
 
 	position: relative;
 	width: 41.4rem;
@@ -123,8 +124,8 @@
 	width: 2.4rem;
 	height: 1.2rem;
 	border: 0.1rem solid currentColor;
-	border-radius: 0.4rem;
 	opacity: 0.85;
+	@include corners.radius(0.4rem);
 
 	&::before {
 		content: "";
@@ -132,7 +133,7 @@
 		inset: 0.15rem;
 		right: 0.5rem;
 		background: currentColor;
-		border-radius: 0.2rem;
+		@include corners.radius(0.2rem);
 	}
 }
 

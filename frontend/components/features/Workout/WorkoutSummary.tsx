@@ -1,11 +1,13 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { Clock01Icon, Dumbbell01Icon, FlashIcon } from "@hugeicons/core-free-icons";
 import { useState } from "react";
-import { Badge, Button, Card, EmptyState, Sheet } from "@/components/ui";
+import { AnimatedNumber, Badge, Button, Card, EmptyState, Icon, Sheet, SportIcon } from "@/components/ui";
+import { kcalFor } from "@/lib/fit/calories";
 import { OptionCard } from "@/components/features/OptionCard/OptionCard";
 import { getExercise } from "@/lib/fit/exercises";
 import { useFit } from "@/lib/fit/store/FitProvider";
+import { useActionNavigate, useUnits } from "@/lib/fit/store/hooks";
 import { previewLog } from "@/lib/fit/store/reducer";
 import type { Perceived } from "@/lib/fit/types";
 import { useT } from "@/lib/i18n/I18nProvider";
@@ -13,8 +15,9 @@ import styles from "./Workout.module.scss";
 
 export function WorkoutSummary() {
 	const t = useT();
-	const router = useRouter();
 	const { state, dispatch, today } = useFit();
+	const u = useUnits();
+	const go = useActionNavigate();
 	const [confirmDiscard, setConfirmDiscard] = useState(false);
 	const a = state.active;
 	if (!a) return null;
@@ -27,10 +30,7 @@ export function WorkoutSummary() {
 					description={t("fit.summary.emptyBody")}
 					action={
 						<Button
-							onClick={() => {
-								dispatch({ type: "finish", today, now: new Date().toISOString() });
-								router.replace("/training");
-							}}
+							onClick={() => go("/training", { type: "finish", today, now: new Date().toISOString() }, { replace: true })}
 						>
 							{t("fit.workout.toTraining")}
 						</Button>
@@ -46,8 +46,7 @@ export function WorkoutSummary() {
 	const perceived = a.perceived ?? "right";
 
 	const save = (dest: string) => {
-		dispatch({ type: "finish", today, now: new Date().toISOString() });
-		router.replace(dest);
+		go(dest, { type: "finish", today, now: new Date().toISOString() }, { replace: true });
 	};
 
 	return (
@@ -59,11 +58,12 @@ export function WorkoutSummary() {
 			</div>
 
 			<div className={styles.sumGrid}>
-				<Card className={styles.sumStat}><strong>{Math.max(1, Math.round(log.durationSec / 60))}</strong><span>{t("fit.common.minShort")}</span></Card>
-				<Card className={styles.sumStat}><strong>{sets}</strong><span>{t("fit.common.sets")}</span></Card>
-				<Card className={styles.sumStat}><strong>{log.volumeKg.toLocaleString("en-US")}</strong><span>kg</span></Card>
-				<Card className={styles.sumStat}><strong>+{log.xp}</strong><span>XP</span></Card>
+				<Card className={styles.sumStat}><Icon icon={Clock01Icon} size={16} /><strong><AnimatedNumber value={Math.max(1, Math.round(log.durationSec / 60))} /></strong><span>{t("fit.common.minShort")}</span></Card>
+				<Card className={styles.sumStat}><SportIcon name="flame" size={16} /><strong><AnimatedNumber value={kcalFor(log.exercises.filter((e) => !e.skipped).map((e) => e.exerciseId), state.profile?.weightKg ?? 70, log.durationSec / 60)} /></strong><span>kcal</span></Card>
+				<Card className={styles.sumStat}><Icon icon={Dumbbell01Icon} size={16} /><strong><AnimatedNumber value={u.mass(log.volumeKg)} /></strong><span>{u.unit}</span></Card>
+				<Card className={styles.sumStat}><Icon icon={FlashIcon} size={16} /><strong><AnimatedNumber value={log.xp} prefix="+" /></strong><span>XP</span></Card>
 			</div>
+			<p className={styles.note}>{t("fit.summary.setsLine", { sets, exercises: log.exercises.filter((e) => !e.skipped).length })}</p>
 			{log.avgHr && <p className={styles.note}>{t("fit.summary.avgHr", { n: log.avgHr })}</p>}
 
 			{log.prs.length > 0 && (
@@ -109,7 +109,7 @@ export function WorkoutSummary() {
 			<Sheet open={confirmDiscard} onClose={() => setConfirmDiscard(false)} title={t("fit.summary.discardTitle")} closeLabel={t("common.close")} variant="center" footer={
 				<>
 					<Button variant="secondary" onClick={() => setConfirmDiscard(false)}>{t("fit.common.cancel")}</Button>
-					<Button variant="danger" onClick={() => { dispatch({ type: "discard-active" }); router.replace("/training"); }}>{t("fit.summary.discardConfirm")}</Button>
+					<Button variant="danger" onClick={() => go("/training", { type: "discard-active" }, { replace: true })}>{t("fit.summary.discardConfirm")}</Button>
 				</>
 			}>
 				<p>{t("fit.summary.discardBody")}</p>

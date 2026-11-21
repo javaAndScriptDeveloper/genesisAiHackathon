@@ -3,6 +3,8 @@
 import clsx from "clsx";
 import { Cancel01Icon } from "@hugeicons/core-free-icons";
 import { useEffect, useId, useRef, type ReactNode } from "react";
+import { createPortal } from "react-dom";
+import { useOverlayRoot } from "./OverlayRoot";
 import { IconButton } from "../IconButton/IconButton";
 import styles from "./Sheet.module.scss";
 
@@ -13,28 +15,38 @@ interface SheetProps {
 	closeLabel?: string;
 	children: ReactNode;
 	footer?: ReactNode;
-	/** `center` renders a compact dialog (confirmations); `bottom` a sheet that slides up. */
-	variant?: "bottom" | "center";
+	panelClassName?: string;
+	/** `center` renders a compact dialog (confirmations); `bottom` a sheet that slides up; `full` covers the whole screen (detail views). */
+	variant?: "bottom" | "center" | "full";
 	/** Hides the close button and blocks backdrop/Escape dismissal (safety stops, required choices). */
 	modal?: boolean;
 }
 
 // In-frame overlay. A native <dialog> would escape the phone frame on desktop, so sheets are positioned
 // against the nearest positioned ancestor (the device screen). Escape closes, focus moves inside, Tab is trapped.
-export function Sheet({ open, onClose, title, closeLabel = "Close", children, footer, variant = "bottom", modal = false }: SheetProps) {
+export function Sheet({ open, onClose, title, closeLabel = "Close", children, footer, panelClassName, variant = "bottom", modal = false }: SheetProps) {
 	const ref = useRef<HTMLDivElement>(null);
 	const titleId = useId();
+	const overlayRoot = useOverlayRoot();
+	const panelRef = ref;
+	const dragStart = useRef<number | null>(null);
+	// Parents usually pass a fresh inline onClose every render. Keep the latest in a ref so the effect below does not
+	// re-run (and steal focus) each time the page behind re-renders, e.g. the workout timer ticking every second.
+	const onCloseRef = useRef(onClose);
+	useEffect(() => {
+		onCloseRef.current = onClose;
+	});
 
 	useEffect(() => {
 		if (!open) return;
 		const previous = document.activeElement instanceof HTMLElement ? document.activeElement : null;
 		const panel = ref.current;
 		const focusable = () => Array.from(panel?.querySelectorAll<HTMLElement>('button:not([disabled]), [href], input:not([disabled]), textarea, select, [tabindex]:not([tabindex="-1"])') ?? []);
-		(panel?.querySelector<HTMLElement>("input, textarea") ?? panel)?.focus();
+		(panel?.querySelector<HTMLElement>("input, textarea") ?? panel)?.focus({ preventScroll: true });
 		const onKey = (event: KeyboardEvent) => {
 			if (event.key === "Escape" && !modal) {
 				event.stopPropagation();
-				onClose();
+				onCloseRef.current();
 			}
 			if (event.key === "Tab") {
 				const items = focusable();
@@ -53,15 +65,42 @@ export function Sheet({ open, onClose, title, closeLabel = "Close", children, fo
 		document.addEventListener("keydown", onKey);
 		return () => {
 			document.removeEventListener("keydown", onKey);
-			previous?.focus();
+			previous?.focus({ preventScroll: true });
 		};
-	}, [open, onClose, modal]);
+	}, [open, modal]);
 
 	if (!open) return null;
-	return (
+	const node = (
 		<div className={clsx(styles.root, styles[variant])}>
 			<div className={styles.backdrop} onClick={modal ? undefined : onClose} aria-hidden />
-			<div ref={ref} role="dialog" aria-modal="true" aria-labelledby={titleId} tabIndex={-1} className={styles.panel}>
+			<div ref={ref} role="dialog" aria-modal="true" aria-labelledby={titleId} tabIndex={-1} className={clsx(styles.panel, panelClassName)}>
+				{variant === "bottom" && !modal && (
+					<div
+						className={styles.grab}
+						aria-hidden
+						onPointerDown={(e) => {
+							dragStart.current = e.clientY;
+							e.currentTarget.setPointerCapture(e.pointerId);
+						}}
+						onPointerMove={(e) => {
+							const panel = panelRef.current;
+							if (dragStart.current === null || !panel) return;
+							panel.style.transition = "none";
+							panel.style.transform = `translateY(${Math.max(0, e.clientY - dragStart.current)}px)`;
+						}}
+						onPointerUp={(e) => {
+							const panel = panelRef.current;
+							const start = dragStart.current;
+							dragStart.current = null;
+							if (!panel || start === null) return;
+							panel.style.transition = "";
+							if (e.clientY - start > 80) onCloseRef.current();
+							else panel.style.transform = "";
+						}}
+					>
+						<span />
+					</div>
+				)}
 				<div className={styles.header}>
 					<h3 id={titleId} className={styles.title}>
 						{title}
@@ -73,4 +112,5 @@ export function Sheet({ open, onClose, title, closeLabel = "Close", children, fo
 			</div>
 		</div>
 	);
+	return overlayRoot ? createPortal(node, overlayRoot) : node;
 }

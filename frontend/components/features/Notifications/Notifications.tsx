@@ -1,13 +1,17 @@
 "use client";
 
-import { Notification01Icon, Settings02Icon } from "@hugeicons/core-free-icons";
+import { Alert02Icon, ChartUpIcon, Chat01Icon, Dumbbell03Icon, Medal01Icon, Moon01Icon, Notification01Icon, Settings02Icon, Target01Icon } from "@hugeicons/core-free-icons";
 import { useRouter } from "next/navigation";
 import { ScreenHeader } from "@/components/features/ScreenHeader/ScreenHeader";
-import { Badge, Button, EmptyState, IconButton } from "@/components/ui";
+import { Badge, Button, EmptyState, Icon, IconButton, type IconDefinition } from "@/components/ui";
 import { track } from "@/lib/fit/analytics";
+import type { NotificationKind } from "@/lib/fit/types";
 import { useFit } from "@/lib/fit/store/FitProvider";
+import { useActionNavigate } from "@/lib/fit/store/hooks";
 import { useT } from "@/lib/i18n/I18nProvider";
 import kit from "../ScreenKit/ScreenKit.module.scss";
+
+const KIND_ICONS: Record<NotificationKind, IconDefinition> = { workout: Dumbbell03Icon, missed: Alert02Icon, achievement: Medal01Icon, "weekly-goal": Target01Icon, recovery: Moon01Icon, coach: Chat01Icon, "weekly-summary": ChartUpIcon };
 
 function ago(iso: string, t: (k: string, p?: Record<string, number>) => string): string {
 	const mins = Math.max(0, Math.round((Date.now() - new Date(iso).getTime()) / 60_000));
@@ -21,6 +25,7 @@ export function Notifications() {
 	const t = useT();
 	const router = useRouter();
 	const { state, dispatch } = useFit();
+	const go = useActionNavigate();
 	const unread = state.notifications.filter((n) => !n.read).length;
 	return (
 		<div className={kit.page}>
@@ -38,17 +43,20 @@ export function Notifications() {
 										type="button"
 										className={`${kit.row} ${n.read ? "" : kit.unread}`}
 										onClick={() => {
-											dispatch({ type: "notification-read", id: n.id });
 											track("notification_opened", { id: n.id, kind: n.kind });
-											if (n.href) router.push(n.href);
+											if (n.href) go(n.href, { type: "notification-read", id: n.id });
+											else dispatch({ type: "notification-read", id: n.id });
 										}}
 									>
+										<span className={kit.plate}>
+											<Icon icon={KIND_ICONS[n.kind]} size={20} />
+										</span>
 										<span className={kit.rowText}>
 											<strong>{n.title}</strong>
 											<span>{n.body}</span>
 											<span>{ago(n.createdAt, t)}</span>
 										</span>
-										<Badge tone={n.read ? "neutral" : "accent"}>{t(`fit.notifications.kind.${n.kind}`)}</Badge>
+										{!n.read && <Badge tone="accent">{t("fit.notifications.new")}</Badge>}
 									</button>
 								</li>
 							))}

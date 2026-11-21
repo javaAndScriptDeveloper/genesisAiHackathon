@@ -178,6 +178,11 @@
       "age": "Age",
       "gender": "Gender (optional)",
       "height": "Height",
+      "inches": "Inches",
+      "units": "Measurement units",
+      "metric": "Metric (kg, cm)",
+      "imperial": "Imperial (lb, ft)",
+      "years": "years",
       "weight": "Weight",
       "equipment": "Equipment you have",
       "equipmentNote": "Leave everything unchecked for bodyweight-only training.",
@@ -201,8 +206,8 @@
         "nameLong": "Keep it under 30 characters",
         "number": "Enter a number",
         "age": "Age must be 14 to 90",
-        "height": "Height must be 120 to 230 cm",
-        "weight": "Weight must be 30 to 250 kg"
+        "height": "Enter a height between 120 and 230 cm (3′11″ to 7′7″)",
+        "weight": "Enter a weight between 30 and 250 kg (66 to 551 lb)"
       },
       "steps": {
         "about": {
@@ -211,7 +216,7 @@
         },
         "body": {
           "title": "Your body stats",
-          "lead": "Used to pick sensible starting loads. Stays on your device."
+          "lead": "Pick your units first. Used to choose sensible starting loads, and stays on your device."
         },
         "goal": {
           "title": "What's your main goal?",
@@ -246,7 +251,26 @@
     "gate": {
       "cta": "See Premium"
     },
+    "insight": {
+      "headNone": "Your insights start with your first workout",
+      "headDone": "Week complete. Well done.",
+      "headSome": "On track, {left} more to go this week",
+      "headFresh": "A fresh week, start with your next session",
+      "tipConsistent": "Consistency is your superpower. Keep protecting your rest days.",
+      "tipVolumeDown": "Volume dipped compared with last week. Normal after a lighter week, so build back gradually.",
+      "tipStreak": "{n} planned sessions in a row. Rest days never break it.",
+      "tipDefault": "Small, steady sessions beat rare heroic ones. Aim for your next planned day."
+    },
     "progress": {
+      "calories": "Calories",
+      "goal": "Goal",
+      "goalWeight": "Goal weight",
+      "goalHint": "Set a goal and it shows as a line on your chart.",
+      "goalSaved": "Goal saved",
+      "goalReached": "You are at your goal weight.",
+      "toGoal": "{n} {unit} {dir}",
+      "toLose": "to lose to reach your goal",
+      "toGain": "to gain to reach your goal",
       "title": "Progress",
       "subtitle": "Your training, in numbers",
       "overview": "Overview",
@@ -312,6 +336,61 @@
       "photosLockedTitle": "Unlimited photo check-ins",
       "photosLockedBody": "Free includes {n} photos. Premium keeps your whole journey."
     },
+    "awards": {
+      "level": "Level",
+      "overall": "Overall",
+      "workouts": "Workouts",
+      "minutes": "Minutes",
+      "bestStreak": "Best streak",
+      "collection": "Collection",
+      "collected": "{n} of {total} collected",
+      "aheadOf": "Ahead of {percent} of users",
+      "demoRarity": "Demo rarity: {pct}% unlocked",
+      "tier": {
+        "common": "Common",
+        "rare": "Rare",
+        "epic": "Epic",
+        "legendary": "Legendary"
+      },
+      "tipTitle": "Coach's note",
+      "status": "Status",
+      "howTo": "How to unlock",
+      "locked": "Locked",
+      "reward": "Reward",
+      "close": "Close",
+      "share": "Share",
+      "shareText": "I unlocked “{title}” in Personal Coach!",
+      "rank": {
+        "1": "Rookie",
+        "2": "Mover",
+        "3": "Regular",
+        "4": "Athlete",
+        "5": "Pro",
+        "6": "Elite",
+        "7": "Champion",
+        "8": "Legend"
+      },
+      "badges": "Badges"
+    },
+    "history": {
+      "totals": "Totals",
+      "groupCount": "{n} workouts"
+    },
+    "checkins": {
+      "summary": "Weight summary",
+      "current": "Current weight",
+      "updated": "Updated {when}",
+      "sinceStart": "Since start",
+      "entries": "Entries",
+      "lastHint": "Last entry: {value} · {when}. Change it and save to add a new one.",
+      "firstHint": "Add your first weight. It will show up in your history below.",
+      "weightSaved": "Saved. See it in your weight history below.",
+      "goalSet": "Current goal: {value} · set {when}",
+      "history": "Weight history",
+      "entryCount": "{n} entries",
+      "historyEmpty": "No entries yet",
+      "historyEmptyBody": "Every weight you save appears here with the date and time."
+    },
     "quiz": {
       "skip": "Skip for now",
       "nameLabel": "Your name",
@@ -336,7 +415,6 @@
       },
       "fighter": {
         "loading": "Loading coaches",
-        "intensity": "Intensity {n} of 3",
         "errorTitle": "Coaches didn't load",
         "errorText": "Check your connection and try again.",
         "retry": "Try again",
@@ -348,7 +426,8 @@
       },
       "ready": {
         "cta": "Start week one",
-        "coach": "{trainer} will coach you in a {style} style.",
+        "building": "Building your plan",
+        "coach": "{trainer} will be your coach.",
         "why": "Why this plan",
         "whyGoal": "Built for your goal: {hint}",
         "whyDays": "{n} sessions a week, {min} minutes each, with recovery days in between.",
@@ -404,7 +483,8 @@
         "fighter": "Now the fun part: choose your coach. Your coach sets the tone of every workout.",
         "fighterPicked": "Good pick. {trainer} and I make a strong team.",
         "sync": "Last step. Connect your watch so I can see heart rate and recovery.",
-        "ready": "{name}, your plan is ready. Week one starts now. Easy pace, steady progress."
+        "ready": "{name}, your plan is ready. Week one starts now. Easy pace, steady progress.",
+        "building": "Give me a moment, {name}. I'm building your plan from everything you told me."
       }
     },
     "theme": {
@@ -420,6 +500,7 @@
       "empty": "You're all caught up",
       "emptyBody": "Reminders, achievements and weekly summaries will show up here.",
       "markAll": "Mark all as read",
+      "new": "New",
       "now": "Just now",
       "minAgo": "{n} min ago",
       "hourAgo": "{n} h ago",
@@ -436,6 +517,10 @@
     },
     "profile": {
       "title": "Profile",
+      "openSettings": "Open settings",
+      "goPremium": "Go Premium",
+      "yourTrainer": "Your trainer",
+      "trainerHint": "Choose who coaches you in Settings.",
       "levelLine": "Level {level} · {xp} XP",
       "free": "Free",
       "perWeek": "days/week",
@@ -472,11 +557,33 @@
     },
     "settings": {
       "title": "Settings",
+      "units": "Units",
+      "unitsNote": "Changes how weights and height are shown. Your data is stored once and converted on the fly.",
+      "goalTitle": "Your goal",
+      "goalLabel": "Describe your goal",
+      "goalHint": "For example: run a half marathon by June.",
+      "goalSave": "Save goal",
+      "micStart": "Speak your goal",
+      "micStop": "Stop recording",
+      "micTranscribing": "Listening to what you said…",
+      "micFailed": "Couldn't turn your voice into text. You can type your goal instead.",
+      "micDenied": "Microphone access was blocked. Allow it in your browser, or type your goal.",
+      "micUnsupported": "Voice input isn't supported in this browser. Type your goal instead.",
+      "goalSaved": "Goal updated and plan refreshed",
+      "goalUnavailable": "Saved your wording, but goal matching is unavailable right now, so your plan is unchanged.",
+      "goalKept": "Saved your wording, but it didn't match a preset, so your plan is unchanged.",
+      "trainerTitle": "Your trainer",
+      "trainerNote": "Pick who coaches you.",
+      "trainerLoadFailed": "Couldn't load trainers. Try again later.",
+      "trainerSet": "Trainer set to {name}",
       "language": "Language",
+      "languageLabel": "Show the app in",
       "languageNote": "More languages are on the way. Anything not translated yet appears in English.",
       "reminders": "Reminders",
       "remindersNote": "Fewer, kinder notifications. You choose which ones you want.",
       "reminderTime": "Workout reminder time",
+      "reminderTimeHint": "When your daily workout nudge arrives on training days.",
+      "setTime": "Set time",
       "push": "Browser notifications",
       "pushNote": "Shows system notifications while this app is open in a browser. Real push needs a server and isn't set up in this demo.",
       "pushUnsupported": "This browser doesn't support notifications",
@@ -643,6 +750,10 @@
       }
     },
     "session": {
+      "targets": "Muscles worked",
+      "equipmentTitle": "Equipment",
+      "friendly": "{part}-friendly",
+      "bodyweightOnly": "No equipment needed",
       "title": "Workout",
       "notFound": "Workout not found",
       "notFoundBody": "It may have been replaced when your plan was updated.",
@@ -707,7 +818,8 @@
       "today": "Today",
       "training": "Training",
       "progress": "Progress",
-      "coach": "Coach"
+      "coach": "Coach",
+      "profile": "Profile"
     },
     "common": {
       "back": "Back",
@@ -756,9 +868,9 @@
     },
     "today": {
       "greeting": {
-        "morning": "Good morning, {name}",
-        "afternoon": "Good afternoon, {name}",
-        "evening": "Good evening, {name}"
+        "morning": "Good morning, {name} 👋",
+        "afternoon": "Good afternoon, {name} 👋",
+        "evening": "Good evening, {name} 👋"
       },
       "notifications": "Notifications, {n} unread",
       "profile": "Profile and settings",
@@ -822,19 +934,57 @@
       "3": "Hard"
     },
     "video": {
-      "none": "No demo video mapped yet for this exercise.",
-      "search": "Search the Leap Fitness channel",
       "title": "{name} demonstration",
-      "play": "Play demonstration of {name}",
-      "playLabel": "Play demo",
-      "credit": "Video: Leap Fitness on YouTube.",
-      "openYoutube": "Open on YouTube"
+      "play": "Play {name}",
+      "playLabel": "Play video",
+      "related": "Related clip · {name}",
+      "searchExact": "Find this exercise",
+      "openYoutube": "Open on YouTube",
+      "pause": "Pause video",
+      "resume": "Play video"
+    },
+    "music": {
+      "title": "Workout music",
+      "close": "Close music player",
+      "choose": "Choose a track",
+      "playing": "Playing on repeat",
+      "paused": "Paused",
+      "play": "Play music",
+      "pause": "Pause music",
+      "previous": "Previous track",
+      "next": "Next track",
+      "mute": "Mute music",
+      "unmute": "Unmute music",
+      "volume": "Volume",
+      "off": "Turn off music",
+      "error": "Couldn’t play the track. Try again.",
+      "tracks": {
+        "steady": "Steady Beat",
+        "drive": "Intervals",
+        "cooldown": "Cool Down"
+      },
+      "playingNext": "Playing, then the next track",
+      "seek": "Seek",
+      "repeat": "Repeat track"
     },
     "guide": {
+      "title": "Exercise guide",
+      "short": {
+        "steps": "How to",
+        "tips": "Tips",
+        "breathing": "Breathing",
+        "mistakes": "Mistakes"
+      },
       "steps": "How to do it",
       "tips": "Technique tips",
       "breathing": "Breathing",
-      "mistakes": "Common mistakes"
+      "mistakes": "Common mistakes",
+      "lead": {
+        "steps": "Follow the sequence. Slow and controlled beats fast and sloppy.",
+        "tips": "Small details that make the movement safer and more effective.",
+        "breathing": "Steady breath keeps you calm and the movement smooth.",
+        "mistakes": "Watch for these. Fixing one usually fixes the rest."
+      }
     },
     "exercise": {
       "title": "Exercise",
@@ -843,6 +993,8 @@
       "noEquipment": "No equipment"
     },
     "training": {
+      "today": "Today",
+      "upNext": "Up next · {day}",
       "title": "Training",
       "subtitle": "Your plan and exercise library",
       "plan": "Plan",
@@ -852,12 +1004,21 @@
       "thisWeek": "This week",
       "emptyWeek": "Nothing planned",
       "emptyWeekBody": "This week is all recovery. Use it well.",
-      "recoveryNote": "Training days are spaced so there is recovery between sessions. Days without a workout are recovery days.",
-      "editPlan": "Edit training days and preferences",
+      "recoveryTitle": "Rest is part of training",
+      "recoveryNote": "Days between workouts give your body time to recover.",
+      "editPlan": "Edit training plan",
+      "exerciseCount": {
+        "one": "{count} exercise",
+        "other": "{count} exercises"
+      },
       "search": "Search exercises",
       "searchPlaceholder": "Squat, row, plank…",
       "filterMuscle": "Filter by muscle",
-      "onlyMine": "Only exercises that fit my equipment and limits",
+      "onlyMine": "Fits my setup",
+      "onlyMineHint": "Only exercises that fit my equipment and limits",
+      "medium": "Medium",
+      "pro": "PRO",
+      "proLevel": "PRO difficulty: hard exercises available",
       "noResults": "No exercises found",
       "noResultsBody": "Try another search or show everything.",
       "clearFilters": "Show all exercises"
@@ -871,6 +1032,10 @@
       "noneTitle": "No workout in progress",
       "noneBody": "Start one from your plan.",
       "toTraining": "Go to training",
+      "tooHardPrompt": "Is it too hard?",
+      "tooHardHint": "We can lighten the rest of the workout so you can finish it instead of stopping.",
+      "regenEasier": "Make the rest easier",
+      "regenShort": "Trim to 15 minutes",
       "end": "End workout",
       "pause": "Pause workout",
       "resume": "Resume",
@@ -962,9 +1127,20 @@
       "endEmpty": "You haven't logged any sets. Leave without saving?",
       "keepGoing": "Keep going",
       "endSave": "End and save",
-      "endLeave": "Leave workout"
+      "endLeave": "Leave workout",
+      "restart": "Restart",
+      "quit": "Quit",
+      "quitTitle": "Why are you leaving?",
+      "quitLead": "Pick the closest reason. We'll help you with it before you quit.",
+      "reasonUnwell": "I don't feel well right now",
+      "reasonHard": "It's too hard",
+      "reasonHardHint": "Make the rest of the workout easier and carry on.",
+      "reasonUnsure": "I don't know how to do this",
+      "reasonUnsureHint": "Swap this exercise for another one.",
+      "feedback": "Tell us what went wrong"
     },
     "summary": {
+      "setsLine": "{sets} sets across {exercises} exercises.",
       "title": "Workout complete",
       "partialTitle": "Good effort",
       "complete": "Completed",

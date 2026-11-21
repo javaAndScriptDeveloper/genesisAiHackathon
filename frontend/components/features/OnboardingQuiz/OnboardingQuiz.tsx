@@ -4,19 +4,20 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { AlertCircleIcon, ArrowLeft02Icon, ArrowRight02Icon, Tick02Icon, UserGroupIcon } from "@hugeicons/core-free-icons";
 import clsx from "clsx";
-import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 import { OptionCard } from "@/components/features/OptionCard/OptionCard";
 import { Spotty, type SpottyMood } from "@/components/features/Spotty/Spotty";
 import { ThemeToggle } from "@/components/features/ThemeToggle/ThemeToggle";
-import { Badge, Button, Card, EmptyState, Icon, IconButton, Input, ProgressBar, Skeleton, Switch } from "@/components/ui";
-import { parseGoal, useTrainers, type GoalResult, type Trainer } from "@/lib/api/onboarding";
+import { Avatar, Badge, Button, Card, EmptyState, Icon, IconButton, Input, ProgressBar, Skeleton, Switch } from "@/components/ui";
+import { parseGoal, type GoalResult } from "@/lib/api/onboarding";
+import { usePersonalPlan } from "@/lib/api/plan";
+import { useTrainers, type Trainer } from "@/lib/api/trainers";
 import { WEEKDAYS } from "@/lib/fit/dates";
 import { DAYS, DURATIONS, EQUIPMENT, EXPERIENCES, GOALS, LOCATIONS, WEARABLES } from "@/lib/fit/options";
-import { generatePlan } from "@/lib/fit/plan";
 import { useFit } from "@/lib/fit/store/FitProvider";
+import { useActionNavigate } from "@/lib/fit/store/hooks";
 import type { Equipment, Gender, Profile, TrainingLocation } from "@/lib/fit/types";
 import { useT } from "@/lib/i18n/I18nProvider";
 import styles from "./OnboardingQuiz.module.scss";
@@ -88,13 +89,12 @@ const toProfile = (v: Form): Profile => ({
 	limitations: [],
 	limitationNote: "",
 	wearable: v.wearable,
-	trainerId: v.trainerId,
 });
 
 export function OnboardingQuiz() {
 	const t = useT();
-	const router = useRouter();
-	const { dispatch, today } = useFit();
+	const go = useActionNavigate();
+	const { state, today } = useFit();
 	const [step, setStep] = useState(0);
 	const [dir, setDir] = useState<"fwd" | "back">("fwd");
 	const [demoHistory, setDemoHistory] = useState(true);
@@ -120,7 +120,7 @@ export function OnboardingQuiz() {
 		},
 	});
 
-	const go = (to: number) => {
+	const goStep = (to: number) => {
 		setDir(to > step ? "fwd" : "back");
 		setStep(Math.max(0, Math.min(STEPS.length - 1, to)));
 	};
@@ -128,36 +128,38 @@ export function OnboardingQuiz() {
 		// Typed a goal but didn't send it: let Spotty read it before validating the step.
 		const text = getValues("goalText").trim();
 		if (current === "goal" && !getValues("goal") && text) await understand.mutateAsync(text);
-		if (await trigger(FIELDS[current])) go(step + 1);
+		if (await trigger(FIELDS[current])) goStep(step + 1);
 	};
 	const skip = () => {
 		if (current === "gender") setValue("gender", null);
 		if (current === "sync") setValue("wearable", "none");
-		go(step + 1);
+		goStep(step + 1);
 	};
+
+	// The plan is written from the answers once the user reaches the last screen (AI, with a rule-based fallback).
+	const planRequest = useMemo(() => {
+		if (current !== "ready") return null;
+		const parsed = schema.safeParse(getValues());
+		if (!parsed.success) return null;
+		return { profile: toProfile(parsed.data), trainer: trainer ? { name: trainer.name, tov: trainer.tov } : undefined };
+	}, [current, schema, getValues, trainer]);
+	const plan = usePersonalPlan(planRequest, today);
+	// The next N sessions: late in the week the current week may have none left.
+	const preview = plan.data?.planned.slice(0, planRequest?.profile.daysPerWeek ?? 0) ?? [];
+	const aiWhy = plan.data?.source === "ai" ? plan.data.why : [];
 
 	const finish = () => {
 		const parsed = schema.safeParse(getValues());
-		if (!parsed.success) return;
-		dispatch({ type: "complete-onboarding", profile: toProfile(parsed.data), demoHistory, today, now: new Date().toISOString() });
-		router.replace("/today");
+		if (!parsed.success || plan.isPending) return;
+		go("/today", { type: "complete-onboarding", profile: toProfile(parsed.data), units: state.units, trainerId: parsed.data.trainerId, demoHistory, today, now: new Date().toISOString(), planned: plan.data?.planned }, { replace: true });
 	};
 
-	const preview = useMemo(() => {
-		if (current !== "ready") return [];
-		const parsed = schema.safeParse(getValues());
-		if (!parsed.success) return [];
-		const profile = toProfile(parsed.data);
-		// The next N sessions: late in the week the current week may have none left.
-		return generatePlan(profile, today, 2).slice(0, profile.daysPerWeek);
-	}, [current, schema, getValues, today]);
-
-	const spotty = spottyLine(current, { t, name, values, goalResult, pending: understand.isPending, trainer });
+	const spotty = spottyLine(current, { t, name, values, goalResult, pending: understand.isPending, trainer, planPending: plan.isPending, planSummary: plan.data?.summary ?? "" });
 
 	return (
 		<form className={styles.root} noValidate onSubmit={(e) => e.preventDefault()}>
 			<div className={styles.top}>
-				{step > 0 ? <IconButton icon={ArrowLeft02Icon} label={t("fit.common.back")} onClick={() => go(step - 1)} /> : <span className={styles.spacer} />}
+				{step > 0 ? <IconButton icon={ArrowLeft02Icon} label={t("fit.common.back")} onClick={() => goStep(step - 1)} /> : <span className={styles.spacer} />}
 				<ProgressBar value={(Math.min(step + 1, QUIZ_STEPS) / QUIZ_STEPS) * 100} label={t("fit.onboarding.progress")} className={styles.bar} />
 				<span className={styles.count}>{current === "ready" ? <Icon icon={Tick02Icon} size={18} /> : `${step + 1}/${QUIZ_STEPS}`}</span>
 				<ThemeToggle />
@@ -308,7 +310,7 @@ export function OnboardingQuiz() {
 							<Controller control={control} name="trainerId" render={({ field }) => (
 								<div className={styles.stack} role="radiogroup" aria-label={t("fit.quiz.steps.fighter.title")}>
 									{trainers.data.map((tr) => (
-										<TrainerCard key={tr.id} trainer={tr} checked={field.value === tr.id} onChange={() => field.onChange(tr.id)} intensityLabel={t("fit.quiz.fighter.intensity", { n: tr.intensity })} />
+										<TrainerCard key={tr.id} trainer={tr} checked={field.value === tr.id} onChange={() => field.onChange(tr.id)} />
 									))}
 								</div>
 							)} />
@@ -343,21 +345,40 @@ export function OnboardingQuiz() {
 							</div>
 							{trainer && (
 								<p className={styles.coachLine}>
-									<span className={clsx(styles.avatar, styles[trainer.tone])} aria-hidden>
-										{initials(trainer.name)}
-									</span>
-									<span>{t("fit.quiz.ready.coach", { trainer: trainer.name, style: trainer.style.toLowerCase() })}</span>
+									<Avatar name={trainer.name} src={trainer.pathToImage} size={32} />
+									<span>{t("fit.quiz.ready.coach", { trainer: trainer.name })}</span>
 								</p>
 							)}
 						</Card>
 						<h2 className={styles.subTitle}>{t("fit.quiz.ready.why")}</h2>
+						{plan.isPending ? (
+							<div className={styles.stack} aria-busy="true" aria-label={t("fit.quiz.ready.building")}>
+								{[0, 1, 2].map((i) => (
+									<Skeleton key={i} height="2rem" />
+								))}
+							</div>
+						) : aiWhy.length > 0 ? (
+							<ul className={styles.why}>
+								{aiWhy.map((reason) => (
+									<li key={reason}><Icon icon={Tick02Icon} size={16} />{reason}</li>
+								))}
+							</ul>
+						) : (
 						<ul className={styles.why}>
 							<li><Icon icon={Tick02Icon} size={16} />{t("fit.quiz.ready.whyGoal", { hint: t(`fit.opt.goal.${values.goal ?? "stay-fit"}.hint`) })}</li>
 							<li><Icon icon={Tick02Icon} size={16} />{t("fit.quiz.ready.whyDays", { n: values.daysPerWeek, min: values.durationMin })}</li>
 							<li><Icon icon={Tick02Icon} size={16} />{t("fit.quiz.ready.whyLevel", { level: t(`fit.opt.experience.${values.experience}.label`).toLowerCase() })}</li>
 							{values.wearable !== "none" && <li><Icon icon={Tick02Icon} size={16} />{t("fit.quiz.ready.whyWatch", { device: t(`fit.opt.wearable.${values.wearable}.label`) })}</li>}
 						</ul>
+						)}
 						<h2 className={styles.subTitle}>{t("fit.onboarding.firstWeek")}</h2>
+						{plan.isPending ? (
+							<div className={styles.stack} aria-busy="true">
+								{Array.from({ length: values.daysPerWeek }, (_, i) => (
+									<Skeleton key={i} height="5.6rem" />
+								))}
+							</div>
+						) : (
 						<ul className={styles.week}>
 							{preview.map((w) => (
 								<li key={w.id} className={styles.weekItem}>
@@ -372,7 +393,8 @@ export function OnboardingQuiz() {
 								</li>
 							))}
 						</ul>
-						{preview.length === 0 && <p className={styles.note}>{t("fit.onboarding.noPreview")}</p>}
+						)}
+						{!plan.isPending && preview.length === 0 && <p className={styles.note}>{t("fit.onboarding.noPreview")}</p>}
 						<Switch label={t("fit.onboarding.demoHistory")} checked={demoHistory} onChange={(e) => setDemoHistory(e.target.checked)} />
 					</div>
 				)}
@@ -380,7 +402,7 @@ export function OnboardingQuiz() {
 
 			<div className={styles.footer}>
 				{current === "ready" ? (
-					<Button size="lg" iconRight={ArrowRight02Icon} onClick={finish}>
+					<Button size="lg" iconRight={ArrowRight02Icon} loading={plan.isPending} onClick={finish}>
 						{t("fit.quiz.ready.cta")}
 					</Button>
 				) : (
@@ -398,36 +420,14 @@ export function OnboardingQuiz() {
 	);
 }
 
-const initials = (name: string) =>
-	name
-		.split(" ")
-		.map((p) => p[0] ?? "")
-		.join("")
-		.slice(0, 2);
-
-function TrainerCard({ trainer, checked, onChange, intensityLabel }: { trainer: Trainer; checked: boolean; onChange: () => void; intensityLabel: string }) {
+function TrainerCard({ trainer, checked, onChange }: { trainer: Trainer; checked: boolean; onChange: () => void }) {
 	return (
 		<label className={clsx(styles.trainer, checked && styles.trainerOn)}>
 			<input className={styles.srOnly} type="radio" name="trainer" checked={checked} onChange={onChange} />
-			<span className={clsx(styles.avatar, styles.avatarLg, styles[trainer.tone])} aria-hidden>
-				{initials(trainer.name)}
-			</span>
+			<Avatar name={trainer.name} src={trainer.pathToImage} size={56} />
 			<span className={styles.trainerText}>
-				<span className={styles.trainerHead}>
-					<strong className={styles.trainerName}>{trainer.name}</strong>
-					<span className={styles.intensity} aria-label={intensityLabel} role="img">
-						{[1, 2, 3].map((n) => (
-							<span key={n} className={clsx(styles.bolt, n <= trainer.intensity && styles.boltOn)} />
-						))}
-					</span>
-				</span>
-				<span className={styles.trainerStyle}>{trainer.style}</span>
-				<span className={styles.tagline}>{trainer.tagline}</span>
-				<span className={styles.badges}>
-					{trainer.specialties.map((s) => (
-						<Badge key={s}>{s}</Badge>
-					))}
-				</span>
+				<strong className={styles.trainerName}>{trainer.name}</strong>
+				<span className={styles.tagline}>{trainer.tov}</span>
 			</span>
 		</label>
 	);
@@ -440,10 +440,12 @@ interface LineCtx {
 	goalResult: GoalResult | null;
 	pending: boolean;
 	trainer: Trainer | undefined;
+	planPending: boolean;
+	planSummary: string;
 }
 
 /** Spotty's reaction for the current step: personal, and reacting to what the user just entered. */
-function spottyLine(step: Step, { t, name, values, goalResult, pending, trainer }: LineCtx): { mood: SpottyMood; line: string } {
+function spottyLine(step: Step, { t, name, values, goalResult, pending, trainer, planPending, planSummary }: LineCtx): { mood: SpottyMood; line: string } {
 	switch (step) {
 		case "hello":
 		case "name":
@@ -452,7 +454,7 @@ function spottyLine(step: Step, { t, name, values, goalResult, pending, trainer 
 			return { mood: "idle", line: t("fit.quiz.spotty.gender", { name }) };
 		case "goal":
 			if (pending) return { mood: "think", line: t("fit.quiz.spotty.thinking") };
-			if (goalResult && values.goal) return { mood: "cheer", line: goalResult.summary || t("fit.quiz.spotty.goalGot", { goal: t(`fit.opt.goal.${values.goal}.label`).toLowerCase() }) };
+			if (goalResult && values.goal) return { mood: "cheer", line: t("fit.quiz.spotty.goalGot", { goal: t(`fit.opt.goal.${values.goal}.label`).toLowerCase() }) };
 			if (goalResult) return { mood: "think", line: t("fit.quiz.spotty.goalUnsure") };
 			return { mood: "idle", line: t("fit.quiz.spotty.goal", { name }) };
 		case "body":
@@ -466,6 +468,7 @@ function spottyLine(step: Step, { t, name, values, goalResult, pending, trainer 
 		case "sync":
 			return { mood: "idle", line: t("fit.quiz.spotty.sync") };
 		case "ready":
-			return { mood: "cheer", line: t("fit.quiz.spotty.ready", { name }) };
+			if (planPending) return { mood: "think", line: t("fit.quiz.spotty.building", { name }) };
+			return { mood: "cheer", line: planSummary || t("fit.quiz.spotty.ready", { name }) };
 	}
 }

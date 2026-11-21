@@ -1,15 +1,13 @@
 import Fastify, { type FastifyInstance } from "fastify";
+import type { Knex } from "knex";
+import { listTrainers } from "./trainers.js";
 
-export interface Queryable {
-  query: (sql: string) => Promise<unknown>;
-}
-
-export function buildApp(pool: Queryable): FastifyInstance {
+export function buildApp(db: Knex): FastifyInstance {
   const app = Fastify({ logger: true });
 
   app.get("/api/health", async (_req, reply) => {
     try {
-      await pool.query("SELECT 1");
+      await db.raw("SELECT 1");
       return { status: "ok", db: true };
     } catch (err) {
       app.log.error(err, "database health check failed");
@@ -22,6 +20,15 @@ export function buildApp(pool: Queryable): FastifyInstance {
     message: "pong from platform-backend",
     time: new Date().toISOString(),
   }));
+
+  app.get("/api/trainers", async (_req, reply) => {
+    try {
+      return { trainers: await listTrainers(db) };
+    } catch (err) {
+      app.log.error(err, "listing trainers failed");
+      return reply.code(503).send({ error: "trainers unavailable" });
+    }
+  });
 
   return app;
 }

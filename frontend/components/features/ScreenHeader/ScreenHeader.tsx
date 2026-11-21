@@ -10,7 +10,7 @@ import styles from "./ScreenHeader.module.scss";
 
 interface ScreenHeaderProps {
 	title: string;
-	subtitle?: string;
+	subtitle?: ReactNode;
 	/** Show a back button. A string overrides the destination, otherwise history back. */
 	back?: boolean | string;
 	actions?: ReactNode;
@@ -21,7 +21,7 @@ export function ScreenHeader({ title, subtitle, back, actions }: ScreenHeaderPro
 	const t = useT();
 	return (
 		<header className={styles.header}>
-			{back && <IconButton icon={ArrowLeft02Icon} label={t("fit.common.back")} onClick={() => (typeof back === "string" ? router.push(back) : router.back())} />}
+			{back && <IconButton icon={ArrowLeft02Icon} label={t("fit.common.back")} onClick={() => (typeof back === "string" ? router.push(back, { transitionTypes: ["nav-back"] }) : router.back())} />}
 			<div className={styles.titles}>
 				<h1 className={styles.title}>{title}</h1>
 				{subtitle && <p className={styles.subtitle}>{subtitle}</p>}

@@ -1,5 +1,8 @@
 import { afterEach, describe, expect, it } from "vitest";
+import { POST } from "@/app/api/goal/route";
+import { POST as STT } from "@/app/api/stt/route";
 import { AiConfigError, askClaude, askGemini } from "@/lib/ai";
+import { parseGoalReply } from "@/lib/fit/goalParse";
 
 const saved = { a: process.env.ANTHROPIC_API_KEY, g: process.env.GEMINI_API_KEY };
 afterEach(() => {
@@ -15,5 +18,57 @@ describe("ai utilities without keys", () => {
 	it("askGemini throws AiConfigError", async () => {
 		delete process.env.GEMINI_API_KEY;
 		await expect(askGemini({ prompt: "hi" })).rejects.toBeInstanceOf(AiConfigError);
+	});
+});
+
+describe("parseGoalReply", () => {
+	it("accepts plain JSON", () => {
+		expect(parseGoalReply('{"goal":"build-muscle"}')).toBe("build-muscle");
+	});
+	it("accepts JSON wrapped in code fences", () => {
+		expect(parseGoalReply('```json\n{"goal":"endurance"}\n```')).toBe("endurance");
+	});
+	it("rejects a goal outside the preset list", () => {
+		expect(parseGoalReply('{"goal":"fly"}')).toBeNull();
+	});
+	it("rejects non-JSON and empty replies", () => {
+		expect(parseGoalReply("not json")).toBeNull();
+		expect(parseGoalReply("")).toBeNull();
+	});
+});
+
+describe("POST /api/goal", () => {
+	const post = (body: unknown) => POST(new Request("http://localhost/api/goal", { method: "POST", body: JSON.stringify(body) }));
+	it("rejects an empty or whitespace-only text with 400", async () => {
+		expect((await post({ text: "" })).status).toBe(400);
+		expect((await post({ text: "   " })).status).toBe(400);
+	});
+	it("rejects text over 500 characters with 400", async () => {
+		expect((await post({ text: "a".repeat(501) })).status).toBe(400);
+	});
+	it("answers 503 when the Gemini key is missing", async () => {
+		delete process.env.GEMINI_API_KEY;
+		expect((await post({ text: "run a marathon" })).status).toBe(503);
+	});
+});
+
+describe("POST /api/stt", () => {
+	const send = (audio?: Blob) => {
+		const form = new FormData();
+		if (audio) form.append("audio", audio, "goal.webm");
+		return STT(new Request("http://localhost/api/stt", { method: "POST", body: form }));
+	};
+	it("rejects a request without an audio field with 400", async () => {
+		expect((await send()).status).toBe(400);
+	});
+	it("rejects non-audio uploads with 400", async () => {
+		expect((await send(new Blob(["hi"], { type: "text/plain" }))).status).toBe(400);
+	});
+	it("rejects audio over 5 MB with 400", async () => {
+		expect((await send(new Blob([new Uint8Array(5 * 1024 * 1024 + 1)], { type: "audio/webm" }))).status).toBe(400);
+	});
+	it("answers 503 when the Gemini key is missing", async () => {
+		delete process.env.GEMINI_API_KEY;
+		expect((await send(new Blob([new Uint8Array(10)], { type: "audio/webm;codecs=opus" }))).status).toBe(503);
 	});
 });

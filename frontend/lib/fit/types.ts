@@ -1,4 +1,5 @@
 import type { ISODate } from "./dates";
+import type { Units } from "./units";
 
 export type Goal = "lose-fat" | "build-muscle" | "get-stronger" | "stay-fit" | "endurance";
 export type Experience = "beginner" | "intermediate" | "advanced";
@@ -18,6 +19,8 @@ export interface Profile {
 	heightCm: number;
 	weightKg: number;
 	goal: Goal;
+	/** The user's own wording of their goal (typed or dictated); `goal` is its closest preset. */
+	goalText?: string;
 	experience: Experience;
 	location: TrainingLocation;
 	equipment: Equipment[];
@@ -26,10 +29,6 @@ export interface Profile {
 	limitations: Limitation[];
 	limitationNote: string;
 	wearable: WearableChoice;
-	/** AI trainer picked in the onboarding quiz ("Choose your fighter"). */
-	trainerId?: string;
-	/** The user's own words (typed or spoken) for their goal. */
-	goalText?: string;
 }
 
 export interface Exercise {
@@ -213,7 +212,10 @@ export type MealSlot = "breakfast" | "lunch" | "snack" | "dinner";
 
 export interface FitState {
 	version: 1;
+	units: Units;
 	profile: Profile | null;
+	/** Selected AI trainer id (from platform-backend `/api/trainers`); null means the default trainer. */
+	trainerId: string | null;
 	planned: PlannedWorkout[];
 	history: SessionLog[];
 	active: ActiveSession | null;
@@ -228,7 +230,11 @@ export interface FitState {
 	devices: DeviceState;
 	bloodPressure: BloodPressureEntry[];
 	photos: PhotoCheckIn[];
-	bodyWeights: { date: ISODate; kg: number }[];
+	/** `at` is the moment the entry was saved (absent on demo seed data). */
+	bodyWeights: { date: ISODate; kg: number; at?: string }[];
+	goalWeightKg: number | null;
+	/** When the current goal weight was set. */
+	goalSetAt?: string | null;
 	partners: Record<string, "invited" | "accepted">;
 	hasDemoHistory: boolean;
 	celebrate: string[];

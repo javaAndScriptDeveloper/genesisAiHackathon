@@ -10,3 +10,6 @@ export const GENDERS: Gender[] = ["female", "male", "non-binary", "private"];
 export const WEARABLES: WearableChoice[] = ["none", "apple", "garmin"];
 export const DURATIONS = [20, 30, 45, 60];
 export const DAYS = [2, 3, 4, 5, 6];
+
+export const DEFAULT_TRAINER_ID = "john";
+export const activeTrainerId = (state: { trainerId: string | null }): string => state.trainerId ?? DEFAULT_TRAINER_ID;

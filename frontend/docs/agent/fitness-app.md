@@ -21,11 +21,24 @@ Everything is frontend state + localStorage today. Needs a backend (Next.js rout
 ## Videos
 `lib/fit/videos.ts` maps exercise id → video id from the Leap Fitness channel (embedded with youtube-nocookie, loaded on tap, never downloaded). Unmapped exercises show a channel-search link. Override at deploy time with `NEXT_PUBLIC_EXERCISE_VIDEO_MAP='{"goblet-squat":"<11-char id>"}'`.
 
+## Page transitions
+`app/(app)/template.tsx` wraps each page in React `<ViewTransition>`. Direction comes from `transitionTypes` (`nav-forward` / `nav-back`) on `Link` and `router.push`: bottom-nav tabs pick it from tab order, drill-down links use forward, header back uses back; everything else gets a soft fade. Styles live in `styles/partials/_transitions.scss` (only page content is animated, reduced motion disables it).
+
+## Units (kg / lb)
+All data is stored metric (kg, cm). `state.units` (`metric` | `imperial`, default metric, chosen in onboarding and Settings) only changes display and input. Never write "kg" in a component: use `useUnits()` (`fmtLoad`, `fmtMass`, `mass`, `toKg`, `unit`) or `lib/fit/units.ts`. Animated numbers use `AnimatedNumber` (`@number-flow/react`).
+
+## Avoiding flicker
+- State change + navigation go through `useActionNavigate()` (one transition), never `dispatch(); router.push()`. Otherwise the current screen re-renders with the new state before the next page appears.
+- `Sheet` keeps its latest `onClose` in a ref: inline handlers must not re-run its focus effect (the workout timer re-renders the page every second).
+- Scroll restoration runs in a layout effect so it is applied before paint and before the view-transition snapshot.
+- Page crossfade uses `mix-blend-mode: plus-lighter` on old/new snapshots so the content never dips toward the background colour.
+
 ## Onboarding quiz (Spotty)
-`/onboarding` renders `components/features/OnboardingQuiz`: 9 steps (hello, name, gender, goal, body, level+place, days, choose your fighter, watch sync) plus a "plan ready" screen with "why this plan" and the first sessions. The `Onboarding` component is kept only for `/profile/edit`. Spotty (`components/features/Spotty`) is the app mascot, a bouncy volt bubble in a sweatband holding two dumbbells, drawn as inline SVG with moods (`idle | wave | think | cheer`) and a speech bubble; animations stop under `prefers-reduced-motion`.
-- **Trainers:** `GET /api/mock/trainers` → `{ trainers: Trainer[] }` (`lib/api/onboarding.ts`, data in `lib/api/mock/trainers.ts`). The list is AI-generated for now; to move to a real AI or backend endpoint, keep `trainersResponseSchema` and change only the source. The chosen id is saved as `profile.trainerId` and shown in the Coach header.
-- **Goal:** `parseGoal(text)` asks `POST /api/ai` (Claude) for `{goal, summary}` JSON and falls back to `matchGoalKeywords` (`lib/fit/goal.ts`) on a missing key, an error or a 6s timeout, so the demo works without `ANTHROPIC_API_KEY`. The raw words are saved as `profile.goalText`.
-- Copy: `messages/parts/quiz.json` (English only; `uk.json` has no `fit.*` keys yet).
+`/onboarding` renders `components/features/OnboardingQuiz`: 9 steps (hello, name, gender, goal, body, level, days, choose your coach, watch sync) plus a "plan ready" screen with "why this plan" and the first sessions. The `Onboarding` component is kept for `/profile/edit`. Spotty (`components/features/Spotty`) is an inline SVG mascot with moods (`idle | wave | think | cheer`); animations stop under `prefers-reduced-motion`.
+- **Coaches:** the same backend list as Settings (`useTrainers` from `lib/api/trainers`, `GET /api/trainers`). The pick goes into `complete-onboarding` as `trainerId`, so it survives the state reset and lands in `FitState.trainerId`.
+- **Goal:** pick a preset, or type your own words. On Continue, `parseGoal` (`lib/api/onboarding.ts`) calls `POST /api/goal` (Gemini) and falls back to `matchGoalKeywords` (`lib/fit/goal.ts`) on a missing key, an error, a 6s timeout or "could not tell". The words are saved as `profile.goalText`.
+- **Personal plan:** the "plan ready" screen calls `usePersonalPlan` (`lib/api/plan.ts`) → `POST /api/plan` → Gemini (`generateAiPlan`) with the full profile, the coach's `tov` and the exercise catalog already filtered by equipment and limitations. The model returns a one-week template (`aiPlanSchema` in `lib/fit/aiPlan.ts`): session titles, exercise ids, sets/reps/rest, plus `summary` and `why`. `planFromAi` lays it onto the training days for 4 weeks; loads, durations and dates are always ours, unknown or unusable ids are dropped, and a session with fewer than 2 valid exercises becomes the rule-based workout. No key, an error or a 25s timeout → `generatePlan`. The result goes to the reducer as `complete-onboarding.planned`. Later rebuilds (profile edit, `rebuildUpcoming`) still use the rule-based generator.
+- Copy: `messages/parts/quiz.json` (English only).
 
 ## Theme: Training UI design system
 The app uses the dark theme of the Training UI design system (`training-ui/` at the repo root; tokens in `training-ui/tokens.css`). `styles/partials/_training.scss` maps it onto the kit's semantic tokens (`--color-*`) and Onest. `PhoneFrame` includes it on `.device`, so every screen inside the phone gets it and `/ui-kit` keeps the base kit look. Rules from `training-ui/README.md` that apply here:

@@ -38,6 +38,7 @@ import {
 	Sheet,
 	Skeleton,
 	Stepper,
+	TimePicker,
 	Switch,
 	Table,
 	Tabs,
@@ -266,8 +267,10 @@ function MobileControlsDemo() {
 	const [seg, setSeg] = useState<"plan" | "library">("plan");
 	const [reps, setReps] = useState(10);
 	const [open, setOpen] = useState(false);
+	const [time, setTime] = useState("07:30");
 	return (
 		<div className={styles.stack} style={{ position: "relative", minHeight: "26rem" }}>
+			<TimePicker label="Reminder time" value={time} onChange={setTime} />
 			<SegmentedControl label="Demo tabs" value={seg} onChange={setSeg} options={[{ id: "plan", label: "Plan" }, { id: "library", label: "Library" }]} />
 			<Stepper label="Repetitions" value={reps} onChange={setReps} min={1} max={50} unit="reps" />
 			<ProgressBar value={reps * 2} label="Demo progress" />

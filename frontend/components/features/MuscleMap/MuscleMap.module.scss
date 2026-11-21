@@ -1,0 +1,22 @@
+.badge {
+	display: grid;
+	flex: none;
+	place-items: center;
+	overflow: hidden;
+	background: var(--color-accentSoft);
+	color: var(--color-accent);
+	border: 0.2rem solid transparent;
+	border-radius: 50%;
+	transition: border-color var(--transition-fast);
+}
+
+.selected {
+	border-color: var(--color-accent);
+}
+
+.pair {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: var(--space-3);
+}

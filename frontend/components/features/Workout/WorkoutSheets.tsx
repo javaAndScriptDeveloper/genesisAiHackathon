@@ -1,18 +1,21 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { Alert02Icon, ArrowReloadHorizontalIcon, Clock01Icon, Dumbbell03Icon, HelpCircleIcon, SmileIcon, Logout01Icon, Moon01Icon, PauseIcon, SkipForwardIcon, StopIcon, Timer02Icon, Tick02Icon } from "@hugeicons/core-free-icons";
+import Link from "next/link";
 import { useEffect, useState } from "react";
-import { Button, Checkbox, EmptyState, Sheet } from "@/components/ui";
+import { ChoiceList, type Choice } from "@/components/features/ChoiceList/ChoiceList";
+import { Button, Checkbox, EmptyState, Icon, Sheet, type IconDefinition } from "@/components/ui";
 import { applyAdapt } from "@/lib/fit/adapt";
 import { SAFETY_TEXT } from "@/lib/fit/coach";
 import { alternativesFor, getExercise } from "@/lib/fit/exercises";
 import { describeBlock } from "@/lib/fit/format";
 import { useFit } from "@/lib/fit/store/FitProvider";
+import { useActionNavigate, useUnits } from "@/lib/fit/store/hooks";
 import type { AdaptOp } from "@/lib/fit/types";
 import { useT } from "@/lib/i18n/I18nProvider";
 import styles from "./Workout.module.scss";
 
-export type SheetName = null | "adjust" | "replace" | "overview" | "end" | "safety";
+export type SheetName = null | "adjust" | "replace" | "overview" | "end" | "safety" | "quit";
 
 interface Props {
 	sheet: SheetName;
@@ -22,8 +25,9 @@ interface Props {
 
 export function WorkoutSheets({ sheet, setSheet, toastShow }: Props) {
 	const t = useT();
-	const router = useRouter();
 	const { state, dispatch, today } = useFit();
+	const u = useUnits();
+	const go = useActionNavigate();
 	const a = state.active;
 	const profile = state.profile;
 
@@ -46,15 +50,16 @@ export function WorkoutSheets({ sheet, setSheet, toastShow }: Props) {
 		setSheet(null);
 	};
 
-	const ACTIONS: { key: string; op?: AdaptOp; onClick?: () => void }[] = [
-		{ key: "too-hard", op: { kind: "too-hard" } },
-		{ key: "easier", op: { kind: "easier" } },
-		{ key: "more-rest", op: { kind: "more-rest" } },
-		{ key: "replace", onClick: () => setSheet("replace") },
-		{ key: "min20", op: { kind: "shorten", minutes: 20 } },
-		{ key: "tired", op: { kind: "tired" } },
+	const ACTIONS: { key: string; icon: IconDefinition; op?: AdaptOp; onClick?: () => void }[] = [
+		{ key: "too-hard", icon: Alert02Icon, op: { kind: "too-hard" } },
+		{ key: "easier", icon: SmileIcon, op: { kind: "easier" } },
+		{ key: "more-rest", icon: Clock01Icon, op: { kind: "more-rest" } },
+		{ key: "replace", icon: ArrowReloadHorizontalIcon, onClick: () => setSheet("replace") },
+		{ key: "min20", icon: Timer02Icon, op: { kind: "shorten", minutes: 20 } },
+		{ key: "tired", icon: Moon01Icon, op: { kind: "tired" } },
 		{
 			key: "skip",
+			icon: SkipForwardIcon,
 			onClick: () => {
 				if (block) dispatch({ type: "skip-exercise", blockId: block.id });
 				toastShow(t("fit.workout.skippedToast"), "info");
@@ -63,12 +68,13 @@ export function WorkoutSheets({ sheet, setSheet, toastShow }: Props) {
 		},
 		{
 			key: "pause",
+			icon: PauseIcon,
 			onClick: () => {
 				dispatch({ type: "pause" });
 				setSheet(null);
 			},
 		},
-		{ key: "end", onClick: () => setSheet("end") },
+		{ key: "end", icon: StopIcon, onClick: () => setSheet("end") },
 	];
 
 	const alternatives = block ? alternativesFor(block.exerciseId, profile, a.exercises.map((b) => b.exerciseId)) : [];
@@ -77,22 +83,12 @@ export function WorkoutSheets({ sheet, setSheet, toastShow }: Props) {
 		<>
 			<Sheet open={sheet === "adjust"} onClose={() => setSheet(null)} title={t("fit.workout.adjustTitle")} closeLabel={t("common.close")}>
 				<p className={styles.sheetLead}>{t("fit.workout.adjustLead")}</p>
-				<ul className={styles.choices}>
-					{ACTIONS.map((item) => (
-						<li key={item.key}>
-							<button type="button" className={styles.choice} onClick={() => (item.op ? run(item.op) : item.onClick?.())}>
-								<strong>{t(`fit.workout.actions.${item.key}.label`)}</strong>
-								<span>{t(`fit.workout.actions.${item.key}.hint`)}</span>
-							</button>
-						</li>
-					))}
-					<li>
-						<button type="button" className={styles.choiceDanger} onClick={() => setSheet("safety")}>
-							<strong>{t("fit.workout.unwell")}</strong>
-							<span>{t("fit.workout.unwellHint")}</span>
-						</button>
-					</li>
-				</ul>
+				<ChoiceList
+					items={[
+						...ACTIONS.map((item): Choice => ({ key: item.key, icon: item.icon, title: t(`fit.workout.actions.${item.key}.label`), hint: t(`fit.workout.actions.${item.key}.hint`), onClick: () => (item.op ? run(item.op) : item.onClick?.()) })),
+						{ key: "unwell", icon: Alert02Icon, tone: "danger", title: t("fit.workout.unwell"), hint: t("fit.workout.unwellHint"), onClick: () => setSheet("safety") },
+					]}
+				/>
 			</Sheet>
 
 			<Sheet open={sheet === "replace"} onClose={() => setSheet(null)} title={t("fit.workout.replaceTitle")} closeLabel={t("common.close")}>
@@ -100,67 +96,71 @@ export function WorkoutSheets({ sheet, setSheet, toastShow }: Props) {
 				{alternatives.length === 0 ? (
 					<EmptyState title={t("fit.session.noAlternatives")} description={t("fit.session.noAlternativesBody")} />
 				) : (
-					<ul className={styles.choices}>
-						{alternatives.map((o) => (
-							<li key={o.id}>
-								<button
-									type="button"
-									className={styles.choice}
-									onClick={() => {
-										if (block) dispatch({ type: "replace-exercise", blockId: block.id, exerciseId: o.id, today });
-										toastShow(t("fit.session.replaced", { name: o.name }), "success");
-										setSheet(null);
-									}}
-								>
-									<strong>{o.name}</strong>
-									<span>{t(`fit.level.${o.level}`)}</span>
-								</button>
-							</li>
-						))}
-					</ul>
+					<ChoiceList
+						items={alternatives.map((o) => ({
+							key: o.id,
+							icon: Dumbbell03Icon,
+							title: o.name,
+							hint: t(`fit.level.${o.level}`),
+							onClick: () => {
+								if (block) dispatch({ type: "replace-exercise", blockId: block.id, exerciseId: o.id, today });
+								toastShow(t("fit.session.replaced", { name: o.name }), "success");
+								setSheet(null);
+							},
+						}))}
+					/>
 				)}
 			</Sheet>
 
 			<Sheet open={sheet === "overview"} onClose={() => setSheet(null)} title={t("fit.workout.overviewTitle")} closeLabel={t("common.close")}>
-				<ol className={styles.choices}>
-					{a.exercises.map((b, i) => {
+				<ChoiceList
+					ordered
+					items={a.exercises.map((b, i) => {
 						const done = b.sets.filter((s) => s.done).length;
-						return (
-							<li key={b.id}>
-								<button
-									type="button"
-									className={styles.choice}
-									aria-current={i === a.index ? "step" : undefined}
-									onClick={() => {
-										dispatch({ type: "go-to", index: i });
-										setSheet(null);
-									}}
-								>
-									<strong>
-										{i + 1}. {getExercise(b.exerciseId).name}
-									</strong>
-									<span>
-										{b.skipped ? t("fit.workout.skippedLabel") : `${describeBlock(b)} · ${t("fit.workout.setsDone", { done, total: b.sets.length })}`}
-									</span>
-								</button>
-							</li>
-						);
+						const finished = !b.skipped && done === b.sets.length;
+						return {
+							key: b.id,
+							icon: finished ? Tick02Icon : b.skipped ? SkipForwardIcon : Dumbbell03Icon,
+							title: `${i + 1}. ${getExercise(b.exerciseId).name}`,
+							hint: b.skipped ? t("fit.workout.skippedLabel") : `${describeBlock(b, u.units)} · ${t("fit.workout.setsDone", { done, total: b.sets.length })}`,
+							current: i === a.index,
+							onClick: () => {
+								dispatch({ type: "go-to", index: i });
+								setSheet(null);
+							},
+						};
 					})}
-				</ol>
+				/>
+			</Sheet>
+
+			<Sheet open={sheet === "quit"} onClose={() => { dispatch({ type: "resume" }); setSheet(null); }} title={t("fit.workout.quitTitle")} closeLabel={t("common.close")}>
+				<div className={styles.quitReasons}>
+					<p className={styles.sheetLead}>{t("fit.workout.quitLead")}</p>
+					<ChoiceList
+						items={[
+							{ key: "unwell", icon: Alert02Icon, tone: "danger", title: t("fit.workout.reasonUnwell"), onClick: () => setSheet("safety") },
+							{ key: "hard", icon: SmileIcon, title: t("fit.workout.reasonHard"), hint: t("fit.workout.reasonHardHint"), onClick: () => { dispatch({ type: "resume" }); run({ kind: "too-hard" }); } },
+							{ key: "unsure", icon: HelpCircleIcon, title: t("fit.workout.reasonUnsure"), hint: t("fit.workout.reasonUnsureHint"), onClick: () => { dispatch({ type: "resume" }); setSheet("replace"); } },
+						]}
+					/>
+				</div>
+				<hr className={styles.quitDivider} />
+				<div className={styles.quitActions}>
+					<Button variant="secondary" className={styles.leaveBtn} iconLeft={Logout01Icon} onClick={() => setSheet("end")}>{t("fit.workout.quit")}</Button>
+					<Link href="/coach" className={styles.feedbackLink}>{t("fit.workout.feedback")}</Link>
+				</div>
 			</Sheet>
 
 			<Sheet open={sheet === "end"} onClose={() => setSheet(null)} title={t("fit.workout.endTitle")} closeLabel={t("common.close")} variant="center" footer={
 				<>
 					<Button variant="secondary" onClick={() => setSheet(null)}>{t("fit.workout.keepGoing")}</Button>
 					<Button
-						variant="danger"
+						variant="secondary"
+						className={styles.leaveBtn}
 						onClick={() => {
 							setSheet(null);
 							if (setsDone > 0) dispatch({ type: "end-early" });
-							else {
-								dispatch({ type: "discard-active" });
-								router.replace("/training");
-							}
+							else go("/training", { type: "discard-active" }, { replace: true });
 						}}
 					>
 						{setsDone > 0 ? t("fit.workout.endSave") : t("fit.workout.endLeave")}
@@ -168,6 +168,18 @@ export function WorkoutSheets({ sheet, setSheet, toastShow }: Props) {
 				</>
 			}>
 				<p>{setsDone > 0 ? t("fit.workout.endBody", { n: setsDone }) : t("fit.workout.endEmpty")}</p>
+				<div className={styles.endPrompt}>
+					<div className={styles.endHead}>
+						<span className={styles.endPlate}>
+							<Icon icon={Alert02Icon} size={20} />
+						</span>
+						<div>
+							<strong>{t("fit.workout.tooHardPrompt")}</strong>
+							<p>{t("fit.workout.tooHardHint")}</p>
+						</div>
+					</div>
+					<Button iconLeft={SmileIcon} onClick={() => run({ kind: "too-hard" })}>{t("fit.workout.regenEasier")}</Button>
+				</div>
 			</Sheet>
 
 			<SafetySheet open={a.safetyStop} onEnd={() => dispatch({ type: "end-early" })} onResume={() => dispatch({ type: "resume" })} />
@@ -185,11 +197,13 @@ function SafetySheet({ open, onEnd, onResume }: { open: boolean; onEnd: () => vo
 			onClose={() => undefined}
 			title={t("fit.safety.title")}
 			variant="center"
+			panelClassName={styles.safetyPanel}
 			modal
 			footer={
-				<>
+				<div className={styles.safetyActions}>
 					<Button variant="danger" onClick={onEnd}>{t("fit.workout.end")}</Button>
 					<Button
+						variant="secondary"
 						disabled={!rested}
 						onClick={() => {
 							setRested(false);
@@ -198,7 +212,7 @@ function SafetySheet({ open, onEnd, onResume }: { open: boolean; onEnd: () => vo
 					>
 						{t("fit.safety.resume")}
 					</Button>
-				</>
+				</div>
 			}
 		>
 			<ul className={styles.safetyList}>

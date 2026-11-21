@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { applyAdapt } from "@/lib/fit/adapt";
 import { coachReply, isSafetyConcern, type CoachContext } from "@/lib/fit/coach";
 import { toISO } from "@/lib/fit/dates";
+import { DEFAULT_TRAINER_ID, activeTrainerId } from "@/lib/fit/options";
 import { estimateMinutes, generatePlan, nextUpcoming } from "@/lib/fit/plan";
 import { emptyState } from "@/lib/fit/seed";
 import { computeStreak } from "@/lib/fit/stats";
@@ -50,7 +51,7 @@ describe("adaptation", () => {
 
 describe("end to end journey", () => {
 	it("onboard, train, adapt, finish, unlock and update progress", () => {
-		let s = run(emptyState(), { type: "complete-onboarding", profile, demoHistory: true, today, now });
+		let s = run(emptyState(), { type: "complete-onboarding", units: "metric", profile, demoHistory: true, today, now });
 		expect(s.history.length).toBeGreaterThan(5);
 		const before = s.history.length;
 		const next = nextUpcoming(s.planned, today);
@@ -76,14 +77,14 @@ describe("end to end journey", () => {
 		expect(s.celebrate.length).toBeGreaterThan(0);
 	});
 	it("recovery skip does not break the streak", () => {
-		const s = run(emptyState(), { type: "complete-onboarding", profile, demoHistory: true, today, now });
+		const s = run(emptyState(), { type: "complete-onboarding", units: "metric", profile, demoHistory: true, today, now });
 		const before = computeStreak(s.planned, today).current;
 		const next = nextUpcoming(s.planned, today);
 		const skipped = run(s, { type: "skip-planned", id: next?.id ?? "", reason: "recovery" });
 		expect(computeStreak(skipped.planned, today).current).toBeGreaterThanOrEqual(before);
 	});
 	it("removing dumbbells swaps exercises", () => {
-		let s = run(emptyState(), { type: "complete-onboarding", profile, demoHistory: false, today, now });
+		let s = run(emptyState(), { type: "complete-onboarding", units: "metric", profile, demoHistory: false, today, now });
 		const action = { id: "eq", label: "x", type: "remove-equipment" as const, equipment: "dumbbells" as const };
 		s = run(s, { type: "coach-message", message: { id: "m", from: "coach", text: "", at: now } }, { type: "coach-apply", messageId: "m", action, today, now, reply: { id: "r", from: "coach", text: "ok", at: now } });
 		const ids = s.planned.filter((w) => w.status === "planned").flatMap((w) => w.exercises.map((b) => b.exerciseId));
@@ -105,5 +106,43 @@ describe("coach", () => {
 		expect(coachReply("I don't have dumbbells", ctx).actions[0]?.type).toBe("remove-equipment");
 		expect(coachReply("I only have 20 minutes", ctx).actions[0]).toMatchObject({ type: "adapt", op: { kind: "shorten", minutes: 20 } });
 		expect(coachReply("I feel exhausted", ctx).actions.length).toBeGreaterThan(0);
+	});
+});
+
+describe("trainer and goal text", () => {
+	const withProfile: FitState = { ...emptyState(), profile, planned: generatePlan(profile, today, 4) };
+
+	it("set-trainer stores the id", () => {
+		expect(run(withProfile, { type: "set-trainer", trainerId: "mike" }).trainerId).toBe("mike");
+	});
+	it("set-goal updates goal and goalText and rebuilds upcoming workouts like update-profile", () => {
+		const next = run(withProfile, { type: "set-goal", goal: "endurance", goalText: "run a half marathon", today });
+		expect(next.profile?.goal).toBe("endurance");
+		expect(next.profile?.goalText).toBe("run a half marathon");
+		const viaUpdate = run(withProfile, { type: "update-profile", profile: { ...profile, goal: "endurance", goalText: "run a half marathon" }, units: "metric", today });
+		// Plan ids are generated, so compare the stable shape: profile, and which days carry which kind of workout.
+		expect(next.profile).toEqual(viaUpdate.profile);
+		expect(next.planned.map((w) => [w.date, w.title])).toEqual(viaUpdate.planned.map((w) => [w.date, w.title]));
+	});
+	it("set-goal is a no-op without a profile", () => {
+		const empty = emptyState();
+		expect(run(empty, { type: "set-goal", goal: "endurance", goalText: "x", today })).toBe(empty);
+	});
+	it("activeTrainerId falls back to john when nothing is stored", () => {
+		expect(activeTrainerId({ ...emptyState(), trainerId: null })).toBe(DEFAULT_TRAINER_ID);
+		expect(DEFAULT_TRAINER_ID).toBe("john");
+		expect(activeTrainerId({ ...emptyState(), trainerId: "alex" })).toBe("alex");
+	});
+});
+
+describe("goalText survives preference edits", () => {
+	const base: FitState = { ...emptyState(), profile: { ...profile, goalText: "run a half marathon" }, planned: generatePlan(profile, today, 4) };
+	it("update-profile keeps goalText when the edit form does not carry it and the goal is unchanged", () => {
+		const { goalText: _drop, ...edited } = { ...profile, daysPerWeek: 5 };
+		expect(run(base, { type: "update-profile", profile: edited, units: "metric", today }).profile?.goalText).toBe("run a half marathon");
+	});
+	it("update-profile drops goalText when the preset goal itself was changed", () => {
+		const { goalText: _drop, ...edited } = { ...profile, goal: "lose-fat" as const };
+		expect(run(base, { type: "update-profile", profile: edited, units: "metric", today }).profile?.goalText).toBeUndefined();
 	});
 });
