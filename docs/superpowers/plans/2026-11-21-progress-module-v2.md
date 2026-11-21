@@ -2,9 +2,9 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Один модуль `lib/progress` рахує всю аналітику й мотивацію застосунку (регулярність, тижнева ціль, серія з паузою, XP/рівні, бейджі, рекорди за Brzycki, вага/ІМТ, тижневий звіт, «що покращилось / що далі», події «нового»). Розділ Progress отримує 6 екранів і підсвічування нового. Факти зберігаються в Postgres (Knex + Objection) з синхронізацією по анонімному `device_id`, а **кожен обчислений знімок аналітики архівується** (append-only).
+**Goal:** Один модуль `lib/progress` рахує всю аналітику й мотивацію застосунку (регулярність, тижнева ціль, серія з паузою, XP/рівні, бейджі, рекорди за Brzycki, вага/ІМТ, тижневий звіт, «що покращилось / що далі», події «нового»). Розділ Progress отримує 6 екранів і підсвічування нового. Факти зберігаються в Postgres (Knex + Objection) в окремих таблицях `user_progress_*`, прив'язаних до `users` команди (гостьовий користувач за секретним `progressToken`), а **кожен обчислений знімок аналітики архівується** (append-only).
 
-**Architecture:** Рушій — чисті функції в `frontend/lib/progress` над `History` (адаптер `historyFromFit` уже є). Хук `useProgress()` віддає все екранам; `useFitStats()`, Today, Coach, Profile, Celebration, сповіщення читають тільки з нього. Новий стан (тижнева ціль, паузи, події, `deviceId`) — у `FitState`/reducer. `platform-backend` зберігає сирі факти в 7 таблицях і архів знімків у `progress_snapshots`; клієнт синхронізує факти пакетами й архівує знімки (`weekly` щотижня, `change` після кожної зміни чисел).
+**Architecture:** Рушій — чисті функції в `frontend/lib/progress` над `History` (адаптер `historyFromFit` уже є). Хук `useProgress()` віддає все екранам; `useFitStats()`, Today, Coach, Profile, Celebration, сповіщення читають тільки з нього. Новий стан (тижнева ціль, паузи, події, `progressToken`) — у `FitState`/reducer. `platform-backend` зберігає сирі факти в 7 таблицях `user_progress_*` і архів знімків у `user_progress_snapshots`; клієнт синхронізує факти пакетами й архівує знімки (`weekly` щотижня, `change` після кожної зміни чисел).
 
 **Tech Stack:** Next.js 16 App Router, React 19, TS strict + `noUncheckedIndexedAccess`, SCSS Modules, react-query, zod 4, Vitest, bun (frontend); Fastify 5, Knex 3, Objection 4, `pg`, Vitest + Testcontainers (backend).
 
@@ -33,9 +33,9 @@
 
 ## Review Focus
 
-1. **Старий збережений стан без нових полів** (`weeklyGoal`, `pauses`, `progressEvents`, `deviceId`) — застосунок завантажується, поля отримують значення за замовчуванням. Тест: Task 8.
+1. **Старий збережений стан без нових полів** (`weeklyGoal`, `pauses`, `progressEvents`, `progressToken`) — застосунок завантажується, поля отримують значення за замовчуванням. Тест: Task 8.
 2. **Пауза на межі тижнів і поточний тиждень на паузі** — серія не обривається і не росте, регулярність бере наступний старіший тиждень. Тест: Task 2.
-3. **Повторна синхронізація того самого пакета / два пристрої з різним `device_id` / повторне архівування того самого знімка** — без дублікатів, без витоку чужих даних, архів ніколи не перезаписується. Тест: Task 11.
+3. **Повторна синхронізація того самого пакета / два клієнти з різними `progressToken` / повторне архівування того самого знімка** — без дублікатів, без витоку чужих даних, архів ніколи не перезаписується. Тест: Task 11.
 4. **Новий користувач (0 тренувань, сценарій S0)** — жодних нулів-вироків, усі екрани показують порожні стани з підказкою дії. Тест: Task 8b (+ скриншоти S0 у кожній задачі Фази D).
 5. **Кілька подій одночасно (2 бейджі + рівень)** — одне святкове вікно; після відкриття звіту крапка на табі й картка зникають. Тест: Task 7, Task 19.
 
@@ -90,8 +90,8 @@
 | `frontend/lib/fit/types.ts`, `seed.ts`, `store/reducer.ts`, `store/persist.ts`, `store/hooks.ts` (mod) | новий стан, дії, 12-тижнева демо-історія, `useProgress()` |
 | `frontend/lib/fit/stats.ts`, `gamification.ts`, `notifications.ts`, `coach.ts` (mod) | старі розрахунки → виклики рушія |
 | `frontend/lib/api/progressSync.ts` (new) | zod-схеми, `fetchSnapshot`, `pushSync`, `markSeenRemote`, хук `useProgressSync` |
-| `platform-backend/src/migrations/20261123_create_progress.ts` (new) | 7 таблиць фактів |
-| `platform-backend/src/migrations/20261124_create_progress_snapshots.ts` (new) | архів знімків (append-only) |
+| `platform-backend/src/migrations/20261124_01_create_user_progress.ts` (new) | 7 таблиць фактів `user_progress_*` |
+| `platform-backend/src/migrations/20261124_02_create_user_progress_snapshots.ts` (new) | архів знімків (append-only) |
 | `platform-backend/src/progress/models.ts`, `repo.ts`, `routes.ts` (new) | Objection-моделі, upsert/знімок, Fastify-маршрути |
 | `platform-backend/src/app.ts` (mod) | реєстрація маршрутів |
 | `platform-backend/test/progress.test.ts` (new) | схема, ідемпотентність, ізоляція пристроїв |
@@ -246,7 +246,7 @@ export function snapshotHash(s: ProgressSnapshot): string; // стабільни
 **Interfaces — Produces:**
 ```ts
 // FitState +
-deviceId: string;            // crypto.randomUUID() при першому запуску
+progressToken: string;       // crypto.randomUUID() при першому запуску; секрет, за яким сервер знаходить гостьового користувача
 weeklyGoal: number;          // 2..5, за замовчуванням clamp(profile.daysPerWeek, 2, 5)
 pauses: Pause[];
 progressEvents: ProgressEvent[];
@@ -312,10 +312,10 @@ export function useProgress(): ProgressSnapshot & { history: History; ctx: Progr
 
 ### Task 10: Міграції й Objection-моделі
 
-**Files:** Create `platform-backend/src/migrations/20261123_create_progress.ts`, `platform-backend/src/migrations/20261124_create_progress_snapshots.ts`, `platform-backend/src/progress/models.ts`; Test `platform-backend/test/progress.test.ts`
+**Files:** Create `platform-backend/src/migrations/20261124_01_create_user_progress.ts`, `platform-backend/src/migrations/20261124_02_create_user_progress_snapshots.ts`, `platform-backend/src/progress/models.ts`; Test `platform-backend/test/progress.test.ts`
 
-Схема — таблиця «Схема БД» у дизайн-документі (дослівно). Моделі: `ProgressDeviceModel`, `PlanDayModel`, `WorkoutModel` (relation `sets` → `SetLogModel`), `SetLogModel`, `PauseModel`, `WeightEntryModel`, `ProgressEventModel`, `ProgressSnapshotModel` (архів: у моделі немає методів оновлення/видалення, репозиторій лише вставляє); `tableName` як у схемі, поля camelCase (`knexSnakeCaseMappers`). `numeric` повертати як `number` (`$parseDatabaseJson` або `pg.types.setTypeParser(1700, parseFloat)` у `db.ts`).
-- [ ] **Step 1: Тести:** після `migrate` існують 7 таблиць з колонками зі схеми (`information_schema.columns`); check `weekly_goal` відхиляє 6; check паузи відхиляє 29 днів; `down` прибирає всі таблиці; видалення `workouts` каскадно видаляє `set_logs`; `progress_snapshots` має unique (`device_id`, `period`, `week_start`) для `weekly` (частковий unique index `where period = 'weekly'`) і index (`device_id`, `taken_at`); `payload` — `jsonb not null`.
+Схема — таблиця «Схема БД» у дизайн-документі (дослівно). Моделі: `ProgressSettingsModel`, `ProgressPlanDayModel`, `ProgressWorkoutModel` (relation `sets` → `ProgressSetModel`), `ProgressSetModel`, `ProgressPauseModel`, `ProgressWeightModel`, `ProgressEventModel`, `ProgressSnapshotModel` (архів: у моделі немає методів оновлення/видалення, репозиторій лише вставляє); `tableName` як у схемі, поля camelCase (`knexSnakeCaseMappers`). `numeric` повертати як `number` (`$parseDatabaseJson` або `pg.types.setTypeParser(1700, parseFloat)` у `db.ts`).
+- [ ] **Step 1: Тести:** після `migrate` (разом з міграціями команди) існують 8 таблиць `user_progress_*` з колонками зі схеми; видалення рядка `users` каскадно видаляє всі дані прогресу цього користувача; `user_progress_workouts.training_id` при видаленні `user_trainings` стає `null` (`information_schema.columns`); check `weekly_goal` відхиляє 6; check паузи відхиляє 29 днів; `down` прибирає всі таблиці; видалення `user_progress_workouts` каскадно видаляє `user_progress_sets`; `user_progress_snapshots` має частковий unique (`user_id`, `week_start`) `where period = 'weekly'` і index (`user_id`, `taken_at`); `payload` — `jsonb not null`.
 - [ ] **Step 2–4:** RED → GREEN (`npm test` у `platform-backend`).
 - [ ] **Step 5:** commit `feat(backend): progress schema and models`.
 
@@ -325,8 +325,8 @@ export function useProgress(): ProgressSnapshot & { history: History; ctx: Progr
 
 **Interfaces — Produces:**
 ```ts
-// Усі з заголовком x-device-id (UUID v4), інакше 400 { error }.
-GET  /api/progress/snapshot      → 200 RemoteSnapshot (порожні масиви для нового пристрою)
+// Усі з заголовком x-progress-token (UUID), інакше 400 { error }. repo.resolveUser(token, { create }) знаходить user_id через user_progress_settings.client_token; при першому записі створює users { name: "Guest", email: `guest-${token}@guest.invalid` } + settings в одній транзакції. users.id назовні не віддається.
+GET  /api/progress/snapshot      → 200 RemoteSnapshot (порожні масиви для невідомого токена, користувач не створюється)
 POST /api/progress/sync          body RemoteSnapshot (часткові масиви дозволені) → 200 { ok: true, counts }
 POST /api/progress/events/seen   body { ids: string[]; seenAt: string } → 200 { updated: number }
 POST /api/progress/archive       body { period: "weekly" | "change"; weekStart: string | null; takenAt: string; engineVersion: string; payload: object; payloadHash: string } → 201 { archived: true } | 200 { archived: false } (дублікат)
@@ -334,7 +334,7 @@ GET  /api/progress/archive?from=&to=&period= → 200 { snapshots: { period, week
 interface RemoteSnapshot { device: { weeklyGoal: number; units: "metric" | "imperial"; heightCm: number | null }; planDays: …; workouts: (Workout & { sets: SetLog[] })[]; pauses: …; weights: …; events: … }
 ```
 - Валідація тіла — JSON Schema у Fastify-маршруті (без нових бібліотек), ліміт тіла 1 МБ. Upsert в одній транзакції: `insert … onConflict(pk).merge()`; `set_logs` тренування замінюються повністю.
-- [ ] **Step 1: Тести:** sync двічі тим самим тілом → ті самі кількості рядків; два `device_id` не бачать даних один одного; без заголовка → 400; некоректний `kind` → 400; `events/seen` проставляє `seen_at` лише для свого пристрою; архів: `weekly` за той самий тиждень двічі → 1 рядок, другий виклик `archived: false`, перший payload не змінився; `change` з тим самим хешем, що й останній знімок пристрою → не пишеться, з іншим → пишеться; `GET archive` повертає лише знімки свого пристрою в межах дат; у коді репозиторію немає `update`/`delete` для `progress_snapshots` (перевірити `grep`).
+- [ ] **Step 1: Тести:** sync двічі тим самим тілом → ті самі кількості рядків; два токени не бачать даних один одного; перший `sync` з новим токеном створює рівно одного гостьового користувача, повторний — жодного; без заголовка → 400; некоректний `kind` → 400; `events/seen` проставляє `seen_at` лише для свого користувача; архів: `weekly` за той самий тиждень двічі → 1 рядок, другий виклик `archived: false`, перший payload не змінився; `change` з тим самим хешем, що й останній знімок користувача → не пишеться, з іншим → пишеться; `GET archive` повертає лише знімки свого користувача в межах дат; у коді репозиторію немає `update`/`delete` для `user_progress_snapshots` (перевірити `grep`).
 - [ ] **Step 2–4:** RED → GREEN. **Step 5:** commit `feat(backend): progress snapshot and sync endpoints`.
 
 ### Task 12: Клієнт синхронізації

@@ -20,7 +20,7 @@
 ## Не-цілі
 
 - Справжні push-сповіщення (тільки текст у наявній системі сповіщень, як заглушка).
-- Акаунти й вхід (зберігання прив'язане до анонімного `device_id`, див. рішення 10).
+- Акаунти й вхід (гостьовий користувач за `progressToken`, див. рішення 10).
 - Відновлення м'язів і Training Readiness (розділ 5 промпту).
 - Обчислення метрик на бекенді (бекенд лише зберігає факти).
 
@@ -48,29 +48,30 @@
 8. **Мок-дані:** демо-історію Дмитра (`lib/fit/seed.ts`) розширюємо до 12 тижнів за вимогами розділу 1 промпту; `lib/api/mock/progressDb.ts` лишається тестовим фікстуром.
 9. **Маршрути:** `/progress` (головний), `/progress/calendar`, `/progress/records`, `/progress/weight`, `/progress/week/[week]` (вже є), `/progress/achievements`. Вкладки Overview/History/Awards/Check-ins Дмитра: Overview стає головним екраном за промптом, History і Check-ins (фото) лишаються доступними зі списку переходів, Awards замінюється екраном «Досягнення».
 
-10. **Зберігання в Postgres (на запит користувачки «включити ORM-схему»).** За патерном команди: Knex-міграції + Objection-моделі в `platform-backend`, тести через Testcontainers, браузер звертається через `/api/*` rewrite. Акаунтів немає, тому всі таблиці прогресу мають ключ `device_id` — анонімний UUID, який фронтенд генерує один раз і зберігає в `FitState`. Схема зберігає **сирі факти** (план, тренування, підходи, паузи, зважування, події «нового»), з яких рушій `lib/progress` рахує поточні числа на клієнті, тож формули живуть в одному місці. Крім того, **кожен обчислений знімок архівується** (таблиця `progress_snapshots`, див. нижче). localStorage лишається робочим сховищем (офлайн), бекенд — синхронізація й резервна копія: клієнт надсилає зміни пакетом (ідемпотентний upsert) і при порожньому локальному стані підтягує знімок.
+10. **Зберігання в Postgres: окремі таблиці прогресу, прив'язані до `users`.** Команда вже має схему: `users`, `user_devices` (годинники Garmin/Apple), `user_trainings`, `user_device_data_snapshots`. Рішення користувачки — **окремі таблиці для прогресу**. Їхні таблиці ми не змінюємо і не перевантажуємо; наші мають префікс `user_progress_` і ключ `user_id` → `users.id` з каскадним видаленням. Стиль той самий, що в команди: Knex-міграції, Objection-моделі, Testcontainers, `bigIncrements` там, де id генерує сервер, `timestamps(true, true)`.
+    - **Ідентичність без акаунтів.** Акаунтів у застосунку ще немає. Тому клієнт один раз генерує секретний `progressToken` (UUID) і зберігає його в `FitState`. Сервер знаходить користувача за цим токеном у `user_progress_settings`, а при першому зверненні створює гостьового користувача в `users`: `name = "Guest"`, `email = guest-<token>@guest.invalid`. Числовий `users.id` назовні не віддається, щоб чужі дані не можна було підібрати перебором. Коли з'являться акаунти, гість зливається зі справжнім користувачем зміною `user_id`.
+    - **Сирі факти й архів знімків.** Схема зберігає сирі факти (план, тренування, підходи, паузи, зважування, події «нового»); рушій `lib/progress` рахує з них поточні числа на клієнті, тож формули живуть в одному місці. Кожен обчислений знімок архівується в `user_progress_snapshots`.
+    - **Офлайн.** localStorage лишається робочим сховищем. Бекенд — синхронізація й резервна копія: клієнт надсилає зміни пакетом (ідемпотентний upsert), а при порожньому локальному стані підтягує знімок.
 
-## Схема БД (Postgres, усі таблиці з `device_id text not null`)
+## Схема БД (Postgres; усі таблиці мають `user_id bigint not null references users(id) on delete cascade`)
 
 | Таблиця | Колонки | Ключі й обмеження |
 |---|---|---|
-| `progress_devices` | `device_id` PK, `weekly_goal` smallint (2–5), `units` text (`metric`/`imperial`), `height_cm` smallint null, `created_at`, `updated_at` | check `weekly_goal between 2 and 5` |
-| `plan_days` | `device_id`, `date` date, `type` text (`training`/`rest`), `workout_id` text null | PK (`device_id`, `date`) |
-| `workouts` | `id` text PK, `device_id`, `plan_date` date null, `performed_on` date, `status` text (`completed`/`partial`/`abandoned`), `planned_sets` smallint, `duration_sec` int, `perceived` text null, `adapted` boolean, `ad_hoc` boolean, `created_at` | index (`device_id`, `performed_on`) |
-| `set_logs` | `id` text PK, `device_id`, `workout_id` FK → `workouts.id` on delete cascade, `exercise_id` text, `kind` text (`weighted`/`bodyweight`/`timed`), `reps` smallint null, `weight_kg` numeric(6,2) null, `duration_sec` int null, `completed` boolean, `performed_at` timestamptz | index (`device_id`, `exercise_id`, `performed_at`) |
-| `pauses` | `id` text PK, `device_id`, `from_date` date, `to_date` date | check `to_date >= from_date and to_date - from_date <= 27` |
-| `weight_entries` | `device_id`, `date` date, `kg` numeric(5,2) | PK (`device_id`, `date`) |
-| `progress_events` | `id` text PK, `device_id`, `kind` text (`badge`/`level`/`pr`/`report`), `ref_id` text, `payload` jsonb, `created_at` timestamptz, `seen_at` timestamptz null | unique (`device_id`, `kind`, `ref_id`) |
-| `progress_snapshots` | `id` bigserial PK, `device_id`, `period` text (`weekly`/`change`), `week_start` date null, `taken_at` timestamptz, `engine_version` text, `payload` jsonb, `payload_hash` text | unique (`device_id`, `period`, `week_start`) для `weekly`; index (`device_id`, `taken_at`) |
+| `user_progress_settings` | `user_id` PK, `client_token` uuid, `weekly_goal` smallint, `units` text (`metric`/`imperial`), `created_at`, `updated_at` | unique `client_token`; check `weekly_goal between 2 and 5` |
+| `user_progress_plan_days` | `user_id`, `date` date, `type` text (`training`/`rest`), `workout_ref` text null | PK (`user_id`, `date`) |
+| `user_progress_workouts` | `id` text PK (id з клієнта), `user_id`, `training_id` bigint null → `user_trainings.id` on delete set null, `plan_date` date null, `performed_on` date, `status` text (`completed`/`partial`/`abandoned`), `planned_sets` smallint, `duration_sec` int, `perceived` text null, `adapted` boolean, `ad_hoc` boolean, `created_at` | index (`user_id`, `performed_on`) |
+| `user_progress_sets` | `id` text PK, `user_id`, `workout_id` → `user_progress_workouts.id` on delete cascade, `exercise_id` text, `kind` text (`weighted`/`bodyweight`/`timed`), `reps` smallint null, `weight_kg` numeric(6,2) null, `duration_sec` int null, `completed` boolean, `performed_at` timestamptz | index (`user_id`, `exercise_id`, `performed_at`) |
+| `user_progress_pauses` | `id` text PK, `user_id`, `from_date` date, `to_date` date | check `to_date >= from_date and to_date - from_date <= 27` |
+| `user_progress_weights` | `user_id`, `date` date, `kg` numeric(5,2) | PK (`user_id`, `date`) |
+| `user_progress_events` | `id` text PK, `user_id`, `kind` text (`badge`/`level`/`pr`/`report`), `ref_id` text, `payload` jsonb, `created_at` timestamptz, `seen_at` timestamptz null | unique (`user_id`, `kind`, `ref_id`) |
+| `user_progress_snapshots` | `id` bigserial PK, `user_id`, `period` text (`weekly`/`change`), `week_start` date null, `taken_at` timestamptz, `engine_version` text, `payload` jsonb, `payload_hash` text | частковий unique (`user_id`, `week_start`) where `period = 'weekly'`; index (`user_id`, `taken_at`); append-only (коментар до таблиці, як у `user_device_data_snapshots`) |
 
-**Архів знімків (на запит користувачки «архівувати всі снепшот-дані»).** Кожен обчислений `ProgressSnapshot` архівується в `progress_snapshots`. Записи **лише додаються**: рядки не оновлюються і не видаляються.
+**Архів знімків (на запит користувачки «архівувати всі снепшот-дані»).** Кожен обчислений `ProgressSnapshot` архівується в `user_progress_snapshots`. Записи **лише додаються**: рядки не оновлюються і не видаляються.
 - `weekly` — один знімок на завершений тиждень, у ніч з неділі на понеділок разом із перерахунком регулярності. Повторна спроба за той самий тиждень нічого не змінює (`on conflict do nothing`).
-- `change` — знімок після кожної зміни, яка змінила числа (завершене тренування, пауза, зважування, нова ціль). Новий рядок пишеться, лише якщо `payload_hash` відрізняється від останнього знімка цього пристрою.
+- `change` — знімок після кожної зміни, яка змінила числа. Новий рядок пишеться, лише якщо `payload_hash` відрізняється від останнього знімка цього користувача.
 - `engine_version` — версія формул рушія, тож старі знімки лишаються зрозумілими після зміни правил.
 
-Так історія показників (як змінювались регулярність, серія, рівень, рекорди) зберігається незалежно від того, як потім зміняться факти чи формули.
-
-Ендпоінти: `GET /api/progress/snapshot`, `POST /api/progress/sync`, `POST /api/progress/events/seen`, `POST /api/progress/archive`, `GET /api/progress/archive?from=&to=&period=` (усі з заголовком `x-device-id`, UUID, інакше 400).
+Ендпоінти (усі з заголовком `x-progress-token`, UUID, інакше 400; невідомий токен на `snapshot`/`archive GET` → порожні дані, на запис → створюється гостьовий користувач): `GET /api/progress/snapshot`, `POST /api/progress/sync`, `POST /api/progress/events/seen`, `POST /api/progress/archive`, `GET /api/progress/archive?from=&to=&period=`.
 
 ## Видимість досягнень (максимальна мотивація)
 
