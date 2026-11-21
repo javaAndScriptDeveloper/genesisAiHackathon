@@ -6,7 +6,7 @@
 
 **Architecture:** Trainers = backend (Postgres table seeded on boot, `GET /api/trainers`, reached from the browser through the existing `/api/*` fallback rewrite). The selected trainer id and goal text are frontend state (`FitState`, localStorage), because the app has no accounts. Voice goal = browser `MediaRecorder` → Next route `/api/stt` → Gemini transcription (free tier key). Typed or spoken goal text → Next route `/api/goal` → Gemini maps it to the existing `Goal` enum so plan generation keeps working.
 
-**Tech Stack:** Fastify 5 + `pg` + Knex (migrations) + Vitest/Testcontainers (backend); Next.js App Router, TypeScript strict, SCSS Modules, react-query, zod, `@google/genai`, Vitest, bun (frontend).
+**Tech Stack:** Fastify 5 + `pg` + Knex (migrations) + Objection (models) + Vitest/Testcontainers (backend); Next.js App Router, TypeScript strict, SCSS Modules, react-query, zod, `@google/genai`, Vitest, bun (frontend).
 
 **Spec:** No separate design doc; the requirements are the user's messages in this session (summarized under Global Constraints). Read `frontend/AGENTS.md` and `frontend/docs/agent/{architecture,ui-kit,data-and-api,ai-utils}.md` before frontend work.
 
@@ -21,7 +21,7 @@
 - Icons are generated dummy images under `frontend/public/trainers/<id>.svg`; `icon_path` is `/trainers/<id>.svg`.
 - STT and goal parsing use Gemini via `GEMINI_API_KEY` (free-plan key), server-side only.
 - Frontend rules: bun only; no `any` / `@ts-ignore`; zod for external data; Server Components by default; all UI text in `messages/parts/*.json` (edit parts, then `node scripts/build-messages.mjs`; never edit `messages/en.json`); Hugeicons via `components/ui/Icon`; kit components, tokens only, radii via `corners` mixins; one light theme.
-- Hackathon MVP: no new dependencies except `knex` (backend, for migrations); no accounts, no sync of trainer/goal to the backend.
+- Hackathon MVP: no new dependencies except `knex` and `objection` (backend); no accounts, no sync of trainer/goal to the backend.
 - Commits: subject ≤72 chars, imperative, body explains why, end with `Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>`.
 
 ## Review Focus
@@ -59,20 +59,20 @@
 
 ---
 
-### Task 1: Backend Knex setup, trainers migration, seed, endpoint
+### Task 1: Backend Knex + Objection setup, trainers migration, seed, endpoint
 
 **Files:**
 - Create: `platform-backend/src/db.ts`, `platform-backend/src/migrations/20261121_create_trainers.ts`, `platform-backend/src/trainers.ts`, `platform-backend/test/trainers.test.ts`
-- Modify: `platform-backend/package.json` (add `knex` dependency; `pg` is already there), `platform-backend/src/app.ts`, `platform-backend/src/server.ts`, `platform-backend/test/health.test.ts`
+- Modify: `platform-backend/package.json` (add `knex` and `objection` dependencies; `pg` is already there), `platform-backend/src/app.ts`, `platform-backend/src/server.ts`, `platform-backend/test/health.test.ts`
 
 **Interfaces:**
 - Produces:
-  - `createDb(connectionString: string): Knex` and `migrate(db: Knex): Promise<void>` in `db.ts` (`migrate` = `db.migrate.latest()` with `directory` resolved from `import.meta.dirname` + `"migrations"` and `loadExtensions: [".js", ".ts"]`, so it works from `dist/` in Docker and from `src/` under Vitest).
-  - `interface Trainer { id: string; name: string; iconPath: string; description: string }`; `TRAINER_SEED: Trainer[]` (order: mike, john, hanna, caroline, alex); `seedTrainers(db: Knex): Promise<void>`; `listTrainers(db: Knex): Promise<Trainer[]>`.
+  - `createDb(connectionString: string): Knex` (config spreads objection's `knexSnakeCaseMappers()` so `iconPath` ↔ `icon_path`) and `migrate(db: Knex): Promise<void>` in `db.ts` (`migrate` = `db.migrate.latest()` with `directory` resolved from `import.meta.dirname` + `"migrations"` and `loadExtensions: [".js", ".ts"]`, so it works from `dist/` in Docker and from `src/` under Vitest).
+  - `interface Trainer { id: string; name: string; iconPath: string; description: string }`; `class TrainerModel extends Model` (`static tableName = "trainers"`, fields `id, name, iconPath, description, sortOrder`); `TRAINER_SEED: Trainer[]` (order: mike, john, hanna, caroline, alex); `seedTrainers(db: Knex): Promise<void>`; `listTrainers(db: Knex): Promise<Trainer[]>`.
   - `buildApp(db: Knex): FastifyInstance` (replaces the old `Queryable` parameter; health now runs `db.raw("SELECT 1")`).
   - HTTP `GET /api/trainers` → `{ trainers: Trainer[] }` (camelCase keys).
 
-- [ ] **Step 1: Add the dependency:** `cd platform-backend && npm install knex`. Check `Dockerfile` still builds (migrations are compiled by `tsc` into `dist/migrations`; if the build only copies selected files, copy that folder too).
+- [ ] **Step 1: Add the dependencies:** `cd platform-backend && npm install knex objection`. Check `Dockerfile` still builds (migrations are compiled by `tsc` into `dist/migrations`; if the build only copies selected files, copy that folder too).
 - [ ] **Step 2: Write failing tests.** `test/trainers.test.ts` (Testcontainers as in `health.test.ts`, one `createDb` per suite):
   - `GET /api/trainers returns the 5 seeded trainers in order`: after `migrate(db)` + `seedTrainers(db)`, names equal `["Mike","John","Hanna","Caroline","Alex"]`; every trainer has non-empty `description` and `iconPath` matching `/^\/trainers\/[a-z]+\.svg$/`.
   - `migrate and seed are idempotent`: run both twice, `db("trainers").count()` is 5.
@@ -81,8 +81,8 @@
 - [ ] **Step 3: Run** `npm test` (needs Docker). Expected: FAIL, modules missing.
 - [ ] **Step 4: Implement.**
   - Migration `up`: `createTable("trainers")` with `id` text primary key, `name` text not null, `icon_path` text not null, `description` text not null, `sort_order` integer not null; `down`: `dropTable`.
-  - `seedTrainers`: one `insert(...).onConflict("id").merge()` of all seed rows, so edited TOV text propagates on every deploy without a new migration.
-  - `listTrainers`: select ordered by `sort_order`, map `icon_path` → `iconPath`.
+  - `seedTrainers`: `TrainerModel.query(db).insert(rows).onConflict("id").merge()` of all seed rows (add `sortOrder` from array index), so edited TOV text propagates on every deploy without a new migration.
+  - `listTrainers`: `TrainerModel.query(db).orderBy("sortOrder")`, return plain `Trainer` objects (`toJSON()`-free: pick the four fields).
   - `app.ts`: health via `db.raw`, new route with try/catch (on error log and `reply.code(503).send({ error: "trainers unavailable" })`).
   - `server.ts`: `const db = createDb(url); await migrate(db); await seedTrainers(db);` before `app.listen`; shutdown calls `db.destroy()`.
   - Seed descriptions (2–3 sentences each; these are the future LLM tone-of-voice briefs):
