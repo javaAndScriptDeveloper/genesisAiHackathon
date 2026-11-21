@@ -31,6 +31,8 @@ export function emptyState(): FitState {
 		bodyWeights: [],
 		goalWeightKg: null,
 		partners: {},
+		partnerInvitedAt: {},
+		chats: {},
 		hasDemoHistory: false,
 		celebrate: [],
 	};

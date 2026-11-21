@@ -208,6 +208,15 @@ export interface PhotoCheckIn {
 	weightKg?: number;
 }
 
+export interface ChatMessage {
+	id: string;
+	from: "me" | "buddy";
+	text: string;
+	/** Resized JPEG data URL of a shared photo. */
+	photo?: string;
+	at: string;
+}
+
 export type MealSlot = "breakfast" | "lunch" | "snack" | "dinner";
 
 export interface FitState {
@@ -236,6 +245,10 @@ export interface FitState {
 	/** When the current goal weight was set. */
 	goalSetAt?: string | null;
 	partners: Record<string, "invited" | "accepted">;
+	/** When each pending request was sent (ISO). Approval is derived from it, so it survives navigation and reloads. */
+	partnerInvitedAt: Record<string, string>;
+	/** Simulated chats with connected gym buddies, keyed by buddy id. */
+	chats: Record<string, ChatMessage[]>;
 	hasDemoHistory: boolean;
 	celebrate: string[];
 }
