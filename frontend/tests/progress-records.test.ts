@@ -43,6 +43,11 @@ describe("records", () => {
 		]);
 		expect(exerciseSeries(h, "goblet_squat").map((p) => p.value)).toEqual([16, 18]);
 	});
+	it("weighted: one metric per exercise (no mixed e1rm/weight)", () => {
+		const h = hist([sess("a", "2026-11-10", [wt("squat", 10, 10)]), sess("b", "2026-11-12", [wt("squat", 12, 12)])]);
+		// e1RM metric is used for all; the 12-rep session has no qualifying set and is skipped
+		expect(exerciseSeries(h, "squat").map((p) => p.value)).toEqual([13.5]);
+	});
 	it("покинуті сесії не дають рекордів", () => {
 		const h = hist([sess("a", "2026-11-10", [bw(8)]), sess("b", "2026-11-12", [bw(20)], "abandoned")]);
 		expect(personalRecords(h)).toEqual([]);

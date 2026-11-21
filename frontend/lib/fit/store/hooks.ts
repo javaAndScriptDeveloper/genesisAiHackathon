@@ -2,8 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { startTransition, useCallback, useMemo } from "react";
-import { addDays } from "../dates";
-import { appInsights, hasPlanWindow, historyFromFit, reportWeeksOf } from "../../progress/fromFit";
+import { appInsights, consistencyDeltaOf, historyFromFit, reportWeeksOf } from "../../progress/fromFit";
 import { weeklyChallenge, levelOf, totalXp } from "../gamification";
 import { nextUpcoming } from "../plan";
 import { computeStreak, consistencyScore, daysSinceLastWorkout, personalRecords, weekStats } from "../stats";
@@ -83,11 +82,7 @@ export function useProgressAnalytics() {
 	const { state, today } = useFit();
 	return useMemo(() => {
 		const history = historyFromFit(state, today);
-		const weekAgo = addDays(today, -7);
-		const consistencyDelta =
-			hasPlanWindow(state.planned, today) || hasPlanWindow(state.planned, weekAgo)
-				? consistencyScore(state.planned, today) - consistencyScore(state.planned, weekAgo)
-				: null;
+		const consistencyDelta = consistencyDeltaOf(state.planned, today);
 		return { history, insights: appInsights(history, consistencyDelta), consistencyDelta, reportWeeks: reportWeeksOf(history) };
 	}, [state, today]);
 }

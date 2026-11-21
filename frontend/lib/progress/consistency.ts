@@ -97,6 +97,7 @@ function weekAllDone(h: History, ws: IsoDate): boolean {
 	return workouts.length > 0 && workouts.every((d) => isDone(d.status));
 }
 
+// Not used by the app UI — the app's streak lives in lib/fit (see docs/agent/fitness-app.md, ruling R7). Kept as tested reference.
 export function streakWeeks(h: History): number {
 	const current = weekStart(h.today);
 	let streak = weekAllDone(h, current) ? 1 : 0;

@@ -12,7 +12,7 @@ export interface Insight {
 
 function tooHard(h: History): Insight | null {
 	const rated = h.sessions
-		.filter((s) => s.rpe !== null)
+		.filter((s) => s.rpe !== null && s.date <= h.today)
 		.sort((a, b) => (a.date === b.date ? a.id.localeCompare(b.id) : a.date.localeCompare(b.date)));
 	if (rated.length < 3) return null;
 	return rated.slice(-3).every((s) => s.rpe === "hard") ? { id: "too_hard", vars: {} } : null;

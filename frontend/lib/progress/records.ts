@@ -61,12 +61,15 @@ function chronological(h: History): WorkoutSession[] {
 export function exerciseSeries(h: History, exerciseId: string): SeriesPoint[] {
 	const kind = h.exercises.find((e) => e.id === exerciseId)?.kind;
 	if (!kind) return [];
+	const done = chronological(h);
+	let main = mainMetric(kind);
+	// One metric per exercise: e1RM if any set ever qualifies, otherwise max weight (never a mix).
+	if (kind === "weighted" && !done.some((s) => metricValue(s.sets.filter((x) => x.exerciseId === exerciseId), "e1rm") !== null)) main = "weight";
 	const points: SeriesPoint[] = [];
-	for (const s of chronological(h)) {
+	for (const s of done) {
 		const sets = s.sets.filter((x) => x.exerciseId === exerciseId);
 		if (sets.length === 0) continue;
-		const main = mainMetric(kind);
-		const value = metricValue(sets, main) ?? (kind === "weighted" ? metricValue(sets, "weight") : null);
+		const value = metricValue(sets, main);
 		if (value !== null) points.push({ date: s.date, value });
 	}
 	return points;

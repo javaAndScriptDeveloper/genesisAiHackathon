@@ -54,6 +54,14 @@ describe("insights", () => {
 	});
 });
 
+describe("too_hard is bounded by today", () => {
+	it("later hard sessions do not affect an earlier today", () => {
+		const h = hist([sess("a", "2026-11-05", 5, "ok"), sess("b", "2026-11-08", 5, "hard"), sess("c", "2026-11-10", 5, "hard"), sess("d", "2026-11-12", 5, "hard")]);
+		expect(insights({ ...h, today: "2026-11-11" }).map((i) => i.id)).not.toContain("too_hard");
+		expect(insights(h).map((i) => i.id)).toContain("too_hard");
+	});
+});
+
 describe("exerciseInsight", () => {
 	const h = hist([sess("a", "2026-11-05", 8), sess("b", "2026-11-19", 12)]);
 	it("приріст для вправи", () => expect(exerciseInsight(h, "pushup")?.vars).toMatchObject({ from: 8, to: 12, weeks: 2 }));

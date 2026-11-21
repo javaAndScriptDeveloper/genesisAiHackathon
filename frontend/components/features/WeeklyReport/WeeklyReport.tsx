@@ -69,7 +69,7 @@ export function WeeklyReport({ week }: { week: string }) {
 					)}
 				</Card>
 
-				{insight && <ProgressInsights insights={[insight]} fallback="" />}
+				{insight && <ProgressInsights insights={[insight]} />}
 
 				<Card>
 					<h3 className={styles.h3}>{t("fit.progress.report.next")}</h3>

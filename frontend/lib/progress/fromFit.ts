@@ -1,5 +1,6 @@
 import { findExercise } from "../fit/exercises";
 import type { FitState, Perceived, PlannedWorkout } from "../fit/types";
+import { consistencyScore } from "../fit/stats";
 import { addDays, eachDay, weekStart } from "./dates";
 import { insights, type Insight } from "./insights";
 import type { Exercise, History, IsoDate, PlannedDay, Rpe, SetLog, WorkoutSession } from "./types";
@@ -51,15 +52,18 @@ export function historyFromFit(state: Pick<FitState, "planned" | "history" | "bo
 				kind: info.timed ? "timed" : "bodyweight",
 			});
 		}
-		const plannedSets = plan ? plan.exercises.reduce((n, b) => n + b.sets.length, 0) : 0;
+		const regular = plan !== undefined && !plan.adHoc ? plan : undefined;
+		const plannedSets = regular ? regular.exercises.reduce((n, b) => n + b.sets.length, 0) : 0;
+		// lib/fit credits the planned workout (even when done on another day); a partial/completed one counts as quality.
+		const credited = regular !== undefined && (regular.status === "partial" || regular.status === "completed");
 		return {
 			id: log.id,
-			date: log.date,
-			planned: plan !== undefined && !plan.adHoc,
+			date: regular ? regular.date : log.date,
+			planned: regular !== undefined,
 			status: "completed",
 			adapted: log.adaptations.length > 0,
 			durationMin: Math.round(log.durationSec / 60),
-			setsPlanned: Math.max(1, plannedSets || logged),
+			setsPlanned: Math.max(1, credited ? Math.min(plannedSets || logged, logged) : plannedSets || logged),
 			sets,
 			rpe: RPE[log.perceived],
 		};
@@ -102,4 +106,12 @@ export function appInsights(h: History, consistencyDelta: number | null, limit =
 	const list = insights(h, 4).filter((i) => i.id !== "consistency_up");
 	if (consistencyDelta !== null && consistencyDelta > 0) list.push({ id: "consistency_up", vars: { delta: consistencyDelta } });
 	return list.slice(0, limit);
+}
+
+/** Change in the app's consistency score over the last 7 days; the week-ago score only sees workouts up to that day. */
+export function consistencyDeltaOf(planned: PlannedWorkout[], today: IsoDate): number | null {
+	const weekAgo = addDays(today, -7);
+	const past = planned.filter((w) => w.date <= weekAgo);
+	if (!hasPlanWindow(planned, today) && !hasPlanWindow(past, weekAgo)) return null;
+	return consistencyScore(planned, today) - consistencyScore(past, weekAgo);
 }

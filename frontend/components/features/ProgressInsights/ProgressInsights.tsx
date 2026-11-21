@@ -10,7 +10,7 @@ import styles from "./ProgressInsights.module.scss";
 interface ProgressInsightsProps {
 	insights: Insight[];
 	/** Shown when there are no insights yet. */
-	fallback: string;
+	fallback?: string;
 	/** Optional trailing action, e.g. a Share button. */
 	action?: ReactNode;
 }

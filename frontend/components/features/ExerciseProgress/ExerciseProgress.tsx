@@ -52,7 +52,7 @@ export function ExerciseProgress({ exerciseId }: { exerciseId: string }) {
 					</>
 				)}
 			</Card>
-			{insight && <ProgressInsights insights={[insight]} fallback="" />}
+			{insight && <ProgressInsights insights={[insight]} />}
 		</section>
 	);
 }

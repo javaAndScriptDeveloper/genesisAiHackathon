@@ -1,3 +1,4 @@
+// Not used by the app UI — the app's XP/achievements/streak live in lib/fit (see docs/agent/fitness-app.md, ruling R7). Kept as tested reference.
 import { addDays, eachDay, weekStart } from "./dates";
 import { isRestKept, streakWeeks, weeklyGoal } from "./consistency";
 import { isQualitySession } from "./days";
