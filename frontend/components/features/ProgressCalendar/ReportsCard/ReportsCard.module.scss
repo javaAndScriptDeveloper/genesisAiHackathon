@@ -1,0 +1,27 @@
+@use "partials/corners";
+
+.title {
+	margin-bottom: var(--space-2);
+	font-size: 1.6rem;
+}
+
+.list {
+	display: flex;
+	flex-direction: column;
+	gap: var(--space-2);
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.record {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--space-2);
+	padding: var(--space-3);
+	background: var(--color-surface);
+	border: 0.1rem solid var(--color-border);
+	font-size: 1.4rem;
+	@include corners.radius(var(--radius-card));
+}

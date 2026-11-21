@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { ScreenHeader } from "@/components/features/ScreenHeader/ScreenHeader";
 import { Skeleton } from "@/components/ui";
-import { useProgressCalendar } from "@/lib/fit/store/hooks";
+import { useProgressAnalytics, useProgressCalendar } from "@/lib/fit/store/hooks";
 import { useT } from "@/lib/i18n/I18nProvider";
 import { calendarMonth, dayDetails, isValidMonth, monthOf, shiftMonth, weekDetails } from "@/lib/progress/calendar";
 import { consistencyV2, streakV2 } from "@/lib/progress/consistency";
@@ -12,6 +12,7 @@ import { CalendarGrid } from "./CalendarGrid/CalendarGrid";
 import { DaySheet } from "./DaySheet/DaySheet";
 import { PauseCard } from "./PauseCard/PauseCard";
 import { ScoreBreakdown } from "./ScoreBreakdown/ScoreBreakdown";
+import { ReportsCard } from "./ReportsCard/ReportsCard";
 import { StreakCard } from "./StreakCard/StreakCard";
 import { WeekSheet } from "./WeekSheet/WeekSheet";
 import styles from "./ProgressCalendar.module.scss";
@@ -25,6 +26,7 @@ const monthIndex = (m: string): number => {
 export function ProgressCalendar({ initialMonth }: { initialMonth?: string }) {
 	const t = useT();
 	const { history, ctx, today, ready, pauses } = useProgressCalendar();
+	const { reportWeeks } = useProgressAnalytics();
 	const thisMonth = monthOf(today);
 	// Months relative to the current one, so "Today" is offset 0 and a new day keeps the view stable.
 	const [offset, setOffset] = useState(() => (initialMonth && isValidMonth(initialMonth) ? monthIndex(initialMonth) - monthIndex(monthOf(today)) : 0));
@@ -67,6 +69,7 @@ export function ProgressCalendar({ initialMonth }: { initialMonth?: string }) {
 							onDay={setDay}
 							onWeek={setWeek}
 						/>
+						<ReportsCard weeks={reportWeeks} />
 						<StreakCard current={streak.current} best={streak.best} empty={noWorkouts} />
 						<ScoreBreakdown score={noWorkouts ? null : consistency.score} weeks={consistency.weeks} onWeek={setWeek} />
 						<PauseCard pauses={pauses} today={today} />

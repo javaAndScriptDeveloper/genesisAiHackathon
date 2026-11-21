@@ -63,7 +63,7 @@ function Overview() {
 	const u = useUnits();
 	const { state, today } = useFit();
 	const stats = useFitStats();
-	const { insights, consistencyDelta, reportWeeks } = useProgressAnalytics();
+	const { insights, consistencyDelta } = useProgressAnalytics();
 	const [period, setPeriod] = useState<"week" | "month">("week");
 	const premium = usePremium();
 
@@ -134,22 +134,6 @@ function Overview() {
 			</div>
 
 			{insights.length > 0 && <ProgressInsights insights={insights} fallback="" />}
-
-			{reportWeeks.length > 0 && (
-				<Card>
-					<h3 className={styles.h3}>{t("fit.progress.reports.title")}</h3>
-					<ul className={styles.list}>
-						{reportWeeks.slice(0, 4).map((w) => (
-							<li key={w}>
-								<Link href={`/progress/week/${w}`} transitionTypes={["nav-forward"]} className={styles.record}>
-									<strong>{t("fit.progress.reports.week", { date: formatMonthDay(w) })}</strong>
-									<Badge>{t("fit.progress.reports.open")}</Badge>
-								</Link>
-							</li>
-						))}
-					</ul>
-				</Card>
-			)}
 
 			<Card>
 				<h3 className={styles.h3}>{t("fit.progress.weeklyVolume")}</h3>
