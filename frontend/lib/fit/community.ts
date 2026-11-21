@@ -39,7 +39,7 @@ export const BUDDIES: Buddy[] = [
 ];
 
 export function buddyPortrait(buddy: Buddy): string {
-	return `/img/buddy-${buddy.id}@2x.webp`;
+	return `/img/buddy-portrait-${buddy.id}@2x.webp`;
 }
 
 const REPLIES = [
