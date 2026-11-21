@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it } from "vitest";
 import { POST } from "@/app/api/goal/route";
+import { POST as STT } from "@/app/api/stt/route";
 import { AiConfigError, askClaude, askGemini } from "@/lib/ai";
 import { parseGoalReply } from "@/lib/fit/goalParse";
 
@@ -48,5 +49,26 @@ describe("POST /api/goal", () => {
 	it("answers 503 when the Gemini key is missing", async () => {
 		delete process.env.GEMINI_API_KEY;
 		expect((await post({ text: "run a marathon" })).status).toBe(503);
+	});
+});
+
+describe("POST /api/stt", () => {
+	const send = (audio?: Blob) => {
+		const form = new FormData();
+		if (audio) form.append("audio", audio, "goal.webm");
+		return STT(new Request("http://localhost/api/stt", { method: "POST", body: form }));
+	};
+	it("rejects a request without an audio field with 400", async () => {
+		expect((await send()).status).toBe(400);
+	});
+	it("rejects non-audio uploads with 400", async () => {
+		expect((await send(new Blob(["hi"], { type: "text/plain" }))).status).toBe(400);
+	});
+	it("rejects audio over 5 MB with 400", async () => {
+		expect((await send(new Blob([new Uint8Array(5 * 1024 * 1024 + 1)], { type: "audio/webm" }))).status).toBe(400);
+	});
+	it("answers 503 when the Gemini key is missing", async () => {
+		delete process.env.GEMINI_API_KEY;
+		expect((await send(new Blob([new Uint8Array(10)], { type: "audio/webm;codecs=opus" }))).status).toBe(503);
 	});
 });

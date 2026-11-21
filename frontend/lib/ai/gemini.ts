@@ -51,3 +51,11 @@ export async function classifyGoal(text: string): Promise<Goal | null> {
 	});
 	return parseGoalReply(res.text ?? "");
 }
+
+export async function transcribeAudio({ data, mimeType }: { data: Buffer; mimeType: string }): Promise<string> {
+	const res = await client().models.generateContent({
+		model: model(),
+		contents: [{ role: "user", parts: [{ inlineData: { mimeType, data: data.toString("base64") } }, { text: "Transcribe this audio verbatim. Return only the transcript." }] }],
+	});
+	return res.text ?? "";
+}
