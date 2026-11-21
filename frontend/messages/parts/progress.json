@@ -116,6 +116,37 @@
           "title": "Consistency up {delta} points",
           "next": "Keep this rhythm — it works."
         }
+      },
+      "reports": {
+        "title": "Weekly reports",
+        "week": "Week of {date}",
+        "open": "Open report"
+      },
+      "report": {
+        "title": "Weekly report",
+        "range": "{from} – {to}",
+        "notFound": "Report not found",
+        "notFoundBody": "That week isn't available yet or doesn't exist.",
+        "back": "Back to progress",
+        "workouts": "Workouts",
+        "minutes": "Minutes",
+        "adherence": "Plan completed",
+        "vsPrev": "{diff} vs prior week",
+        "noPrev": "no prior week",
+        "same": "=",
+        "empty": "A quiet week. Nothing to log here, and that's fine. Your next plan is below.",
+        "records": "Records this week",
+        "noRecords": "No new records this week.",
+        "recordValue": "{value} {unit}",
+        "unit": {
+          "kg": "kg",
+          "reps": "reps",
+          "s": "s"
+        },
+        "next": "Next week's plan",
+        "nextEmpty": "No plan for next week yet.",
+        "workoutDay": "Workout",
+        "restDay": "Rest"
       }
     },
     "awards": {

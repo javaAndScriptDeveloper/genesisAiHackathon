@@ -1,6 +1,7 @@
 "use client";
 
 import { Calendar03Icon, Clock01Icon, Dumbbell01Icon, FireIcon } from "@hugeicons/core-free-icons";
+import Link from "next/link";
 import { useState } from "react";
 import { Awards } from "@/components/features/Awards/Awards";
 import { CheckIns } from "@/components/features/CheckIns/CheckIns";
@@ -57,7 +58,7 @@ function Overview() {
 	const u = useUnits();
 	const { state, today } = useFit();
 	const stats = useFitStats();
-	const { insights, consistencyDelta } = useProgressAnalytics();
+	const { insights, consistencyDelta, reportWeeks } = useProgressAnalytics();
 	const [period, setPeriod] = useState<"week" | "month">("week");
 	const premium = usePremium();
 
@@ -128,6 +129,22 @@ function Overview() {
 			</div>
 
 			{insights.length > 0 && <ProgressInsights insights={insights} fallback="" />}
+
+			{reportWeeks.length > 0 && (
+				<Card>
+					<h3 className={styles.h3}>{t("fit.progress.reports.title")}</h3>
+					<ul className={styles.list}>
+						{reportWeeks.slice(0, 4).map((w) => (
+							<li key={w}>
+								<Link href={`/progress/week/${w}`} transitionTypes={["nav-forward"]} className={styles.record}>
+									<strong>{t("fit.progress.reports.week", { date: formatMonthDay(w) })}</strong>
+									<Badge>{t("fit.progress.reports.open")}</Badge>
+								</Link>
+							</li>
+						))}
+					</ul>
+				</Card>
+			)}
 
 			<Card>
 				<h3 className={styles.h3}>{t("fit.progress.weeklyVolume")}</h3>
