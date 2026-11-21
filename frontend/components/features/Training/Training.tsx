@@ -48,7 +48,7 @@ export function Training() {
 
 	return (
 		<div className={styles.root}>
-			<ScreenHeader title={t("fit.training.title")} subtitle={t("fit.training.subtitle")} />
+			<ScreenHeader title={t("fit.training.title")} />
 			<div className={styles.content}>
 				<SegmentedControl
 					label={t("fit.training.title")}
@@ -88,9 +88,14 @@ export function Training() {
 								})}
 							</ol>
 						)}
-						<Card className={styles.plain}>
+						<Card className={styles.recovery}>
+							<Picture name="training-mobility" alt="" width={384} height={384} sizes="200px" className={styles.recoveryPhoto} />
+							<h2>{t("fit.training.recoveryTitle")}</h2>
 							<p>{t("fit.training.recoveryNote")}</p>
-							<Link href="/profile/edit" className={styles.link}>{t("fit.training.editPlan")}</Link>
+							<Link href="/profile/edit" className={styles.recoveryLink}>
+								{t("fit.training.editPlan")}
+								<Icon icon={ArrowRight01Icon} size={18} />
+							</Link>
 						</Card>
 					</>
 				) : (

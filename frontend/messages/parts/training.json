@@ -88,8 +88,9 @@
       "thisWeek": "This week",
       "emptyWeek": "Nothing planned",
       "emptyWeekBody": "This week is all recovery. Use it well.",
-      "recoveryNote": "Training days are spaced so there is recovery between sessions. Days without a workout are recovery days.",
-      "editPlan": "Edit training days and preferences",
+      "recoveryTitle": "Rest is part of training",
+      "recoveryNote": "Days between workouts give your body time to recover.",
+      "editPlan": "Edit training plan",
       "exerciseCount": {
         "one": "{count} exercise",
         "other": "{count} exercises"

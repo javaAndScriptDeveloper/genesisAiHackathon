@@ -28,22 +28,57 @@
 	list-style: none;
 }
 
-.plain {
-	display: flex;
-	flex-direction: column;
+.recovery {
+	--card-padding: var(--space-4);
+	position: relative;
+	isolation: isolate;
+	overflow: hidden;
+	display: grid;
 	gap: var(--space-2);
-	color: var(--color-textMuted);
-	font-size: 1.3rem;
-	line-height: 1.5;
+	background: var(--color-text);
+	border-color: var(--color-text);
+	color: var(--color-onPrimary);
+
+	h2 {
+		font-size: 1.7rem;
+		line-height: 1.2;
+	}
+
+	p {
+		max-width: 24ch;
+		font-size: 1.35rem;
+		line-height: 1.45;
+	}
 }
 
-.link {
+.recoveryPhoto {
+	position: absolute;
+	z-index: -1;
+	inset-block: 0;
+	inset-inline-end: 0;
+	width: min(60%, 20rem);
+	height: 100%;
+	object-fit: cover;
+	object-position: center 40%;
+	opacity: 0.65;
+	mask-image: linear-gradient(to right, transparent 0%, #000 70%);
+}
+
+.recoveryLink {
 	display: inline-flex;
 	align-items: center;
+	gap: var(--space-1);
+	justify-self: start;
 	min-height: var(--hit-target);
-	color: var(--color-accentText);
-	font-weight: 600;
+	color: inherit;
+	font-size: 1.4rem;
+	font-weight: 650;
+	text-underline-offset: 0.25rem;
 	@include mixins.focus-ring;
+
+	&:hover {
+		text-decoration: underline;
+	}
 }
 
 .search {
@@ -178,7 +213,8 @@
 		background: var(--color-accentSoft);
 		border-color: var(--color-accent);
 		color: var(--color-accentText);
-		box-shadow: 0 0 0 0.1rem var(--color-accent);
+		box-shadow: 0 0 0 0.2rem var(--color-accent), 0 0.8rem 1.6rem -0.8rem rgba(229, 36, 46, 0.5);
+		transform: translateY(-0.2rem);
 	}
 }
 
@@ -204,13 +240,14 @@
 }
 
 .medium {
-	background: var(--color-surface);
-	color: var(--color-text);
+	background: #ffe27a;
+	color: #7a4a00;
 }
 
 .pro {
-	background: var(--color-text);
-	color: var(--color-onAccent);
+	background: linear-gradient(135deg, #ff5a64, var(--color-accent) 55%, #b4141d);
+	color: #fff;
+	box-shadow: 0 0.2rem 0.8rem -0.2rem rgba(229, 36, 46, 0.6);
 }
 
 .onlyMine {

@@ -29,7 +29,7 @@ export function Progress() {
 	const [tab, setTab] = useTabMemory<Tab>("progress.tab", "overview");
 	return (
 		<div className={styles.root}>
-			<ScreenHeader title={t("fit.progress.title")} subtitle={t("fit.progress.subtitle")} />
+			<ScreenHeader title={t("fit.progress.title")} />
 			<div className={styles.content}>
 				<SegmentedControl
 					label={t("fit.progress.title")}
