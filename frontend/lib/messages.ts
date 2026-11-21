@@ -26,3 +26,15 @@ export function t(key: string, params?: Params, locale: Locale = DEFAULT_LOCALE)
 	if (!params) return raw;
 	return raw.replace(/\{(\w+)\}/g, (_, name: string) => String(params[name] ?? `{${name}}`));
 }
+
+/** Replaces every `{name}` in the template; unknown placeholders are left as-is. */
+export function interpolate(template: string, vars: Record<string, string | number>): string {
+	return template.replace(/\{(\w+)\}/g, (match, name: string) => {
+		const v = vars[name];
+		return v === undefined ? match : String(v);
+	});
+}
+
+export function tf(key: string, vars: Record<string, string | number>): string {
+	return interpolate(t(key), vars);
+}
