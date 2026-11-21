@@ -119,7 +119,7 @@
       "partialLead": "You stopped early and that's fine. What you did still counts.",
       "emptyTitle": "No sets logged",
       "emptyBody": "Nothing to save this time. Come back whenever you're ready.",
-      "avgHr": "Average heart rate {n} bpm (simulated, demo mode).",
+      "avgHr": "Average heart rate {n} bpm (simulated).",
       "prs": "New personal records",
       "adapted": "Adjustments made",
       "adaptNote": "Your next sessions take your feedback into account.",

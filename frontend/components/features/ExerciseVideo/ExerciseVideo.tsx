@@ -37,17 +37,20 @@ function ExercisePlayer({ exercise, compact = false, autoPlay = false, fullWidth
 		command(paused ? "playVideo" : "pauseVideo");
 		setPaused(!paused);
 	};
-	const heroParams = hero ? "&enablejsapi=1" : "";
+	// Every mode hides the YouTube UI and uses the same minimal controls: our own play / pause button, and a loop.
+	const playerParams = "&enablejsapi=1&disablekb=1&modestbranding=1&playsinline=1";
 	// Restart the workout demo without creating a playlist and its previous/next buttons.
 	useEffect(() => {
-		if (!hero) return;
 		const iframe = player.current;
 		const onMessage = (event: MessageEvent) => {
 			if (event.origin !== playerOrigin || event.source !== iframe?.contentWindow || typeof event.data !== "string") return;
 			try {
 				const message: unknown = JSON.parse(event.data);
-				if (typeof message === "object" && message !== null && "event" in message && "info" in message && message.event === "onStateChange" && message.info === 0) {
-					iframe?.contentWindow?.postMessage(JSON.stringify({ event: "command", func: "playVideo", args: [] }), playerOrigin);
+				// The widget reports state through `infoDelivery` messages carrying `info.playerState` (0 = ended).
+				const info: unknown = typeof message === "object" && message !== null && "info" in message ? message.info : null;
+				if (typeof info === "object" && info !== null && "playerState" in info && info.playerState === 0) {
+					// Reload the same clip: seekTo/playVideo on an ended player is unreliable and ends again at once.
+					iframe?.contentWindow?.postMessage(JSON.stringify({ event: "command", func: "loadVideoById", args: [video.id] }), playerOrigin);
 				}
 			} catch {
 				// Ignore non-JSON player messages.
@@ -55,7 +58,7 @@ function ExercisePlayer({ exercise, compact = false, autoPlay = false, fullWidth
 		};
 		window.addEventListener("message", onMessage);
 		return () => window.removeEventListener("message", onMessage);
-	}, [hero, playerOrigin, autoPlay, playing]);
+	}, [playerOrigin, video.id, autoPlay, playing]);
 	const title = video.relatedTitle ?? t("fit.video.title", { name: exercise.name });
 
 	return (
@@ -66,9 +69,9 @@ function ExercisePlayer({ exercise, compact = false, autoPlay = false, fullWidth
 					{autoPlay || playing ? (
 						<iframe
 							ref={player}
-							onLoad={hero ? () => player.current?.contentWindow?.postMessage(JSON.stringify({ event: "listening", id: 1, channel: "widget" }), playerOrigin) : undefined}
+							onLoad={() => player.current?.contentWindow?.postMessage(JSON.stringify({ event: "listening", id: 1, channel: "widget" }), playerOrigin)}
 							className={styles.iframe}
-							src={`${video.embedUrl}&autoplay=1&controls=0&fs=0&iv_load_policy=3${autoPlay ? "&mute=1" : ""}${heroParams}`}
+							src={`${video.embedUrl}&autoplay=1&controls=0&fs=0&iv_load_policy=3${autoPlay ? "&mute=1" : ""}${playerParams}`}
 							title={title}
 							allow="autoplay; encrypted-media"
 							referrerPolicy="strict-origin-when-cross-origin"
@@ -80,7 +83,7 @@ function ExercisePlayer({ exercise, compact = false, autoPlay = false, fullWidth
 							<span>{t("fit.video.playLabel")}</span>
 						</button>
 					)}
-					{hero && (autoPlay || playing) && (
+					{(autoPlay || playing) && (
 						<button type="button" className={styles.toggle} aria-label={t(paused ? "fit.video.resume" : "fit.video.pause")} onClick={toggle}>
 							<Icon icon={paused ? PlayIcon : PauseIcon} size={22} />
 						</button>

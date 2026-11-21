@@ -6,29 +6,38 @@ import {
 import { useState } from "react";
 import { Badge, Card, Icon, Input, Select } from "@/components/ui";
 import { useI18n } from "@/lib/i18n/I18nProvider";
-import { assumptions, buildMinutes, estimateBuildPayback, modelEconomics, scenarios, type Scenario } from "@/lib/insights/economics";
+import { assumptions, buildMinutes, defaultScenario, estimateBuildPayback, modelEconomics, scenarios, type Scenario } from "@/lib/insights/economics";
 import { ChartSeries, DashboardChart } from "./DashboardChart";
 import styles from "./AnalyticsDashboard.module.scss";
 
-const scenarioOptions: Scenario[] = ["conservative", "base", "optimistic"];
+const scenarioOptions: Scenario[] = ["pilot", "base", "conservative", "optimistic"];
 
 export function EconomicsPanel() {
 	const { locale, t } = useI18n();
-	const [scenario, setScenario] = useState<Scenario>("base");
-	const [organic, setOrganic] = useState(String(assumptions.defaultOrganicPercent));
-	const [fixed, setFixed] = useState(String(assumptions.defaultFixedCosts));
+	const [scenario, setScenario] = useState<Scenario>(defaultScenario);
+	const [organic, setOrganic] = useState(String(scenarios[defaultScenario].organicPercent));
+	const [fixed, setFixed] = useState(String(scenarios[defaultScenario].fixedCosts));
 	const [hourly, setHourly] = useState(String(assumptions.defaultCombinedHourlyRate));
+	const preset = scenarios[scenario];
 	const hourlyInvalid = !hourly || Number(hourly) < 0 || Number(hourly) > 1_000_000;
 	const organicInvalid = !organic || Number(organic) < 0 || Number(organic) > 100;
 	const fixedInvalid = !fixed || Number(fixed) < 0 || Number(fixed) > 1_000_000_000;
-	const organicPercent = organicInvalid ? assumptions.defaultOrganicPercent : Number(organic);
-	const fixedCosts = fixedInvalid ? assumptions.defaultFixedCosts : Number(fixed);
+	const organicPercent = organicInvalid ? preset.organicPercent : Number(organic);
+	const fixedCosts = fixedInvalid ? preset.fixedCosts : Number(fixed);
 	const model = modelEconomics(scenario, organicPercent / 100, fixedCosts);
 	const build = estimateBuildPayback(
 		hourlyInvalid ? assumptions.defaultCombinedHourlyRate : Number(hourly),
 		model.firstYearContribution,
 		model.blendedCac,
+		fixedCosts,
 	);
+
+	function chooseScenario(next: Scenario) {
+		setScenario(next);
+		setOrganic(String(scenarios[next].organicPercent));
+		setFixed(String(scenarios[next].fixedCosts));
+	}
+
 	const formatMoney = new Intl.NumberFormat(locale, { style: "currency", currency: "USD", currencyDisplay: "narrowSymbol" });
 	const formatWhole = new Intl.NumberFormat(locale, { maximumFractionDigits: 0 });
 	const formatDecimal = new Intl.NumberFormat(locale, { maximumFractionDigits: 2 });
@@ -60,11 +69,11 @@ export function EconomicsPanel() {
 	const inputs = [
 		{ id: "monthlyPrice", value: money(assumptions.monthlyPrice) },
 		{ id: "annualPrice", value: money(assumptions.annualPrice) },
-		{ id: "annualShare", value: percent(scenarios[scenario].annualShare) },
-		{ id: "annualRenewal", value: percent(scenarios[scenario].annualRenewal) },
-		{ id: "monthlyLifetime", value: decimal(scenarios[scenario].monthlyLifetime) },
-		{ id: "cpi", value: money(scenarios[scenario].cpi) },
-		{ id: "conversion", value: percent(scenarios[scenario].conversion) },
+		{ id: "annualShare", value: percent(preset.annualShare) },
+		{ id: "annualRenewal", value: percent(preset.annualRenewal) },
+		{ id: "monthlyLifetime", value: decimal(preset.monthlyLifetime) },
+		{ id: "cpi", value: money(preset.cpi) },
+		{ id: "conversion", value: percent(preset.conversion) },
 		{ id: "storeFee", value: percent(assumptions.storeFee) },
 	];
 
@@ -74,14 +83,17 @@ export function EconomicsPanel() {
 				<div>
 					<Badge tone="accent" className={styles.sourceBadge}>{t("analytics.model.badge")}</Badge>
 					<h1 id="economics-title">{t("analytics.economics")}</h1>
-					<p>{t("analytics.model.subtitle")}</p>
+					<p>{scenario === "pilot" ? t("analytics.model.pilotPlan", {
+						organic: percent(preset.organicPercent / 100),
+						budget: money(preset.fixedCosts),
+					}) : t("analytics.model.subtitle")}</p>
 				</div>
 				<Select
 					className={styles.scenario}
 					label={t("analytics.model.scenario")}
 					value={scenario}
 					options={scenarioOptions.map((value) => ({ value, label: t(`analytics.model.scenarios.${value}`) }))}
-					onChange={setScenario}
+					onChange={chooseScenario}
 				/>
 			</header>
 
@@ -175,8 +187,8 @@ export function EconomicsPanel() {
 					<span className={styles.panelIcon}><Icon icon={MoneyAdd01Icon} size={21} /></span>
 				</header>
 				<div className={styles.driverGrid}>
-					<Input label={t("analytics.model.organic")} type="number" min={0} max={100} step="any" suffix="%" value={organic} onChange={(event) => setOrganic(event.target.value)} error={organicInvalid ? t("analytics.model.organicError") : undefined} />
-					<Input label={t("analytics.model.fixed")} type="number" min={0} max={1_000_000_000} step="any" suffix="USD" value={fixed} onChange={(event) => setFixed(event.target.value)} error={fixedInvalid ? t("analytics.model.fixedError") : undefined} />
+					<Input label={t("analytics.model.organic")} type="number" min={0} max={100} step="any" suffix="%" value={organic} onChange={(event) => setOrganic(event.target.value)} error={organicInvalid ? t("analytics.model.organicError", { value: percent(preset.organicPercent / 100) }) : undefined} />
+					<Input label={t("analytics.model.fixed")} type="number" min={0} max={1_000_000_000} step="any" suffix="USD" value={fixed} onChange={(event) => setFixed(event.target.value)} error={fixedInvalid ? t("analytics.model.fixedError", { value: money(preset.fixedCosts) }) : undefined} />
 					<div className={styles.driverOutput}>
 						<span>{t("analytics.model.subscribers")}</span>
 						<strong>{model.breakEven === null ? "—" : whole(model.breakEven)}</strong>
@@ -212,7 +224,10 @@ export function EconomicsPanel() {
 					</div>
 				</div>
 				<p className={styles.buildNote}>
-					{t(build.contributionAfterCac > 0 ? "analytics.build.recoverable" : "analytics.build.unrecoverable", { value: money(build.contributionAfterCac) })}
+					{t(build.payers === null ? "analytics.build.unrecoverable" : "analytics.build.recoverable", {
+						value: money(build.contributionAfterCac),
+						budget: money(build.firstYearCost),
+					})}
 				</p>
 			</Card>
 
@@ -225,7 +240,7 @@ export function EconomicsPanel() {
 						))}
 					</dl>
 					<ul className={styles.notes}>
-						{["ltv", "cac", "payback", "fixed", "limits", "source"].map((id) => <li key={id}>{t(`analytics.model.notes.${id}`)}</li>)}
+						{["ltv", "cac", "payback", "fixed", "pilot", "limits", "source"].map((id) => <li key={id}>{t(`analytics.model.notes.${id}`)}</li>)}
 					</ul>
 				</div>
 			</details>

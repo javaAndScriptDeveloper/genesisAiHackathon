@@ -9,8 +9,9 @@
       "subtitle": "Revenue, costs and acquisition per paying subscriber.",
       "scenario": "Scenario",
       "scenarios": {
+        "pilot": "Base launch pilot",
         "conservative": "Conservative",
-        "base": "Base case",
+        "base": "Market benchmark",
         "optimistic": "Optimistic"
       },
       "metrics": {
@@ -46,10 +47,10 @@
       "breakEvenDetail": "Adjust organic acquisition and monthly overhead.",
       "organic": "Organic share of installs",
       "fixed": "Fixed costs per month",
-      "organicError": "Enter 0–100%. Using 50% for now.",
-      "fixedError": "Enter 0–1 billion USD. Using $5,000 for now.",
+      "organicError": "Enter 0–100%. Using the scenario default of {value}.",
+      "fixedError": "Enter 0–1 billion USD. Using the scenario default of {value}.",
       "subscribers": "Active subscribers to cover overhead",
-      "organicThreshold": "Minimum organic share to cover CAC",
+      "organicThreshold": "Minimum organic share for lifetime payback",
       "method": "Assumptions and formulas",
       "inputs": {
         "monthlyPrice": "Monthly plan price",
@@ -67,20 +68,22 @@
         "payback": "Payback is the first month cumulative contribution covers blended CAC. The model recognizes annual revenue over each 12-month term and includes one possible renewal.",
         "fixed": "Operating break-even = fixed costs ÷ monthly contribution per active subscriber, rounded up. Acquisition spend is tracked separately in CAC.",
         "limits": "The model excludes free-tier usage, voice, taxes, refunds and wearable integration costs. The AI estimate uses planned token volumes and rates from the report.",
-        "source": "Source — Fitness Companion Market Evidence & Unit Economics Report, section 4. Values are recalculated from its input assumptions."
-      }
+        "source": "Prices, conversion, paid acquisition and renewal assumptions come from section 4 of the Fitness Companion Market Evidence & Unit Economics Report.",
+        "pilot": "The pilot uses a 90% organic target and a $50 monthly budget assumption. Include ongoing labor, content and other recurring costs in your actual budget."
+      },
+      "pilotPlan": "Launch target: {organic} organic acquisition and a {budget} monthly operating budget."
     },
     "build": {
-      "title": "MVP build payback",
-      "subtitle": "Hackathon build from 10:30 to 17:50. The hourly rate is an estimate you can change.",
+      "title": "First-year MVP break-even",
+      "subtitle": "Build labor from 10:30 to 17:50 plus 12 months of fixed costs.",
       "elapsed": "Elapsed build time",
       "duration": "{hours} h {minutes} min",
       "hourly": "Combined team rate per hour",
       "hourlyError": "Enter 0–1 million USD. Using $50 for now.",
       "cost": "One-time labor cost",
-      "payers": "New payers to recover labor in 12 months",
-      "recoverable": "{value} per payer in first-year contribution after blended CAC, before monthly overhead.",
-      "unrecoverable": "First-year contribution after blended CAC is {value} per payer. This acquisition mix leaves no surplus for the build."
+      "payers": "New paying subscribers to break even",
+      "recoverable": "{value} first-year contribution per payer after blended CAC. Total to cover: {budget} for build labor and 12 months of overhead.",
+      "unrecoverable": "{value} first-year contribution per payer after blended CAC. Covering the {budget} first-year budget requires a positive contribution."
     },
     "activity": {
       "title": "Product activity",
@@ -125,13 +128,13 @@
         "achievement_unlocked": "Achievement unlocked",
         "notification_opened": "Notification opened",
         "subscription_viewed": "Subscription viewed",
-        "subscription_started": "Demo trial started"
+        "subscription_started": "Trial started"
       },
       "coverage": "What the dashboard measures",
       "notes": {
         "retention": "Counts start when this dashboard’s event storage is enabled. The browser retains up to 4,000 recent events and shows up to 90 calendar days.",
         "workouts": "Logged workouts include partial sessions. The 80% metric uses the planned set count after workout adjustments and excludes extra sessions, safety stops and seeded history.",
-        "subscription": "Trials in the app are demos. Prices, acquisition costs and AI expenses above are planning estimates.",
+        "subscription": "Trials in the app are simulated. Prices, acquisition costs and AI expenses above are planning estimates.",
         "cohorts": "The product goal is three planned workouts in the first 14 days. Cohort activation and retention require shared user IDs and server-side event collection."
       }
     }

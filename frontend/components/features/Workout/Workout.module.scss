@@ -147,11 +147,12 @@
 	display: inline-flex;
 	flex: none;
 	align-items: center;
-	gap: 0.5rem;
-	padding: 0.5rem 1rem;
+	gap: 0.4rem;
+	padding: 0.2rem 0.8rem;
 	background: rgba(255, 255, 255, 0.16);
 	backdrop-filter: blur(0.8rem);
-	font-size: 1.3rem;
+	font-size: 1.2rem;
+	line-height: 1.3;
 	font-weight: 700;
 	font-variant-numeric: tabular-nums;
 	border-radius: var(--radius-pill);
@@ -358,13 +359,13 @@
 
 }
 
-// Rest screen: saturated accent background instead of the dark overlay.
+// Rest screen: calm blue background instead of the dark overlay.
 .restScreen {
 	justify-content: flex-start;
 	gap: var(--space-5);
 	padding: var(--space-6) var(--space-4) var(--space-5);
 	overflow-y: auto;
-	background: linear-gradient(180deg, #e5242e 0%, #b4141d 100%);
+	background: linear-gradient(180deg, #2f6fe4 0%, #1b3f9e 100%);
 }
 
 .restTop {
@@ -430,7 +431,7 @@
 
 .pillSolid {
 	background: #fff;
-	color: #b4141d;
+	color: #1b3f9e;
 }
 
 .nextUp {
@@ -719,5 +720,16 @@
 	&:hover:not(:disabled) {
 		background: var(--color-dangerSoft);
 		filter: brightness(0.96);
+	}
+}
+
+// Glass button on the blue rest screen (the default secondary icon button is dark and vanishes there).
+.restMusic {
+	background: rgba(255, 255, 255, 0.2);
+	border-color: transparent;
+	color: #fff;
+
+	&:hover:not(:disabled) {
+		background: rgba(255, 255, 255, 0.3);
 	}
 }

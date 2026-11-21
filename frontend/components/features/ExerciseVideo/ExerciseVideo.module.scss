@@ -98,7 +98,8 @@
 
 .related {
 	margin-top: var(--space-2);
-	color: var(--color-textMuted);
+	color: inherit;
+	opacity: 0.75;
 	font-size: 1.3rem;
 	font-weight: 600;
 }
