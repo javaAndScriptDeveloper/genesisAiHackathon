@@ -197,6 +197,20 @@ export function bmi(kg: number, heightCm: number): { value: number; category: Bm
 - [ ] **Step 1: Тести:** `bmi(70, 175)` → `22.9`, `normal`; межі 18.5 / 25 / 30; ковзне середнє по календарних 7 днях (дні без зважувань не рахуються як 0); порожній список → усі `null`.
 - [ ] **Step 2–4:** RED → GREEN. **Step 5:** commit `feat(progress): body weight trend and BMI`.
 
+### Task 5b: Дані з Check-ins у рушії
+
+**Files:** Modify `frontend/lib/progress/types.ts` (+ `CheckIn`, `History.checkIns`), `frontend/lib/progress/fromFit.ts` (заповнення з `bodyWeights`, `goalWeightKg`/`goalSetAt`, `photos` — без `dataUrl`), `frontend/lib/progress/bodyWeight.ts` (читає `checkIns`); Create `frontend/lib/progress/checkins.ts`; Test `frontend/tests/progress-checkins.test.ts`
+
+**Interfaces — Produces:**
+```ts
+export interface CheckIn { id: string; kind: "weight" | "goal" | "photo"; date: IsoDate; at: string; weightKg?: number; goalKg?: number }
+export interface CheckInSummary { lastWeighIn: { date: IsoDate; kg: number } | null; weighInsThisWeek: number; weighInsLast4Weeks: number; photos: number; lastPhotoDate: IsoDate | null; goalKg: number | null; toGoalKg: number | null }
+export function checkInSummary(h: History): CheckInSummary;
+```
+- Id записів: вага — `w:${at ?? date}`, ціль — `g:${goalSetAt}`, фото — `p:${photo.id}`. Фото без `dataUrl` у `CheckIn` (перевірити тестом, що жодне поле не містить `data:`).
+- [ ] **Step 1: Тести:** 3 зважування в один день → 3 записи в журналі, `lastWeighIn` — найпізніше за `at`; `toGoalKg` = поточна − ціль (зі знаком); S0 → усі лічильники 0, `null`.
+- [ ] **Step 2–4:** RED → GREEN. **Step 5:** commit `feat(progress): read check-ins into the analytics engine`.
+
 ### Task 6: Тижневий звіт v2
 
 **Files:** Modify `report.ts`; Test `tests/progress-report.test.ts`
@@ -229,7 +243,7 @@ export function unseen(events: ProgressEvent[]): { any: boolean; byKind: Record<
 export function celebrationGroup(events: ProgressEvent[]): { badges: string[]; level: number | null } | null; // одне вікно на всі непереглянуті badge/level
 export const PREMIUM = { historyMonths: 3, detailedCharts: true, personalAdvice: true } as const;
 export function visibleHistoryFrom(today: IsoDate, isPremium: boolean): IsoDate | null; // null = без обмеження
-export interface ProgressSnapshot { consistency: ReturnType<typeof consistencyV2>; streak: { current: number; best: number }; week: { goal: number; quality: number; days: WeekGoalDay[] }; level: LevelInfo; badges: Badge[]; records: PersonalRecord[]; improvements: Improvement[]; advice: Advice | null }
+export interface ProgressSnapshot { checkIns: CheckInSummary; consistency: ReturnType<typeof consistencyV2>; streak: { current: number; best: number }; week: { goal: number; quality: number; days: WeekGoalDay[] }; level: LevelInfo; badges: Badge[]; records: PersonalRecord[]; improvements: Improvement[]; advice: Advice | null }
 export function progressSnapshot(h: History, ctx: ProgressContext): ProgressSnapshot;
 export const ENGINE_VERSION: string; // "2.0.0"; підвищувати при зміні будь-якої формули
 export function snapshotHash(s: ProgressSnapshot): string; // стабільний хеш: JSON з відсортованими ключами → FNV-1a (без нових залежностей)
@@ -337,6 +351,14 @@ interface RemoteSnapshot { settings: { weeklyGoal: number; units: "metric" | "im
 - [ ] **Step 1: Тести:** sync двічі тим самим тілом → ті самі кількості рядків; два токени не бачать даних один одного; перший `sync` з новим токеном створює рівно одного гостьового користувача, повторний — жодного; без заголовка → 400; некоректний `kind` → 400; `events/seen` проставляє `seen_at` лише для свого користувача; архів: `weekly` за той самий тиждень двічі → 1 рядок, другий виклик `archived: false`, перший payload не змінився; `change` з тим самим хешем, що й останній знімок користувача → не пишеться, з іншим → пишеться; `GET archive` повертає лише знімки свого користувача в межах дат; у коді репозиторію немає `update`/`delete` для `user_progress_snapshots` (перевірити `grep`).
 - [ ] **Step 2–4:** RED → GREEN. **Step 5:** commit `feat(backend): progress snapshot and sync endpoints`.
 
+### Task 11b: Таблиця й синхронізація check-ins (backend)
+
+**Files:** Create `platform-backend/src/migrations/20261124_03_create_user_progress_checkins.ts`; Modify `src/progress/models.ts` (`ProgressCheckInModel`), `repo.ts`, `routes.ts` (масив `checkIns` у `sync` і `snapshot`); Test `test/progress-api.test.ts`
+
+Схема — таблиця `user_progress_checkins` у дизайн-документі (розділ «Дані з Check-ins»).
+- [ ] **Step 1: Тести:** sync з 3 check-ins → `snapshot` повертає їх; повторний sync — без дублікатів; `kind` поза списком → 400; поле на кшталт `dataUrl` у тілі → 400 (`additionalProperties: false`); чужий id → 409; видалення користувача каскадно видаляє check-ins.
+- [ ] **Step 2–4:** RED → GREEN. **Step 5:** commit `feat(backend): store progress check-ins`.
+
 ### Task 12: Клієнт синхронізації
 
 **Files:** Create `frontend/lib/api/progressSync.ts`; Modify `lib/fit/store/FitProvider.tsx` (запуск хука); Test `frontend/tests/progress-sync.test.ts`
@@ -344,7 +366,7 @@ interface RemoteSnapshot { settings: { weeklyGoal: number; units: "metric" | "im
 **Interfaces — Produces:**
 ```ts
 export const remoteSnapshotSchema: z.ZodType<RemoteSnapshot>;
-export function toRemote(state: FitState): RemoteSnapshot;             // FitState → сирі факти (kind вправи з lib/fit/exercises)
+export function toRemote(state: FitState): RemoteSnapshot;             // FitState → сирі факти (kind вправи з lib/fit/exercises) + checkIns з Task 5b (фото — лише метадані, без dataUrl)
 export function fromRemote(s: RemoteSnapshot): Partial<FitState>;      // для apply-remote
 export function archiveSnapshot(s: ProgressSnapshot, period: "weekly" | "change", weekStart: IsoDate | null, now: string): Promise<void>;
 export function useProgressSync(): void; // при старті: локальна історія порожня → GET snapshot → apply-remote; далі після змін — POST sync з debounce 3 с; помилки мовчки повторюються пізніше (офлайн-перш)

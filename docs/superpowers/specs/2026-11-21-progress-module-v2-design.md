@@ -73,6 +73,42 @@
 
 Ендпоінти (усі з заголовком `x-progress-token`, UUID, інакше 400; невідомий токен на `snapshot`/`archive GET` → порожні дані, на запис → створюється гостьовий користувач): `GET /api/progress/snapshot`, `POST /api/progress/sync`, `POST /api/progress/events/seen`, `POST /api/progress/archive`, `GET /api/progress/archive?from=&to=&period=`. Тіло `RemoteSnapshot`: `settings` (`weeklyGoal`, `units`, `heightCm`; ключ навмисно не `device`, щоб не плутати з `user_devices` команди), `planDays`, `workouts` (з `sets`), `pauses`, `weights`, `events`; `users.id` назовні не віддається.
 
+## Дані з Check-ins (на запит користувачки)
+
+Модуль аналітики **зчитує все, що людина вносить у Check-ins**, і записує це:
+- у знімки прогресу;
+- в архів;
+- у БД.
+
+Що зчитуємо з `FitState`:
+
+| Check-in | Поле стану | Що робимо |
+|---|---|---|
+| Зважування | `bodyWeights` (`date`, `kg`, `at`) | Кожен запис потрапляє в журнал check-ins. Останнє значення дня йде в `user_progress_weights` (тренд, ІМТ) |
+| Цільова вага | `goalWeightKg`, `goalSetAt` | Запис у журналі, коли ціль змінюється. У знімку — «до цілі N кг» |
+| Фото прогресу | `photos` (`id`, `date`, `weightKg?`) | **Лише метадані**: дата і вага на момент фото. Зображення (`dataUrl`) **ніколи не надсилається** — це обіцянка в інтерфейсі Check-ins |
+
+**Рушій.**
+- `History` отримує поле `checkIns: CheckIn[]`, де `CheckIn = { id, kind: "weight" | "goal" | "photo", date, at, weightKg?, goalKg? }`. Його заповнює `historyFromFit`.
+- `ProgressSnapshot` отримує блок `checkIns`:
+  - `lastWeighIn`;
+  - `weighInsThisWeek`;
+  - `weighInsLast4Weeks`;
+  - `photos`;
+  - `lastPhotoDate`;
+  - `goalKg`;
+  - `toGoalKg`.
+
+  Тож у кожному архівному знімку видно й регулярність самих check-ins.
+
+**БД.** Нова таблиця `user_progress_checkins` (окрема, як і решта таблиць прогресу):
+
+| Колонки | Ключі й обмеження |
+|---|---|
+| `id` text PK (id з клієнта), `user_id` → `users` on delete cascade, `kind` text (`weight`/`goal`/`photo`), `date` date, `taken_at` timestamptz, `weight_kg` numeric(5,2) null, `goal_kg` numeric(5,2) null, `created_at` | check на `kind`; index (`user_id`, `taken_at`); жодних колонок для зображень |
+
+Синхронізація (`POST /api/progress/sync`, `GET /api/progress/snapshot`) отримує масив `checkIns`.
+
 ## Видимість досягнень (максимальна мотивація)
 
 Досягнення мають бути **видно на кожному кроці**, а не лише на екрані «Досягнення». Людина завжди бачить, що вже отримала, що отримає наступним і скільки до цього лишилось.
