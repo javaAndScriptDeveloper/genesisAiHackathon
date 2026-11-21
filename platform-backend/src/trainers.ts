@@ -1,6 +1,7 @@
 import type { Knex } from "knex";
 import { Model } from "objection";
 
+// API shape: `id` is the trainer's slug ('mike'), which the frontend stores; the numeric DB id stays internal.
 export interface Trainer {
   id: string;
   name: string;
@@ -10,10 +11,11 @@ export interface Trainer {
 
 export class TrainerModel extends Model {
   static tableName = "trainers";
-  id!: string;
+  id!: number;
+  slug!: string;
   name!: string;
-  pathToImage!: string;
-  tov!: string;
+  pathToImage!: string | null;
+  tov!: string | null;
   sortOrder!: number;
 }
 
@@ -28,11 +30,11 @@ export const TRAINER_SEED: Trainer[] = [
 
 // Upsert on every boot so edited tone-of-voice text reaches production without a new migration.
 export async function seedTrainers(db: Knex): Promise<void> {
-  const rows = TRAINER_SEED.map((t, sortOrder) => ({ ...t, sortOrder }));
-  await TrainerModel.query(db).insert(rows).onConflict("id").merge();
+  const rows = TRAINER_SEED.map(({ id: slug, ...t }, sortOrder) => ({ ...t, slug, sortOrder }));
+  await TrainerModel.query(db).insert(rows).onConflict("slug").merge();
 }
 
 export async function listTrainers(db: Knex): Promise<Trainer[]> {
   const rows = await TrainerModel.query(db).orderBy("sortOrder");
-  return rows.map(({ id, name, pathToImage, tov }) => ({ id, name, pathToImage, tov }));
+  return rows.map(({ slug, name, pathToImage, tov }) => ({ id: slug, name, pathToImage: pathToImage ?? "", tov: tov ?? "" }));
 }
