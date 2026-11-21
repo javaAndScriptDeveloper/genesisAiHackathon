@@ -5,7 +5,42 @@
       "noStats": "No device data for today yet, so your plan stays as it is.",
       "dailyFine": "You look good to go today. Stick with the plan.",
       "dailyLighter": "You're a bit worn down today, so I made this session lighter.",
-      "dailyRecovery": "Your body needs rest today, so I cut this down to a short, easy session."
+      "dailyRecovery": "Your body needs rest today, so I cut this down to a short, easy session.",
+      "building": "{name} is building your plan…",
+      "buildingNote": "This usually takes a few seconds.",
+      "buildFailed": "The AI trainer is unavailable, so I built your plan from your answers instead.",
+      "rebuilding": "Your trainer is rebuilding your plan…",
+      "rebuilt": "Your plan is updated.",
+      "rebuildFailed": "Couldn't rebuild with AI. Your current plan stays.",
+      "daily": {
+        "title": "Today's check-in",
+        "demo": "Demo",
+        "undo": "Undo",
+        "undone": "Back to your original session.",
+        "sleep": "Sleep",
+        "restingHr": "Resting HR",
+        "hrv": "HRV",
+        "readiness": "Readiness",
+        "sleepValue": "{h} h",
+        "hrValue": "{bpm} bpm",
+        "hrvValue": "{ms} ms",
+        "readinessValue": "{n}/100",
+        "loading": "Checking how you feel today…"
+      },
+      "demoSim": {
+        "title": "Demo: simulate tonight",
+        "note": "Pick how last night went. Your trainer reads the new numbers and may adjust today's session.",
+        "label": "Scenario",
+        "normal": "Normal",
+        "tired": "Tired",
+        "badNight": "Bad night",
+        "simulate": "Simulate",
+        "fine": "Stats synced. Your plan stays as it is.",
+        "lighter": "Your trainer made today's session lighter.",
+        "recovery": "Your trainer switched today to recovery.",
+        "failed": "Couldn't run the check. Try again."
+      },
+      "trainerFallback": "Your trainer"
     }
   }
 }

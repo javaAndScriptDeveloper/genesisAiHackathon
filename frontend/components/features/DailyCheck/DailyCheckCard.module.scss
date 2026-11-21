@@ -1,0 +1,55 @@
+@use "partials/corners";
+
+.root {
+	display: flex;
+	flex-direction: column;
+	gap: var(--space-3);
+}
+
+.head {
+	display: flex;
+	align-items: center;
+	gap: var(--space-2);
+}
+
+.round {
+	@include corners.radius(var(--radius-pill));
+}
+
+.title {
+	flex: 1;
+	min-width: 0;
+	font-size: 1.5rem;
+}
+
+.stats {
+	display: grid;
+	grid-template-columns: repeat(2, 1fr);
+	gap: var(--space-2);
+}
+
+.stat {
+	display: flex;
+	flex-direction: column;
+	gap: 0.2rem;
+	padding: var(--space-2) var(--space-3);
+	background: var(--color-surfaceMuted);
+	@include corners.radius(var(--radius-control));
+
+	dt {
+		color: var(--color-textSubtle);
+		font-size: 1.2rem;
+	}
+
+	dd {
+		font-size: 1.6rem;
+		font-weight: 700;
+		font-variant-numeric: tabular-nums;
+	}
+}
+
+.note {
+	color: var(--color-textMuted);
+	font-size: 1.4rem;
+	line-height: 1.45;
+}

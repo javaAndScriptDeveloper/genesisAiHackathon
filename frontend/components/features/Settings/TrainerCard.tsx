@@ -4,6 +4,7 @@ import { UserGroupIcon } from "@hugeicons/core-free-icons";
 import { Avatar, Card, Icon, Skeleton, useToast } from "@/components/ui";
 import { useTrainers } from "@/lib/api/trainers";
 import { activeTrainerId } from "@/lib/fit/options";
+import { useAiPlan } from "@/lib/fit/store/useAiPlan";
 import { useFit } from "@/lib/fit/store/FitProvider";
 import { useT } from "@/lib/i18n/I18nProvider";
 import { OptionCard } from "../OptionCard/OptionCard";
@@ -16,6 +17,15 @@ export function TrainerCard() {
 	const { state, dispatch } = useFit();
 	const { data: trainers, isPending, isError } = useTrainers();
 	const selected = activeTrainerId(state);
+	const { rebuild } = useAiPlan();
+
+	const choose = async (id: string, name: string) => {
+		dispatch({ type: "set-trainer", trainerId: id });
+		toast.show(t("fit.settings.trainerSet", { name }), "success");
+		toast.show(t("fit.ai.rebuilding"), "info");
+		const result = await rebuild({ trainerSlug: id });
+		toast.show(t(result === "failed" ? "fit.ai.rebuildFailed" : "fit.ai.rebuilt"), result === "failed" ? "danger" : "success");
+	};
 
 	return (
 		<Card className={kit.stack}>
@@ -26,7 +36,7 @@ export function TrainerCard() {
 			{trainers?.map((tr) => (
 				<div key={tr.id} className={styles.item}>
 					<Avatar name={tr.name} src={tr.pathToImage} size={48} />
-					<OptionCard type="radio" name="trainer" label={tr.name} hint={tr.tov} checked={tr.id === selected} onChange={() => { dispatch({ type: "set-trainer", trainerId: tr.id }); toast.show(t("fit.settings.trainerSet", { name: tr.name }), "success"); }} />
+					<OptionCard type="radio" name="trainer" label={tr.name} hint={tr.tov} checked={tr.id === selected} onChange={() => void choose(tr.id, tr.name)} />
 				</div>
 			))}
 		</Card>

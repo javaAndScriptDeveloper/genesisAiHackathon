@@ -1,11 +1,11 @@
 "use client";
 
-import { useCallback, useLayoutEffect, useRef, useState } from "react";
+import { useCallback, useLayoutEffect, useRef, useSyncExternalStore } from "react";
 import { aiClient } from "../aiClient";
 import { dailyCheck, ensureBackend, rebuildPlan } from "../aiFlow";
 import { toBackendUser } from "../backendUser";
 import { createGate, singleFlight } from "../singleFlight";
-import type { Scenario } from "../dailyStats";
+import type { DailyStatus, Scenario } from "../dailyStats";
 import { activeTrainerId } from "../options";
 import type { Profile } from "../types";
 import type { Dispatch } from "react";
@@ -22,10 +22,29 @@ const ensureShared = singleFlight(async (args: Parameters<typeof ensureBackend>[
 });
 const dailyGate = createGate();
 
+// Work in flight is shared too, so every component sees the same `busy` (e.g. the daily card skeleton while the runner works).
+let inflight = 0;
+const listeners = new Set<() => void>();
+const subscribe = (cb: () => void) => {
+	listeners.add(cb);
+	return () => void listeners.delete(cb);
+};
+const snapshot = () => inflight > 0;
+async function tracked<T>(job: () => Promise<T>): Promise<T> {
+	inflight += 1;
+	listeners.forEach((l) => l());
+	try {
+		return await job();
+	} finally {
+		inflight -= 1;
+		listeners.forEach((l) => l());
+	}
+}
+
 export function useAiPlan() {
 	const fit = useFit();
 	const { dispatch, today } = fit;
-	const [busy, setBusy] = useState(false);
+	const busy = useSyncExternalStore(subscribe, snapshot, () => false);
 	// Always read the latest state: callbacks may outlive the render that created them.
 	const latest = useRef(fit.state);
 	useLayoutEffect(() => {
@@ -41,28 +60,35 @@ export function useAiPlan() {
 		[dispatch, today],
 	);
 
+	/** Resolves with the resulting status, or null when no check ran (no profile, backend or response). */
 	const runDaily = useCallback(
-		(o: { scenario?: Scenario; force?: boolean } = {}): Promise<void> =>
-			dailyGate(o.force === true, async () => {
-				const profile = latest.current.profile;
-				if (!profile) return;
-				const backend = await ensure(profile);
-				if (!backend) return;
-				const s = latest.current;
-				const result = await dailyCheck(aiClient, { backend, profile, trainerSlug: activeTrainerId(s), planned: s.planned, wishes: s.planWishes, today, daily: s.daily, scenario: o.scenario, force: o.force });
-				if (result) dispatch({ type: "apply-daily", ...result });
+		(o: { scenario?: Scenario; force?: boolean } = {}): Promise<DailyStatus | null> =>
+			tracked(async () => {
+				let status: DailyStatus | null = null;
+				await dailyGate(o.force === true, async () => {
+					const profile = latest.current.profile;
+					if (!profile) return;
+					const backend = await ensure(profile);
+					if (!backend) return;
+					const s = latest.current;
+					const result = await dailyCheck(aiClient, { backend, profile, trainerSlug: activeTrainerId(s), planned: s.planned, wishes: s.planWishes, today, daily: s.daily, scenario: o.scenario, force: o.force });
+					if (result) {
+						dispatch({ type: "apply-daily", ...result });
+						status = result.check.status;
+					}
+				});
+				return status;
 			}),
 		[ensure, dispatch, today],
 	);
 
 	const rebuild = useCallback(
-		async (o: { profile?: Profile; wishes?: string[] } = {}): Promise<"ai" | "fallback" | "failed"> => {
+		async (o: { profile?: Profile; wishes?: string[]; trainerSlug?: string } = {}): Promise<"ai" | "fallback" | "failed"> => {
 			const profile = o.profile ?? latest.current.profile;
 			if (!profile) return "failed";
 			const wishes = o.wishes ?? latest.current.planWishes;
-			const trainerSlug = activeTrainerId(latest.current);
-			setBusy(true);
-			try {
+			const trainerSlug = o.trainerSlug ?? activeTrainerId(latest.current);
+			return tracked(async () => {
 				const backend = await ensure(profile);
 				if (backend) await aiClient.patchUser(backend.userId, toBackendUser(profile, trainerSlug, today)).catch(() => undefined);
 				const plan = await rebuildPlan(aiClient, { backend, profile, trainerSlug, wishes, today });
@@ -78,9 +104,7 @@ export function useAiPlan() {
 					});
 				}
 				return plan.createdBy;
-			} finally {
-				setBusy(false);
-			}
+			});
 		},
 		[ensure, dispatch, today],
 	);

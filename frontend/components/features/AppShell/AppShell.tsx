@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useLayoutEffect, useRef, ViewTransition, type ReactNode } from "react";
 import { BottomNav } from "@/components/features/BottomNav/BottomNav";
+import { DailyCheckRunner } from "@/components/features/DailyCheck/DailyCheckRunner";
 import { Celebration } from "@/components/features/Celebration/Celebration";
 import { PhoneFrame } from "@/components/features/PhoneFrame/PhoneFrame";
 import { Icon, Skeleton, ToastProvider } from "@/components/ui";
@@ -64,6 +65,7 @@ function Screen({ children }: { children: ReactNode }) {
 				</Link>
 			)}
 			{!full && ready && state.profile && <BottomNav />}
+			{ready && state.profile && <DailyCheckRunner />}
 			<Celebration />
 		</>
 	);

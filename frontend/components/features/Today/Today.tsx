@@ -3,6 +3,7 @@
 import { Add01Icon, Alert02Icon, Calendar03Icon, DropletIcon, FireIcon, Medal01Icon, Target01Icon, Notification03Icon, PlayIcon, UserCircleIcon } from "@hugeicons/core-free-icons";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { DailyCheckCard } from "@/components/features/DailyCheck/DailyCheckCard";
 import { ScreenHeader } from "@/components/features/ScreenHeader/ScreenHeader";
 import { Stat } from "@/components/features/Stat/Stat";
 import { WeekStrip } from "@/components/features/WeekStrip/WeekStrip";
@@ -61,6 +62,8 @@ export function Today() {
 
 			<div className={styles.content}>
 				{state.planned.length === 0 && <EmptyState title={t("fit.today.empty.title")} description={t("fit.today.empty.body")} action={<Button onClick={() => router.push("/profile/edit")}>{t("fit.today.empty.cta")}</Button>} />}
+
+				<DailyCheckCard />
 
 				{active ? (
 					<Card className={styles.hero}>
