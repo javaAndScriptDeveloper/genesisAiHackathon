@@ -2,6 +2,9 @@
 
 import { useRouter } from "next/navigation";
 import { startTransition, useCallback, useMemo } from "react";
+import { addDays } from "../dates";
+import { hasPlanWindow, historyFromFit, reportWeeksOf } from "../../progress/fromFit";
+import { insights } from "../../progress/insights";
 import { weeklyChallenge, levelOf, totalXp } from "../gamification";
 import { nextUpcoming } from "../plan";
 import { computeStreak, consistencyScore, daysSinceLastWorkout, personalRecords, weekStats } from "../stats";
@@ -74,4 +77,18 @@ export function useUnits() {
 		}),
 		[units],
 	);
+}
+
+/** Progress analytics (pure lib/progress) fed from the real app state. Consistency delta uses the same score as the ring. */
+export function useProgressAnalytics() {
+	const { state, today } = useFit();
+	return useMemo(() => {
+		const history = historyFromFit(state, today);
+		const weekAgo = addDays(today, -7);
+		const consistencyDelta =
+			hasPlanWindow(state.planned, today) || hasPlanWindow(state.planned, weekAgo)
+				? consistencyScore(state.planned, today) - consistencyScore(state.planned, weekAgo)
+				: null;
+		return { history, insights: insights(history, 2), consistencyDelta, reportWeeks: reportWeeksOf(history) };
+	}, [state, today]);
 }
