@@ -1,4 +1,5 @@
 import type { Knex } from "knex";
+import type { Modifiers } from "objection";
 import {
   ProgressEventModel,
   ProgressPauseModel,
@@ -84,20 +85,8 @@ export async function resolveUser(db: Knex, token: string, opts: { create: boole
   }
 }
 
-export async function getSnapshot(db: Knex, userId: number | null): Promise<RemoteSnapshot> {
-  const snapshot: RemoteSnapshot = { settings: { weeklyGoal: 3, units: "metric", heightCm: null }, planDays: [], workouts: [], pauses: [], weights: [], events: [] };
-  if (userId === null) return snapshot;
-  const [settings, planDays, workouts, pauses, weights, events] = await Promise.all([
-    ProgressSettingsModel.query(db).findById(userId),
-    ProgressPlanDayModel.query(db).where({ userId }).orderBy("date"),
-    ProgressWorkoutModel.query(db).where({ userId }).withGraphFetched("sets(ordered)").modifiers({ ordered: (b) => b.orderBy("performedAt").orderBy("id") }).orderBy("performedOn").orderBy("id"),
-    ProgressPauseModel.query(db).where({ userId }).orderBy("fromDate").orderBy("id"),
-    db("user_progress_weights").where({ userId }).orderBy("date"),
-    ProgressEventModel.query(db).where({ userId }).orderBy("createdAt").orderBy("id"),
-  ]);
-  if (settings) snapshot.settings = { weeklyGoal: settings.weeklyGoal, units: settings.units, heightCm: null };
-  snapshot.planDays = planDays.map((p) => ({ date: p.date, type: p.type, workoutRef: p.workoutRef }));
-  snapshot.workouts = workouts.map((w) => ({
+function toWorkoutDto(w: ProgressWorkoutModel): WorkoutDto {
+  return {
     id: w.id,
     trainingId: w.trainingId === null ? null : Number(w.trainingId),
     planDate: w.planDate,
@@ -118,7 +107,25 @@ export async function getSnapshot(db: Knex, userId: number | null): Promise<Remo
       completed: s.completed,
       performedAt: s.performedAt.toISOString(),
     })),
-  }));
+  };
+}
+
+const orderedSets: Modifiers = { ordered: (b) => b.orderBy("performedAt").orderBy("id") };
+
+export async function getSnapshot(db: Knex, userId: number | null): Promise<RemoteSnapshot> {
+  const snapshot: RemoteSnapshot = { settings: { weeklyGoal: 3, units: "metric", heightCm: null }, planDays: [], workouts: [], pauses: [], weights: [], events: [] };
+  if (userId === null) return snapshot;
+  const [settings, planDays, workouts, pauses, weights, events] = await Promise.all([
+    ProgressSettingsModel.query(db).findById(userId),
+    ProgressPlanDayModel.query(db).where({ userId }).orderBy("date"),
+    ProgressWorkoutModel.query(db).where({ userId }).withGraphFetched("sets(ordered)").modifiers(orderedSets).orderBy("performedOn").orderBy("id"),
+    ProgressPauseModel.query(db).where({ userId }).orderBy("fromDate").orderBy("id"),
+    db("user_progress_weights").where({ userId }).orderBy("date"),
+    ProgressEventModel.query(db).where({ userId }).orderBy("createdAt").orderBy("id"),
+  ]);
+  if (settings) snapshot.settings = { weeklyGoal: settings.weeklyGoal, units: settings.units, heightCm: null };
+  snapshot.planDays = planDays.map((p) => ({ date: p.date, type: p.type, workoutRef: p.workoutRef }));
+  snapshot.workouts = workouts.map(toWorkoutDto);
   snapshot.pauses = pauses.map((p) => ({ id: p.id, fromDate: p.fromDate, toDate: p.toDate }));
   snapshot.weights = weights.map((w: { date: string; kg: number }) => ({ date: w.date, kg: w.kg }));
   snapshot.events = events.map((e) => ({ id: e.id, kind: e.kind, refId: e.refId, payload: e.payload, createdAt: e.createdAt.toISOString(), seenAt: iso(e.seenAt) }));
@@ -227,4 +234,61 @@ export async function listArchive(db: Knex, userId: number | null, q: { from?: s
   if (q.period) query.where({ period: q.period });
   const rows = await query;
   return rows.map((s) => ({ period: s.period, weekStart: s.weekStart, takenAt: s.takenAt.toISOString(), engineVersion: s.engineVersion, payload: s.payload }));
+}
+
+export interface WorkoutSummary {
+  totalSets: number;
+  completedSets: number;
+  plannedSets: number;
+  exercises: string[]; // distinct exercise ids in the order they were performed
+  volumeKg: number; // sum of reps × weight over completed weighted sets
+  durationSec: number;
+}
+export type HistoryWorkout = WorkoutDto & { summary: WorkoutSummary };
+export interface HistoryQuery {
+  from?: string;
+  to?: string;
+  status?: WorkoutDto["status"];
+  limit?: number;
+  cursor?: string;
+}
+
+function summarize(w: WorkoutDto): WorkoutSummary {
+  const done = w.sets.filter((s) => s.completed);
+  const volume = done.reduce((sum, s) => (s.kind === "weighted" && s.reps !== null && s.weightKg !== null ? sum + s.reps * s.weightKg : sum), 0);
+  return {
+    totalSets: w.sets.length,
+    completedSets: done.length,
+    plannedSets: w.plannedSets,
+    exercises: [...new Set(w.sets.map((s) => s.exerciseId))],
+    volumeKg: Math.round(volume * 100) / 100,
+    durationSec: w.durationSec,
+  };
+}
+
+// Opaque keyset cursor: base64url of [performedOn, id] of the last workout on the page.
+const encodeCursor = (w: WorkoutDto): string => Buffer.from(JSON.stringify([w.performedOn, w.id])).toString("base64url");
+function decodeCursor(cursor: string): [string, string] {
+  try {
+    const v: unknown = JSON.parse(Buffer.from(cursor, "base64url").toString("utf8"));
+    if (Array.isArray(v) && v.length === 2 && typeof v[0] === "string" && /^\d{4}-\d{2}-\d{2}$/.test(v[0]) && typeof v[1] === "string") return [v[0], v[1]];
+  } catch {
+    // fall through
+  }
+  throw new HttpError(400, "invalid cursor");
+}
+
+// Training history: own workouts, newest first (performed_on desc, id desc), with sets and a per-workout summary.
+export async function listWorkouts(db: Knex, userId: number | null, q: HistoryQuery): Promise<{ workouts: HistoryWorkout[]; nextCursor: string | null }> {
+  const after = q.cursor ? decodeCursor(q.cursor) : null;
+  if (userId === null) return { workouts: [], nextCursor: null };
+  const limit = q.limit ?? 50;
+  const query = ProgressWorkoutModel.query(db).where({ userId }).withGraphFetched("sets(ordered)").modifiers(orderedSets).orderBy("performedOn", "desc").orderBy("id", "desc").limit(limit + 1);
+  if (q.from) query.where("performedOn", ">=", q.from);
+  if (q.to) query.where("performedOn", "<=", q.to);
+  if (q.status) query.where({ status: q.status });
+  if (after) query.whereRaw("(performed_on, id) < (?::date, ?)", after);
+  const rows = (await query).map(toWorkoutDto);
+  const page = rows.slice(0, limit);
+  return { workouts: page.map((w) => ({ ...w, summary: summarize(w) })), nextCursor: rows.length > limit ? encodeCursor(page[page.length - 1]) : null };
 }

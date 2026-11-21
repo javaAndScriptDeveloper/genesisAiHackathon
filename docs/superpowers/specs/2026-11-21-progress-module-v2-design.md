@@ -71,7 +71,7 @@
 - `change` — знімок після кожної зміни, яка змінила числа. Новий рядок пишеться, лише якщо `payload_hash` відрізняється від останнього знімка цього користувача.
 - `engine_version` — версія формул рушія, тож старі знімки лишаються зрозумілими після зміни правил.
 
-Ендпоінти (усі з заголовком `x-progress-token`, UUID, інакше 400; невідомий токен на `snapshot`/`archive GET` → порожні дані, на запис → створюється гостьовий користувач): `GET /api/progress/snapshot`, `POST /api/progress/sync`, `POST /api/progress/events/seen`, `POST /api/progress/archive`, `GET /api/progress/archive?from=&to=&period=`. Тіло `RemoteSnapshot`: `settings` (`weeklyGoal`, `units`, `heightCm`; ключ навмисно не `device`, щоб не плутати з `user_devices` команди), `planDays`, `workouts` (з `sets`), `pauses`, `weights`, `events`; `users.id` назовні не віддається.
+Ендпоінти (усі з заголовком `x-progress-token`, UUID, інакше 400; невідомий токен на `snapshot`/`archive GET` → порожні дані, на запис → створюється гостьовий користувач): `GET /api/progress/snapshot`, `POST /api/progress/sync`, `POST /api/progress/events/seen`, `POST /api/progress/archive`, `GET /api/progress/archive?from=&to=&period=`, `GET /api/progress/workouts?from=&to=&status=&limit=&cursor=` (історія тренувань, див. нижче). Тіло `RemoteSnapshot`: `settings` (`weeklyGoal`, `units`, `heightCm`; ключ навмисно не `device`, щоб не плутати з `user_devices` команди), `planDays`, `workouts` (з `sets`), `pauses`, `weights`, `events`; `users.id` назовні не віддається.
 
 ## Дані з Check-ins (на запит користувачки)
 
@@ -108,6 +108,29 @@
 | `id` text PK (id з клієнта), `user_id` → `users` on delete cascade, `kind` text (`weight`/`goal`/`photo`), `date` date, `taken_at` timestamptz, `weight_kg` numeric(5,2) null, `goal_kg` numeric(5,2) null, `created_at` | check на `kind`; index (`user_id`, `taken_at`); жодних колонок для зображень |
 
 Синхронізація (`POST /api/progress/sync`, `GET /api/progress/snapshot`) отримує масив `checkIns`.
+
+## Історія тренувань (API модуля аналітики)
+
+Модуль аналітики **віддає історію тренувань** окремим ендпоінтом, щоб екрани (History, Coach, звіти) не тягнули весь `snapshot`.
+
+`GET /api/progress/workouts` (заголовок `x-progress-token`, як і решта):
+
+| Параметр | Що робить |
+|---|---|
+| `from`, `to` | Межі за `performedOn`, включно (`YYYY-MM-DD`) |
+| `status` | `completed` / `partial` / `abandoned` |
+| `limit` | 1–200, за замовчуванням 50 |
+| `cursor` | Непрозорий курсор з попередньої сторінки (`nextCursor`) |
+
+Відповідь: `{ workouts: HistoryWorkout[], nextCursor: string | null }`.
+- Порядок: від найновішого (`performedOn` desc, далі `id` desc). Пагінація keyset, тож вставки між запитами не дублюють і не гублять записи.
+- `HistoryWorkout` = `WorkoutDto` (усі поля з `sync`, разом із `sets`) + `summary`:
+  - `totalSets`, `completedSets`, `plannedSets`;
+  - `exercises` — унікальні вправи в порядку виконання;
+  - `volumeKg` — сума повтори × вага лише по виконаних підходах з вагою;
+  - `durationSec`.
+- Лише свої тренування; `users.id` назовні не віддається. Невідомий токен → порожня сторінка, користувач не створюється.
+- Некоректні параметри або курсор → 400.
 
 ## Видимість досягнень (максимальна мотивація)
 

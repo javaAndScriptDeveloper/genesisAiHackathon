@@ -151,6 +151,88 @@ describe("progress API", () => {
     expect(await count("users")).toBe(users);
   });
 
+  describe("workout history", () => {
+    const set = (id: string, over: Record<string, unknown> = {}) => ({
+      id, exerciseId: "squat", kind: "weighted", reps: 5, weightKg: 100, durationSec: null, completed: true, performedAt: "2026-11-02T10:00:00.000Z", ...over,
+    });
+    const workout = (id: string, performedOn: string, over: Record<string, unknown> = {}) => ({
+      id, trainingId: null, planDate: performedOn, performedOn, status: "completed", plannedSets: 3, durationSec: 1500, perceived: null,
+      adapted: false, adHoc: false, sets: [] as unknown[], ...over,
+    });
+    const history = (token: string, qs = "") => call("GET", `/api/progress/workouts${qs}`, token);
+
+    it("unknown token gets an empty page and no user is created", async () => {
+      const res = await history(A);
+      expect(res.statusCode).toBe(200);
+      expect(res.json()).toEqual({ workouts: [], nextCursor: null });
+      expect(await count("users")).toBe(0);
+    });
+
+    it("returns own workouts newest first with sets and a summary", async () => {
+      await call("POST", "/api/progress/sync", A, {
+        workouts: [
+          workout("w-old", "2026-11-02", {
+            sets: [
+              set("a1"),
+              set("a2", { reps: 3, weightKg: 110, performedAt: "2026-11-02T10:05:00.000Z" }),
+              set("a3", { completed: false, performedAt: "2026-11-02T10:10:00.000Z" }),
+              set("a4", { exerciseId: "plank", kind: "timed", reps: null, weightKg: null, durationSec: 60, performedAt: "2026-11-02T10:15:00.000Z" }),
+            ],
+          }),
+          workout("w-new", "2026-11-05", { status: "partial", plannedSets: 4, adapted: true }),
+        ],
+      });
+      await call("POST", "/api/progress/sync", B, { workouts: [workout("w-b", "2026-11-04")] });
+
+      const res = await history(A);
+      expect(res.statusCode).toBe(200);
+      const { workouts, nextCursor } = res.json();
+      expect(nextCursor).toBeNull();
+      expect(workouts.map((w: { id: string }) => w.id)).toEqual(["w-new", "w-old"]);
+      expect(JSON.stringify(workouts)).not.toContain('"userId"');
+      expect(workouts[0]).toMatchObject({ status: "partial", adapted: true, sets: [], summary: { totalSets: 0, completedSets: 0, exercises: [], volumeKg: 0 } });
+      expect(workouts[1].sets.map((s: { id: string }) => s.id)).toEqual(["a1", "a2", "a3", "a4"]);
+      // volume = completed weighted sets only: 5*100 + 3*110
+      expect(workouts[1].summary).toEqual({ totalSets: 4, completedSets: 3, plannedSets: 3, exercises: ["squat", "plank"], volumeKg: 830, durationSec: 1500 });
+    });
+
+    it("filters by date range and status", async () => {
+      await call("POST", "/api/progress/sync", A, {
+        workouts: [workout("w1", "2026-11-01"), workout("w2", "2026-11-10", { status: "abandoned" }), workout("w3", "2026-11-20")],
+      });
+      const ids = async (qs: string) => (await history(A, qs)).json().workouts.map((w: { id: string }) => w.id);
+      expect(await ids("?from=2026-11-05&to=2026-11-20")).toEqual(["w3", "w2"]);
+      expect(await ids("?status=completed")).toEqual(["w3", "w1"]);
+      expect(await ids("?to=2026-11-01")).toEqual(["w1"]);
+    });
+
+    it("paginates with limit and an opaque cursor, ties broken by id", async () => {
+      await call("POST", "/api/progress/sync", A, {
+        workouts: [workout("w1", "2026-11-01"), workout("w2", "2026-11-03"), workout("w3", "2026-11-03"), workout("w4", "2026-11-05"), workout("w5", "2026-11-07")],
+      });
+      const seen: string[] = [];
+      let cursor: string | null = null;
+      let pages = 0;
+      do {
+        const res = await history(A, `?limit=2${cursor ? `&cursor=${encodeURIComponent(cursor)}` : ""}`);
+        expect(res.statusCode).toBe(200);
+        const page = res.json();
+        seen.push(...page.workouts.map((w: { id: string }) => w.id));
+        cursor = page.nextCursor;
+        pages++;
+      } while (cursor && pages < 10);
+      expect(pages).toBe(3);
+      expect(seen).toEqual(["w5", "w4", "w3", "w2", "w1"]);
+    });
+
+    it("rejects bad query params with 400", async () => {
+      for (const qs of ["?limit=0", "?limit=201", "?from=nope", "?status=weird", "?cursor=%%%", "?cursor=bm9wZQ", "?extra=1"]) {
+        expect((await history(A, qs)).statusCode, qs).toBe(400);
+      }
+      expect((await call("GET", "/api/progress/workouts", undefined)).statusCode).toBe(400);
+    });
+  });
+
   describe("archive", () => {
     const item = (over: Record<string, unknown> = {}) => ({
       period: "weekly", weekStart: "2026-11-16", takenAt: "2026-11-22T20:00:00.000Z", engineVersion: "2", payload: { n: 1 }, payloadHash: "h1", ...over,

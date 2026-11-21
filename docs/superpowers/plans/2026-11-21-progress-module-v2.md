@@ -359,6 +359,15 @@ interface RemoteSnapshot { settings: { weeklyGoal: number; units: "metric" | "im
 - [ ] **Step 1: Тести:** sync з 3 check-ins → `snapshot` повертає їх; повторний sync — без дублікатів; `kind` поза списком → 400; поле на кшталт `dataUrl` у тілі → 400 (`additionalProperties: false`); чужий id → 409; видалення користувача каскадно видаляє check-ins.
 - [ ] **Step 2–4:** RED → GREEN. **Step 5:** commit `feat(backend): store progress check-ins`.
 
+### Task 11c: API історії тренувань (backend) ✅
+
+**Files:** Modify `platform-backend/src/progress/repo.ts` (`listWorkouts`, `toWorkoutDto`, `summarize`), `routes.ts` (`GET /api/progress/workouts`); Test `test/progress-api.test.ts` (блок `workout history`)
+
+Контракт — розділ «Історія тренувань» у дизайн-документі.
+- [x] **Step 1: Тести:** невідомий токен → `{ workouts: [], nextCursor: null }` без нового користувача; лише свої тренування, від найновішого, із `sets` і `summary` (`volumeKg` лише з виконаних підходів з вагою); фільтри `from`/`to`/`status`; пагінація `limit=2` проходить 5 тренувань за 3 сторінки без дублів (однакова дата → порядок за `id`); `limit=0`/`201`, поганий `from`/`status`/`cursor`, зайвий параметр, без токена → 400.
+- [x] **Step 2–4:** RED → GREEN. **Step 5:** commit `feat(backend): workout history endpoint`.
+- [ ] Фронтенд: `fetchWorkoutHistory(q)` у `frontend/lib/api/progressSync.ts` (Task 12) для екрана History.
+
 ### Task 12: Клієнт синхронізації
 
 **Files:** Create `frontend/lib/api/progressSync.ts`; Modify `lib/fit/store/FitProvider.tsx` (запуск хука); Test `frontend/tests/progress-sync.test.ts`

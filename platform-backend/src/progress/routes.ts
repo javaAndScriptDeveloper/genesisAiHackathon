@@ -1,6 +1,6 @@
 import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import type { Knex } from "knex";
-import { archiveSnapshot, getSnapshot, HttpError, listArchive, markEventsSeen, resolveUser, syncSnapshot, type ArchiveInput, type SyncBody } from "./repo.js";
+import { archiveSnapshot, getSnapshot, HttpError, listArchive, listWorkouts, markEventsSeen, resolveUser, syncSnapshot, type ArchiveInput, type HistoryQuery, type SyncBody } from "./repo.js";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -117,6 +117,18 @@ const archiveQuerySchema = {
   properties: { from: date, to: date, period: { enum: ["weekly", "change"] } },
 } as const;
 
+const historyQuerySchema = {
+  type: "object",
+  additionalProperties: false,
+  properties: {
+    from: date,
+    to: date,
+    status: { enum: ["completed", "partial", "abandoned"] },
+    limit: { type: "string", pattern: "^[1-9][0-9]{0,2}$" }, // query strings are not coerced (src/app.ts); 1..200 checked in the handler
+    cursor: { type: "string", minLength: 1, maxLength: 512, pattern: "^[A-Za-z0-9_-]+$" },
+  },
+} as const;
+
 const isMonday = (d: string): boolean => new Date(`${d}T00:00:00Z`).getUTCDay() === 1;
 
 function token(req: FastifyRequest): string {
@@ -171,6 +183,13 @@ export function progressRoutes(db: Knex) {
         app.log.error(err, "progress archive failed");
         return reply.code(503).send({ error: "progress unavailable" });
       }
+    });
+
+    app.get("/api/progress/workouts", { schema: { querystring: historyQuerySchema } }, async (req, reply) => {
+      const { limit, ...rest } = req.query as Omit<HistoryQuery, "limit"> & { limit?: string };
+      const n = limit === undefined ? undefined : Number(limit);
+      if (n !== undefined && n > 200) return reply.code(400).send({ error: "limit must be between 1 and 200" });
+      return guard(reply, "progress workout history", async () => listWorkouts(db, await resolveUser(db, token(req), { create: false }), { ...rest, limit: n }));
     });
 
     app.get("/api/progress/archive", { schema: { querystring: archiveQuerySchema } }, async (req, reply) =>
