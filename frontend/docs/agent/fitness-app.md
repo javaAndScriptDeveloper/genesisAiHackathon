@@ -23,3 +23,6 @@ Everything is frontend state + localStorage today. Needs a backend (Next.js rout
 
 ## Page transitions
 `app/(app)/template.tsx` wraps each page in React `<ViewTransition>`. Direction comes from `transitionTypes` (`nav-forward` / `nav-back`) on `Link` and `router.push`: bottom-nav tabs pick it from tab order, drill-down links use forward, header back uses back; everything else gets a soft fade. Styles live in `styles/partials/_transitions.scss` (only page content is animated, reduced motion disables it).
+
+## Units (kg / lb)
+All data is stored metric (kg, cm). `state.units` (`metric` | `imperial`, default metric, chosen in onboarding and Settings) only changes display and input. Never write "kg" in a component: use `useUnits()` (`fmtLoad`, `fmtMass`, `mass`, `toKg`, `unit`) or `lib/fit/units.ts`. Animated numbers use `AnimatedNumber` (`@number-flow/react`).

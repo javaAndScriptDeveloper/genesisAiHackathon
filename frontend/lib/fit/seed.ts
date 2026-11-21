@@ -11,6 +11,7 @@ export const WATER_GOAL_ML = 2500;
 export function emptyState(): FitState {
 	return {
 		version: 1,
+		units: "metric",
 		profile: null,
 		planned: [],
 		history: [],

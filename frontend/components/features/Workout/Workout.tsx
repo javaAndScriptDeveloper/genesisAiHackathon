@@ -1,12 +1,14 @@
 "use client";
 
-import { Cancel01Icon, PauseIcon, PlayIcon } from "@hugeicons/core-free-icons";
+import { Alert02Icon, ArrowDown01Icon, Cancel01Icon, PauseIcon, PlayIcon, Timer02Icon } from "@hugeicons/core-free-icons";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { Button, EmptyState, IconButton, Icon, useToast } from "@/components/ui";
 import { WorkoutHealthPanel } from "@/components/features/WorkoutHealthPanel/WorkoutHealthPanel";
 import { useWorkoutHealth } from "@/components/features/WorkoutHealthPanel/useWorkoutHealth";
+import { applyAdapt } from "@/lib/fit/adapt";
 import { formatClock } from "@/lib/fit/dates";
+import type { AdaptOp } from "@/lib/fit/types";
 import { getExercise } from "@/lib/fit/exercises";
 import { estimateMinutes } from "@/lib/fit/plan";
 import { useFit } from "@/lib/fit/store/FitProvider";
@@ -21,7 +23,7 @@ export function Workout() {
 	const t = useT();
 	const router = useRouter();
 	const toast = useToast();
-	const { state, dispatch } = useFit();
+	const { state, dispatch, today } = useFit();
 	const [sheet, setSheet] = useState<SheetName>(null);
 	const a = state.active;
 	const profile = state.profile;
@@ -48,6 +50,14 @@ export function Workout() {
 	}
 
 	if (a.phase === "summary") return <WorkoutSummary />;
+
+	// On pause the most likely reason to stop is that it feels too hard: offer to regenerate the rest right here.
+	const regenerate = (op: AdaptOp) => {
+		const res = applyAdapt(a.exercises, op, { profile, startIndex: a.index });
+		dispatch({ type: "adapt", op, today });
+		dispatch({ type: "resume" });
+		toast.show(res.message, res.changed ? "success" : "info");
+	};
 
 	const linked = state.devices.apple ? "Apple Health" : state.devices.garmin ? "Garmin" : undefined;
 	const doneBlocks = a.exercises.filter((b) => !b.skipped && b.sets.every((s) => s.done)).length;
@@ -86,6 +96,14 @@ export function Workout() {
 					<Icon icon={PauseIcon} size={40} />
 					<h2>{t("fit.workout.paused")}</h2>
 					<p>{t("fit.workout.pausedBody")}</p>
+					<div className={styles.pausePrompt}>
+						<p className={styles.pausePromptTitle}>
+							<Icon icon={Alert02Icon} size={16} />
+							{t("fit.workout.tooHardPrompt")}
+						</p>
+						<Button variant="secondary" className={styles.onDark} iconLeft={ArrowDown01Icon} onClick={() => regenerate({ kind: "too-hard" })}>{t("fit.workout.regenEasier")}</Button>
+						<Button variant="secondary" className={styles.onDark} iconLeft={Timer02Icon} onClick={() => regenerate({ kind: "shorten", minutes: 15 })}>{t("fit.workout.regenShort")}</Button>
+					</div>
 					<Button size="lg" iconLeft={PlayIcon} onClick={() => dispatch({ type: "resume" })}>{t("fit.workout.resume")}</Button>
 					<Button variant="secondary" className={styles.onDark} onClick={() => setSheet("end")}>{t("fit.workout.end")}</Button>
 				</div>

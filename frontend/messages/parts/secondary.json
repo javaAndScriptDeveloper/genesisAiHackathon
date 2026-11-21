@@ -18,7 +18,7 @@
       }
     },
     "settings": {
-      "title": "Settings", "language": "Language", "languageLabel": "Show the app in", "languageNote": "More languages are on the way. Anything not translated yet appears in English.",
+      "title": "Settings", "units": "Units", "unitsNote": "Changes how weights and height are shown. Your data is stored once and converted on the fly.", "language": "Language", "languageLabel": "Show the app in", "languageNote": "More languages are on the way. Anything not translated yet appears in English.",
       "reminders": "Reminders", "remindersNote": "Fewer, kinder notifications. You choose which ones you want.", "reminderTime": "Workout reminder time", "reminderTimeHint": "When your daily workout nudge arrives on training days.", "setTime": "Set time",
       "push": "Browser notifications", "pushNote": "Shows system notifications while this app is open in a browser. Real push needs a server and isn't set up in this demo.",
       "pushUnsupported": "This browser doesn't support notifications", "pushDenied": "Notification permission was not granted", "pushOn": "Browser notifications on", "pushOff": "Browser notifications off",

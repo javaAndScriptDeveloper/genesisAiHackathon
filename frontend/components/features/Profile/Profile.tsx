@@ -6,7 +6,8 @@ import { ScreenHeader } from "@/components/features/ScreenHeader/ScreenHeader";
 import { Avatar, Badge, Card, Icon, type IconDefinition } from "@/components/ui";
 import { bmi } from "@/lib/fit/stats";
 import { useFit } from "@/lib/fit/store/FitProvider";
-import { useFitStats } from "@/lib/fit/store/hooks";
+import { useFitStats, useUnits } from "@/lib/fit/store/hooks";
+import { fmtHeight } from "@/lib/fit/units";
 import { useT } from "@/lib/i18n/I18nProvider";
 import kit from "../ScreenKit/ScreenKit.module.scss";
 
@@ -24,6 +25,7 @@ export function Profile() {
 	const t = useT();
 	const { state } = useFit();
 	const stats = useFitStats();
+	const u = useUnits();
 	const p = state.profile;
 	if (!p) return null;
 	return (
@@ -52,7 +54,7 @@ export function Profile() {
 							{p.durationMin} {t("fit.common.minShort")}
 						</Badge>
 					</div>
-					<p className={kit.note}>{p.heightCm} cm · {p.weightKg} kg · BMI {bmi(p)}</p>
+					<p className={kit.note}>{fmtHeight(p.heightCm, u.units)} · {u.fmtMass(p.weightKg, 1)} · BMI {bmi(p)}</p>
 				</Card>
 				<ul className={kit.list}>
 					{LINKS.map((l) => (

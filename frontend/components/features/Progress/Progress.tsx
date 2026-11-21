@@ -5,17 +5,18 @@ import { useRef, useState } from "react";
 import { AchievementBadge } from "@/components/features/AchievementBadge/AchievementBadge";
 import { BarChart, LineChart } from "@/components/features/Charts/Charts";
 import { PremiumGate, usePremium } from "@/components/features/PremiumGate/PremiumGate";
+import { TrainingInsight } from "@/components/features/TrainingInsight/TrainingInsight";
 import { Notice } from "@/components/features/Notice/Notice";
 import { ScreenHeader } from "@/components/features/ScreenHeader/ScreenHeader";
 import { Stat } from "@/components/features/Stat/Stat";
-import { Badge, Button, Card, EmptyState, Icon, Input, ProgressBar, ProgressRing, SegmentedControl, Sheet, useToast } from "@/components/ui";
+import { AnimatedNumber, Badge, Button, Card, EmptyState, Icon, Input, ProgressBar, ProgressRing, SegmentedControl, Sheet, useToast } from "@/components/ui";
 import { addDays, formatDay, formatMonthDay, mondayOf, WEEKDAYS } from "@/lib/fit/dates";
 import { getExercise } from "@/lib/fit/exercises";
 import { ACHIEVEMENTS } from "@/lib/fit/gamification";
 import { shareText } from "@/lib/fit/share";
 import { historyByWeek } from "@/lib/fit/stats";
 import { useFit } from "@/lib/fit/store/FitProvider";
-import { useFitStats } from "@/lib/fit/store/hooks";
+import { useFitStats, useUnits } from "@/lib/fit/store/hooks";
 import { useTabMemory } from "@/lib/fit/store/useTabMemory";
 import { useT } from "@/lib/i18n/I18nProvider";
 import styles from "./Progress.module.scss";
@@ -73,7 +74,7 @@ export function Progress() {
 
 function Overview() {
 	const t = useT();
-	const toast = useToast();
+	const u = useUnits();
 	const { state, today } = useFit();
 	const stats = useFitStats();
 	const [period, setPeriod] = useState<"week" | "month">("week");
@@ -88,7 +89,7 @@ function Overview() {
 	const view = period === "week" ? { planned: stats.week.planned, done: stats.week.done, minutes: stats.week.minutes, volume: stats.week.volume } : month;
 
 	const weeks = historyByWeek(state.history, today, 6);
-	const weights = state.bodyWeights.slice(-6).map((b) => ({ label: formatMonthDay(b.date), value: b.kg }));
+	const weights = state.bodyWeights.slice(-6).map((b) => ({ label: formatMonthDay(b.date), value: u.mass(b.kg, 1) }));
 
 	// Calendar: last 5 weeks as a grid of planned/completed days, built from the same planned sessions as everywhere else.
 	const gridStart = addDays(mondayOf(today), -28);
@@ -107,26 +108,21 @@ function Overview() {
 	for (const log of state.history) for (const e of log.exercises) muscleVolume.set(getExercise(e.exerciseId).muscle, (muscleVolume.get(getExercise(e.exerciseId).muscle) ?? 0) + e.sets.length);
 	const muscleTotal = [...muscleVolume.values()].reduce((a, b) => a + b, 0) || 1;
 
-	const summary = (() => {
-		if (state.history.length === 0) return t("fit.progress.summaryNone");
-		const trend = stats.week.volume >= stats.lastWeek.volume ? t("fit.progress.trendUp") : t("fit.progress.trendDown");
-		return t("fit.progress.summary", { done: stats.week.done, planned: stats.week.planned, score: stats.consistency, trend });
-	})();
 
 	return (
 		<>
 			{state.hasDemoHistory && <Notice tone="info">{t("fit.progress.demoNote")}</Notice>}
 			<SegmentedControl label={t("fit.progress.period")} value={period} onChange={setPeriod} options={[{ id: "week", label: t("fit.progress.thisWeek") }, { id: "month", label: t("fit.progress.last4") }]} />
 			<div className={styles.grid2}>
-				<Stat label={t("fit.progress.sessions")} value={`${view.done}/${view.planned}`} hint={t("fit.progress.completedVsPlanned")} icon={<Icon icon={Calendar03Icon} size={14} />} />
+				<Stat label={t("fit.progress.sessions")} value={<><AnimatedNumber value={view.done} />/<AnimatedNumber value={view.planned} /></>} hint={t("fit.progress.completedVsPlanned")} icon={<Icon icon={Calendar03Icon} size={14} />} />
 				<Stat label={t("fit.progress.time")} value={view.minutes} hint={t("fit.common.minShort")} icon={<Icon icon={Clock01Icon} size={14} />} />
-				<Stat label={t("fit.progress.volume")} value={view.volume.toLocaleString("en-US")} hint="kg" icon={<Icon icon={Dumbbell01Icon} size={14} />} />
+				<Stat label={t("fit.progress.volume")} value={u.mass(view.volume)} hint={u.unit} icon={<Icon icon={Dumbbell01Icon} size={14} />} />
 				<Stat label={t("fit.progress.streakLabel")} value={stats.streak.current} hint={t("fit.progress.longest", { n: stats.streak.longest })} icon={<Icon icon={FireIcon} size={14} />} />
 			</div>
 
 			<Card className={styles.row}>
 				<ProgressRing value={stats.consistency} label={t("fit.progress.consistency")} size={84}>
-					<strong>{stats.consistency}%</strong>
+					<strong><AnimatedNumber value={stats.consistency} suffix="%" /></strong>
 				</ProgressRing>
 				<div>
 					<h3>{t("fit.progress.consistency")}</h3>
@@ -134,18 +130,11 @@ function Overview() {
 				</div>
 			</Card>
 
-			<Card>
-				<h3 className={styles.h3}>{t("fit.progress.insight")}</h3>
-				<p className={styles.p}>{summary}</p>
-				<Button size="sm" variant="secondary" onClick={async () => {
-					const r = await shareText(t("fit.progress.shareTitle"), t("fit.progress.shareText", { done: stats.week.done, planned: stats.week.planned, streak: stats.streak.current, level: stats.level.level }));
-					toast.show(r === "copied" ? t("fit.common.copied") : r === "failed" ? t("fit.common.shareFailed") : t("fit.progress.shared"), r === "failed" ? "danger" : "success");
-				}}>{t("fit.common.share")}</Button>
-			</Card>
+			<TrainingInsight />
 
 			<Card>
 				<h3 className={styles.h3}>{t("fit.progress.weeklyVolume")}</h3>
-				{state.history.length === 0 ? <p className={styles.p}>{t("fit.progress.noData")}</p> : <BarChart data={weeks.map((w) => ({ label: w.label, value: w.volume }))} label={t("fit.progress.weeklyVolume")} unit=" kg" />}
+				{state.history.length === 0 ? <p className={styles.p}>{t("fit.progress.noData")}</p> : <BarChart data={weeks.map((w) => ({ label: w.label, value: u.mass(w.volume) }))} label={t("fit.progress.weeklyVolume")} unit={` ${u.unit}`} />}
 			</Card>
 
 			<Card>
@@ -165,7 +154,7 @@ function Overview() {
 
 			<Card>
 				<h3 className={styles.h3}>{t("fit.progress.bodyWeight")}</h3>
-				{weights.length < 2 ? <p className={styles.p}>{t("fit.progress.weightNeedMore")}</p> : <LineChart data={weights} label={t("fit.progress.bodyWeight")} unit=" kg" />}
+				{weights.length < 2 ? <p className={styles.p}>{t("fit.progress.weightNeedMore")}</p> : <LineChart data={weights} label={t("fit.progress.bodyWeight")} unit={` ${u.unit}`} />}
 			</Card>
 
 			<PremiumGate title={t("fit.progress.insightsLockedTitle")} body={t("fit.progress.insightsLockedBody")} source="insights">
@@ -174,7 +163,7 @@ function Overview() {
 					{top ? (
 						<>
 							<p className={styles.p}>{getExercise(top[0]).name}</p>
-							<LineChart data={top[1].slice(-6).map((p) => ({ label: formatMonthDay(p.date), value: p.kg }))} label={t("fit.progress.strength")} unit=" kg" />
+							<LineChart data={top[1].slice(-6).map((p) => ({ label: formatMonthDay(p.date), value: u.load(p.kg) }))} label={t("fit.progress.strength")} unit={` ${u.unit}`} />
 						</>
 					) : <p className={styles.p}>{t("fit.progress.noData")}</p>}
 					<h3 className={styles.h3}>{t("fit.progress.muscles")}</h3>
@@ -192,6 +181,7 @@ function Overview() {
 
 function History() {
 	const t = useT();
+	const u = useUnits();
 	const { state } = useFit();
 	const logs = [...state.history].sort((a, b) => b.date.localeCompare(a.date) || b.id.localeCompare(a.id));
 	if (logs.length === 0) return <EmptyState title={t("fit.progress.historyEmpty")} description={t("fit.progress.historyEmptyBody")} />;
@@ -203,7 +193,7 @@ function History() {
 						<summary className={styles.logSummary}>
 							<span>
 								<strong>{l.title}</strong>
-								<span className={styles.sub}>{formatDay(l.date)} · {Math.max(1, Math.round(l.durationSec / 60))} {t("fit.common.minShort")} · {l.volumeKg.toLocaleString("en-US")} kg</span>
+								<span className={styles.sub}>{formatDay(l.date)} · {Math.max(1, Math.round(l.durationSec / 60))} {t("fit.common.minShort")} · {u.fmtMass(l.volumeKg)}</span>
 							</span>
 							<span className={styles.logBadges}>
 								{l.demo && <Badge>{t("fit.common.demo")}</Badge>}
@@ -215,7 +205,7 @@ function History() {
 							{l.exercises.map((e) => (
 								<li key={e.exerciseId}>
 									<strong>{getExercise(e.exerciseId).name}</strong>
-									<span>{e.skipped ? t("fit.workout.skippedLabel") : e.sets.map((s) => `${s.reps}${s.weight ? `×${s.weight}kg` : ""}`).join(", ")}</span>
+									<span>{e.skipped ? t("fit.workout.skippedLabel") : e.sets.map((s) => `${s.reps}${s.weight ? `×${u.fmtLoad(s.weight)}` : ""}`).join(", ")}</span>
 								</li>
 							))}
 							{l.prs.length > 0 && <li className={styles.pr}>{t("fit.session.prs", { list: l.prs.join(", ") })}</li>}
@@ -230,6 +220,7 @@ function History() {
 
 function Awards() {
 	const t = useT();
+	const u = useUnits();
 	const toast = useToast();
 	const { state } = useFit();
 	const stats = useFitStats();
@@ -278,7 +269,7 @@ function Awards() {
 					{stats.records.slice(0, 8).map((r) => (
 						<li key={r.exerciseId} className={styles.record}>
 							<span><strong>{getExercise(r.exerciseId).name}</strong><span className={styles.sub}>{formatDay(r.date)}</span></span>
-							<Badge tone="accent">{r.best} {r.unit}</Badge>
+							<Badge tone="accent">{r.unit === "kg" ? u.fmtLoad(r.best) : `${r.best} ${r.unit}`}</Badge>
 						</li>
 					))}
 				</ul>
@@ -317,15 +308,19 @@ function CheckIns() {
 		}
 	};
 
-	const kg = Number(weight);
+	const u = useUnits();
+	const entered = Number(weight);
+	const kg = u.toKg(entered);
 	const validWeight = weight !== "" && kg >= 30 && kg <= 250;
 
 	return (
 		<>
 			<Card className={styles.stack}>
 				<h3 className={styles.h3}>{t("fit.progress.logWeight")}</h3>
-				<Input label={t("fit.onboarding.weight")} type="number" inputMode="decimal" step="0.1" value={weight} onChange={(e) => setWeight(e.target.value)} hint="kg" error={weight !== "" && !validWeight ? t("fit.onboarding.errors.weight") : undefined} />
-				<Button disabled={!validWeight} onClick={() => { dispatch({ type: "add-body-weight", date: today, kg }); setWeight(""); toast.show(t("fit.progress.weightSaved"), "success"); }}>{t("fit.common.save")}</Button>
+				<div className={styles.inline}>
+					<Input className={styles.grow} label={t("fit.onboarding.weight")} type="number" inputMode="decimal" step="0.1" suffix={u.unit} value={weight} onChange={(e) => setWeight(e.target.value)} error={weight !== "" && !validWeight ? t("fit.onboarding.errors.weight") : undefined} />
+					<Button disabled={!validWeight} onClick={() => { dispatch({ type: "add-body-weight", date: today, kg }); setWeight(""); toast.show(t("fit.progress.weightSaved"), "success"); }}>{t("fit.common.save")}</Button>
+				</div>
 			</Card>
 
 			<Card className={styles.stack}>

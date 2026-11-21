@@ -1,4 +1,5 @@
 import type { ISODate } from "./dates";
+import type { Units } from "./units";
 
 export type Goal = "lose-fat" | "build-muscle" | "get-stronger" | "stay-fit" | "endurance";
 export type Experience = "beginner" | "intermediate" | "advanced";
@@ -209,6 +210,7 @@ export type MealSlot = "breakfast" | "lunch" | "snack" | "dinner";
 
 export interface FitState {
 	version: 1;
+	units: Units;
 	profile: Profile | null;
 	planned: PlannedWorkout[];
 	history: SessionLog[];

@@ -1,3 +1,4 @@
+export { AnimatedNumber } from "./AnimatedNumber/AnimatedNumber";
 export { Avatar } from "./Avatar/Avatar";
 export { Badge } from "./Badge/Badge";
 export { Button } from "./Button/Button";

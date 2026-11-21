@@ -5,6 +5,7 @@ import { useCallback, useMemo } from "react";
 import { weeklyChallenge, levelOf, totalXp } from "../gamification";
 import { nextUpcoming } from "../plan";
 import { computeStreak, consistencyScore, daysSinceLastWorkout, personalRecords, weekStats } from "../stats";
+import { fmtLoad, fmtMass, loadStep, loadValue, massUnit, massValue, toKg } from "../units";
 import { useFit } from "./FitProvider";
 
 export function useStartWorkout() {
@@ -40,4 +41,23 @@ export function useFitStats() {
 			sinceLast: daysSinceLastWorkout(state.history, today),
 		};
 	}, [state, today]);
+}
+
+/** Unit-aware formatting bound to the user's choice (kg or lb). Components never hardcode "kg". */
+export function useUnits() {
+	const { state } = useFit();
+	const units = state.units;
+	return useMemo(
+		() => ({
+			units,
+			unit: massUnit(units),
+			step: loadStep(units),
+			mass: (kg: number, decimals = 0) => massValue(kg, units, decimals),
+			load: (kg: number) => loadValue(kg, units),
+			toKg: (value: number) => toKg(value, units),
+			fmtMass: (kg: number, decimals = 0) => fmtMass(kg, units, decimals),
+			fmtLoad: (kg: number) => fmtLoad(kg, units),
+		}),
+		[units],
+	);
 }

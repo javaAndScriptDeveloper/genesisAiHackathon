@@ -10,6 +10,7 @@ import { SAFETY_TEXT } from "@/lib/fit/coach";
 import { alternativesFor, getExercise } from "@/lib/fit/exercises";
 import { describeBlock } from "@/lib/fit/format";
 import { useFit } from "@/lib/fit/store/FitProvider";
+import { useUnits } from "@/lib/fit/store/hooks";
 import type { AdaptOp } from "@/lib/fit/types";
 import { useT } from "@/lib/i18n/I18nProvider";
 import styles from "./Workout.module.scss";
@@ -26,6 +27,7 @@ export function WorkoutSheets({ sheet, setSheet, toastShow }: Props) {
 	const t = useT();
 	const router = useRouter();
 	const { state, dispatch, today } = useFit();
+	const u = useUnits();
 	const a = state.active;
 	const profile = state.profile;
 
@@ -120,7 +122,7 @@ export function WorkoutSheets({ sheet, setSheet, toastShow }: Props) {
 							key: b.id,
 							icon: finished ? Tick02Icon : b.skipped ? SkipForwardIcon : Dumbbell03Icon,
 							title: `${i + 1}. ${getExercise(b.exerciseId).name}`,
-							hint: b.skipped ? t("fit.workout.skippedLabel") : `${describeBlock(b)} · ${t("fit.workout.setsDone", { done, total: b.sets.length })}`,
+							hint: b.skipped ? t("fit.workout.skippedLabel") : `${describeBlock(b, u.units)} · ${t("fit.workout.setsDone", { done, total: b.sets.length })}`,
 							current: i === a.index,
 							onClick: () => {
 								dispatch({ type: "go-to", index: i });
@@ -150,6 +152,10 @@ export function WorkoutSheets({ sheet, setSheet, toastShow }: Props) {
 				</>
 			}>
 				<p>{setsDone > 0 ? t("fit.workout.endBody", { n: setsDone }) : t("fit.workout.endEmpty")}</p>
+				<div className={styles.endPrompt}>
+					<p>{t("fit.workout.tooHardPrompt")}</p>
+					<Button variant="secondary" iconLeft={ArrowDown01Icon} onClick={() => run({ kind: "too-hard" })}>{t("fit.workout.regenEasier")}</Button>
+				</div>
 			</Sheet>
 
 			<SafetySheet open={a.safetyStop} onEnd={() => dispatch({ type: "end-early" })} onResume={() => dispatch({ type: "resume" })} />

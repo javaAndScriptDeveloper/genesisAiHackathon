@@ -12,7 +12,7 @@ import { alternativesFor, getExercise } from "@/lib/fit/exercises";
 import { describeBlock } from "@/lib/fit/format";
 import { applyAdapt } from "@/lib/fit/adapt";
 import { useFit } from "@/lib/fit/store/FitProvider";
-import { useStartWorkout } from "@/lib/fit/store/hooks";
+import { useStartWorkout, useUnits } from "@/lib/fit/store/hooks";
 import type { AdaptOp, SkipReason } from "@/lib/fit/types";
 import { useT } from "@/lib/i18n/I18nProvider";
 import styles from "./SessionDetail.module.scss";
@@ -25,6 +25,7 @@ export function SessionDetail({ id }: { id: string }) {
 	const toast = useToast();
 	const { state, dispatch, today } = useFit();
 	const start = useStartWorkout();
+	const u = useUnits();
 	const [panel, setPanel] = useState<Panel>(null);
 	const workout = state.planned.find((w) => w.id === id);
 	const profile = state.profile;
@@ -102,7 +103,7 @@ export function SessionDetail({ id }: { id: string }) {
 					<Card className={styles.logCard}>
 						<h2>{t("fit.session.result")}</h2>
 						<p>
-							{Math.round(log.durationSec / 60)} {t("fit.common.minShort")} · {log.volumeKg.toLocaleString("en-US")} kg · +{log.xp} XP
+							{Math.round(log.durationSec / 60)} {t("fit.common.minShort")} · {u.fmtMass(log.volumeKg)} · +{log.xp} XP
 						</p>
 						{log.prs.length > 0 && <p className={styles.pr}>{t("fit.session.prs", { list: log.prs.join(", ") })}</p>}
 					</Card>
@@ -117,7 +118,7 @@ export function SessionDetail({ id }: { id: string }) {
 								<span className={styles.num}>{i + 1}</span>
 								<div className={styles.itemBody}>
 									<Link href={`/training/exercise/${ex.id}`} className={styles.itemName}>{ex.name}</Link>
-									<span className={styles.itemMeta}>{describeBlock(b)} · {t("fit.session.rest", { s: b.restSec })}</span>
+									<span className={styles.itemMeta}>{describeBlock(b, u.units)} · {t("fit.session.rest", { s: b.restSec })}</span>
 								</div>
 								{editable && (
 									<Button size="sm" variant="ghost" onClick={() => setPanel({ replace: b.id })}>{t("fit.session.replace")}</Button>

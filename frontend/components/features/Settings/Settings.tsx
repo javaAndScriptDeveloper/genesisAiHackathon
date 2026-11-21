@@ -1,10 +1,10 @@
 "use client";
 
-import { Globe02Icon, Notification03Icon, Shield01Icon } from "@hugeicons/core-free-icons";
+import { Globe02Icon, Notification03Icon, RulerIcon, Shield01Icon } from "@hugeicons/core-free-icons";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { ScreenHeader } from "@/components/features/ScreenHeader/ScreenHeader";
-import { Button, Card, Icon, Select, Sheet, Switch, TimePicker, useToast } from "@/components/ui";
+import { Button, Card, Icon, SegmentedControl, Select, Sheet, Switch, TimePicker, useToast } from "@/components/ui";
 import { NOTIFICATION_LABELS } from "@/lib/fit/notifications";
 import { useFit } from "@/lib/fit/store/FitProvider";
 import type { NotificationKind } from "@/lib/fit/types";
@@ -41,6 +41,12 @@ export function Settings() {
 					<h2 className={`${kit.h2} ${kit.heading}`}><Icon icon={Globe02Icon} size={20} />{t("fit.settings.language")}</h2>
 					<Select label={t("fit.settings.languageLabel")} value={locale} options={LOCALES.map((l) => ({ value: l, label: LOCALE_LABELS[l] }))} onChange={(v) => isLocale(v) && setLocale(v)} />
 					<p className={kit.note}>{t("fit.settings.languageNote")}</p>
+				</Card>
+
+				<Card className={kit.stack}>
+					<h2 className={`${kit.h2} ${kit.heading}`}><Icon icon={RulerIcon} size={20} />{t("fit.settings.units")}</h2>
+					<SegmentedControl label={t("fit.settings.units")} value={state.units} onChange={(units) => dispatch({ type: "set-units", units })} options={[{ id: "metric", label: t("fit.onboarding.metric") }, { id: "imperial", label: t("fit.onboarding.imperial") }]} />
+					<p className={kit.note}>{t("fit.settings.unitsNote")}</p>
 				</Card>
 
 				<Card className={kit.stack}>

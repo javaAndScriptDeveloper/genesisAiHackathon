@@ -27,8 +27,8 @@
 }
 
 .list {
-	margin: 0;
-	padding: 0 var(--space-3) var(--space-3) calc(var(--space-3) + 1.6rem);
+	margin: var(--space-3) 0 0;
+	padding: 0 0 0 1.8rem;
 	color: var(--color-textMuted);
 	font-size: 1.4rem;
 	line-height: 1.5;
@@ -51,10 +51,67 @@
 	transform: rotate(180deg);
 }
 
-ol.list {
+.ordered,
+.bullets {
+	min-height: 12rem;
+}
+
+.ordered {
 	list-style: decimal;
 }
 
-ul.list {
+.bullets {
 	list-style: disc;
+}
+
+.summaryIcon {
+	display: grid;
+	place-items: center;
+	margin-right: var(--space-2);
+	color: var(--color-accent);
+}
+
+.summary {
+	gap: 0;
+}
+
+.chevron {
+	margin-left: auto;
+}
+
+// Icon buttons that open the guide in a sheet.
+.chips {
+	display: grid;
+	grid-template-columns: repeat(4, 1fr);
+	gap: var(--space-2);
+}
+
+.chip {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 0.6rem;
+	min-height: 7.2rem;
+	padding: var(--space-3) var(--space-1) var(--space-2);
+	background: var(--color-surface);
+	border: 0.1rem solid var(--color-border);
+	color: var(--color-textMuted);
+	font-size: 1.2rem;
+	font-weight: 600;
+	@include corners.radius(var(--radius-card));
+	@include mixins.focus-ring;
+
+	&:hover {
+		border-color: var(--color-accent);
+	}
+}
+
+.chipIcon {
+	display: grid;
+	place-items: center;
+	width: 3.6rem;
+	height: 3.6rem;
+	background: var(--color-accentSoft);
+	color: var(--color-accent);
+	@include corners.nested(var(--radius-card), 0.6rem);
 }

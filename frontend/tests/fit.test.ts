@@ -50,7 +50,7 @@ describe("adaptation", () => {
 
 describe("end to end journey", () => {
 	it("onboard, train, adapt, finish, unlock and update progress", () => {
-		let s = run(emptyState(), { type: "complete-onboarding", profile, demoHistory: true, today, now });
+		let s = run(emptyState(), { type: "complete-onboarding", units: "metric", profile, demoHistory: true, today, now });
 		expect(s.history.length).toBeGreaterThan(5);
 		const before = s.history.length;
 		const next = nextUpcoming(s.planned, today);
@@ -76,14 +76,14 @@ describe("end to end journey", () => {
 		expect(s.celebrate.length).toBeGreaterThan(0);
 	});
 	it("recovery skip does not break the streak", () => {
-		const s = run(emptyState(), { type: "complete-onboarding", profile, demoHistory: true, today, now });
+		const s = run(emptyState(), { type: "complete-onboarding", units: "metric", profile, demoHistory: true, today, now });
 		const before = computeStreak(s.planned, today).current;
 		const next = nextUpcoming(s.planned, today);
 		const skipped = run(s, { type: "skip-planned", id: next?.id ?? "", reason: "recovery" });
 		expect(computeStreak(skipped.planned, today).current).toBeGreaterThanOrEqual(before);
 	});
 	it("removing dumbbells swaps exercises", () => {
-		let s = run(emptyState(), { type: "complete-onboarding", profile, demoHistory: false, today, now });
+		let s = run(emptyState(), { type: "complete-onboarding", units: "metric", profile, demoHistory: false, today, now });
 		const action = { id: "eq", label: "x", type: "remove-equipment" as const, equipment: "dumbbells" as const };
 		s = run(s, { type: "coach-message", message: { id: "m", from: "coach", text: "", at: now } }, { type: "coach-apply", messageId: "m", action, today, now, reply: { id: "r", from: "coach", text: "ok", at: now } });
 		const ids = s.planned.filter((w) => w.status === "planned").flatMap((w) => w.exercises.map((b) => b.exerciseId));

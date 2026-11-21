@@ -4,12 +4,14 @@ import { ProgressRing, Button } from "@/components/ui";
 import { formatClock } from "@/lib/fit/dates";
 import { getExercise } from "@/lib/fit/exercises";
 import { useFit } from "@/lib/fit/store/FitProvider";
+import { useUnits } from "@/lib/fit/store/hooks";
 import { useT } from "@/lib/i18n/I18nProvider";
 import styles from "./Workout.module.scss";
 
 export function RestView({ onAdjust }: { onAdjust: () => void }) {
 	const t = useT();
 	const { state, dispatch } = useFit();
+	const u = useUnits();
 	const a = state.active;
 	if (!a) return null;
 	const block = a.exercises[a.index];
@@ -34,7 +36,7 @@ export function RestView({ onAdjust }: { onAdjust: () => void }) {
 					<span>
 						{t("fit.workout.setOf", { n: upSetIndex + 1, total: upcomingBlock.sets.length })} · {upSet.target}
 						{getExercise(upcomingBlock.exerciseId).timed ? " s" : ` ${t("fit.common.reps")}`}
-						{upSet.targetWeight ? ` · ${upSet.targetWeight} kg` : ""}
+						{upSet.targetWeight ? ` · ${u.fmtLoad(upSet.targetWeight)}` : ""}
 					</span>
 				</div>
 			)}

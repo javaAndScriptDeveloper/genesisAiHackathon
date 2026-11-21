@@ -27,6 +27,8 @@ export function Sheet({ open, onClose, title, closeLabel = "Close", children, fo
 	const ref = useRef<HTMLDivElement>(null);
 	const titleId = useId();
 	const overlayRoot = useOverlayRoot();
+	const panelRef = ref;
+	const dragStart = useRef<number | null>(null);
 
 	useEffect(() => {
 		if (!open) return;
@@ -65,6 +67,33 @@ export function Sheet({ open, onClose, title, closeLabel = "Close", children, fo
 		<div className={clsx(styles.root, styles[variant])}>
 			<div className={styles.backdrop} onClick={modal ? undefined : onClose} aria-hidden />
 			<div ref={ref} role="dialog" aria-modal="true" aria-labelledby={titleId} tabIndex={-1} className={styles.panel}>
+				{variant === "bottom" && !modal && (
+					<div
+						className={styles.grab}
+						aria-hidden
+						onPointerDown={(e) => {
+							dragStart.current = e.clientY;
+							e.currentTarget.setPointerCapture(e.pointerId);
+						}}
+						onPointerMove={(e) => {
+							const panel = panelRef.current;
+							if (dragStart.current === null || !panel) return;
+							panel.style.transition = "none";
+							panel.style.transform = `translateY(${Math.max(0, e.clientY - dragStart.current)}px)`;
+						}}
+						onPointerUp={(e) => {
+							const panel = panelRef.current;
+							const start = dragStart.current;
+							dragStart.current = null;
+							if (!panel || start === null) return;
+							panel.style.transition = "";
+							if (e.clientY - start > 80) onClose();
+							else panel.style.transform = "";
+						}}
+					>
+						<span />
+					</div>
+				)}
 				<div className={styles.header}>
 					<h3 id={titleId} className={styles.title}>
 						{title}

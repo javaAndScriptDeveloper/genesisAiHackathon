@@ -1,4 +1,5 @@
 import { toISO, type ISODate } from "../dates";
+import type { Units } from "../units";
 import { findExercise, getExercise } from "../exercises";
 import { applyAdapt, replaceBlock, replaceUnavailable } from "../adapt";
 import { evaluateAchievements, achievementById, totalXp } from "../gamification";
@@ -30,8 +31,9 @@ import type {
 export type Action =
 	| { type: "hydrate"; state: FitState }
 	| { type: "reset" }
-	| { type: "complete-onboarding"; profile: Profile; demoHistory: boolean; today: ISODate; now: string }
-	| { type: "update-profile"; profile: Profile; today: ISODate }
+	| { type: "complete-onboarding"; profile: Profile; units: Units; demoHistory: boolean; today: ISODate; now: string }
+	| { type: "update-profile"; profile: Profile; units: Units; today: ISODate }
+	| { type: "set-units"; units: Units }
 	| { type: "sync"; now: string }
 	| { type: "start-workout"; plannedId: string; now: string }
 	| { type: "go-to"; index: number }
@@ -214,7 +216,7 @@ export function reducer(state: FitState, action: Action): FitState {
 		case "reset":
 			return emptyState();
 		case "complete-onboarding": {
-			const base: FitState = { ...emptyState(), profile: action.profile, notificationSettings: state.notificationSettings, bodyWeights: [{ date: action.today, kg: action.profile.weightKg }] };
+			const base: FitState = { ...emptyState(), units: action.units, profile: action.profile, notificationSettings: state.notificationSettings, bodyWeights: [{ date: action.today, kg: action.profile.weightKg }] };
 			const devices = { apple: action.profile.wearable === "apple", garmin: action.profile.wearable === "garmin" };
 			if (action.demoHistory) {
 				const seeded = seedHistory(action.profile, action.today);
@@ -231,7 +233,10 @@ export function reducer(state: FitState, action: Action): FitState {
 		}
 		case "update-profile": {
 			const devices = { apple: action.profile.wearable === "apple" ? true : state.devices.apple && action.profile.wearable === "none" ? state.devices.apple : state.devices.apple, garmin: state.devices.garmin };
-			return rebuildUpcoming({ ...state, devices }, action.profile, action.today);
+			return rebuildUpcoming({ ...state, devices, units: action.units }, action.profile, action.today);
+		}
+		case "set-units": {
+			return { ...state, units: action.units };
 		}
 		case "sync":
 			return state.profile ? appendNotifications(state, deriveNotifications(state, new Date(action.now))) : state;

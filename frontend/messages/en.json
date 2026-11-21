@@ -177,6 +177,11 @@
       "age": "Age",
       "gender": "Gender (optional)",
       "height": "Height",
+      "inches": "Inches",
+      "units": "Measurement units",
+      "metric": "Metric (kg, cm)",
+      "imperial": "Imperial (lb, ft)",
+      "years": "years",
       "weight": "Weight",
       "equipment": "Equipment you have",
       "equipmentNote": "Leave everything unchecked for bodyweight-only training.",
@@ -200,8 +205,8 @@
         "nameLong": "Keep it under 30 characters",
         "number": "Enter a number",
         "age": "Age must be 14 to 90",
-        "height": "Height must be 120 to 230 cm",
-        "weight": "Weight must be 30 to 250 kg"
+        "height": "Enter a height between 120 and 230 cm (3′11″ to 7′7″)",
+        "weight": "Enter a weight between 30 and 250 kg (66 to 551 lb)"
       },
       "steps": {
         "about": {
@@ -210,7 +215,7 @@
         },
         "body": {
           "title": "Your body stats",
-          "lead": "Used to pick sensible starting loads. Stays on your device."
+          "lead": "Pick your units first. Used to choose sensible starting loads, and stays on your device."
         },
         "goal": {
           "title": "What's your main goal?",
@@ -244,6 +249,16 @@
     },
     "gate": {
       "cta": "See Premium"
+    },
+    "insight": {
+      "headNone": "Your insights start with your first workout",
+      "headDone": "Week complete. Well done.",
+      "headSome": "On track, {left} more to go this week",
+      "headFresh": "A fresh week, start with your next session",
+      "tipConsistent": "Consistency is your superpower. Keep protecting your rest days.",
+      "tipVolumeDown": "Volume dipped compared with last week. Normal after a lighter week, so build back gradually.",
+      "tipStreak": "{n} planned sessions in a row. Rest days never break it.",
+      "tipDefault": "Small, steady sessions beat rare heroic ones. Aim for your next planned day."
     },
     "progress": {
       "title": "Progress",
@@ -370,6 +385,8 @@
     },
     "settings": {
       "title": "Settings",
+      "units": "Units",
+      "unitsNote": "Changes how weights and height are shown. Your data is stored once and converted on the fly.",
       "language": "Language",
       "languageLabel": "Show the app in",
       "languageNote": "More languages are on the way. Anything not translated yet appears in English.",
@@ -732,6 +749,13 @@
       "openYoutube": "Open on YouTube"
     },
     "guide": {
+      "title": "Exercise guide",
+      "short": {
+        "steps": "How to",
+        "tips": "Tips",
+        "breathing": "Breathing",
+        "mistakes": "Mistakes"
+      },
       "steps": "How to do it",
       "tips": "Technique tips",
       "breathing": "Breathing",
@@ -772,6 +796,9 @@
       "noneTitle": "No workout in progress",
       "noneBody": "Start one from your plan.",
       "toTraining": "Go to training",
+      "tooHardPrompt": "Is it too hard?",
+      "regenEasier": "Make the rest easier",
+      "regenShort": "Trim to 15 minutes",
       "end": "End workout",
       "pause": "Pause workout",
       "resume": "Resume",

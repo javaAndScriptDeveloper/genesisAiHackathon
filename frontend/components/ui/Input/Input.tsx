@@ -6,11 +6,13 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
 	label?: string;
 	hint?: string;
 	error?: string;
+	/** Grey unit shown inside the field on the right (kg, cm, mmHg). */
+	suffix?: string;
 }
 
 // Uncontrolled-friendly (works with react-hook-form `register`). Focus = border-color change only.
 export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
-	{ label, hint, error, id, className, ...rest },
+	{ label, hint, error, suffix, id, className, ...rest },
 	ref,
 ) {
 	const autoId = useId();
@@ -23,14 +25,21 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
 					{label}
 				</label>
 			)}
-			<input
-				ref={ref}
-				id={inputId}
-				className={clsx(styles.input, error && styles.invalid)}
-				aria-invalid={error ? true : undefined}
-				aria-describedby={describedBy}
-				{...rest}
-			/>
+			<div className={styles.control}>
+				<input
+					ref={ref}
+					id={inputId}
+					className={clsx(styles.input, error && styles.invalid, suffix && styles.withSuffix)}
+					aria-invalid={error ? true : undefined}
+					aria-describedby={describedBy}
+					{...rest}
+				/>
+				{suffix && (
+					<span className={styles.suffix} aria-hidden>
+						{suffix}
+					</span>
+				)}
+			</div>
 			{error ? (
 				<p id={`${inputId}-error`} className={styles.error} role="alert">
 					{error}

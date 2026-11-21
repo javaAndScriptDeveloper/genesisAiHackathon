@@ -10,12 +10,14 @@ import { formatClock } from "@/lib/fit/dates";
 import { getExercise } from "@/lib/fit/exercises";
 import { listenOnce, parseSetPhrase, speechSupported } from "@/lib/fit/speech";
 import { useFit } from "@/lib/fit/store/FitProvider";
+import { useUnits } from "@/lib/fit/store/hooks";
 import { useT } from "@/lib/i18n/I18nProvider";
 import styles from "./Workout.module.scss";
 
 export function WorkoutStage({ onAdjust, onOverview }: { onAdjust: () => void; onOverview: () => void }) {
 	const t = useT();
 	const { state, dispatch } = useFit();
+	const u = useUnits();
 	const a = state.active;
 	const block = a?.exercises[a.index];
 	const setIndex = block ? block.sets.findIndex((s) => !s.done) : -1;
@@ -35,19 +37,19 @@ export function WorkoutStage({ onAdjust, onOverview }: { onAdjust: () => void; o
 				<p className={styles.target}>
 					{t("fit.workout.target", { sets: block.sets.length, reps: block.sets[0]?.target ?? 0 })}
 					{timed ? " s" : ""}
-					{loaded && block.sets[0]?.targetWeight ? ` · ${block.sets[0].targetWeight} kg` : ""}
+					{loaded && block.sets[0]?.targetWeight ? ` · ${u.fmtLoad(block.sets[0].targetWeight)}` : ""}
 				</p>
 			</div>
 
 			<ExerciseVideo exercise={exercise} compact />
-			<ExerciseGuide exercise={exercise} defaultOpen={null} />
+			<ExerciseGuide exercise={exercise} variant="sheet" />
 
 			<ol className={styles.sets} aria-label={t("fit.workout.sets")}>
 				{block.sets.map((s, i) => (
 					<li key={i} className={clsx(styles.setRow, s.done && styles.setDone, i === setIndex && styles.setCurrent)}>
 						<span className={styles.setNum}>{s.done ? <Icon icon={Tick02Icon} size={16} strokeWidth={3} /> : i + 1}</span>
 						<span className={styles.setText}>
-							{s.done ? `${s.reps}${timed ? " s" : ` ${t("fit.common.reps")}`}${s.weight ? ` · ${s.weight} kg` : ""}` : `${s.target}${timed ? " s" : ` ${t("fit.common.reps")}`}${s.targetWeight ? ` · ${s.targetWeight} kg` : ""}`}
+							{s.done ? `${s.reps}${timed ? " s" : ` ${t("fit.common.reps")}`}${s.weight ? ` · ${u.fmtLoad(s.weight)}` : ""}` : `${s.target}${timed ? " s" : ` ${t("fit.common.reps")}`}${s.targetWeight ? ` · ${u.fmtLoad(s.targetWeight)}` : ""}`}
 						</span>
 						<span className={styles.setState}>{s.done ? t("fit.workout.logged") : i === setIndex ? t("fit.workout.current") : ""}</span>
 					</li>
@@ -88,8 +90,9 @@ function SetLogger({ target, weight: targetWeight, loaded }: { target: number; w
 	const t = useT();
 	const toast = useToast();
 	const { dispatch } = useFit();
+	const u = useUnits();
 	const [reps, setReps] = useState(target);
-	const [weight, setWeight] = useState(targetWeight ?? 0);
+	const [weight, setWeight] = useState(targetWeight === undefined ? 0 : u.load(targetWeight));
 	const [listening, setListening] = useState(false);
 	const stop = useRef<(() => void) | null>(null);
 	useEffect(() => () => stop.current?.(), []);
@@ -107,7 +110,7 @@ function SetLogger({ target, weight: targetWeight, loaded }: { target: number; w
 					return;
 				}
 				if (parsed.reps !== undefined) setReps(parsed.reps);
-				if (parsed.weight !== undefined) setWeight(parsed.weight);
+				if (parsed.weight !== undefined) setWeight(parsed.unit && parsed.unit !== u.unit ? (parsed.unit === "kg" ? u.load(parsed.weight) : u.load(parsed.weight * 0.45359237)) : parsed.weight);
 				toast.show(t("fit.workout.voiceHeard", { reps: parsed.reps ?? reps, weight: parsed.weight ?? weight }), "success");
 			},
 			onEnd: () => setListening(false),
@@ -124,9 +127,9 @@ function SetLogger({ target, weight: targetWeight, loaded }: { target: number; w
 	return (
 		<div className={styles.logger}>
 			<Stepper label={t("fit.workout.repsLabel")} value={reps} onChange={setReps} min={1} max={100} unit={t("fit.common.reps")} decreaseLabel={t("fit.workout.decrease")} increaseLabel={t("fit.workout.increase")} />
-			{loaded && <Stepper label={t("fit.workout.weightLabel")} value={weight} onChange={setWeight} min={0} max={500} step={2.5} unit="kg" decreaseLabel={t("fit.workout.decrease")} increaseLabel={t("fit.workout.increase")} />}
+			{loaded && <Stepper label={t("fit.workout.weightLabel")} value={weight} onChange={setWeight} min={0} max={u.units === "metric" ? 500 : 1100} step={u.step} unit={u.unit} decreaseLabel={t("fit.workout.decrease")} increaseLabel={t("fit.workout.increase")} />}
 			<div className={styles.loggerRow}>
-				<Button size="lg" iconLeft={Tick02Icon} onClick={() => dispatch({ type: "log-set", reps, weight: loaded ? weight : undefined })} className={styles.complete}>
+				<Button size="lg" iconLeft={Tick02Icon} onClick={() => dispatch({ type: "log-set", reps, weight: loaded ? u.toKg(weight) : undefined })} className={styles.complete}>
 					{t("fit.workout.completeSet")}
 				</Button>
 				<IconButton icon={listening ? MicOff01Icon : Mic02Icon} label={speechSupported() ? (listening ? t("fit.workout.voiceStop") : t("fit.workout.voiceStart")) : t("fit.workout.voiceUnsupported")} variant="secondary" disabled={!speechSupported()} onClick={voice} />

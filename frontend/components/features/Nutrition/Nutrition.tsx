@@ -38,7 +38,7 @@ export function Nutrition() {
 			<div className={kit.content}>
 				<Notice>{t("fit.nutrition.disclaimer")}</Notice>
 				<div className={kit.cols}>
-					<Stat label={t("fit.nutrition.calories")} value={target.kcal.toLocaleString("en-US")} hint="kcal" icon={<Icon icon={FireIcon} size={14} />} />
+					<Stat label={t("fit.nutrition.calories")} value={target.kcal} hint="kcal" icon={<Icon icon={FireIcon} size={14} />} />
 					<Stat label={t("fit.nutrition.protein")} value={target.protein} hint="g" />
 					<Stat label={t("fit.nutrition.carbs")} value={target.carbs} hint="g" />
 					<Stat label={t("fit.nutrition.fat")} value={target.fat} hint="g" />

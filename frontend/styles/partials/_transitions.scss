@@ -11,10 +11,16 @@
 	pointer-events: none;
 }
 
-// Clip the moving page to its own box so it never slides over the device bezel.
+// The animated element is the screen's content area, so clipping its group keeps the motion inside the phone.
 ::view-transition-group(.page-forward),
 ::view-transition-group(.page-back),
 ::view-transition-group(.page-fade) {
+	overflow: clip;
+}
+
+::view-transition-image-pair(.page-forward),
+::view-transition-image-pair(.page-back),
+::view-transition-image-pair(.page-fade) {
 	overflow: clip;
 }
 

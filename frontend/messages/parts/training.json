@@ -3,7 +3,7 @@
     "muscle": { "all": "All", "chest": "Chest", "back": "Back", "legs": "Legs", "glutes": "Glutes", "shoulders": "Shoulders", "arms": "Arms", "core": "Core", "cardio": "Cardio", "mobility": "Mobility" },
     "level": { "1": "Easy", "2": "Moderate", "3": "Hard" },
     "video": { "none": "No demo video mapped yet for this exercise.", "search": "Search the Leap Fitness channel", "title": "{name} demonstration", "play": "Play demonstration of {name}", "playLabel": "Play demo", "credit": "Video: Leap Fitness on YouTube.", "openYoutube": "Open on YouTube" },
-    "guide": { "steps": "How to do it", "tips": "Technique tips", "breathing": "Breathing", "mistakes": "Common mistakes" },
+    "guide": { "title": "Exercise guide", "short": { "steps": "How to", "tips": "Tips", "breathing": "Breathing", "mistakes": "Mistakes" }, "steps": "How to do it", "tips": "Technique tips", "breathing": "Breathing", "mistakes": "Common mistakes" },
     "exercise": { "title": "Exercise", "notFound": "Exercise not found", "backToLibrary": "Back to library", "noEquipment": "No equipment" },
     "training": {
       "title": "Training", "subtitle": "Your plan and exercise library", "plan": "Plan", "library": "Library",

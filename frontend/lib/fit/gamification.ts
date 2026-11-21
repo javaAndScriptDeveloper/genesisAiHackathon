@@ -1,5 +1,6 @@
 import { addDays, daysBetween, mondayOf, weekKey, type ISODate } from "./dates";
 import { computeStreak, levelInfo, weekStats } from "./stats";
+import { massUnit, massValue, type Units } from "./units";
 import type { FitState, PlannedWorkout, SessionLog } from "./types";
 
 export type BadgeIcon = "flame" | "medal" | "target" | "heart" | "drop" | "bolt" | "calendar" | "shield";
@@ -76,7 +77,7 @@ export const ACHIEVEMENTS: (AchievementDef & { check: Check })[] = [
 		icon: "drop",
 		check: (c) => Object.values(c.water).filter((ml) => ml >= c.waterGoalMl).length >= 3,
 	},
-	{ id: "iron-month", title: "Volume Club", description: "Lift 25,000 kg in total.", xp: 120, icon: "bolt", check: (c) => c.history.reduce((n, l) => n + l.volumeKg, 0) >= 25_000 },
+	{ id: "iron-month", title: "Volume Club", description: "Lift a combined 25,000 kg (55,000 lb).", xp: 120, icon: "bolt", check: (c) => c.history.reduce((n, l) => n + l.volumeKg, 0) >= 25_000 },
 ];
 
 export function evaluateAchievements(state: FitState, today: ISODate): string[] {
@@ -109,7 +110,8 @@ export interface Challenge {
 	weekKey: string;
 }
 
-export function weeklyChallenge(state: Pick<FitState, "history" | "planned" | "water" | "waterGoalMl">, today: ISODate): Challenge {
+export function weeklyChallenge(state: Pick<FitState, "history" | "planned" | "water" | "waterGoalMl"> & { units?: Units }, today: ISODate): Challenge {
+	const units: Units = state.units ?? "metric";
 	const key = weekKey(today);
 	const week = Number(key.split("-W")[1] ?? 0);
 	const start = mondayOf(today);
@@ -119,7 +121,10 @@ export function weeklyChallenge(state: Pick<FitState, "history" | "planned" | "w
 	if (variant === 0)
 		return make({ id: "planned", title: "Show up for the plan", description: "Finish every session planned this week. Rest days are part of it.", progress: stats.done, target: Math.max(1, stats.planned), unit: "sessions" });
 	if (variant === 1)
-		return make({ id: "volume", title: "Move 4,000 kg", description: "Total weight lifted across this week's sessions.", progress: Math.min(4000, stats.volume), target: 4000, unit: "kg" });
+	{
+		const target = units === "metric" ? 4000 : 10_000;
+		return make({ id: "volume", title: `Move ${target.toLocaleString("en-US")} ${massUnit(units)}`, description: "Total weight lifted across this week's sessions.", progress: Math.min(target, massValue(stats.volume, units)), target, unit: massUnit(units) });
+	}
 	const days = Array.from({ length: 7 }, (_, i) => addDays(start, i)).filter((d) => (state.water[d] ?? 0) >= state.waterGoalMl).length;
 	return make({ id: "water", title: "Hydration streak", description: "Reach your daily water goal on 4 days this week.", progress: days, target: 4, unit: "days" });
 }

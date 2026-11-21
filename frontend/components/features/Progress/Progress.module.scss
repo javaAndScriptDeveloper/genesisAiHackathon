@@ -378,3 +378,18 @@
 .log[open] .chevron {
 	transform: rotate(180deg);
 }
+
+.inline {
+	display: flex;
+	align-items: flex-start;
+	gap: var(--space-2);
+
+	> button {
+		flex: none;
+		margin-top: 2.8rem; // aligns with the field, below its label
+	}
+}
+
+.grow {
+	flex: 1;
+}

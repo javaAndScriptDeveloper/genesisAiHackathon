@@ -7,7 +7,7 @@ import { ScreenHeader } from "@/components/features/ScreenHeader/ScreenHeader";
 import { Stat } from "@/components/features/Stat/Stat";
 import { WeekStrip } from "@/components/features/WeekStrip/WeekStrip";
 import { WorkoutCard } from "@/components/features/WorkoutCard/WorkoutCard";
-import { Button, Card, EmptyState, Icon, IconButton, ProgressBar, ProgressRing, useToast } from "@/components/ui";
+import { AnimatedNumber, Button, Card, EmptyState, Icon, IconButton, ProgressBar, ProgressRing, useToast } from "@/components/ui";
 import { daysBetween, formatDay } from "@/lib/fit/dates";
 import { motivationFor } from "@/lib/fit/gamification";
 import { unreadCount } from "@/lib/fit/notifications";
@@ -129,7 +129,7 @@ export function Today() {
 
 				<section aria-label={t("fit.today.weekGoal")} className={styles.goal}>
 					<ProgressRing value={weekPct} label={t("fit.today.weekGoal")} size={92}>
-						<strong className={styles.ringNum}>{stats.week.done}/{stats.week.planned}</strong>
+						<strong className={styles.ringNum}><AnimatedNumber value={stats.week.done} />/<AnimatedNumber value={stats.week.planned} /></strong>
 						<span className={styles.ringLabel}>{t("fit.today.sessions")}</span>
 					</ProgressRing>
 					<div className={styles.goalText}>

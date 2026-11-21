@@ -3,7 +3,7 @@
     "safety": { "title": "Stop and rest", "rested": "I've rested and I feel normal again", "resume": "Resume workout" },
     "workout": {
       "noneTitle": "No workout in progress", "noneBody": "Start one from your plan.", "toTraining": "Go to training",
-      "end": "End workout", "pause": "Pause workout", "resume": "Resume", "paused": "Workout paused", "pausedBody": "Take your time. The timer is stopped.",
+      "tooHardPrompt": "Is it too hard?", "regenEasier": "Make the rest easier", "regenShort": "Trim to 15 minutes", "end": "End workout", "pause": "Pause workout", "resume": "Resume", "paused": "Workout paused", "pausedBody": "Take your time. The timer is stopped.",
       "left": "~{n} min left", "progress": "{done} of {total} exercises done",
       "exerciseOf": "Exercise {n} of {total}", "target": "{sets} sets × {reps}", "sets": "Sets", "logged": "Logged", "current": "Now",
       "skippedNote": "You skipped this exercise.", "blockDone": "All sets done. Move to the next exercise.", "skippedLabel": "Skipped", "skippedToast": "Exercise skipped",
