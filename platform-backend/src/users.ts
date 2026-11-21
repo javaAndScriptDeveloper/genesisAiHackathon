@@ -56,6 +56,18 @@ const snapshotsSchema = {
   },
 };
 
+const idParams = { type: "object", properties: { id: { type: "integer", minimum: 1 } } };
+const createTrainingSchema = {
+  params: idParams,
+  body: {
+    type: "object",
+    required: ["trainerSlug", "planData"],
+    additionalProperties: false,
+    properties: { trainerSlug: nullable("string"), planData: { type: "object" } },
+  },
+};
+const latestTrainingSchema = { params: idParams };
+
 // Pure calendar arithmetic on YYYY-MM-DD (UTC, so no DST/timezone drift).
 function shiftDate(date: string, days: number): string {
   const d = new Date(`${date}T00:00:00Z`);
@@ -165,4 +177,39 @@ export function registerUserRoutes(app: FastifyInstance, db: Knex): void {
       return { snapshots: result.rows.map((r: { data: DailyStats }) => r.data) };
     },
   );
+
+  app.post<{ Params: { id: number }; Body: { trainerSlug: string | null; planData: object } }>(
+    "/api/users/:id/trainings",
+    { schema: createTrainingSchema },
+    async (req, reply) => {
+      const user = await db("users").where({ id: req.params.id }).first("id");
+      if (!user) return reply.code(404).send({ error: "user not found" });
+      const { trainerSlug, planData } = req.body;
+      const trainer = trainerSlug === null ? undefined : await db("trainers").where({ slug: trainerSlug }).first("id");
+      const [row] = await db("user_trainings")
+        .insert({ userId: req.params.id, trainerId: trainer?.id ?? null, planData: JSON.stringify(planData) })
+        .returning("id");
+      return reply.code(201).send({ id: Number(row.id) });
+    },
+  );
+
+  app.get<{ Params: { id: number } }>("/api/users/:id/trainings/latest", { schema: latestTrainingSchema }, async (req) => {
+    const row = await db("user_trainings as ut")
+      .leftJoin("trainers as t", "t.id", "ut.trainerId")
+      .where("ut.userId", req.params.id)
+      .orderBy([
+        { column: "ut.createdAt", order: "desc" },
+        { column: "ut.id", order: "desc" },
+      ])
+      .first("ut.id", "ut.planData", "ut.createdAt", "t.slug as trainerSlug");
+    if (!row) return { training: null };
+    return {
+      training: {
+        id: Number(row.id),
+        trainerSlug: row.trainerSlug ?? null,
+        planData: row.planData,
+        createdAt: new Date(row.createdAt).toISOString(),
+      },
+    };
+  });
 }

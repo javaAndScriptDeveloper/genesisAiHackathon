@@ -150,4 +150,51 @@ describe("users and devices endpoints", () => {
       expect(res.statusCode).toBe(400);
     });
   });
+
+  describe("training versions", () => {
+    let userId: number;
+    const latest = (id: number) => buildApp(db).inject({ method: "GET", url: `/api/users/${id}/trainings/latest` });
+    const save = (id: number, payload: object) =>
+      buildApp(db).inject({ method: "POST", url: `/api/users/${id}/trainings`, payload });
+
+    beforeAll(async () => {
+      userId = (await create()).json().id;
+    });
+
+    it("returns null when the user has no versions", async () => {
+      const res = await latest(userId);
+      expect(res.statusCode).toBe(200);
+      expect(res.json()).toEqual({ training: null });
+    });
+
+    it("saves versions and returns the latest one with the trainer slug", async () => {
+      const first = await save(userId, { trainerSlug: "hanna", planData: { kind: "plan" } });
+      expect(first.statusCode).toBe(201);
+      expect(typeof first.json().id).toBe("number");
+      const second = await save(userId, { trainerSlug: "alex", planData: { kind: "daily-adjust" } });
+      expect(second.statusCode).toBe(201);
+      const res = await latest(userId);
+      const { training } = res.json();
+      expect(training.id).toBe(second.json().id);
+      expect(training.trainerSlug).toBe("alex");
+      expect(training.planData.kind).toBe("daily-adjust");
+      expect(typeof training.createdAt).toBe("string");
+    });
+
+    it("stores null trainer for unknown or null slug", async () => {
+      const other = (await create()).json().id;
+      const res = await save(other, { trainerSlug: "nobody", planData: { kind: "plan" } });
+      expect(res.statusCode).toBe(201);
+      expect((await latest(other)).json().training.trainerSlug).toBeNull();
+      expect((await save(other, { trainerSlug: null, planData: {} })).statusCode).toBe(201);
+    });
+
+    it("returns 404 for an unknown user", async () => {
+      expect((await save(999999, { trainerSlug: null, planData: {} })).statusCode).toBe(404);
+    });
+
+    it("rejects a body without planData", async () => {
+      expect((await save(userId, { trainerSlug: "alex" })).statusCode).toBe(400);
+    });
+  });
 });
