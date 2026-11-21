@@ -10,7 +10,7 @@ import {
 	unseen,
 	visibleHistoryFrom,
 } from "@/lib/progress";
-import type { Badge, History, ProgressContext, ProgressEvent, ProgressSnapshot } from "@/lib/progress";
+import type { Badge, BadgeId, History, ProgressContext, ProgressEvent, ProgressSnapshot } from "@/lib/progress";
 
 const today = "2026-11-21"; // Saturday
 const empty: History = { today, exercises: [], plan: [], sessions: [], body: [], checkIns: [], device: null };
@@ -24,10 +24,11 @@ const hasNaN = (v: unknown): boolean => {
 	return false;
 };
 
-const withBadges = (s: ProgressSnapshot, ids: string[], level: number): ProgressSnapshot => ({
+const unlockedBadge = (id: BadgeId): Badge => ({ id, unlocked: true, unlockedOn: today, current: 1, target: 1, remaining: 0 });
+const withBadges = (s: ProgressSnapshot, ids: BadgeId[], level: number): ProgressSnapshot => ({
 	...s,
 	level: { ...s.level, level },
-	badges: ids.map((id) => ({ id, unlocked: true, unlockedOn: today, current: 1, target: 1, remaining: 0 }) as Badge),
+	badges: ids.map(unlockedBadge),
 });
 
 describe("snapshot", () => {
@@ -35,11 +36,15 @@ describe("snapshot", () => {
 	it("empty history has no NaN", () => {
 		expect(hasNaN(before)).toBe(false);
 		expect(before.week.goal).toBe(3);
-		expect(before.advice).toBeDefined();
+		expect(before.advice).toEqual({ id: "start", vars: {} });
 	});
 	it("clamps weekly goal", () => {
 		expect(progressSnapshot(empty, { weeklyGoal: 9, pauses: [] }).week.goal).toBe(5);
 		expect(progressSnapshot(empty, { weeklyGoal: 0, pauses: [] }).week.goal).toBe(2);
+	});
+	it("non-finite weekly goal falls back to 3", () => {
+		expect(progressSnapshot(empty, { weeklyGoal: NaN, pauses: [] }).week.goal).toBe(3);
+		expect(progressSnapshot(empty, { weeklyGoal: Infinity, pauses: [] }).week.goal).toBe(3);
 	});
 	it("ENGINE_VERSION", () => expect(ENGINE_VERSION).toBe("2.0.0"));
 });
@@ -84,7 +89,14 @@ describe("events", () => {
 describe("hash and premium", () => {
 	const s = progressSnapshot(empty, ctx);
 	it("stable across key order, sensitive to numbers", () => {
-		const reordered = JSON.parse(JSON.stringify(Object.fromEntries(Object.entries(s).reverse())));
+		const reorder = (v: unknown): unknown =>
+			Array.isArray(v)
+				? v.map(reorder)
+				: v && typeof v === "object"
+					? Object.fromEntries(Object.entries(v).reverse().map(([k, x]) => [k, reorder(x)]))
+					: v;
+		const reordered: ProgressSnapshot = { ...s, ...Object.fromEntries(Object.entries(s).reverse().map(([k, x]) => [k, reorder(x)])) };
+		expect(Object.keys(reordered.streak)).toEqual(Object.keys(s.streak).reverse());
 		expect(snapshotHash(reordered)).toBe(snapshotHash(s));
 		expect(snapshotHash(s)).toMatch(/^[0-9a-f]{8}$/);
 		expect(snapshotHash({ ...s, streak: { current: 1, best: 0 } })).not.toBe(snapshotHash(s));

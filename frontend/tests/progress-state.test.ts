@@ -4,6 +4,7 @@ import { getExercise } from "@/lib/fit/exercises";
 import { ARCHIVE_QUEUE_CAP, reducer } from "@/lib/fit/store/reducer";
 import type { FitState, Profile } from "@/lib/fit/types";
 import { historyFromFit } from "@/lib/progress/fromFit";
+import { progressSnapshot } from "@/lib/progress/engine";
 import { personalRecords } from "@/lib/progress/records";
 import type { ArchiveItem, ProgressEvent } from "@/lib/progress/types";
 
@@ -14,7 +15,8 @@ const profile: Profile = {
 const today = "2026-11-19";
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 const ev = (id: string, kind: ProgressEvent["kind"] = "badge", seenAt: string | null = null): ProgressEvent => ({ id, kind, refId: id, createdAt: "2026-11-19T10:00:00Z", seenAt });
-const item = (id: string, period: ArchiveItem["period"]): ArchiveItem => ({ id, period, weekStart: null, takenAt: "2026-11-19T10:00:00Z", engineVersion: "1", payload: {} as ArchiveItem["payload"], payloadHash: id });
+const emptySnapshot = progressSnapshot({ today, exercises: [], plan: [], sessions: [], body: [], checkIns: [], device: null }, { weeklyGoal: 3, pauses: [] });
+const item = (id: string, period: ArchiveItem["period"]): ArchiveItem => ({ id, period, weekStart: null, takenAt: "2026-11-19T10:00:00Z", engineVersion: "1", payload: emptySnapshot, payloadHash: id });
 
 describe("progress state", () => {
 	it("hydrate of old JSON adds defaults", () => {
