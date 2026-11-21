@@ -16,6 +16,7 @@ interface SheetProps {
 	children: ReactNode;
 	footer?: ReactNode;
 	panelClassName?: string;
+	compactHeader?: boolean;
 	/** `center` renders a compact dialog (confirmations); `bottom` a sheet that slides up; `full` covers the whole screen (detail views). */
 	variant?: "bottom" | "center" | "full";
 	/** Hides the close button and blocks backdrop/Escape dismissal (safety stops, required choices). */
@@ -24,7 +25,7 @@ interface SheetProps {
 
 // In-frame overlay. A native <dialog> would escape the phone frame on desktop, so sheets are positioned
 // against the nearest positioned ancestor (the device screen). Escape closes, focus moves inside, Tab is trapped.
-export function Sheet({ open, onClose, title, closeLabel = "Close", children, footer, panelClassName, variant = "bottom", modal = false }: SheetProps) {
+export function Sheet({ open, onClose, title, closeLabel = "Close", children, footer, panelClassName, compactHeader = false, variant = "bottom", modal = false }: SheetProps) {
 	const ref = useRef<HTMLDivElement>(null);
 	const titleId = useId();
 	const overlayRoot = useOverlayRoot();
@@ -101,7 +102,7 @@ export function Sheet({ open, onClose, title, closeLabel = "Close", children, fo
 						<span />
 					</div>
 				)}
-				<div className={styles.header}>
+				<div className={clsx(styles.header, compactHeader && styles.compactHeader)}>
 					<h3 id={titleId} className={styles.title}>
 						{title}
 					</h3>

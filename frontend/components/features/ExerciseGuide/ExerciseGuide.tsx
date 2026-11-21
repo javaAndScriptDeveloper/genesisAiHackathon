@@ -1,6 +1,6 @@
 "use client";
 
-import { Alert02Icon, ArrowDown01Icon, Idea01Icon, InformationCircleIcon, LeftToRightListNumberIcon, WindIcon } from "@hugeicons/core-free-icons";
+import { Alert02Icon, ArrowDown01Icon, Idea01Icon, HelpCircleIcon, LeftToRightListNumberIcon, WindIcon } from "@hugeicons/core-free-icons";
 import clsx from "clsx";
 import { useState } from "react";
 import { Icon, IconButton, SegmentedControl, Sheet, type IconDefinition } from "@/components/ui";
@@ -29,16 +29,15 @@ export function ExerciseGuide({ exercise, variant = "inline", defaultOpen = "ste
 		return (
 			<>
 				<IconButton
-					icon={InformationCircleIcon}
+					icon={HelpCircleIcon}
 					label={t("fit.guide.title")}
-					variant="secondary"
 					className={styles.trigger}
 					onClick={() => {
 						setSection("steps");
 						setOpen("steps");
 					}}
 				/>
-				<Sheet open={open !== null} onClose={() => setOpen(null)} title={exercise.name} closeLabel={t("common.close")}>
+				<Sheet compactHeader open={open !== null} onClose={() => setOpen(null)} title={exercise.name} closeLabel={t("common.close")}>
 					<SegmentedControl label={t("fit.guide.title")} value={section} onChange={setSection} options={IDS.map((id) => ({ id, label: t(`fit.guide.short.${id}`) }))} />
 					<div className={styles.sheetIntro} data-section={section}>
 						<span className={styles.introIcon}>

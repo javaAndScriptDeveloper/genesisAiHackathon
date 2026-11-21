@@ -303,6 +303,9 @@
       }
     },
     "awards": {
+      "sharePreview": "Preview to share",
+      "copySummary": "Copy summary",
+      "copyManually": "The text is selected. Copy it using your device’s menu.",
       "level": "Level",
       "overall": "Overall",
       "workouts": "Workouts",

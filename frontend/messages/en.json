@@ -688,6 +688,9 @@
       }
     },
     "awards": {
+      "sharePreview": "Preview to share",
+      "copySummary": "Copy summary",
+      "copyManually": "The text is selected. Copy it using your device’s menu.",
       "level": "Level",
       "overall": "Overall",
       "workouts": "Workouts",
@@ -1260,7 +1263,11 @@
       "challengeDone": "Complete",
       "water": "Water",
       "waterAdded": "Added 250 ml",
-      "nutritionLink": "Nutrition and water plan"
+      "nutritionLink": "Nutrition and water plan",
+      "waterRemove": "Remove {ml} ml",
+      "waterLeft": "{ml} ml to go",
+      "waterDone": "Goal reached. Nice work!",
+      "waterLimit": "Daily limit reached ({max} ml). More at once isn't safe."
     },
     "muscle": {
       "all": "All",
@@ -1403,13 +1410,6 @@
       "decrease": "Decrease",
       "increase": "Increase",
       "completeSet": "Complete set",
-      "voiceStart": "Dictate reps and weight",
-      "voiceStop": "Stop listening",
-      "voiceHint": "Tap the mic and say, for example, \"10 reps at 20 kilos\".",
-      "voiceUnsupported": "Voice input isn't supported in this browser. Use the steppers.",
-      "voiceHeard": "Heard {reps} reps at {weight} kg. Tap Complete set to log.",
-      "voiceUnclear": "Couldn't read a number from \"{text}\".",
-      "voiceError": "Voice input failed. Try again or use the steppers.",
       "prev": "Back",
       "all": "All",
       "nextEx": "Next",

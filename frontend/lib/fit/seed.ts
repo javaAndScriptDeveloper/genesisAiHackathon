@@ -7,6 +7,9 @@ import { applyProgression, detectPrs, sessionXp, volumeOf } from "./stats";
 import type { ExerciseBlock, FitState, LoggedExercise, PlannedWorkout, Profile, SessionLog } from "./types";
 
 export const WATER_GOAL_ML = 2500;
+/** Hard daily ceiling for logged water: drinking far beyond this at once is not safe, so the UI stops there. */
+export const WATER_MAX_ML = 5000;
+export const WATER_STEP_ML = 250;
 
 /** `crypto.randomUUID` only exists in secure contexts; the app is also served over plain HTTP. */
 export function newProgressToken(): string {

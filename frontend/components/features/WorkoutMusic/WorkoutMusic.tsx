@@ -139,7 +139,8 @@ export function WorkoutMusic({ open, onClose }: { open: boolean; onClose: () => 
 					</div>
 
 					<label className={styles.volume}>
-						<span className={styles.srOnly}>{t("fit.music.volume")}</span>
+						<span className={styles.volumeLabel}><Icon icon={VolumeHighIcon} size={16} />{t("fit.music.volume")}</span>
+						<span className={styles.volumeValue} aria-hidden>{volume}%</span>
 						<input
 							type="range"
 							min={0}

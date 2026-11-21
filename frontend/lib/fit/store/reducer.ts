@@ -6,7 +6,7 @@ import { applyAdapt, replaceBlock, replaceUnavailable } from "../adapt";
 import { evaluateAchievements, achievementById, totalXp } from "../gamification";
 import { deriveNotifications } from "../notifications";
 import { buildAdHocWorkout, estimateMinutes, generatePlan, nextUpcoming } from "../plan";
-import { defaultWeeklyGoal, emptyState, newProgressToken, seedHistory } from "../seed";
+import { defaultWeeklyGoal, emptyState, newProgressToken, seedHistory, WATER_MAX_ML } from "../seed";
 import type { ArchiveItem, ProgressEvent } from "../../progress/types";
 import { applyProgression, detectPrs, mean, sessionXp, volumeOf, weekStats } from "../stats";
 import type {
@@ -440,7 +440,7 @@ export function reducer(state: FitState, action: Action): FitState {
 			return { ...state, notificationSettings: action.settings };
 		case "water": {
 			const current = state.water[action.date] ?? 0;
-			const next = { ...state, water: { ...state.water, [action.date]: Math.max(0, current + action.delta) } };
+			const next = { ...state, water: { ...state.water, [action.date]: Math.max(0, Math.min(Math.max(current, WATER_MAX_ML), current + action.delta)) } };
 			return unlockNew(next, action.date, new Date().toISOString());
 		}
 		case "water-goal":

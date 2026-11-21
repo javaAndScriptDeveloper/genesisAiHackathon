@@ -6,6 +6,7 @@ import styles from "./Stepper.module.scss";
 
 interface StepperProps {
 	value: number;
+	compact?: boolean;
 	onChange: (value: number) => void;
 	label: string;
 	unit?: string;
@@ -17,10 +18,10 @@ interface StepperProps {
 }
 
 // Large +/- control for gloved or sweaty hands: workout set logging and onboarding numbers.
-export function Stepper({ value, onChange, label, unit, step = 1, min = 0, max = 999, decreaseLabel = "Decrease", increaseLabel = "Increase" }: StepperProps) {
+export function Stepper({ value, compact = false, onChange, label, unit, step = 1, min = 0, max = 999, decreaseLabel = "Decrease", increaseLabel = "Increase" }: StepperProps) {
 	const clamp = (n: number) => Math.min(max, Math.max(min, Math.round(n * 100) / 100));
 	return (
-		<div className={styles.root} role="group" aria-label={label}>
+		<div className={styles.root} data-compact={compact || undefined} role="group" aria-label={label}>
 			<button type="button" className={styles.button} aria-label={`${decreaseLabel} ${label}`} onClick={() => onChange(clamp(value - step))} disabled={value <= min}>
 				<Icon icon={MinusSignIcon} size={20} />
 			</button>

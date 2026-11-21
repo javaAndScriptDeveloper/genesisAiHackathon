@@ -1,6 +1,6 @@
 "use client";
 
-import { Add01Icon, Alert02Icon, Calendar03Icon, DropletIcon, FireIcon, Medal01Icon, Target01Icon, Notification03Icon, PlayIcon, UserCircleIcon } from "@hugeicons/core-free-icons";
+import { Add01Icon, Alert02Icon, CheckmarkCircle01Icon, MinusSignIcon, Calendar03Icon, DropletIcon, FireIcon, Medal01Icon, Target01Icon, Notification03Icon, PlayIcon, UserCircleIcon } from "@hugeicons/core-free-icons";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ScreenHeader } from "@/components/features/ScreenHeader/ScreenHeader";
@@ -11,6 +11,7 @@ import { AnimatedNumber, Button, Card, EmptyState, Icon, IconButton, Picture, Pr
 import { kcalFor } from "@/lib/fit/calories";
 import { daysBetween, formatDay } from "@/lib/fit/dates";
 import { motivationFor } from "@/lib/fit/gamification";
+import { WATER_MAX_ML, WATER_STEP_ML } from "@/lib/fit/seed";
 import { unreadCount } from "@/lib/fit/notifications";
 import { useFit } from "@/lib/fit/store/FitProvider";
 import { useActionNavigate, useFitStats, useStartWorkout } from "@/lib/fit/store/hooks";
@@ -158,15 +159,29 @@ export function Today() {
 				</Card>
 
 				<Card className={styles.water}>
-					<div className={styles.waterText}>
-						<Icon icon={DropletIcon} size={22} />
-						<h3>{t("fit.today.water")}</h3>
-						<p>{water} / {state.waterGoalMl} ml</p>
+					<div className={styles.waterTop}>
+						<span className={styles.waterIcon}>
+							<Icon icon={DropletIcon} size={22} />
+						</span>
+						<div className={styles.waterText}>
+							<h3>{t("fit.today.water")}</h3>
+							<p><strong>{water}</strong> / {state.waterGoalMl} ml</p>
+						</div>
+						<div className={styles.waterActions}>
+							<IconButton icon={MinusSignIcon} variant="secondary" label={t("fit.today.waterRemove", { ml: WATER_STEP_ML })} disabled={water <= 0} onClick={() => dispatch({ type: "water", date: today, delta: -WATER_STEP_ML })} />
+							<Button size="sm" iconLeft={Add01Icon} disabled={water >= WATER_MAX_ML} onClick={() => dispatch({ type: "water", date: today, delta: WATER_STEP_ML })}>{WATER_STEP_ML} ml</Button>
+						</div>
 					</div>
-					<Button size="sm" variant="secondary" iconLeft={Add01Icon} onClick={() => {
-						dispatch({ type: "water", date: today, delta: 250 });
-						toast.show(t("fit.today.waterAdded"), "success");
-					}}>250 ml</Button>
+					<ProgressBar value={Math.min(100, (water / state.waterGoalMl) * 100)} label={t("fit.today.water")} tone={water >= state.waterGoalMl ? "success" : "accent"} />
+					<p className={styles.waterStatus} data-state={water >= WATER_MAX_ML ? "limit" : water >= state.waterGoalMl ? "done" : "going"} role="status">
+						{water >= WATER_MAX_ML ? (
+							<><Icon icon={Alert02Icon} size={16} />{t("fit.today.waterLimit", { max: WATER_MAX_ML })}</>
+						) : water >= state.waterGoalMl ? (
+							<><Icon icon={CheckmarkCircle01Icon} size={16} />{t("fit.today.waterDone")}</>
+						) : (
+							t("fit.today.waterLeft", { ml: state.waterGoalMl - water })
+						)}
+					</p>
 				</Card>
 
 				{next && !todays && !active && <WorkoutCard workout={next} />}

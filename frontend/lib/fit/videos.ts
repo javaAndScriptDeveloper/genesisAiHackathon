@@ -1,8 +1,7 @@
 import { z } from "zod";
 import type { Exercise, Muscle } from "./types";
 
-// Exercise id -> YouTube video id. IDs below were taken from the channel's public video list and each one
-// was confirmed embeddable via YouTube oEmbed. Exercises without a match use a labeled related clip.
+// Exercise id -> YouTube video id. Demo availability was checked through YouTube oEmbed. Exercises without a match use a labeled related clip.
 // Override or extend at deploy time with NEXT_PUBLIC_EXERCISE_VIDEO_MAP='{"goblet-squat":"<videoId>"}'.
 export const DEFAULT_VIDEO_MAP: Record<string, string> = {
 	"push-up": "TGQi4VsPIhU",
@@ -17,6 +16,7 @@ export const DEFAULT_VIDEO_MAP: Record<string, string> = {
 	"happy-baby": "z-BjiGQZe4s",
 	"single-leg-hops": "kjjsk2M6DVw",
 	"step-jack": "p75NmUtH9so",
+	"goblet-squat": "dxON7BUO0Wk",
 };
 
 const overrideSchema = z.record(z.string(), z.string().regex(/^[\w-]{11}$/));
