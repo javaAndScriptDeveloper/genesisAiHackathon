@@ -97,6 +97,7 @@
 | `platform-backend/test/progress.test.ts` (new) | схема, ідемпотентність, ізоляція пристроїв |
 | `frontend/app/(app)/progress/{calendar,records,weight,achievements}/page.tsx` (new), `week/[week]` (mod) | маршрути |
 | `frontend/components/features/Progress*` (нові/змінені папки за задачами) | екрани й віджети |
+| `frontend/components/features/BadgeIcon`, `NextAchievementCard` (new); `Today`, `Profile`, `Workout/WorkoutSummary` (mod) | досягнення на кожному кроці (Task 18b) |
 | `frontend/components/features/BottomNav`, `Celebration`, `Workout` (mod) | крапка «нове», групове вікно, банер рекорду |
 | `docs/product/progress-rules.md` (new), `frontend/docs/agent/fitness-app.md` (mod) | формули; правила модуля |
 
@@ -153,8 +154,13 @@ export const LEVEL_NAMES: string[]; // ключі копірайту: fit.progre
 export type BadgeId = "first-workout" | "perfect-week" | "streak-2" | "streak-4" | "streak-6" | "streak-10" | "streak-20" | "first-pr" | "prs-5" | "workouts-20" | "workouts-50" | "workouts-100";
 export interface Badge { id: BadgeId; unlocked: boolean; unlockedOn: IsoDate | null; current: number; target: number; remaining: number }
 export function badges(h: History, ctx: ProgressContext): Badge[];
+export function nextBadges(list: Badge[], n: number): Badge[]; // не отримані, за current/target спадно; при рівності — менший remaining
+export function recentBadges(list: Badge[], n: number): Badge[]; // отримані, новіші першими
+export interface XpBreakdown { workout: number; prs: number; week: number; rest: number; total: number }
+export function xpForSession(h: History, ctx: ProgressContext, sessionId: string): XpBreakdown;
+export function badgeProgressDelta(before: Badge[], after: Badge[]): { id: BadgeId; from: number; to: number; target: number; unlocked: boolean }[]; // для підсумку тренування
 ```
-- [ ] **Step 1: Тести:** тренування з ratio 0.8 → 80 XP; ratio 0.6 → 0; 4 рекорди в одному тренуванні → +75; зарахований тиждень +50; зарахований день відпочинку +5, незарахований 0; `levelFor(0).level === 1`, `levelFor(499).level === 1`, `levelFor(500).level === 2`, `levelFor(1250).level === 3`; рівень 7→8 потребує 2000; `perfect-week` — тиждень з усіма запланованими тренуваннями якісними; `unlockedOn` — дата, коли умову виконано вперше.
+- [ ] **Step 1: Тести:** тренування з ratio 0.8 → 80 XP; ratio 0.6 → 0; 4 рекорди в одному тренуванні → +75; зарахований тиждень +50; зарахований день відпочинку +5, незарахований 0; `levelFor(0).level === 1`, `levelFor(499).level === 1`, `levelFor(500).level === 2`, `levelFor(1250).level === 3`; рівень 7→8 потребує 2000; `perfect-week` — тиждень з усіма запланованими тренуваннями якісними; `unlockedOn` — дата, коли умову виконано вперше; `nextBadges` у S0 починається з `first-workout` (remaining 1); `xpForSession` для тренування з ratio 0.8 і 1 рекордом → `{workout: 80, prs: 25, total: 105}`; `badgeProgressDelta` після 2-го тренування тижня показує `perfect-week` 1→2 з 3.
 - [ ] **Step 2–4:** RED → GREEN.
 - [ ] **Step 5:** commit `feat(progress): XP ledger, levels and badges`.
 
@@ -356,7 +362,7 @@ export function useProgressSync(): void; // при старті: локальн�
 
 **Files:** Modify `components/features/Progress/Progress.tsx` (+ нові дочірні компоненти `ProgressWeekGoal`, `ProgressScoreCards`, `ProgressLevelBar`, `ProgressHighlights`, `ProgressNavList`); `app/(app)/progress/page.tsx`
 
-Порядок блоків — промпт, розділ 3.1: картка тижневої цілі (дні тижня: виконано / відпочинок / сьогодні / попереду, кнопка «Почати тренування» через `useStartWorkout`), дві картки «Регулярність N/100» (міні-бари 4 тижнів з `consistencyV2.weeks`) і «Серія N тижнів» (рекорд), смуга рівня й XP, «Що покращилось» (≤ 2) і «Що далі» (1 дія + кнопка), «Нові рекорди» (2 картки), список переходів: Календар, Вага, Звіт, Досягнення (+ Історія й Фото — наявні вкладки Дмитра стають пунктами списку). Картка «Звіт за тиждень готовий» зверху, якщо є непереглянута подія `report`.
+Порядок блоків — промпт, розділ 3.1: картка тижневої цілі (дні тижня: виконано / відпочинок / сьогодні / попереду, кнопка «Почати тренування» через `useStartWorkout`), дві картки «Регулярність N/100» (міні-бари 4 тижнів з `consistencyV2.weeks`) і «Серія N тижнів» (рекорд), смуга рівня й XP разом зі стрічкою «Наступні досягнення» (`nextBadges(…, 3)` з прогресом і «ще N») та «Останні отримані» (`recentBadges(…, 3)`, тап → `/progress/achievements`), «Що покращилось» (≤ 2) і «Що далі» (1 дія + кнопка), «Нові рекорди» (2 картки), список переходів: Календар, Вага, Звіт, Досягнення (+ Історія й Фото — наявні вкладки Дмитра стають пунктами списку). Картка «Звіт за тиждень готовий» зверху, якщо є непереглянута подія `report`.
 - [ ] **Step 1:** тест на чисту функцію вибору «нових рекордів» (2 найсвіжіші, нові першими). **Step 2:** UI. **Step 3:** typecheck/test + скриншот (з демо-історією і з порожнім станом). **Step 4:** commit `feat(progress): main screen v2`.
 
 ### Task 14: Календар і пауза
@@ -391,14 +397,26 @@ export function useProgressSync(): void; // при старті: локальн�
 
 **Files:** Create `app/(app)/progress/achievements/page.tsx`; Modify/replace `components/features/Awards/*`
 
-Картка рівня (назва з `LEVEL_NAMES`); таблиця «Як отримати XP» (з констант Task 3, не дублювати числа в копірайті); сітка бейджів: отримані й закриті, для закритих «ще N»; нові з міткою «Нове» стоять першими. Відкриття → `mark-seen` для `badge`, `level`.
+Картка рівня (назва з `LEVEL_NAMES`); таблиця «Як отримати XP» (з констант Task 3, не дублювати числа в копірайті); сітка бейджів (`BadgeIcon` з Task 18b): нові з міткою «Нове» першими, далі закриті за близькістю (`nextBadges`) з кільцем прогресу й «ще N», далі отримані з датою. Відкриття → `mark-seen` для `badge`, `level`.
 - [ ] Реалізувати, скриншот, commit `feat(progress): achievements screen`.
+
+### Task 18b: Досягнення на кожному кроці
+
+**Files:** Modify `components/features/Today/*` (чип рівня, картка «Наступне досягнення»), `components/features/Workout/WorkoutSummary.tsx` (розклад XP, анімований рівень, просування бейджів), `components/features/Profile/*` (полиця бейджів), `components/features/WeeklyReport/*` («Отримано цього тижня», «Наступне на черзі»); Create `components/features/BadgeIcon/*` (спільний вигляд бейджа: іконка; закритий — приглушений, з кільцем прогресу й замком; отриманий — акцентний, з галочкою), `components/features/NextAchievementCard/*`. `BadgeIcon` робиться першим кроком і використовується також у Task 18 і Task 19.
+
+**Interfaces:** Consumes `nextBadges`, `recentBadges`, `xpForSession`, `badgeProgressDelta`, `levelFor` (Task 3), `useProgress()` (Task 9), `shareText`.
+
+Поведінка — таблиця «Видимість досягнень» у дизайн-документі (дослівно), разом із межами мотивації звідти ж.
+- [ ] **Step 1:** тест на чисту функцію `nextAchievementCopy(badge: Badge): { key: string; params: Record<string, number | string> }` — «ще N тренувань / тижнів / рекордів» за типом бейджа; S0 → ще 1 тренування до `first-workout`.
+- [ ] **Step 2:** UI у всіх місцях з таблиці.
+- [ ] **Step 3:** typecheck/test; скриншоти 390 px для S0, S1 (перший бейдж щойно отримано) і S2 на Today, підсумку тренування, Profile і звіті.
+- [ ] **Step 4:** commit `feat(progress): show achievements across the app`.
 
 ### Task 19: Підсвічування нового
 
 **Files:** Modify `components/features/BottomNav/*`, `Celebration/*`, `Workout/*` (банер рекорду), компоненти з Task 13–18; Test `tests/progress-engine.test.ts` (доповнити)
 
-Крапка на табі Progress при `unseen.any` + `aria-label` «Progress, new» (ключ); святкове вікно (наявний `Celebration`/`Sheet`) одне на групу з `celebrationGroup`, кнопки «Подивитись усі» / «Закрити» (закриття → `mark-seen`), анімація лише без `prefers-reduced-motion`; банер «Новий рекорд» одразу після підходу в режимі тренування (порівняння з `personalRecords` до підходу); картка рівня й нові рекорди з легким акцентним підсвічуванням до перегляду.
+Крапка на табі Progress при `unseen.any` + `aria-label` «Progress, new» (ключ); святкове вікно (наявний `Celebration`/`Sheet`) одне на групу з `celebrationGroup`: новий рівень — на весь екран, бейджі — bottom sheet з `BadgeIcon`; кнопки «Поділитися» (`shareText`), «Подивитись усі», «Закрити» (закриття → `mark-seen`), анімація лише без `prefers-reduced-motion`; банер «Новий рекорд» одразу після підходу в режимі тренування (порівняння з `personalRecords` до підходу); картка рівня й нові рекорди з легким акцентним підсвічуванням до перегляду.
 - [ ] **Step 1: Тести (промпт 3.1):** непереглянутий звіт → `unseen.any` і картка; після `mark-seen` → обидва зникають; 2 бейджі + рівень → одна група.
 - [ ] **Step 2–4:** RED → GREEN, скриншоти. **Step 5:** commit `feat(progress): highlight new badges, levels, records and reports`.
 
