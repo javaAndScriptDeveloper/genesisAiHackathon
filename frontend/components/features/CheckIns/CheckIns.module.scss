@@ -1,0 +1,240 @@
+@use "partials/corners";
+@use "partials/mixins";
+
+.summary {
+	display: flex;
+	flex-direction: column;
+	gap: var(--space-4);
+	padding: var(--space-4);
+	background: linear-gradient(160deg, #1d1d22 0%, #2b2030 100%);
+	color: #fff;
+	@include corners.radius(var(--radius-panel));
+}
+
+.summaryTop {
+	display: flex;
+	align-items: center;
+	gap: var(--space-3);
+}
+
+.summaryIcon {
+	display: grid;
+	flex: none;
+	place-items: center;
+	width: 5rem;
+	height: 5rem;
+	background: rgba(255, 255, 255, 0.12);
+	color: #ffb4b9;
+	@include corners.nested(var(--radius-panel), var(--space-3));
+}
+
+.eyebrow {
+	color: rgba(255, 255, 255, 0.6);
+	font-size: 1.1rem;
+	font-weight: 700;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+}
+
+.big {
+	display: block;
+	font-size: 3.2rem;
+	line-height: 1.1;
+	font-variant-numeric: tabular-nums;
+}
+
+.stamp {
+	color: rgba(255, 255, 255, 0.65);
+	font-size: 1.2rem;
+}
+
+.facts {
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	gap: var(--space-2);
+	margin: 0;
+	padding: 0;
+	list-style: none;
+
+	li {
+		display: flex;
+		flex-direction: column;
+		gap: 0.2rem;
+		padding: var(--space-2) var(--space-3);
+		background: rgba(255, 255, 255, 0.08);
+		@include corners.radius(var(--radius-control));
+	}
+
+	span {
+		color: rgba(255, 255, 255, 0.6);
+		font-size: 1.1rem;
+	}
+
+	strong {
+		font-size: 1.5rem;
+		font-variant-numeric: tabular-nums;
+	}
+}
+
+.goalBar {
+	display: flex;
+	flex-direction: column;
+	gap: var(--space-2);
+	font-size: 1.3rem;
+
+	span {
+		color: rgba(255, 255, 255, 0.75);
+	}
+}
+
+.stack {
+	display: flex;
+	flex-direction: column;
+	gap: var(--space-3);
+}
+
+.h3 {
+	font-size: 1.6rem;
+}
+
+.p {
+	margin: 0;
+	color: var(--color-textMuted);
+	font-size: 1.3rem;
+	line-height: 1.45;
+}
+
+.inline {
+	display: flex;
+	align-items: flex-start;
+	gap: var(--space-2);
+
+	> button {
+		flex: none;
+		margin-top: 2.8rem; // aligns with the field, below its label
+	}
+}
+
+.grow {
+	flex: 1;
+}
+
+.historySection {
+	display: flex;
+	flex-direction: column;
+	gap: var(--space-3);
+}
+
+.sectionHead {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+
+	h3 {
+		font-size: 1.8rem;
+	}
+
+	span {
+		color: var(--color-textSubtle);
+		font-size: 1.3rem;
+	}
+}
+
+// Vertical rail: one dot per saved entry, newest on top.
+.timeline {
+	display: flex;
+	flex-direction: column;
+	gap: var(--space-2);
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.entry {
+	display: flex;
+	align-items: center;
+	gap: var(--space-3);
+	padding: var(--space-3);
+	background: var(--color-surface);
+	border: 0.1rem solid var(--color-border);
+	@include corners.radius(var(--radius-card));
+}
+
+.entryDot {
+	display: grid;
+	flex: none;
+	place-items: center;
+	width: 3.4rem;
+	height: 3.4rem;
+	background: var(--color-surfaceMuted);
+	color: var(--color-textMuted);
+	border-radius: 50%;
+}
+
+.entryText {
+	display: flex;
+	flex: 1;
+	flex-direction: column;
+	min-width: 0;
+
+	strong {
+		font-size: 1.6rem;
+		font-variant-numeric: tabular-nums;
+	}
+
+	span {
+		color: var(--color-textSubtle);
+		font-size: 1.2rem;
+	}
+}
+
+.delta {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.2rem;
+	padding: 0.4rem 0.9rem;
+	background: var(--color-surfaceMuted);
+	color: var(--color-textMuted);
+	font-size: 1.2rem;
+	font-weight: 700;
+	font-variant-numeric: tabular-nums;
+	border-radius: var(--radius-pill);
+
+	&[data-good] {
+		background: var(--color-successSoft);
+		color: var(--color-success);
+	}
+}
+
+.photos {
+	display: grid;
+	grid-template-columns: repeat(2, 1fr);
+	gap: var(--space-3);
+	margin: 0;
+	padding: 0;
+	list-style: none;
+
+	li {
+		display: flex;
+		flex-direction: column;
+		gap: 0.4rem;
+		font-size: 1.2rem;
+		color: var(--color-textSubtle);
+	}
+
+	img {
+		width: 100%;
+		aspect-ratio: 3 / 4;
+		object-fit: cover;
+		@include corners.radius(var(--radius-control));
+	}
+}
+
+.remove {
+	align-self: flex-start;
+	min-height: 3.6rem;
+	color: var(--color-dangerText);
+	font-size: 1.3rem;
+	font-weight: 600;
+	@include mixins.focus-ring;
+}

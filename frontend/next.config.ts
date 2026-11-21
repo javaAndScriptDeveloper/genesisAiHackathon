@@ -23,6 +23,10 @@ const nextConfig: NextConfig = {
 	// /api/* goes to platform-backend. It must be a `fallback` rewrite: those run only when no route
 	// matched, so our own handlers (app/api/ai, app/api/mock/[...path]) keep priority. An afterFiles
 	// rewrite would shadow the dynamic mock route.
+	// Belt and braces with the robots metadata: also covers API and static responses.
+	async headers() {
+		return [{ source: "/:path*", headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow, noarchive" }] }];
+	},
 	async rewrites() {
 		return { beforeFiles: [], afterFiles: [], fallback: [{ source: "/api/:path*", destination: `${backendUrl}/api/:path*` }] };
 	},

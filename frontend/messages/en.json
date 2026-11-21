@@ -335,6 +335,62 @@
       "photosLockedTitle": "Unlimited photo check-ins",
       "photosLockedBody": "Free includes {n} photos. Premium keeps your whole journey."
     },
+    "awards": {
+      "level": "Level",
+      "overall": "Overall",
+      "workouts": "Workouts",
+      "minutes": "Minutes",
+      "bestStreak": "Best streak",
+      "collection": "Collection",
+      "collected": "{n} of {total} collected",
+      "demoRanking": "Demo ranking",
+      "aheadOf": "Ahead of {percent} of users",
+      "demoRarity": "Demo rarity: {pct}% unlocked",
+      "tier": {
+        "common": "Common",
+        "rare": "Rare",
+        "epic": "Epic",
+        "legendary": "Legendary"
+      },
+      "tipTitle": "Coach's note",
+      "status": "Status",
+      "howTo": "How to unlock",
+      "locked": "Locked",
+      "reward": "Reward",
+      "close": "Close",
+      "share": "Share",
+      "shareText": "I unlocked “{title}” in Personal Coach!",
+      "rank": {
+        "1": "Rookie",
+        "2": "Mover",
+        "3": "Regular",
+        "4": "Athlete",
+        "5": "Pro",
+        "6": "Elite",
+        "7": "Champion",
+        "8": "Legend"
+      },
+      "badges": "Badges"
+    },
+    "history": {
+      "totals": "Totals",
+      "groupCount": "{n} workouts"
+    },
+    "checkins": {
+      "summary": "Weight summary",
+      "current": "Current weight",
+      "updated": "Updated {when}",
+      "sinceStart": "Since start",
+      "entries": "Entries",
+      "lastHint": "Last entry: {value} · {when}. Change it and save to add a new one.",
+      "firstHint": "Add your first weight. It will show up in your history below.",
+      "weightSaved": "Saved. See it in your weight history below.",
+      "goalSet": "Current goal: {value} · set {when}",
+      "history": "Weight history",
+      "entryCount": "{n} entries",
+      "historyEmpty": "No entries yet",
+      "historyEmptyBody": "Every weight you save appears here with the date and time."
+    },
     "notifications": {
       "title": "Notifications",
       "settings": "Notification settings",
@@ -780,7 +836,9 @@
       "playLabel": "Play video",
       "related": "Related clip · {name}",
       "searchExact": "Find this exercise",
-      "openYoutube": "Open on YouTube"
+      "openYoutube": "Open on YouTube",
+      "pause": "Pause video",
+      "resume": "Play video"
     },
     "music": {
       "title": "Workout music",

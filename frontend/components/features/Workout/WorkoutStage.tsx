@@ -49,20 +49,22 @@ export function WorkoutStage({ onAdjust, onOverview, onUnwell, bpm }: { onAdjust
 					<div className={styles.heroInfo}>
 						<div className={styles.heroText}>
 							<h1 className={styles.exName}>{exercise.name}</h1>
-							<p className={styles.target}>
-								{t("fit.workout.target", { sets: block.sets.length, reps: block.sets[0]?.target ?? 0 })}
-								{timed ? " s" : ""}
-								{loaded && block.sets[0]?.targetWeight ? ` · ${u.fmtLoad(block.sets[0].targetWeight)}` : ""}
-							</p>
+							<div className={styles.heroMeta}>
+								<p className={styles.target}>
+									{t("fit.workout.target", { sets: block.sets.length, reps: block.sets[0]?.target ?? 0 })}
+									{timed ? " s" : ""}
+									{loaded && block.sets[0]?.targetWeight ? ` · ${u.fmtLoad(block.sets[0].targetWeight)}` : ""}
+								</p>
+								<span className={styles.pulse} aria-label={t("fit.health.title")}>
+									<Icon icon={FavouriteIcon} size={14} />
+									{bpm ?? "--"} <small>{t("fit.health.bpm")}</small>
+								</span>
+							</div>
 						</div>
-						<span className={styles.pulse} aria-label={t("fit.health.title")}>
-							<Icon icon={FavouriteIcon} size={14} />
-							{bpm ?? "--"} <small>{t("fit.health.bpm")}</small>
-						</span>
+						<ExerciseGuide exercise={exercise} variant="sheet" />
 					</div>
 				}
 			/>
-			<ExerciseGuide exercise={exercise} variant="sheet" />
 
 			<ol className={styles.sets} aria-label={t("fit.workout.sets")}>
 				{block.sets.map((s, i) => (

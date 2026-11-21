@@ -1,0 +1,249 @@
+@use "partials/corners";
+@use "partials/mixins";
+
+.totals {
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	gap: var(--space-2);
+	margin: 0;
+	padding: 0;
+	list-style: none;
+
+	li {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 0.2rem;
+		padding: var(--space-3) var(--space-2);
+		background: var(--color-surface);
+		border: 0.1rem solid var(--color-border);
+		@include corners.radius(var(--radius-card));
+	}
+
+	svg {
+		color: var(--color-accent);
+	}
+
+	strong {
+		font-size: 2rem;
+		font-variant-numeric: tabular-nums;
+	}
+
+	span {
+		color: var(--color-textSubtle);
+		font-size: 1.2rem;
+	}
+}
+
+.group {
+	display: flex;
+	flex-direction: column;
+	gap: var(--space-2);
+}
+
+.groupTitle {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	margin: var(--space-2) 0 0;
+	color: var(--color-textMuted);
+	font-size: 1.3rem;
+	font-weight: 700;
+	letter-spacing: 0.02em;
+
+	span {
+		color: var(--color-textSubtle);
+		font-weight: 500;
+	}
+}
+
+.list {
+	display: flex;
+	flex-direction: column;
+	gap: var(--space-2);
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.log {
+	background: var(--color-surface);
+	border: 0.1rem solid var(--color-border);
+	transition: box-shadow var(--transition-base);
+	@include corners.radius(var(--radius-card));
+
+	&[open] {
+		box-shadow: var(--shadow-popover);
+	}
+}
+
+.summary {
+	display: flex;
+	align-items: center;
+	gap: var(--space-3);
+	min-height: 7.2rem;
+	padding: var(--space-3);
+	list-style: none;
+	cursor: pointer;
+	@include mixins.focus-ring;
+
+	&::-webkit-details-marker {
+		display: none;
+	}
+}
+
+.date {
+	display: grid;
+	flex: none;
+	place-items: center;
+	align-content: center;
+	width: 4.8rem;
+	height: 5.2rem;
+	background: var(--color-surfaceMuted);
+	line-height: 1.1;
+	@include corners.nested(var(--radius-card), 0.8rem);
+
+	small {
+		color: var(--color-textSubtle);
+		font-size: 1.1rem;
+		font-weight: 700;
+		text-transform: uppercase;
+	}
+
+	strong {
+		font-size: 2rem;
+	}
+}
+
+.main {
+	display: flex;
+	flex: 1;
+	flex-direction: column;
+	gap: 0.4rem;
+	min-width: 0;
+
+	> strong {
+		font-size: 1.5rem;
+		@include mixins.truncate;
+	}
+}
+
+.chips {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.4rem var(--space-2);
+	color: var(--color-textMuted);
+	font-size: 1.2rem;
+
+	span {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.3rem;
+		font-variant-numeric: tabular-nums;
+	}
+}
+
+.badges {
+	display: flex;
+	flex: none;
+	flex-direction: column;
+	align-items: flex-end;
+	gap: 0.4rem;
+}
+
+.chevron {
+	flex: none;
+	color: var(--color-textSubtle);
+	transition: transform var(--transition-base);
+
+	.log[open] & {
+		transform: rotate(180deg);
+	}
+}
+
+.body {
+	display: flex;
+	flex-direction: column;
+	gap: var(--space-3);
+	padding: 0 var(--space-3) var(--space-3);
+	border-top: 0.1rem solid var(--color-border);
+}
+
+.exercises {
+	display: flex;
+	flex-direction: column;
+	gap: var(--space-3);
+	margin: var(--space-3) 0 0;
+	padding: 0;
+	list-style: none;
+
+	li {
+		display: flex;
+		align-items: flex-start;
+		gap: var(--space-3);
+	}
+}
+
+.exIcon {
+	display: grid;
+	flex: none;
+	place-items: center;
+	width: 3.4rem;
+	height: 3.4rem;
+	background: var(--color-accentSoft);
+	color: var(--color-accent);
+	@include corners.nested(var(--radius-card), 0.8rem);
+}
+
+.exMain {
+	display: flex;
+	flex-direction: column;
+	gap: 0.4rem;
+	min-width: 0;
+
+	strong {
+		font-size: 1.4rem;
+	}
+}
+
+.sets {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.4rem;
+}
+
+.set {
+	padding: 0.2rem 0.8rem;
+	background: var(--color-surfaceMuted);
+	color: var(--color-textMuted);
+	font-size: 1.2rem;
+	font-variant-numeric: tabular-nums;
+	border-radius: var(--radius-pill);
+}
+
+.skipped {
+	color: var(--color-textSubtle);
+	font-size: 1.2rem;
+}
+
+.pr {
+	display: flex;
+	align-items: center;
+	gap: 0.6rem;
+	margin: 0;
+	padding: var(--space-2) var(--space-3);
+	background: #fff1cc;
+	color: #a85f00;
+	font-size: 1.3rem;
+	font-weight: 600;
+	@include corners.nested(var(--radius-card), 0.8rem);
+}
+
+.foot {
+	display: flex;
+	align-items: center;
+	gap: var(--space-2);
+	margin: 0;
+	color: var(--color-textSubtle);
+	font-size: 1.2rem;
+}

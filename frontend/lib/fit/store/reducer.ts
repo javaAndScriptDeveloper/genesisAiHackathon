@@ -37,7 +37,7 @@ export type Action =
 	| { type: "set-goal"; goal: Goal; goalText: string; today: ISODate }
 	| { type: "set-trainer"; trainerId: string }
 	| { type: "set-units"; units: Units }
-	| { type: "set-goal-weight"; kg: number | null }
+	| { type: "set-goal-weight"; kg: number | null; at?: string }
 	| { type: "sync"; now: string }
 	| { type: "start-workout"; plannedId: string; now: string }
 	| { type: "restart-workout" }
@@ -78,7 +78,7 @@ export type Action =
 	| { type: "remove-bp"; id: string }
 	| { type: "add-photo"; photo: PhotoCheckIn }
 	| { type: "remove-photo"; id: string }
-	| { type: "add-body-weight"; date: ISODate; kg: number }
+	| { type: "add-body-weight"; date: ISODate; kg: number; at?: string }
 	| { type: "partner"; id: string; status: "invited" | "accepted" | null }
 	| { type: "joint-workout"; workoutId: string; partnerId: string | null }
 	| { type: "dismiss-celebration" }
@@ -244,7 +244,7 @@ export function reducer(state: FitState, action: Action): FitState {
 			return rebuildUpcoming({ ...state, devices, units: action.units }, profile, action.today);
 		}
 		case "set-goal-weight":
-			return { ...state, goalWeightKg: action.kg };
+			return { ...state, goalWeightKg: action.kg, goalSetAt: action.kg === null ? null : (action.at ?? null) };
 		case "set-units": {
 			return { ...state, units: action.units };
 		}
@@ -440,7 +440,7 @@ export function reducer(state: FitState, action: Action): FitState {
 		case "remove-photo":
 			return { ...state, photos: state.photos.filter((p) => p.id !== action.id) };
 		case "add-body-weight":
-			return { ...state, bodyWeights: [...state.bodyWeights.filter((b) => b.date !== action.date), { date: action.date, kg: action.kg }].sort((a, b) => a.date.localeCompare(b.date)) };
+			return { ...state, bodyWeights: [...state.bodyWeights.filter((b) => b.date !== action.date), { date: action.date, kg: action.kg, at: action.at }].sort((a, b) => a.date.localeCompare(b.date)) };
 		case "partner": {
 			const partners = { ...state.partners };
 			if (action.status === null) delete partners[action.id];

@@ -23,7 +23,9 @@
       "playLabel": "Play video",
       "related": "Related clip · {name}",
       "searchExact": "Find this exercise",
-      "openYoutube": "Open on YouTube"
+      "openYoutube": "Open on YouTube",
+      "pause": "Pause video",
+      "resume": "Play video"
     },
     "music": {
       "title": "Workout music",

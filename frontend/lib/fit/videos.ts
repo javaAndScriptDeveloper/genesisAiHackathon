@@ -77,6 +77,7 @@ export function videoFor(exercise: Exercise) {
 	const id = exactId ?? relatedClip.id;
 
 	return {
+		id,
 		embedUrl: `https://www.youtube-nocookie.com/embed/${id}?rel=0&playsinline=1`,
 		watchUrl: `https://www.youtube.com/watch?v=${id}`,
 		searchUrl: `${LEAP_CHANNEL_URL}/search?query=${encodeURIComponent(exercise.name)}`,
