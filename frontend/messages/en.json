@@ -209,7 +209,27 @@
         "today": "today",
         "yesterday": "yesterday",
         "daysAgo": "{n} days ago"
-      }
+      },
+      "resultsTab": "Results",
+      "chatTab": "Chat",
+      "notConnectedTitle": "Not connected yet",
+      "notConnectedBody": "You can see results and chat once this buddy approves your request.",
+      "backToList": "Back to Community",
+      "thisWeek": "This week",
+      "workoutsWeek": "{n} workouts",
+      "streak": "{n}-week streak",
+      "bestLift": "Best lift",
+      "prLine": "{exercise}: {weight}",
+      "lastWorkoutTitle": "Last workout",
+      "removeBuddy": "Remove buddy",
+      "removed": "{name} removed",
+      "chatEmpty": "Say hi to {name}",
+      "messagePlaceholder": "Write a message",
+      "send": "Send",
+      "sharePhoto": "Share a photo",
+      "photoFailed": "Couldn't use that file. Pick an image.",
+      "sharedPhoto": "Shared photo",
+      "typing": "{name} is typing…"
     },
     "health": {
       "title": "Live health",
