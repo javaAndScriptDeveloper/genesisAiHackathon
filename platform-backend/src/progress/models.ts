@@ -1,6 +1,6 @@
 import { Model } from "objection";
 
-// Column names are mapped to camelCase by knexSnakeCaseMappers (src/db.ts). Dates (`date` columns) come back as JS Dates.
+// Column names are mapped to camelCase by knexSnakeCaseMappers (src/db.ts). `date` columns come back as 'YYYY-MM-DD' strings (parser in src/db.ts); timestamptz as JS Dates.
 export class ProgressSettingsModel extends Model {
   static tableName = "user_progress_settings";
   static idColumn = "user_id";
@@ -16,7 +16,7 @@ export class ProgressPlanDayModel extends Model {
   static tableName = "user_progress_plan_days";
   static idColumn = ["user_id", "date"];
   userId!: number;
-  date!: Date;
+  date!: string;
   type!: "training" | "rest";
   workoutRef!: string | null;
 }
@@ -40,8 +40,8 @@ export class ProgressWorkoutModel extends Model {
   id!: string;
   userId!: number;
   trainingId!: number | null;
-  planDate!: Date | null;
-  performedOn!: Date;
+  planDate!: string | null;
+  performedOn!: string;
   status!: "completed" | "partial" | "abandoned";
   plannedSets!: number;
   durationSec!: number;
@@ -64,15 +64,15 @@ export class ProgressPauseModel extends Model {
   static tableName = "user_progress_pauses";
   id!: string;
   userId!: number;
-  fromDate!: Date;
-  toDate!: Date;
+  fromDate!: string;
+  toDate!: string;
 }
 
 export class ProgressWeightModel extends Model {
   static tableName = "user_progress_weights";
   static idColumn = ["user_id", "date"];
   userId!: number;
-  date!: Date;
+  date!: string;
   kg!: number;
 }
 
@@ -93,7 +93,7 @@ export class ProgressSnapshotModel extends Model {
   id!: number;
   userId!: number;
   period!: "weekly" | "change";
-  weekStart!: Date | null;
+  weekStart!: string | null;
   takenAt!: Date;
   engineVersion!: string;
   payload!: unknown;

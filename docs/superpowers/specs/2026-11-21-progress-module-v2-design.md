@@ -71,7 +71,7 @@
 - `change` — знімок після кожної зміни, яка змінила числа. Новий рядок пишеться, лише якщо `payload_hash` відрізняється від останнього знімка цього користувача.
 - `engine_version` — версія формул рушія, тож старі знімки лишаються зрозумілими після зміни правил.
 
-Ендпоінти (усі з заголовком `x-progress-token`, UUID, інакше 400; невідомий токен на `snapshot`/`archive GET` → порожні дані, на запис → створюється гостьовий користувач): `GET /api/progress/snapshot`, `POST /api/progress/sync`, `POST /api/progress/events/seen`, `POST /api/progress/archive`, `GET /api/progress/archive?from=&to=&period=`.
+Ендпоінти (усі з заголовком `x-progress-token`, UUID, інакше 400; невідомий токен на `snapshot`/`archive GET` → порожні дані, на запис → створюється гостьовий користувач): `GET /api/progress/snapshot`, `POST /api/progress/sync`, `POST /api/progress/events/seen`, `POST /api/progress/archive`, `GET /api/progress/archive?from=&to=&period=`. Тіло `RemoteSnapshot`: `settings` (`weeklyGoal`, `units`, `heightCm`; ключ навмисно не `device`, щоб не плутати з `user_devices` команди), `planDays`, `workouts` (з `sets`), `pauses`, `weights`, `events`; `users.id` назовні не віддається.
 
 ## Видимість досягнень (максимальна мотивація)
 

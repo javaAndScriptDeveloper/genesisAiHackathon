@@ -5,6 +5,8 @@ import { knexSnakeCaseMappers } from "objection";
 
 // numeric (OID 1700) -> JS number, so weights and kg come back as numbers, not strings.
 pg.types.setTypeParser(1700, parseFloat);
+// date (OID 1082) -> raw 'YYYY-MM-DD' string, so calendar dates never shift with the server timezone.
+pg.types.setTypeParser(1082, (v: string) => v);
 
 export function createDb(connectionString: string): Knex {
   return knex({ client: "pg", connection: connectionString, pool: { min: 0, max: 5 }, ...knexSnakeCaseMappers() });
