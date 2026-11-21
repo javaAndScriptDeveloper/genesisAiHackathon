@@ -71,6 +71,7 @@ export type Action =
 	| { type: "replace-planned-exercise"; id: string; blockId: string; exerciseId: string }
 	| { type: "add-adhoc"; kind: "mobility" | "cardio"; today: ISODate }
 	| { type: "coach-message"; message: CoachMessage }
+	| { type: "coach-mark"; messageId: string; appliedAction: string }
 	| { type: "coach-apply"; messageId: string; action: CoachAction; today: ISODate; now: string; reply: CoachMessage }
 	| { type: "notification-read"; id: string }
 	| { type: "notifications-read-all" }
@@ -423,6 +424,8 @@ export function reducer(state: FitState, action: Action): FitState {
 		}
 		case "coach-message":
 			return { ...state, coach: [...state.coach, action.message].slice(-80) };
+		case "coach-mark":
+			return { ...state, coach: state.coach.map((m) => (m.id === action.messageId ? { ...m, appliedAction: action.appliedAction } : m)) };
 		case "coach-apply": {
 			let next: FitState = state;
 			const a = action.action;

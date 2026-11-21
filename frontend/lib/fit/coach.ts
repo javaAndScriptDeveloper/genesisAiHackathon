@@ -24,14 +24,7 @@ export interface CoachReply {
 	safety?: boolean;
 }
 
-export const SUGGESTED_PROMPTS = [
-	"My workout is too difficult",
-	"I don't have dumbbells",
-	"I only have 20 minutes",
-	"How am I progressing?",
-	"What should I train today?",
-	"I feel exhausted",
-];
+export const SUGGESTED_PROMPTS = ["Fewer leg days", "I can only train at home", "More cardio", "Shorter sessions", "My knee hurts", "How am I progressing?"];
 
 export const SAFETY_TEXT = [
 	"Stop exercising now and sit or lie down somewhere comfortable.",

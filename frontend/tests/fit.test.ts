@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { applyAdapt } from "@/lib/fit/adapt";
 import { coachReply, isSafetyConcern, type CoachContext } from "@/lib/fit/coach";
+import { chatHistory, mergeProfile, planSummaryText, profileDiff } from "@/lib/fit/coachChat";
 import { toISO } from "@/lib/fit/dates";
 import { DEFAULT_TRAINER_ID, activeTrainerId } from "@/lib/fit/options";
 import { estimateMinutes, generatePlan, nextUpcoming } from "@/lib/fit/plan";
@@ -220,6 +221,23 @@ describe("AI plan state", () => {
 		expect(s2.planned[0]).toEqual(original);
 		expect(s2.daily?.status).toBe("unchanged");
 		expect(s2.daily?.original).toBeNull();
+	});
+
+	it("coach chat helpers: profile diff, merge, plan summary and history", () => {
+		const changes = { location: "home" as const, daysPerWeek: profile.daysPerWeek };
+		expect(profileDiff(profile, changes).map((c) => c.field)).toEqual(profile.location === "home" ? [] : ["location"]);
+		expect(profileDiff(profile, null)).toEqual([]);
+		expect(mergeProfile(profile, changes).location).toBe("home");
+		expect(mergeProfile(profile, null)).toBe(profile);
+		const near = aiSession("near", tomorrow);
+		const far = aiSession("far", toISO(new Date(Date.now() + 9 * 86_400_000)));
+		const text = planSummaryText([far, near, { ...aiSession("done", today), status: "completed" }], today);
+		expect(text.split("\n")).toHaveLength(1);
+		expect(text.startsWith(`${tomorrow} AI session: `)).toBe(true);
+		const many = Array.from({ length: 20 }, (_, i) => ({ id: `m${i}`, from: "user" as const, text: "x".repeat(700), at: now }));
+		const history = chatHistory(many);
+		expect(history).toHaveLength(12);
+		expect(history[0]?.text).toHaveLength(600);
 	});
 
 	it("old saved state without new fields loads with defaults", () => {

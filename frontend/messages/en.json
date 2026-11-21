@@ -75,7 +75,22 @@
         "recovery": "Your trainer switched today to recovery.",
         "failed": "Couldn't run the check. Try again."
       },
-      "trainerFallback": "Your trainer"
+      "trainerFallback": "Your trainer",
+      "recreate": "Recreate my plan",
+      "recreating": "Recreating…",
+      "rebuildingChat": "{name} is rebuilding your plan…",
+      "none": "none",
+      "added": "Added: {list}",
+      "removed": "Removed: {list}",
+      "change": {
+        "location": "Location: {from} → {to}",
+        "equipment": "Equipment: {from} → {to}",
+        "limitations": "Limitations: {from} → {to}",
+        "limitationNote": "Limitation note: {from} → {to}",
+        "daysPerWeek": "Days per week: {from} → {to}",
+        "durationMin": "Session length: {from} → {to} min",
+        "goal": "Goal: {from} → {to}"
+      }
     },
     "coach": {
       "title": "Personal Coach",

@@ -7,14 +7,21 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { ScreenHeader } from "@/components/features/ScreenHeader/ScreenHeader";
 import { Button, Icon, IconButton, useToast } from "@/components/ui";
+import { useTrainers } from "@/lib/api/trainers";
 import { applyAdapt, replaceUnavailable } from "@/lib/fit/adapt";
+import { aiClient } from "@/lib/fit/aiClient";
+import { diffPlans } from "@/lib/fit/aiPlan";
 import { coachReply, isSafetyConcern, SUGGESTED_PROMPTS, type CoachContext } from "@/lib/fit/coach";
+import { chatHistory, mergeProfile, planSummaryText, profileAfterAction, profileDiff } from "@/lib/fit/coachChat";
+import { activeTrainerId } from "@/lib/fit/options";
 import { listenOnce, speechSupported } from "@/lib/fit/speech";
 import { useFit } from "@/lib/fit/store/FitProvider";
 import { useFitStats } from "@/lib/fit/store/hooks";
-import type { CoachAction, CoachMessage } from "@/lib/fit/types";
+import { useAiPlan } from "@/lib/fit/store/useAiPlan";
+import type { CoachAction, CoachMessage, PlannedWorkout } from "@/lib/fit/types";
 import { useT } from "@/lib/i18n/I18nProvider";
 import styles from "./Coach.module.scss";
+import { RebuildCard } from "./RebuildCard/RebuildCard";
 
 const uid = () => `m${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
 
@@ -23,6 +30,10 @@ export function Coach() {
 	const router = useRouter();
 	const toast = useToast();
 	const { state, dispatch, today } = useFit();
+	const { rebuild, busy } = useAiPlan();
+	const { data: trainers } = useTrainers();
+	const [awaiting, setAwaiting] = useState<{ before: PlannedWorkout[] } | null>(null);
+	const [recreating, setRecreating] = useState(false);
 	const stats = useFitStats();
 	const [text, setText] = useState("");
 	const [pending, setPending] = useState(false);
@@ -43,6 +54,16 @@ export function Coach() {
 		},
 		[],
 	);
+	// The rebuilt plan reaches `state` on a later render than the handler, so the result message is posted from here.
+	useEffect(() => {
+		if (!awaiting) return;
+		const { added, removed } = diffPlans(awaiting.before, state.planned, today);
+		const lines = [state.planSummary ?? t("fit.ai.rebuilt")];
+		if (added.length) lines.push(t("fit.ai.added", { list: added.join(", ") }));
+		if (removed.length) lines.push(t("fit.ai.removed", { list: removed.join(", ") }));
+		dispatch({ type: "coach-message", message: { id: uid(), from: "coach", text: lines.join("\n"), at: new Date().toISOString() } });
+		setAwaiting(null);
+	}, [awaiting, state.planned, state.planSummary, today, dispatch, t]);
 	if (!profile) return null;
 
 	const context = (): CoachContext => ({
@@ -60,18 +81,65 @@ export function Coach() {
 		premium: state.subscription.tier === "premium",
 	});
 
+	const post = (message: Omit<CoachMessage, "id" | "from" | "at">) => dispatch({ type: "coach-message", message: { id: uid(), from: "coach", at: new Date().toISOString(), ...message } });
+
+	// Symptom messages and an unavailable AI both use the local rule-based coach.
+	const localReply = (value: string) => {
+		timer.current = window.setTimeout(() => {
+			const reply = coachReply(value, context());
+			if (isSafetyConcern(value) && active) dispatch({ type: "safety-stop" });
+			post({ text: reply.text, actions: reply.actions, safety: reply.safety });
+			setPending(false);
+		}, 650);
+	};
+
+	const ask = async (value: string, history: CoachMessage[]) => {
+		try {
+			const res = await aiClient.requestCoach({
+				userId: state.backend?.userId ?? null,
+				profile,
+				trainerSlug: activeTrainerId(state),
+				wishes: state.planWishes.slice(-10),
+				planSummary: planSummaryText(state.planned, today),
+				messages: chatHistory(history),
+			});
+			if (res.safety && active) dispatch({ type: "safety-stop" });
+			post({ text: res.reply, safety: res.safety || undefined, rebuild: res.rebuild ?? undefined });
+			setPending(false);
+		} catch {
+			localReply(value);
+		}
+	};
+
 	const send = (raw: string) => {
 		const value = raw.trim();
 		if (!value || pending) return;
 		setText("");
-		dispatch({ type: "coach-message", message: { id: uid(), from: "user", text: value, at: new Date().toISOString() } });
+		const message: CoachMessage = { id: uid(), from: "user", text: value, at: new Date().toISOString() };
+		dispatch({ type: "coach-message", message });
 		setPending(true);
-		timer.current = window.setTimeout(() => {
-			const reply = coachReply(value, context());
-			if (isSafetyConcern(value) && active) dispatch({ type: "safety-stop" });
-			dispatch({ type: "coach-message", message: { id: uid(), from: "coach", text: reply.text, at: new Date().toISOString(), actions: reply.actions, safety: reply.safety } });
-			setPending(false);
-		}, 650);
+		if (isSafetyConcern(value)) localReply(value);
+		else void ask(value, [...state.coach, message]);
+	};
+
+	const trainerName = trainers?.find((tr) => tr.id === activeTrainerId(state))?.name ?? t("fit.ai.trainerFallback");
+
+	const recreate = async (message: CoachMessage) => {
+		const proposal = message.rebuild;
+		if (!proposal || recreating || busy) return;
+		setRecreating(true);
+		const before = state.planned;
+		const merged = mergeProfile(profile, proposal.profileChanges);
+		if (profileDiff(profile, proposal.profileChanges).length) dispatch({ type: "update-profile", profile: merged, units: state.units, today });
+		post({ text: t("fit.ai.rebuildingChat", { name: trainerName }) });
+		const result = await rebuild({ profile: merged, wishes: proposal.wishes });
+		setRecreating(false);
+		if (result === "failed") {
+			post({ text: t("fit.ai.rebuildFailed") });
+			return;
+		}
+		dispatch({ type: "coach-mark", messageId: message.id, appliedAction: "rebuild" });
+		setAwaiting({ before });
 	};
 
 	const confirmation = (action: CoachAction): string => {
@@ -108,6 +176,9 @@ export function Coach() {
 		}
 		const reply: CoachMessage = { id: uid(), from: "coach", text: confirmation(action), at: new Date().toISOString() };
 		dispatch({ type: "coach-apply", messageId: message.id, action, today, now: new Date().toISOString(), reply });
+		// Keep the plan AI-made after a settings change from the rule-based coach.
+		const changed = profileAfterAction(profile, action);
+		if (changed) void rebuild({ profile: changed });
 		toast.show(t("fit.coach.applied"), "success");
 	};
 
@@ -131,7 +202,8 @@ export function Coach() {
 				</div>
 				{state.coach.map((m) => (
 					<div key={m.id} className={clsx(styles.bubble, m.from === "user" ? styles.user : styles.coach, m.safety && styles.safety)}>
-						<p>{m.text}</p>
+						<p className={styles.text}>{m.text}</p>
+							{m.rebuild && <RebuildCard rebuild={m.rebuild} profile={profile} applied={m.appliedAction === "rebuild"} busy={recreating || busy} onRecreate={() => void recreate(m)} />}
 						{m.actions && m.actions.length > 0 && (
 							<div className={styles.actions}>
 								{m.actions.map((a) => {
