@@ -3,6 +3,7 @@
 import { Mic01Icon, StopIcon, Target02Icon } from "@hugeicons/core-free-icons";
 import { useState } from "react";
 import { Button, Card, Icon, IconButton, Textarea, useToast } from "@/components/ui";
+import { transcribe } from "@/lib/api/stt";
 import { useVoiceRecorder } from "@/lib/hooks/useVoiceRecorder";
 import { matchGoal } from "@/lib/fit/goalClient";
 import { useFit } from "@/lib/fit/store/FitProvider";
@@ -29,12 +30,7 @@ export function GoalCard() {
 		if (!audio || audio.size === 0) return;
 		setTranscribing(true);
 		try {
-			const form = new FormData();
-			form.append("audio", audio, "goal.webm");
-			const response = await fetch("/api/stt", { method: "POST", body: form, signal: AbortSignal.timeout(25_000) });
-			const data: unknown = await response.json().catch(() => null);
-			if (!response.ok || typeof data !== "object" || data === null || !("text" in data) || typeof data.text !== "string" || data.text === "") throw new Error("stt");
-			const heard = data.text;
+			const heard = await transcribe(audio);
 			// A new recording replaces the goal instead of piling onto the previous one.
 			setText(heard.slice(0, 500));
 		} catch {

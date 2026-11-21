@@ -2,7 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
-import { AlertCircleIcon, ArrowLeft02Icon, ArrowRight02Icon, Tick02Icon, UserGroupIcon } from "@hugeicons/core-free-icons";
+import { AlertCircleIcon, ArrowLeft02Icon, ArrowRight02Icon, Mic01Icon, StopIcon, Tick02Icon, UserGroupIcon } from "@hugeicons/core-free-icons";
 import clsx from "clsx";
 import { useMemo, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
@@ -13,10 +13,12 @@ import { ThemeToggle } from "@/components/features/ThemeToggle/ThemeToggle";
 import { Avatar, Badge, Button, Card, EmptyState, Icon, IconButton, Input, ProgressBar, Skeleton, Switch } from "@/components/ui";
 import { parseGoal, type GoalResult } from "@/lib/api/onboarding";
 import { usePersonalPlan } from "@/lib/api/plan";
+import { transcribe } from "@/lib/api/stt";
 import { useTrainers, type Trainer } from "@/lib/api/trainers";
 import { WEEKDAYS } from "@/lib/fit/dates";
 import { DAYS, DURATIONS, EQUIPMENT, EXPERIENCES, GOALS, LOCATIONS, WEARABLES } from "@/lib/fit/options";
 import { useFit } from "@/lib/fit/store/FitProvider";
+import { useVoiceRecorder } from "@/lib/hooks/useVoiceRecorder";
 import { useActionNavigate } from "@/lib/fit/store/hooks";
 import type { Equipment, Gender, Profile, TrainingLocation } from "@/lib/fit/types";
 import { useT } from "@/lib/i18n/I18nProvider";
@@ -120,7 +122,39 @@ export function OnboardingQuiz() {
 		},
 	});
 
+	// Voice goal: Gemini transcribes the recording, then Spotty reads it like a typed goal.
+	const recorder = useVoiceRecorder();
+	const [micFailed, setMicFailed] = useState(false);
+	const listen = useMutation({
+		mutationFn: (audio: Blob) => transcribe(audio),
+		onSuccess: (text) => {
+			const heard = text.slice(0, 500);
+			// A new recording replaces the goal instead of piling onto the previous one.
+			setValue("goalText", heard, { shouldValidate: true });
+			setValue("goal", null);
+			setGoalResult(null);
+			understand.mutate(heard);
+		},
+		onError: () => setMicFailed(true),
+	});
+	const toggleMic = async () => {
+		setMicFailed(false);
+		if (recorder.status !== "recording") return recorder.start();
+		const audio = await recorder.stop();
+		if (audio && audio.size > 0) listen.mutate(audio);
+	};
+	const micMessage = micFailed
+		? t("fit.profile.micFailed")
+		: recorder.status === "unsupported"
+			? t("fit.profile.micUnsupported")
+			: recorder.status === "denied"
+				? t("fit.profile.micDenied")
+				: null;
+
 	const goStep = (to: number) => {
+		// Leaving the goal step mid-recording: release the microphone and drop the clip.
+		if (recorder.status === "recording") void recorder.stop();
+		setMicFailed(false);
 		setDir(to > step ? "fwd" : "back");
 		setStep(Math.max(0, Math.min(STEPS.length - 1, to)));
 	};
@@ -242,6 +276,17 @@ export function OnboardingQuiz() {
 								}
 							}}
 						/>
+						<Button
+							variant="secondary"
+							iconLeft={recorder.status === "recording" ? StopIcon : Mic01Icon}
+							aria-pressed={recorder.status === "recording"}
+							loading={listen.isPending}
+							disabled={understand.isPending}
+							onClick={() => void toggleMic()}
+						>
+							{listen.isPending ? t("fit.profile.micTranscribing") : recorder.status === "recording" ? t("fit.profile.micStop") : t("fit.profile.micStart")}
+						</Button>
+						{micMessage && <p className={styles.note} role="alert">{micMessage}</p>}
 					</div>
 				)}
 
